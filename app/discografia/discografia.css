@@ -1,0 +1,1291 @@
+/* ==========================================================================
+   DISCOGRAFIA — MIQUEL GIL
+   Redisseny editorial d'alta gamma (Art Direction & Micro-interaccions)
+   Tipografia: GRIFINITO L (Titulars) i GRAPHIK (Text editorial)
+   ========================================================================== */
+
+.discografia-container {
+  width: 100%;
+  min-height: 100vh;
+  background-color: #FFFFFF;
+}
+
+.discografia-page {
+  position: relative;
+  background-color: #FFFFFF;
+  color: #111211;
+  min-height: 100vh;
+  width: 100%;
+  overflow-x: hidden;
+  padding-bottom: 120px; /* Espai de seguretat per al reproductor persistent */
+  box-sizing: border-box;
+}
+
+/* --------------------------------------------------------------------------
+   HERO EDITORIAL
+   -------------------------------------------------------------------------- */
+.disco-hero {
+  position: relative;
+  width: 100%;
+  background: linear-gradient(180deg, #F8F7F4 0%, #FFFFFF 100%);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.07);
+  padding: clamp(60px, 8vw, 110px) clamp(24px, 5vw, 80px) clamp(40px, 5vw, 64px) clamp(88px, 7vw, 120px);
+  box-sizing: border-box;
+}
+
+.disco-hero-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.disco-hero-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-family: 'GRAPHIK', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #E20000;
+  margin-bottom: 16px;
+}
+
+.disco-hero-eyebrow::before {
+  content: "";
+  display: inline-block;
+  width: 24px;
+  height: 2px;
+  background-color: #E20000;
+}
+
+.disco-hero-title {
+  font-family: 'GRIFINITO L', serif;
+  font-size: clamp(54px, 7.5vw, 108px);
+  line-height: 0.92;
+  letter-spacing: -0.02em;
+  color: #000000;
+  margin: 0 0 24px 0;
+  font-weight: 400;
+  text-transform: uppercase;
+}
+
+.disco-hero-lead {
+  font-family: 'GRAPHIK', sans-serif;
+  font-size: clamp(16px, 1.35vw, 20px);
+  line-height: 1.6;
+  color: #444745;
+  max-width: 740px;
+  margin: 0 0 32px 0;
+}
+
+.disco-hero-stats {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 24px 36px;
+  padding-top: 24px;
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.disco-stat-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.disco-stat-num {
+  font-family: 'GRIFINITO L', serif;
+  font-size: 28px;
+  line-height: 1;
+  color: #000000;
+  font-weight: 600;
+}
+
+.disco-stat-lbl {
+  font-family: 'GRAPHIK', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #777a78;
+}
+
+/* --------------------------------------------------------------------------
+   BARRA DE TIMELINE I SALT RÀPID D'ÀLBUMS (STICKY)
+   -------------------------------------------------------------------------- */
+.disco-timeline-wrap {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  width: 100%;
+}
+
+.disco-timeline-nav {
+  max-width: 1360px;
+  margin: 0 auto;
+  padding: 12px clamp(20px, 4vw, 60px) 12px clamp(88px, 6vw, 100px);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  overflow-x: auto;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE */
+}
+
+.disco-timeline-nav::-webkit-scrollbar {
+  display: none; /* Chrome, Edge, Safari */
+}
+
+.disco-timeline-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 15px;
+  border-radius: 999px;
+  background-color: transparent;
+  border: 1px solid rgba(0, 0, 0, 0.09);
+  color: #555856;
+  font-family: 'GRAPHIK', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  text-decoration: none;
+}
+
+.disco-timeline-pill:hover {
+  background-color: #F0EEEA;
+  color: #000000;
+  border-color: rgba(0, 0, 0, 0.18);
+  transform: translateY(-1px);
+}
+
+.disco-timeline-pill.is-active {
+  background-color: #111211;
+  color: #FFFFFF;
+  border-color: #111211;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
+}
+
+.disco-pill-year {
+  opacity: 0.65;
+  font-weight: 400;
+  font-size: 11px;
+}
+
+.disco-timeline-pill.is-active .disco-pill-year {
+  opacity: 0.85;
+  color: #FF3B30;
+}
+
+/* --------------------------------------------------------------------------
+   LLISTA D'ÀLBUMS (SECCIONS EDITORIALS)
+   -------------------------------------------------------------------------- */
+.disco-albums-container {
+  width: 100%;
+}
+
+.disco-album-item {
+  position: relative;
+  width: 100%;
+  padding: clamp(60px, 8vw, 110px) clamp(20px, 4vw, 60px) clamp(60px, 8vw, 110px) clamp(88px, 6vw, 100px);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  box-sizing: border-box;
+}
+
+.disco-album-item:nth-child(even) {
+  background-color: #FAF9F6;
+}
+
+.disco-album-grid {
+  max-width: 1240px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: minmax(320px, 440px) 1fr;
+  gap: clamp(40px, 6vw, 90px);
+  align-items: start;
+}
+
+/* --------------------------------------------------------------------------
+   COLUMNA ESQUERRA: PORTADA I VINIL INTERACTIU
+   -------------------------------------------------------------------------- */
+.disco-cover-wrapper {
+  position: relative;
+  width: 100%;
+  max-width: 440px;
+}
+
+/* Marc interactiu que permet fer lliscar el disc de vinil en passar el cursor */
+.disco-sleeve-stage {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  cursor: pointer;
+  perspective: 1000px;
+}
+
+/* Disc de vinil realista amb solcs concèntrics */
+.disco-vinyl-disc {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: calc(100% - 8px);
+  height: calc(100% - 8px);
+  border-radius: 50%;
+  background: radial-gradient(
+    circle at center,
+    #0c0d0c 0%,
+    #0c0d0c 16%,
+    #252726 17%,
+    #111211 18%,
+    #2a2c2b 32%,
+    #111211 33%,
+    #242625 46%,
+    #0f100f 47%,
+    #222423 60%,
+    #111211 61%,
+    #282a29 74%,
+    #111211 75%,
+    #1d1f1e 88%,
+    #0d0e0d 100%
+  );
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.35);
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.55s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s ease;
+  will-change: transform;
+}
+
+/* Etiqueta central del vinil amb la portada de l'àlbum */
+.disco-vinyl-label {
+  position: relative;
+  width: 36%;
+  height: 36%;
+  border-radius: 50%;
+  background-size: cover;
+  background-position: center;
+  border: 3px solid #1a1b1a;
+  box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.6);
+}
+
+.disco-vinyl-hole {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background-color: #FAF9F6;
+  border: 1px solid #111;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+/* Efecte de lliscament del vinil cap a la dreta en hover */
+.disco-sleeve-stage:hover .disco-vinyl-disc,
+.disco-sleeve-stage:focus-within .disco-vinyl-disc {
+  transform: translateX(36%) rotate(42deg);
+  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.45);
+}
+
+/* Funda de l'àlbum (Sleeve) */
+.disco-sleeve-card {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  height: 100%;
+  border-radius: 8px;
+  overflow: hidden;
+  background-color: #0b0c0b;
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.22), 0 4px 12px rgba(0, 0, 0, 0.12);
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s ease;
+}
+
+.disco-sleeve-stage:hover .disco-sleeve-card {
+  transform: translateY(-4px);
+  box-shadow: 0 24px 54px rgba(0, 0, 0, 0.28), 0 6px 16px rgba(0, 0, 0, 0.14);
+}
+
+.disco-sleeve-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Botó flotant de reproducció ràpida damunt la caràtula */
+.disco-sleeve-play-badge {
+  position: absolute;
+  bottom: 16px;
+  left: 16px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 30px;
+  background: rgba(18, 19, 18, 0.88);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  color: #FFFFFF;
+  font-family: 'GRAPHIK', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 3;
+}
+
+.disco-sleeve-play-badge:hover {
+  background-color: #E20000;
+  border-color: #E20000;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(226, 0, 0, 0.4);
+}
+
+.disco-sleeve-play-badge.is-playing {
+  background-color: #E20000;
+  border-color: #E20000;
+}
+
+/* Metadades a sota de la caràtula */
+.disco-cover-meta {
+  margin-top: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.disco-badges-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.disco-meta-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border-radius: 6px;
+  background-color: rgba(0, 0, 0, 0.05);
+  font-family: 'GRAPHIK', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  color: #444745;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.disco-meta-pill--year {
+  background-color: #000000;
+  color: #FFFFFF;
+}
+
+.disco-spotify-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 18px;
+  border-radius: 8px;
+  background-color: #121312;
+  color: #FFFFFF;
+  font-family: 'GRAPHIK', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.22s ease;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.disco-spotify-btn:hover {
+  background-color: #1DB954;
+  color: #000000;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(29, 185, 84, 0.35);
+}
+
+.disco-spotify-btn svg {
+  width: 18px;
+  height: 18px;
+  fill: currentColor;
+}
+
+/* --------------------------------------------------------------------------
+   COLUMNA DRETA: DETALLS EDITORIALS I TRACKLIST
+   -------------------------------------------------------------------------- */
+.disco-details-col {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.disco-album-header {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.disco-album-kicker {
+  font-family: 'GRAPHIK', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #E20000;
+}
+
+.disco-album-title {
+  font-family: 'GRIFINITO L', serif;
+  font-size: clamp(42px, 5.2vw, 76px);
+  line-height: 0.95;
+  letter-spacing: -0.015em;
+  color: #000000;
+  margin: 0;
+  font-weight: 400;
+  text-transform: uppercase;
+}
+
+.disco-album-desc {
+  font-family: 'GRAPHIK', sans-serif;
+  font-size: 15px;
+  line-height: 1.65;
+  color: #4b4e4c;
+  margin: 0;
+  max-width: 680px;
+}
+
+/* Secció del Tracklist */
+.disco-tracklist-section {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 10px;
+}
+
+.disco-tracklist-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.disco-tracklist-heading {
+  font-family: 'GRAPHIK', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #888b89;
+  margin: 0;
+}
+
+.disco-tracklist-count {
+  font-family: 'GRAPHIK', sans-serif;
+  font-size: 12px;
+  color: #888b89;
+}
+
+/* Llista de pistes */
+.disco-tracks-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.disco-track-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  border-radius: 8px;
+  background-color: transparent;
+  border: 1px solid transparent;
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: pointer;
+  user-select: none;
+}
+
+.disco-track-card:hover {
+  background-color: rgba(0, 0, 0, 0.035);
+  border-color: rgba(0, 0, 0, 0.06);
+  transform: translateX(4px);
+}
+
+.disco-track-card.is-active {
+  background-color: #111211;
+  color: #FFFFFF;
+  border-color: #111211;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.16);
+  transform: translateX(6px);
+}
+
+.disco-track-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-width: 0;
+}
+
+.disco-track-num {
+  font-family: 'GRAPHIK', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  color: #9da09e;
+  width: 20px;
+  flex-shrink: 0;
+}
+
+.disco-track-card.is-active .disco-track-num {
+  color: #FF3B30;
+}
+
+.disco-track-name {
+  font-family: 'GRAPHIK', sans-serif;
+  font-size: 14.5px;
+  font-weight: 600;
+  color: #1a1c1b;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.disco-track-card.is-active .disco-track-name {
+  color: #FFFFFF;
+}
+
+.disco-track-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+/* Indicador de reproducció i ecualitzador animat */
+.disco-eq-bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 2.5px;
+  height: 14px;
+  width: 14px;
+}
+
+.disco-eq-bar {
+  width: 2.5px;
+  background-color: #FF3B30;
+  border-radius: 1px;
+}
+
+.disco-eq-bar:nth-child(1) {
+  height: 8px;
+  animation: disco-eq 0.7s infinite alternate ease-in-out;
+}
+
+.disco-eq-bar:nth-child(2) {
+  height: 14px;
+  animation: disco-eq 0.5s infinite alternate ease-in-out 0.2s;
+}
+
+.disco-eq-bar:nth-child(3) {
+  height: 10px;
+  animation: disco-eq 0.8s infinite alternate ease-in-out 0.1s;
+}
+
+@keyframes disco-eq {
+  0% { height: 3px; }
+  100% { height: 14px; }
+}
+
+.disco-track-badge-preview {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: 4px;
+  background-color: rgba(226, 0, 0, 0.09);
+  color: #E20000;
+  font-family: 'GRAPHIK', sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.disco-track-card.is-active .disco-track-badge-preview {
+  background-color: rgba(255, 59, 48, 0.25);
+  color: #FF3B30;
+}
+
+.disco-track-play-btn {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: transparent;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  color: #222;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.disco-track-card:hover .disco-track-play-btn {
+  background-color: #000000;
+  border-color: #000000;
+  color: #FFFFFF;
+}
+
+.disco-track-card.is-active .disco-track-play-btn {
+  background-color: #FF3B30;
+  border-color: #FF3B30;
+  color: #FFFFFF;
+}
+
+/* --------------------------------------------------------------------------
+   RESPONSIVE DESIGN (Tauletes i Mòbils)
+   -------------------------------------------------------------------------- */
+@media (max-width: 1024px) {
+  .disco-hero {
+    padding: 60px 24px 44px 80px;
+  }
+
+  .disco-album-grid {
+    grid-template-columns: minmax(280px, 360px) 1fr;
+    gap: 40px;
+  }
+
+  .disco-album-item {
+    padding: 60px 24px 60px 80px;
+  }
+}
+
+@media (max-width: 767px) {
+  .disco-hero {
+    padding: 100px 20px 36px 20px;
+  }
+
+  .disco-hero-eyebrow {
+    font-size: 11px;
+  }
+
+  .disco-hero-title {
+    font-size: clamp(48px, 12vw, 68px);
+    margin-bottom: 18px;
+  }
+
+  .disco-timeline-nav {
+    padding: 10px 16px;
+    gap: 6px;
+  }
+
+  .disco-timeline-pill {
+    padding: 6px 12px;
+    font-size: 11px;
+  }
+
+  .disco-album-item {
+    padding: 44px 16px 52px 16px;
+  }
+
+  .disco-album-grid {
+    grid-template-columns: 1fr;
+    gap: 32px;
+  }
+
+  .disco-cover-wrapper {
+    max-width: 320px;
+    margin: 0 auto;
+  }
+
+  /* A mòbil el vinil només es desplaça lleugerament en tocar */
+  .disco-sleeve-stage:hover .disco-vinyl-disc,
+  .disco-sleeve-stage:active .disco-vinyl-disc {
+    transform: translateX(20%) rotate(24deg);
+  }
+
+  .disco-album-title {
+    font-size: clamp(36px, 9vw, 50px);
+  }
+
+  .disco-track-card {
+    padding: 12px 10px;
+  }
+
+  .disco-track-name {
+    font-size: 13.5px;
+  }
+}
+
+/* ==========================================================================
+   REPRODUCTOR D'ÀUDIO PERSISTENT INFERIOR (AudioPlayerBottom)
+   ========================================================================== */
+
+/* Playlist Drawer (Llista de mostres de Spotify desplegable) */
+.bottom-player-playlist-drawer {
+  position: fixed;
+  bottom: 84px;
+  right: 24px;
+  width: min(420px, calc(100vw - 32px));
+  max-height: 480px;
+  background-color: #1a1c1b;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 16px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5);
+  z-index: 1099;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(16px) scale(0.97);
+}
+
+.bottom-player-playlist-drawer.is-open {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0) scale(1);
+}
+
+.bottom-player-playlist-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  background-color: #121413;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.bottom-player-playlist-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'GRAPHIK', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: #FFFFFF;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.bottom-player-playlist-count {
+  font-size: 12px;
+  color: #8E9290;
+  font-weight: 400;
+}
+
+.bottom-player-playlist-close {
+  background: transparent;
+  border: none;
+  color: #8E9290;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.bottom-player-playlist-close:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: #FFFFFF;
+}
+
+.bottom-player-playlist-list {
+  list-style: none;
+  margin: 0;
+  padding: 8px;
+  overflow-y: auto;
+  max-height: 380px;
+}
+
+.bottom-player-playlist-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.bottom-player-playlist-item:hover {
+  background-color: rgba(255, 255, 255, 0.06);
+}
+
+.bottom-player-playlist-item.is-active {
+  background-color: rgba(226, 0, 0, 0.18);
+}
+
+.bottom-player-playlist-item-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.bottom-player-playlist-item-cover {
+  width: 40px;
+  height: 40px;
+  border-radius: 6px;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.bottom-player-playlist-item-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.bottom-player-playlist-item-title {
+  font-family: 'GRAPHIK', sans-serif;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #FFFFFF;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.bottom-player-playlist-item.is-active .bottom-player-playlist-item-title {
+  color: #FF4D4D;
+}
+
+.bottom-player-playlist-item-album {
+  font-family: 'GRAPHIK', sans-serif;
+  font-size: 11.5px;
+  color: #8E9290;
+}
+
+.bottom-player-playlist-item-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.bottom-player-playlist-spotify-btn {
+  color: #8E9290;
+  display: flex;
+  align-items: center;
+  padding: 4px;
+  transition: color 0.2s ease;
+}
+
+.bottom-player-playlist-spotify-btn:hover {
+  color: #1DB954;
+}
+
+/* Barra inferior persistent (Sticky Bottom Player) */
+.bottom-audio-player {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 84px;
+  background: rgba(18, 20, 19, 0.96);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.35);
+  z-index: 1050;
+  display: flex;
+  align-items: center;
+  transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+  box-sizing: border-box;
+}
+
+.bottom-audio-player.is-minimized {
+  transform: translateY(calc(100% - 24px));
+}
+
+.bottom-player-minimize-btn {
+  position: absolute;
+  top: -24px;
+  right: 32px;
+  background-color: #121413;
+  color: #A0A5A2;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: none;
+  border-radius: 8px 8px 0 0;
+  padding: 4px 12px;
+  font-size: 11px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.2s ease;
+}
+
+.bottom-player-minimize-btn:hover {
+  color: #FFFFFF;
+  background-color: #1a1c1b;
+}
+
+.bottom-player-inner {
+  width: 100%;
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 0 clamp(16px, 3vw, 40px);
+  display: grid;
+  grid-template-columns: 280px 1fr 280px;
+  align-items: center;
+  gap: 20px;
+  box-sizing: border-box;
+}
+
+/* Columna esquerra: Info cançó */
+.bottom-player-track {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+}
+
+.bottom-player-cover-wrap {
+  position: relative;
+  width: 52px;
+  height: 52px;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  flex-shrink: 0;
+}
+
+.bottom-player-cover {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.bottom-player-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.bottom-player-title-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.bottom-player-title {
+  font-family: 'GRAPHIK', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: #FFFFFF;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.bottom-player-badge {
+  background-color: rgba(226, 0, 0, 0.2);
+  color: #FF4D4D;
+  font-family: 'GRAPHIK', sans-serif;
+  font-size: 9px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 3px;
+  letter-spacing: 0.06em;
+  flex-shrink: 0;
+}
+
+.bottom-player-album {
+  font-family: 'GRAPHIK', sans-serif;
+  font-size: 12px;
+  color: #8E9290;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Columna central: Controls i Scrubber */
+.bottom-player-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  max-width: 560px;
+  margin: 0 auto;
+}
+
+.bottom-player-controls {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.bottom-player-btn {
+  background: transparent;
+  border: none;
+  color: #A0A5A2;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  border-radius: 50%;
+}
+
+.bottom-player-btn--skip {
+  padding: 6px;
+}
+
+.bottom-player-btn--skip:hover {
+  color: #FFFFFF;
+  transform: scale(1.1);
+}
+
+.bottom-player-btn--play {
+  width: 38px;
+  height: 38px;
+  background-color: #FFFFFF;
+  color: #000000;
+  box-shadow: 0 4px 12px rgba(255, 255, 255, 0.15);
+}
+
+.bottom-player-btn--play:hover {
+  transform: scale(1.06);
+  background-color: #F0F0F0;
+}
+
+.bottom-player-btn--play.is-playing {
+  background-color: #E20000;
+  color: #FFFFFF;
+  box-shadow: 0 4px 14px rgba(226, 0, 0, 0.4);
+}
+
+.bottom-player-scrubber-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+}
+
+.bottom-player-time {
+  font-family: 'GRAPHIK', sans-serif;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  color: #6C706E;
+  min-width: 34px;
+}
+
+.bottom-player-time--current {
+  text-align: right;
+}
+
+.bottom-player-time--total {
+  text-align: left;
+}
+
+.bottom-player-progress-bar {
+  flex: 1;
+  height: 4px;
+  background-color: rgba(255, 255, 255, 0.12);
+  border-radius: 2px;
+  cursor: pointer;
+  position: relative;
+  transition: height 0.15s ease;
+}
+
+.bottom-player-progress-bar:hover {
+  height: 6px;
+}
+
+.bottom-player-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #E20000 0%, #FF5A5A 100%);
+  border-radius: 2px;
+  position: relative;
+}
+
+.bottom-player-progress-thumb {
+  position: absolute;
+  right: -5px;
+  top: 50%;
+  transform: translateY(-50%) scale(0);
+  width: 12px;
+  height: 12px;
+  background-color: #FFFFFF;
+  border-radius: 50%;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+  transition: transform 0.15s ease;
+}
+
+.bottom-player-progress-bar:hover .bottom-player-progress-thumb {
+  transform: translateY(-50%) scale(1);
+}
+
+/* Columna dreta: Volum i Botons */
+.bottom-player-right {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 16px;
+}
+
+.bottom-player-action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #A0A5A2;
+  font-family: 'GRAPHIK', sans-serif;
+  font-size: 11.5px;
+  font-weight: 500;
+  padding: 6px 12px;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.bottom-player-action-btn:hover,
+.bottom-player-action-btn.is-active {
+  background-color: rgba(255, 255, 255, 0.15);
+  color: #FFFFFF;
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
+.bottom-player-volume-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.bottom-player-volume-btn {
+  background: transparent;
+  border: none;
+  color: #8E9290;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  padding: 4px;
+  transition: color 0.2s ease;
+}
+
+.bottom-player-volume-btn:hover {
+  color: #FFFFFF;
+}
+
+.bottom-player-volume-slider {
+  width: 72px;
+  height: 4px;
+  -webkit-appearance: none;
+  appearance: none;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 2px;
+  outline: none;
+  cursor: pointer;
+}
+
+.bottom-player-volume-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #FFFFFF;
+  cursor: pointer;
+}
+
+.bottom-player-spotify-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background-color: #1DB954;
+  color: #000000;
+  font-family: 'GRAPHIK', sans-serif;
+  font-size: 11.5px;
+  font-weight: 700;
+  padding: 6px 12px;
+  border-radius: 20px;
+  transition: all 0.2s ease;
+}
+
+.bottom-player-spotify-link:hover {
+  background-color: #1ed760;
+  transform: scale(1.04);
+}
+
+/* Responsivitat del Reproductor */
+@media (max-width: 900px) {
+  .bottom-player-inner {
+    grid-template-columns: 1fr auto;
+    gap: 12px;
+  }
+
+  .bottom-player-right {
+    display: none;
+  }
+
+  .bottom-player-center {
+    max-width: 320px;
+  }
+}
+
+@media (max-width: 600px) {
+  .bottom-audio-player {
+    height: 72px;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  .bottom-player-inner {
+    display: flex;
+    justify-content: space-between;
+    padding: 0 16px;
+  }
+
+  .bottom-player-cover-wrap {
+    width: 44px;
+    height: 44px;
+  }
+
+  .bottom-player-title {
+    font-size: 13px;
+    max-width: 150px;
+  }
+
+  .bottom-player-album {
+    font-size: 11px;
+    max-width: 150px;
+  }
+
+  .bottom-player-center {
+    width: auto;
+    margin: 0;
+  }
+
+  .bottom-player-scrubber-group {
+    display: none;
+  }
+
+  .bottom-player-controls {
+    gap: 8px;
+  }
+
+  .bottom-player-btn--play {
+    width: 36px;
+    height: 36px;
+  }
+}

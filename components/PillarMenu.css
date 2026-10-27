@@ -1,0 +1,474 @@
+/* ============================================================
+   ANNIMATE PILLAR MENU ("Float beside it")
+   Production-grade floating navigation component for Miquel Gil
+   ============================================================ */
+
+/* Contenidor arrel */
+.anm-pillar-root {
+  position: relative;
+  z-index: 1000;
+}
+
+/* Teló de fons per tancar en fer clic a fora */
+.anm-pillar-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+  z-index: 998;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.32s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.anm-pillar-root.is-open .anm-pillar-backdrop {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Àncora fixa a l'esquerra, centrada verticalment a l'escriptori */
+.anm-pillar-anchor {
+  position: fixed;
+  top: 50%;
+  left: 24px;
+  transform: translateY(-50%);
+  z-index: 999;
+  pointer-events: none;
+}
+
+/* Superfície mutable (The morphing body)
+   Animació real en px de width, height i border-radius entre estats */
+.anm-pillar-body {
+  position: relative;
+  width: 56px;
+  height: 56px;
+  border-radius: 28px;
+  background-color: #171918;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5), 0 4px 12px rgba(0, 0, 0, 0.3);
+  overflow: hidden;
+  pointer-events: auto;
+  box-sizing: border-box;
+  will-change: width, height, border-radius;
+}
+
+/* Gutter esquerre de 56px que conté el botó de disparador */
+.anm-pillar-gutter {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 56px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 3;
+}
+
+/* Línia divisòria vertical que apareix a la dreta del botó en obrir */
+.anm-pillar-gutter-line {
+  position: absolute;
+  top: 24px;
+  bottom: 24px;
+  right: 0;
+  width: 1px;
+  background: rgba(255, 255, 255, 0.1);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.anm-pillar-root.is-open .anm-pillar-gutter-line {
+  opacity: 1;
+}
+
+/* Botó disparador (56x56) */
+.anm-pillar-trigger {
+  width: 56px;
+  height: 56px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  padding: 0;
+  margin: 0;
+  outline: none;
+}
+
+.anm-pillar-trigger:focus-visible {
+  outline: 2px solid #ff3b30;
+  outline-offset: -2px;
+  border-radius: 28px;
+}
+
+/* Els 3 ticks (barres) del disparador */
+.anm-pillar-ticks-wrap {
+  position: relative;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.anm-pillar-tick {
+  position: absolute;
+  width: 18px;
+  height: 2px;
+  background-color: #ffffff;
+  border-radius: 1px;
+  left: 1px;
+  top: 9px;
+  transform-origin: center center;
+  will-change: transform, opacity;
+}
+
+/* Superfície interior de contingut (Fixed dimensions 690px x 620px) */
+.anm-pillar-surface {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 690px;
+  height: 620px;
+  display: flex;
+  flex-direction: row;
+  opacity: 0;
+  pointer-events: none;
+  box-sizing: border-box;
+}
+
+.anm-pillar-root.is-open .anm-pillar-surface {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Contingut a la dreta del gutter */
+.anm-pillar-content {
+  margin-left: 56px;
+  flex: 1;
+  height: 100%;
+  display: flex;
+  flex-direction: row;
+  padding: 38px 36px 36px 32px;
+  gap: 32px;
+  align-items: stretch;
+  justify-content: space-between;
+  box-sizing: border-box;
+}
+
+/* Columna 1: Enllaços i navegació */
+.anm-pillar-index {
+  flex: 1.15;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-width: 250px;
+}
+
+.anm-pillar-rows {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.anm-pillar-row-item {
+  margin: 0;
+  padding: 0;
+}
+
+.anm-pillar-row {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  text-decoration: none;
+  color: #edeae2;
+  transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), color 0.2s ease;
+  width: fit-content;
+}
+
+.anm-pillar-row:hover {
+  color: #ff3b30;
+  transform: translateX(8px);
+}
+
+.anm-pillar-row.is-active {
+  color: #ff3b30;
+}
+
+.anm-pillar-numeral {
+  font-family: monospace, "GRAPHIK", sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.35);
+  letter-spacing: 0.05em;
+  user-select: none;
+  transition: color 0.2s ease;
+}
+
+.anm-pillar-row:hover .anm-pillar-numeral,
+.anm-pillar-row.is-active .anm-pillar-numeral {
+  color: #ff3b30;
+}
+
+.anm-pillar-label {
+  font-family: "GRIFINITO L", serif;
+  font-size: 34px;
+  line-height: 1.1;
+  letter-spacing: -0.015em;
+  text-transform: uppercase;
+}
+
+/* Secció secundària de navegació */
+.anm-pillar-secondary {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.anm-pillar-sec-title {
+  font-family: "GRAPHIK", sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.anm-pillar-sub-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+}
+
+.anm-pillar-sub {
+  font-family: "GRAPHIK", sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.65);
+  text-decoration: none;
+  transition: color 0.2s ease, transform 0.2s ease;
+}
+
+.anm-pillar-sub:hover {
+  color: #ffffff;
+  transform: translateY(-1px);
+}
+
+.anm-pillar-sub.is-active {
+  color: #ff3b30;
+}
+
+/* Xarxes socials inferiors a la columna de navegació */
+.anm-pillar-socials {
+  display: flex;
+  gap: 18px;
+  align-items: center;
+  margin-top: 14px;
+}
+
+.anm-pillar-socials a {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 16px;
+  transition: color 0.2s ease, transform 0.2s ease;
+  text-decoration: none;
+}
+
+.anm-pillar-socials a:hover {
+  color: #ff3b30;
+  transform: translateY(-2px);
+}
+
+/* Columna 2: Fitxa d'imatge destacada (Tile) */
+.anm-pillar-tile {
+  width: 250px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.anm-pillar-tile-link {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  text-decoration: none;
+  color: inherit;
+}
+
+.anm-pillar-tile-media {
+  position: relative;
+  flex: 1;
+  border-radius: 12px;
+  overflow: hidden;
+  background-color: #0b0c0b;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.anm-pillar-tile-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform;
+}
+
+.anm-pillar-tile-link:hover .anm-pillar-tile-img {
+  transform: scale(1.06);
+}
+
+/* Insígnia flotant sobre la imatge (Hover roller) */
+.anm-pillar-tile-roller {
+  position: absolute;
+  bottom: 12px;
+  right: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 20px;
+  background: rgba(18, 20, 19, 0.85);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+  font-family: "GRAPHIK", sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  transform: translateY(4px);
+  opacity: 0.85;
+  transition: transform 0.25s ease, opacity 0.25s ease, background-color 0.2s ease;
+}
+
+.anm-pillar-tile-link:hover .anm-pillar-tile-roller {
+  transform: translateY(0);
+  opacity: 1;
+  background: #ff3b30;
+  border-color: #ff3b30;
+}
+
+.anm-pillar-tile-caption {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.anm-tile-title {
+  font-family: "GRAPHIK", sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  color: #edeae2;
+}
+
+.anm-tile-sub {
+  font-family: "GRAPHIK", sans-serif;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.45);
+}
+
+/* ============================================================
+   RESPONSIVE MÒBIL (< 768px)
+   A mòbil el Pillar Menu és un bottom-sheet modal
+   ============================================================ */
+
+@media (max-width: 767px) {
+  .anm-pillar-anchor {
+    top: 18px;
+    bottom: auto;
+    left: 18px;
+    transform: none;
+    width: auto;
+    max-width: none;
+    display: block;
+    pointer-events: none;
+    z-index: 1000;
+  }
+
+  .anm-pillar-root:not(.is-open) .anm-pillar-anchor {
+    opacity: 1;
+    pointer-events: none;
+    transform: none;
+  }
+
+  .anm-pillar-root.is-open .anm-pillar-anchor {
+    opacity: 1;
+    pointer-events: auto;
+    transform: none;
+  }
+
+  .anm-pillar-body {
+    width: 56px;
+    height: 56px;
+    border-radius: 28px;
+  }
+
+  .anm-pillar-surface {
+    width: 100%;
+    height: 100%;
+    flex-direction: column;
+  }
+
+  .anm-pillar-content {
+    margin-left: 0;
+    padding: 56px 20px 24px 20px;
+    flex-direction: column;
+    gap: 16px;
+    overflow-y: auto;
+    max-height: calc(85vh - 20px);
+    box-sizing: border-box;
+  }
+
+  .anm-pillar-gutter {
+    position: absolute;
+    top: 6px;
+    left: 6px;
+    right: auto;
+    width: 48px;
+    height: 48px;
+    z-index: 10;
+  }
+
+  .anm-pillar-trigger {
+    width: 48px;
+    height: 48px;
+  }
+
+  .anm-pillar-gutter-line {
+    display: none;
+  }
+
+  .anm-pillar-label {
+    font-size: 26px;
+  }
+
+  .anm-pillar-tile {
+    width: 100%;
+    height: 140px;
+    order: -1; /* Posar la imatge dalt a mòbil */
+  }
+
+  .anm-pillar-tile-media {
+    height: 105px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .anm-pillar-body,
+  .anm-pillar-tick,
+  .anm-pillar-row,
+  .anm-pillar-tile-img,
+  .anm-pillar-backdrop {
+    transition: none !important;
+    animation: none !important;
+  }
+}

@@ -1,0 +1,321 @@
+/* ============================================================
+   PÀGINA /CONTACTE — MIQUEL GIL
+   Efecte de l'arena (Sand Reveal): Un "montoncito" d'arena sobre el text
+   Sense requadre gris, fons blanc net, degradat suau a la foto
+   Tipografia original: GRIFINITO L per al subtítol i GRAPHIK
+   ============================================================ */
+
+@font-face {
+  font-family: 'GRIFINITO L';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/grifinito.woff') format('woff'),
+       url('/fonts/grifinito.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'GRIFINITO L';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('/fonts/grifinito.woff') format('woff'),
+       url('/fonts/grifinito.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'GRAPHIK';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/Graphik-Regular.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'GRAPHIK';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('/fonts/Graphik-Bold.woff2') format('woff2');
+}
+
+.contacte-page-root {
+  min-height: 100vh;
+  background-color: #ffffff;
+  display: flex;
+  flex-direction: row;
+  position: relative;
+  overflow-x: hidden;
+  width: 100%;
+}
+
+/* Wrapper principal del contingut subjacent (columna de text + columna de foto) */
+.contacte-main-wrapper {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  min-height: 100vh;
+  align-items: stretch;
+  background-color: #ffffff;
+}
+
+/* Columna de contingut de text (amb marge esquerre per al Pillar Menu flotant) */
+.contacte-content-col {
+  flex: 1.15;
+  max-width: 820px;
+  min-width: 320px;
+  padding: clamp(40px, 6vh, 90px) clamp(24px, 3.5vw, 48px) clamp(40px, 6vh, 90px) clamp(96px, 8vw, 136px);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  background-color: #ffffff;
+  z-index: 2;
+  box-sizing: border-box;
+}
+
+/* Contenidor del "montoncito" d'arena que envolta exclusivament el bloc de text */
+.contacte-mound-container {
+  position: relative;
+  width: 100%;
+  max-width: 720px;
+  margin: 0;
+  padding: 0;
+}
+
+.contacte-sand-mound {
+  position: relative;
+  width: 100%;
+}
+
+/* El component SandReveal actua sobre aquest contenidor */
+.sand-reveal-container {
+  position: relative;
+  width: 100%;
+  height: auto;
+  min-height: auto;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  margin: 0;
+  padding: 0;
+  display: block;
+}
+
+.sand-reveal-content {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: auto;
+  background: transparent;
+}
+
+/* Canvas del monticle d'arena superposat sobre el text */
+.sand-reveal-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 5;
+  touch-action: none;
+  cursor: crosshair;
+  background: transparent;
+  border: none;
+  outline: none;
+  pointer-events: auto;
+}
+
+.sand-reveal-canvas.is-brushing {
+  cursor: grabbing;
+}
+
+/* Bloc intern de text que queda cobert pel montoncito */
+.contacte-text-block {
+  position: relative;
+  padding: 64px 54px 68px 54px;
+  box-sizing: border-box;
+}
+
+/* Tipografia i colors originals Miquel Gil */
+.contacte-subtitle {
+  font-family: 'GRIFINITO L', serif;
+  font-size: clamp(44px, 4.4vw, 72px);
+  line-height: clamp(42px, 4.1vw, 63px);
+  color: #000000;
+  margin: 0;
+  font-weight: 400;
+  letter-spacing: -0.015em;
+  max-width: 620px;
+  user-select: text;
+}
+
+/* Graella de contacte */
+.contacte-info-grid {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: clamp(36px, 5vw, 68px);
+  margin-top: clamp(32px, 4vh, 52px);
+}
+
+.contacte-info-block {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.contacte-block-label {
+  font-family: 'GRAPHIK', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: #000000;
+  margin: 0;
+  line-height: 1.3;
+}
+
+.contacte-email-link {
+  font-family: 'GRAPHIK', sans-serif;
+  font-size: 15px;
+  line-height: 18px;
+  color: #000000;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  word-break: break-all;
+  transition: color 0.18s ease;
+}
+
+.contacte-email-link:hover {
+  color: #B10000;
+}
+
+.contacte-social-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.contacte-social-link {
+  font-family: 'GRAPHIK', sans-serif;
+  font-size: 15px;
+  line-height: 18px;
+  color: #000000;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  transition: color 0.18s ease;
+}
+
+.contacte-social-link:hover {
+  color: #B10000;
+}
+
+/* Columna de la fotografia (completament lliure d'arena) amb degradat suau a blanc */
+.contacte-photo-col {
+  flex: 1.25;
+  position: relative;
+  min-height: 100vh;
+  background-image: url("/images/7.jpg");
+  background-position: 72% center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  overflow: hidden;
+}
+
+/* Degradat suau cap a blanc en escriptori (d'esquerra a dreta per fondre amb el text) */
+.contacte-photo-col::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to right,
+    #ffffff 0%,
+    rgba(255, 255, 255, 0.98) 6%,
+    rgba(255, 255, 255, 0.82) 16%,
+    rgba(255, 255, 255, 0.38) 32%,
+    rgba(255, 255, 255, 0.1) 48%,
+    rgba(255, 255, 255, 0) 65%
+  );
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* ============================================================
+   RESPONSIVE (Tauletes i Mòbils)
+   ============================================================ */
+
+@media (max-width: 1024px) and (min-width: 768px) {
+  .contacte-content-col {
+    padding: 50px 32px 50px 96px;
+  }
+
+  .contacte-subtitle {
+    font-size: clamp(38px, 4.4vw, 54px);
+    line-height: clamp(35px, 4vw, 48px);
+  }
+
+  .contacte-info-grid {
+    gap: 36px;
+    margin-top: 36px;
+  }
+}
+
+@media (max-width: 767px) {
+  .contacte-page-root {
+    padding-top: 0;
+    min-height: 100vh;
+  }
+
+  .contacte-main-wrapper {
+    flex-direction: column;
+    min-height: 100vh;
+  }
+
+  /* Imatge de Miquel Gil a la platja a la part superior amb degradat suau a blanc */
+  .contacte-photo-col {
+    order: -1;
+    min-height: 260px;
+    height: 36vh;
+    max-height: 320px;
+    flex: none;
+    background-position: 65% 25%;
+  }
+
+  .contacte-photo-col::before {
+    background: linear-gradient(
+      to bottom,
+      rgba(255, 255, 255, 0) 45%,
+      rgba(255, 255, 255, 0.65) 75%,
+      #ffffff 100%
+    );
+  }
+
+  /* Bloc de contingut de contacte */
+  .contacte-content-col {
+    padding: 16px 12px 64px 12px;
+    flex: none;
+    width: 100%;
+    max-width: 100%;
+    justify-content: flex-start;
+  }
+
+  .contacte-text-block {
+    padding: 44px 30px 52px 30px;
+  }
+
+  .contacte-subtitle {
+    font-size: clamp(30px, 7.5vw, 44px);
+    line-height: clamp(29px, 7.2vw, 42px);
+  }
+
+  .contacte-info-grid {
+    flex-direction: column;
+    gap: 24px;
+    margin-top: 28px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sand-reveal-canvas {
+    display: none;
+  }
+}

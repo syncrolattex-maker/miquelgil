@@ -1,0 +1,128 @@
+import { BlockReveal, AnimatedTitle } from "@/components/TextAnimations";
+import AnnnimateVideoPlayer from "@/components/AnnnimateVideoPlayer";
+
+export const metadata = { title: "Inici — Miquel Gil" };
+
+export default function Start() {
+  return (
+    <main className="start-page">
+      {/* SECCIÓ 1: NINETA (Fons Negre) */}
+      <section className="start-section-nineta">
+        <div className="start-section-nineta__video">
+          <div className="video-box">
+            <AnnnimateVideoPlayer
+              src="/video/nineta.mp4"
+              poster="/video/nineta_frame.jpg"
+              title="Nineta — Videoclip Oficial"
+              credits="Tubal Perales, Vicent Todolí i Enric Alepuz"
+            />
+          </div>
+        </div>
+
+        <div className="start-section-nineta__content">
+          <BlockReveal color="#FF0000" direction="lr" delay={100} duration={650}>
+            <h2 className="start-desc--white">
+              Per fi, ací teniu el Clip de Nineta. <br />
+              Un Western modern ambientat en un paissatge albuferenc crepuscular i
+              distòpic. Una lluita interna que desemboca en bogeria.
+            </h2>
+          </BlockReveal>
+
+          <p className="start-credits--white">
+            Tubal Perales, Vicent Todolí i Enric Alepuz
+          </p>
+
+          <AnimatedTitle
+            text="NINETA"
+            color="#FF0000"
+            className="start-big-title--red"
+          />
+        </div>
+      </section>
+
+      {/* SECCIÓ 2: VIATGER (Fons Clar / Beige) */}
+      <section className="start-section-viatger">
+        <div className="start-section-viatger__content">
+          <BlockReveal color="#FF0000" direction="lr" delay={150} duration={650}>
+            <h2 className="start-desc--black">
+              No és només un àlbum; és una crida a l'ànima, una invitació a
+              explorar nous horitzons i a abraçar l'essència de la vida. A través
+              de lletres i melodies envoltants, Miquel Gil ens transporta a un
+              univers ric en emocions i experiències. Cada cançó és un viatge en si
+              mateixa, una oportunitat per perdre's en els detalls i trobar
+              significat en cada nota.
+            </h2>
+          </BlockReveal>
+
+          <p className="start-credits--black">
+            Ja pots escoltar el nou LP a les principals plataformes
+          </p>
+
+          <AnimatedTitle
+            text="VIATGER"
+            color="#FF0000"
+            className="start-big-title--red"
+          />
+        </div>
+
+        <div className="start-section-viatger__cover">
+          <BlockReveal color="#000000" direction="rl" delay={200} duration={600}>
+            <a
+              href="https://open.spotify.com/intl-es/album/0nsEwLdHyVm27hZtQihPTl"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <img
+                decoding="async"
+                src="/images/portadaCD.webp"
+                alt="Portada disc Viatger"
+              />
+            </a>
+          </BlockReveal>
+          <p className="start-cover-sub">
+            Pots escoltar el nou Lp a les principals xarxes
+          </p>
+        </div>
+      </section>
+
+      {/* SECCIÓ 3: PRESENTACIÓ AL PRINCIPAL */}
+      <section className="start-section-principal">
+        <div className="start-section-principal__photo">
+          <BlockReveal color="#000000" direction="rl" delay={100} duration={600}>
+            <img
+              decoding="async"
+              src="/images/MiquelGilViatger_Principal.webp"
+              alt="Miquel Gil al Teatre Principal"
+            />
+          </BlockReveal>
+        </div>
+
+        <div className="start-section-principal__content">
+          <AnimatedTitle
+            text="PRESENTACIÓ AL PRINCIPAL"
+            color="#000000"
+            className="start-big-title--black"
+          />
+
+          <BlockReveal color="#F8EFE6" direction="lr" delay={250} duration={500}>
+            <div className="start-divider-red" />
+          </BlockReveal>
+
+          <BlockReveal color="#FF0000" direction="lr" delay={300} duration={700}>
+            <h2 className="start-desc--black">
+              El passat dissabte, van viure una nit inoblidable al Teatre
+              Principal amb la presentació del nou disc de Miquel Gil, "Viatger".
+              L'atmosfera del teatre es va omplir d'emoció i expectació. <br />
+              <br />
+              Els col·laboradors especials, entre els quals es trobaven Pep Gimeno
+              "Botifarra", Vicent Torrent, Maria Bertomeu "La Maria", Noelia
+              Llorens "Titana" i Borja Penalba, van aportar la seva pròpia màgia a
+              la nit, enriquint les actuacions amb la seva presència única i les
+              seves interpretacions brillants.
+            </h2>
+          </BlockReveal>
+        </div>
+      </section>
+    </main>
+  );
+}

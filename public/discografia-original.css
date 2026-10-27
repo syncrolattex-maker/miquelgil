@@ -1,0 +1,34 @@
+.elementor-kit-73850{--e-global-color-primary:#6EC1E4;--e-global-color-secondary:#54595F;--e-global-color-text:#7A7A7A;--e-global-color-accent:#61CE70;--e-global-color-1dc63a9:#116B7E;--e-global-typography-primary-font-family:"Roboto";--e-global-typography-primary-font-weight:600;--e-global-typography-secondary-font-family:"Roboto Slab";--e-global-typography-secondary-font-weight:400;--e-global-typography-text-font-family:"Roboto";--e-global-typography-text-font-weight:400;--e-global-typography-accent-font-family:"Roboto";--e-global-typography-accent-font-weight:500;font-family:"Manic", Sans-serif;--e-page-transition-entrance-animation:e-page-transition-slide-out-right;--e-page-transition-exit-animation:e-page-transition-slide-in-left;--e-page-transition-animation-duration:1500ms;--e-preloader-animation-duration:750ms;--e-preloader-delay:0ms;--e-preloader-width:15%;}.elementor-section.elementor-section-boxed > .elementor-container{max-width:1140px;}.e-con{--container-max-width:1140px;}{}h1.entry-title{display:var(--page-title-display);}.elementor-kit-73850 e-page-transition{background-color:#FF0000;}@media(max-width:1024px){.elementor-section.elementor-section-boxed > .elementor-container{max-width:1024px;}.e-con{--container-max-width:1024px;}}@media(max-width:767px){.elementor-section.elementor-section-boxed > .elementor-container{max-width:767px;}.e-con{--container-max-width:767px;}}/* Start custom CSS */@media only screen and (min-width: 1024px) {
+    body {cursor:none;}
+    #cursorz {
+    z-index:1000000;
+    pointer-events: none;
+    width: 3rem;
+    height: 3rem;
+    will-change: transform;
+    background: #f1f1f1;
+    position: absolute;
+    mix-blend-mode: difference;
+    border-radius: 50%;
+
+    animation: grow-shrink 4s infinite alternate;
+    }
+
+    @keyframes grow-shrink {
+      0% {
+        transform: scale(1.0);
+      }
+      25% {
+        transform: scale(0.9);
+      }
+      50% {
+        transform: scale(1.0);
+      }
+      75% {
+        transform: scale(0.9);
+      }
+      100% {
+        transform: scale(1);
+      }
+    }
+}/* End custom CSS */
