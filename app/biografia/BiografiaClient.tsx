@@ -32,8 +32,8 @@ export default function BiografiaClient() {
 
   return (
     <main className="bio-page">
+      {/* 1. HERO HEADER (Dins del contenidor centrat) */}
       <div className="bio-container">
-        {/* HERO HEADER */}
         <header className="biografia-hero">
           <div className="biografia-hero__kicker">
             <span className="biografia-hero__kicker-dot" />
@@ -68,25 +68,28 @@ export default function BiografiaClient() {
             </div>
           </div>
         </header>
+      </div>
 
-        {/* SECCIÓ ANNNIMATE EXPANDING STRIP (5 POSICIONS) */}
-        <section className="bio-strip-section" aria-label="Les cinc grans etapes biogràfiques">
-          <div className="bio-strip-header">
-            <div>
-              <h2 className="bio-strip-header__title">Cinc Posicions, Una Vida de Música</h2>
-              <span className="bio-strip-header__desc">
-                Explora les cinc etapes capitals de Miquel Gil passant el cursor o seleccionant cada panell.
-              </span>
-            </div>
-          </div>
+      {/* 2. SECCIÓ EXPANDING STRIP (100% FULLWIDTH EDGE-TO-EDGE) */}
+      <section className="bio-strip-fullwidth" aria-label="Les cinc grans etapes biogràfiques">
+        <div className="bio-strip-fullwidth__header">
+          <h2 className="bio-strip-header__title">Cinc Posicions, Una Vida de Música</h2>
+          <span className="bio-strip-header__desc">
+            Explora les cinc etapes capitals de Miquel Gil passant el cursor o seleccionant cada panell.
+          </span>
+        </div>
 
+        <div className="bio-strip-fullwidth__strip-wrap">
           <ExpandingStrip
             sections={BIO_SECTIONS}
             initialIndex={0}
             onOpenChronology={scrollToChronology}
           />
-        </section>
+        </div>
+      </section>
 
+      {/* 3. RESTA DE CONTINGUTS (Dins del contenidor centrat) */}
+      <div className="bio-container">
         {/* SÍNTESI EDITORIAL OFICIAL (250 PARAULES DEL GUIÓ) */}
         <section className="bio-editorial-section" aria-label="Síntesi de trajectòria">
           <div className="bio-editorial__quote-box">
