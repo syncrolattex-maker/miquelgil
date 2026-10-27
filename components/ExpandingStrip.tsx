@@ -66,29 +66,6 @@ export default function ExpandingStrip({
 
   return (
     <div className="expanding-strip-wrapper" ref={containerRef}>
-      {/* Selector mòbil i tauleta de 5 posicions */}
-      <div className="expanding-strip__nav-mobile" role="tablist" aria-label="Seccions biogràfiques">
-        {sections.map((sec, idx) => {
-          const isActive = idx === activeIndex;
-          return (
-            <button
-              key={sec.id}
-              role="tab"
-              aria-selected={isActive}
-              aria-controls={`strip-panel-${sec.id}`}
-              className={`expanding-strip__tab-pill ${isActive ? "is-active" : ""}`}
-              onClick={() => {
-                setSelectedIndex(idx);
-                setHoveredIndex(null);
-              }}
-            >
-              <span className="expanding-strip__tab-num">{sec.num}</span>
-              <span className="expanding-strip__tab-name">{sec.title}</span>
-            </button>
-          );
-        })}
-      </div>
-
       {/* Contenidor Annnimate Expanding Strip (5 posicions) */}
       <div
         className="expanding-strip-container"
@@ -237,30 +214,6 @@ export default function ExpandingStrip({
             </div>
           );
         })}
-      </div>
-
-      {/* Indicadors inferiors de navegació (01 - 05) */}
-      <div className="expanding-strip__indicators">
-        <div className="expanding-strip__ind-list">
-          {sections.map((sec, idx) => (
-            <button
-              key={sec.id}
-              type="button"
-              className={`expanding-strip__ind-dot ${idx === activeIndex ? "is-active" : ""}`}
-              onClick={() => {
-                setSelectedIndex(idx);
-                setHoveredIndex(null);
-              }}
-              title={`Posició ${sec.num}: ${sec.title}`}
-            >
-              <span className="ind-dot__bar" />
-              <span className="ind-dot__label">{sec.num} · {sec.title}</span>
-            </button>
-          ))}
-        </div>
-        <div className="expanding-strip__help-hint">
-          <span className="hint-keys">Passa el ratolí per expandir cada posició o utilitza les fletxes ← →</span>
-        </div>
       </div>
 
       {/* MODAL DE CRÒNICA HISTÒRICA COMPLETA */}

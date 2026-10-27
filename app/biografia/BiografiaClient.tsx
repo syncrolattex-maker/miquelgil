@@ -1,45 +1,74 @@
 "use client";
 
-import React, { useState, useRef, useEffect } from "react";
-import Link from "next/link";
+import React, { useRef } from "react";
 import ExpandingStrip from "@/components/ExpandingStrip";
 import { BIO_SECTIONS } from "./bioData";
-import { siteKeyMessage, chronologyFites, bookingInfo } from "@/lib/site";
+import { siteKeyMessage, chronologyFites } from "@/lib/site";
 import "./biografia.css";
 
+const FEATURED_VENUES = [
+  {
+    name: "Palau de la Música",
+    city: "València",
+    territory: "País Valencià",
+    type: "Auditori Simfònic & Grans Concerts",
+  },
+  {
+    name: "Teatre Principal",
+    city: "València",
+    territory: "País Valencià",
+    type: "Teatre Històric · Estrena de Viatger",
+  },
+  {
+    name: "Barnasants",
+    city: "Barcelona",
+    territory: "Catalunya",
+    type: "Festival de Cançó d'Autor",
+  },
+  {
+    name: "Tradicionàrius (C.A.T.)",
+    city: "Barcelona",
+    territory: "Catalunya",
+    type: "Festival Folk Internacional",
+  },
+  {
+    name: "Festival Strenes",
+    city: "Girona",
+    territory: "Catalunya",
+    type: "Festival de Grans Estrenes",
+  },
+  {
+    name: "Fira Mediterrània",
+    city: "Manresa",
+    territory: "Catalunya",
+    type: "Mercat d'Arrel i Projecció Internacional",
+  },
+  {
+    name: "Glatt & Verkehrt",
+    city: "Krems an der Donau",
+    territory: "Àustria",
+    type: "Festival Europeu de World Music",
+  },
+  {
+    name: "FIL de Guadalajara",
+    city: "Guadalajara",
+    territory: "Mèxic",
+    type: "Institut Ramon Llull & Projecció Americana",
+  },
+];
+
 export default function BiografiaClient() {
-  const [chronoFilter, setChronoFilter] = useState<string>("all");
   const chronoRef = useRef<HTMLElement>(null);
 
   const scrollToChronology = () => {
     chronoRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
-  const filteredChrono = chronologyFites.filter((fita) => {
-    if (chronoFilter === "all") return true;
-
-    // Extreure l'any com a número
-    const match = fita.year.match(/\d{4}/);
-    if (!match) return true;
-    const year = parseInt(match[0], 10);
-
-    if (chronoFilter === "altall") return year <= 1985;
-    if (chronoFilter === "transicio") return year >= 1986 && year <= 2000;
-    if (chronoFilter === "organic") return year >= 2001 && year <= 2015;
-    if (chronoFilter === "recent") return year >= 2016;
-    return true;
-  });
-
   return (
     <main className="bio-page">
-      {/* 1. HERO HEADER (Dins del contenidor centrat) */}
+      {/* 1. HERO HEADER (Netejat segons instruccions: només títol i lead) */}
       <div className="bio-container">
         <header className="biografia-hero">
-          <div className="biografia-hero__kicker">
-            <span className="biografia-hero__kicker-dot" />
-            <span>Trajectòria Oficial · Mig Segle d'Arrel</span>
-          </div>
-
           <h1 className="biografia-hero__title">
             Miquel Gil: el cantador que no deixa d'explorar.
           </h1>
@@ -48,25 +77,6 @@ export default function BiografiaClient() {
             {siteKeyMessage.tagline}. Des de la fundació d'Al Tall el 1975 fins a l'estrena de <em>Viatger</em> (2024), 
             mig segle d'arrel valenciana, poesia contemporània i exploració sonora sense repetir mai fórmules.
           </p>
-
-          <div className="biografia-hero__stats">
-            <div className="bio-stat">
-              <span className="bio-stat__val">50+</span>
-              <span className="bio-stat__label">Anys de Trajectòria</span>
-            </div>
-            <div className="bio-stat">
-              <span className="bio-stat__val">25</span>
-              <span className="bio-stat__label">Discos Signats & Col·laboracions</span>
-            </div>
-            <div className="bio-stat">
-              <span className="bio-stat__val">5</span>
-              <span className="bio-stat__label">Grans Etapes Creatives</span>
-            </div>
-            <div className="bio-stat">
-              <span className="bio-stat__val">#05</span>
-              <span className="bio-stat__label">Top World Music Charts Europe</span>
-            </div>
-          </div>
         </header>
       </div>
 
@@ -124,7 +134,7 @@ export default function BiografiaClient() {
           </div>
         </section>
 
-        {/* CRONOLOGIA DE FITES HISTÒRIQUES (18 FITES) */}
+        {/* CRONOLOGIA DE FITES HISTÒRIQUES (18 FITES EN FILERA CONTINUA) */}
         <section
           id="cronologia"
           ref={chronoRef}
@@ -137,48 +147,10 @@ export default function BiografiaClient() {
             <p className="bio-chrono__desc">
               Totes les fites clau que han marcat la trajectòria professional i humana de Miquel Gil (1956 — 2026).
             </p>
-
-            <div className="bio-chrono__filters" role="group" aria-label="Filtrar cronologia per etapes">
-              <button
-                type="button"
-                className={`chrono-filter-btn ${chronoFilter === "all" ? "is-active" : ""}`}
-                onClick={() => setChronoFilter("all")}
-              >
-                Totes les fites ({chronologyFites.length})
-              </button>
-              <button
-                type="button"
-                className={`chrono-filter-btn ${chronoFilter === "altall" ? "is-active" : ""}`}
-                onClick={() => setChronoFilter("altall")}
-              >
-                1956—1985 (Al Tall)
-              </button>
-              <button
-                type="button"
-                className={`chrono-filter-btn ${chronoFilter === "transicio" ? "is-active" : ""}`}
-                onClick={() => setChronoFilter("transicio")}
-              >
-                1986—2000 (Transició & Terminal Sur)
-              </button>
-              <button
-                type="button"
-                className={`chrono-filter-btn ${chronoFilter === "organic" ? "is-active" : ""}`}
-                onClick={() => setChronoFilter("organic")}
-              >
-                2001—2015 (Orgànic & Katà)
-              </button>
-              <button
-                type="button"
-                className={`chrono-filter-btn ${chronoFilter === "recent" ? "is-active" : ""}`}
-                onClick={() => setChronoFilter("recent")}
-              >
-                2016—2026 (Geometries & Viatger)
-              </button>
-            </div>
           </div>
 
           <div className="bio-chrono__timeline">
-            {filteredChrono.map((fita, index) => (
+            {chronologyFites.map((fita, index) => (
               <div key={`${fita.year}-${index}`} className="chrono-row">
                 <span className="chrono-row__year">{fita.year}</span>
                 <span className="chrono-row__text">{fita.text}</span>
@@ -187,52 +159,30 @@ export default function BiografiaClient() {
           </div>
         </section>
 
-        {/* RECINTES I FESTIVALS DESTACATS */}
-        <section className="bio-venues-section" aria-label="Escenaris destacats">
-          <span className="bio-venues__label">Ha actuat als principals escenaris i festivals internacionals:</span>
+        {/* ESCENARIS I FESTIVALS DESTACATS (REDISEÑAT) */}
+        <section className="bio-venues-section" aria-label="Escenaris i festivals internacionals">
+          <div className="bio-venues__header">
+            <span className="bio-venues__kicker">Circuits & Directes</span>
+            <h2 className="bio-venues__title">
+              Ha actuat als principals escenaris i festivals internacionals:
+            </h2>
+            <p className="bio-venues__subtitle">
+              De les grans sales simfòniques i teatres emblemàtics del país a referents internacionals de la world music a Europa i Amèrica.
+            </p>
+          </div>
+
           <div className="bio-venues__grid">
-            {bookingInfo.featuredVenues.map((venue) => (
-              <span key={venue} className="venue-chip">
-                {venue}
-              </span>
+            {FEATURED_VENUES.map((item) => (
+              <div key={item.name} className="bio-venue-card">
+                <div className="bio-venue-card__top">
+                  <span className="bio-venue-card__territory">{item.territory}</span>
+                  <span className="bio-venue-card__city">{item.city}</span>
+                </div>
+                <h3 className="bio-venue-card__name">{item.name}</h3>
+                <span className="bio-venue-card__type">{item.type}</span>
+              </div>
             ))}
           </div>
-        </section>
-
-        {/* ACCIONS I PÀGINES RELACIONADES */}
-        <section className="bio-cta-section" aria-label="Explora més continguts">
-          <Link href="/discografia" className="bio-cta-card">
-            <span className="bio-cta-card__num">01 / MÚSICA</span>
-            <h3 className="bio-cta-card__title">
-              <span>Discografia</span>
-              <span>→</span>
-            </h3>
-            <p className="bio-cta-card__desc">
-              Descobreix tots els àlbums, des d'Orgànic i Katà fins a Viatger (2024), lletres i escolta incrustada.
-            </p>
-          </Link>
-
-          <Link href="/agenda" className="bio-cta-card">
-            <span className="bio-cta-card__num">02 / DIRECTES</span>
-            <h3 className="bio-cta-card__title">
-              <span>Agenda de Concerts</span>
-              <span>→</span>
-            </h3>
-            <p className="bio-cta-card__desc">
-              Consulta les pròximes dates en directe i l'històric d'actuacions arreu del territori.
-            </p>
-          </Link>
-
-          <Link href="/contractacio" className="bio-cta-card">
-            <span className="bio-cta-card__num">03 / MANAGEMENT</span>
-            <h3 className="bio-cta-card__title">
-              <span>Contractació & Riders</span>
-              <span>→</span>
-            </h3>
-            <p className="bio-cta-card__desc">
-              Els 5 formats en directe (Duo, Trio, Banda, Nus, Estrena), riders tècnics descarregables i contacte oficial.
-            </p>
-          </Link>
         </section>
       </div>
     </main>

@@ -12,55 +12,6 @@
   user-select: none;
 }
 
-/* Nav tabs per a dispositius mòbils */
-.expanding-strip__nav-mobile {
-  display: none;
-  gap: 8px;
-  overflow-x: auto;
-  width: 100%;
-  max-width: 1400px;
-  margin: 0 auto;
-  padding: 4px 20px 10px;
-  box-sizing: border-box;
-  scrollbar-width: none;
-  -webkit-overflow-scrolling: touch;
-}
-
-.expanding-strip__nav-mobile::-webkit-scrollbar {
-  display: none;
-}
-
-.expanding-strip__tab-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 16px;
-  border-radius: 9999px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  color: rgba(255, 255, 255, 0.7);
-  font-family: var(--font-graphik, sans-serif);
-  font-size: 0.8rem;
-  letter-spacing: 0.04em;
-  white-space: nowrap;
-  cursor: pointer;
-  transition: all 0.25s ease;
-}
-
-.expanding-strip__tab-pill.is-active {
-  background: #ffffff;
-  color: #0b0d11;
-  border-color: #ffffff;
-  font-weight: 600;
-  box-shadow: 0 4px 16px rgba(255, 255, 255, 0.15);
-}
-
-.expanding-strip__tab-num {
-  font-family: var(--font-mono, monospace);
-  font-size: 0.75rem;
-  opacity: 0.75;
-}
-
 /* CONTENIDOR PRINCIPAL DE LES 5 POSICIONS (100% FULLWIDTH EDGE-TO-EDGE) */
 .expanding-strip-container {
   display: flex;
@@ -434,67 +385,6 @@
 }
 
 /* ==========================================================================
-   INDICADORS INFERIORS (01 — 05)
-   ========================================================================== */
-.expanding-strip__indicators {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-  max-width: 1400px;
-  margin: 0 auto;
-  padding: 14px clamp(24px, 5vw, 80px) 0 clamp(88px, 7vw, 120px);
-  box-sizing: border-box;
-  gap: 16px;
-}
-
-.expanding-strip__ind-list {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.expanding-strip__ind-dot {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  padding: 6px 0;
-  color: rgba(255, 255, 255, 0.4);
-  font-family: var(--font-graphik, sans-serif);
-  font-size: 0.8rem;
-  transition: color 0.25s ease;
-}
-
-.ind-dot__bar {
-  display: inline-block;
-  width: 24px;
-  height: 3px;
-  border-radius: 2px;
-  background: rgba(255, 255, 255, 0.2);
-  transition: width 0.3s cubic-bezier(0.25, 1, 0.5, 1), background 0.25s ease;
-}
-
-.expanding-strip__ind-dot.is-active {
-  color: #ffffff;
-  font-weight: 500;
-}
-
-.expanding-strip__ind-dot.is-active .ind-dot__bar {
-  width: 44px;
-  background: #d4a359;
-}
-
-.expanding-strip__help-hint {
-  font-family: var(--font-graphik, sans-serif);
-  font-size: 0.75rem;
-  color: rgba(255, 255, 255, 0.35);
-  letter-spacing: 0.02em;
-}
-
-/* ==========================================================================
    MODAL DE CRÒNICA HISTÒRICA COMPLETA
    ========================================================================== */
 .expanding-modal-backdrop {
@@ -764,10 +654,6 @@
     inset: auto;
     padding: 28px 24px;
     transform: none;
-  }
-
-  .expanding-strip__indicators {
-    display: none;
   }
 
   .expanding-modal-card {
