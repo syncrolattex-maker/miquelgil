@@ -3,10 +3,15 @@
    Production-grade floating navigation component for Miquel Gil
    ============================================================ */
 
-/* Contenidor arrel */
+/* Contenidor arrel - Flotant pur sense impacte en el flux del document */
 .anm-pillar-root {
-  position: relative;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 0;
+  height: 0;
   z-index: 1000;
+  pointer-events: none;
 }
 
 /* Teló de fons per tancar en fer clic a fora */

@@ -770,26 +770,7 @@ button {
   fill: currentColor;
 }
 
-/* ---------- Biography ---------- */
-
-.bio-hero {
-  min-height: 88vh;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-}
-
-.bio-hero .display {
-  font-size: clamp(64px, 15vw, 220px);
-}
-
-.bio-hero__quote {
-  max-width: 34ch;
-  margin: clamp(30px, 4vw, 56px) 0 0 auto;
-  font-size: clamp(18px, 2vw, 26px);
-  line-height: 1.4;
-  font-style: italic;
-}
+/* ---------- Biography (replaced by modern /biografia redesign) ---------- */
 
 .chapter {
   display: grid;
