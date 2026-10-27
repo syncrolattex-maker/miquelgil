@@ -7,17 +7,18 @@ import "./PillarMenu.css";
 
 const MAIN_LINKS = [
   { href: "/start", label: "Inici" },
+  { href: "/discografia", label: "Música" },
+  { href: "/agenda", label: "Directes" },
+  { href: "/contractacio", label: "Contractació" },
   { href: "/biografia", label: "Biografia" },
-  { href: "/discografia", label: "Discografia" },
-  { href: "/media", label: "Media" },
   { href: "/contacte", label: "Contacte" },
 ];
 
 const SECONDARY_LINKS = [
-  { href: "/agenda", label: "Agenda" },
+  { href: "/media", label: "Premsa & Media" },
+  { href: "/cronologia", label: "Cronologia" },
   { href: "/mural-sonor", label: "Mural Sonor" },
   { href: "/descarregues", label: "Descàrregues" },
-  { href: "/cronologia", label: "Cronologia" },
 ];
 
 export default function PillarMenu() {

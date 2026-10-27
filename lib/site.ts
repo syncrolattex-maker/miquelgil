@@ -15,14 +15,15 @@ export const socials: Social[] = [
 
 export const nav = [
   { label: "Inici", href: "/start", index: "01" },
-  { label: "Biografia", href: "/biografia", index: "02" },
-  { label: "Discografia", href: "/discografia", index: "03" },
-  { label: "Agenda", href: "/agenda", index: "04" },
-  { label: "Mural Sonor", href: "/mural-sonor", index: "05" },
-  { label: "Cronologia", href: "/cronologia", index: "06" },
-  { label: "Descàrregues", href: "/descarregues", index: "07" },
-  { label: "Media", href: "/media", index: "08" },
-  { label: "Contacte", href: "/contacte", index: "09" },
+  { label: "Música", href: "/discografia", index: "02" },
+  { label: "Directes", href: "/agenda", index: "03" },
+  { label: "Contractació", href: "/contractacio", index: "04" },
+  { label: "Biografia", href: "/biografia", index: "05" },
+  { label: "Contacte", href: "/contacte", index: "06" },
+  { label: "Premsa & Media", href: "/media", index: "07" },
+  { label: "Cronologia", href: "/cronologia", index: "08" },
+  { label: "Mural Sonor", href: "/mural-sonor", index: "09" },
+  { label: "Descàrregues", href: "/descarregues", index: "10" },
 ];
 
 export const siteKeyMessage = {
