@@ -16,33 +16,224 @@ export default function ExpandingStrip({
   initialIndex = 0,
   onOpenChronology,
 }: ExpandingStripProps) {
-  const [selectedIndex, setSelectedIndex] = useState<number>(initialIndex);
-  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+  // activeIndex: -1 when at rest (all equal), or 0..4 when a panel is expanded
+  const [activeIndex, setActiveIndex] = useState<number>(initialIndex);
+  const [lockedIndex, setLockedIndex] = useState<number>(initialIndex);
   const [modalSection, setModalSection] = useState<BioSection | null>(null);
-  const [isMobile, setIsMobile] = useState<boolean>(false);
+
   const containerRef = useRef<HTMLDivElement>(null);
+  const panelsRef = useRef<(HTMLDivElement | null)[]>([]);
+  const imagesRef = useRef<(HTMLImageElement | null)[]>([]);
+  const shadesRef = useRef<(HTMLDivElement | null)[]>([]);
+  const scrimsRef = useRef<(HTMLDivElement | null)[]>([]);
+  const vlabelsRef = useRef<(HTMLSpanElement | null)[]>([]);
+  const textWrapsRef = useRef<(HTMLDivElement | null)[]>([]);
+  const titlesRef = useRef<(HTMLSpanElement | null)[]>([]);
+  const labelsRef = useRef<(HTMLSpanElement | null)[]>([]);
+  const extrasRef = useRef<(HTMLDivElement | null)[]>([]);
+
   const modalBackdropRef = useRef<HTMLDivElement>(null);
   const modalCardRef = useRef<HTMLDivElement>(null);
   const modalTimelineRef = useRef<gsap.core.Timeline | null>(null);
 
-  // Determinar active index: hover prevaleix en desktop; si no hi ha hover, selectedIndex
-  const activeIndex = hoveredIndex !== null ? hoveredIndex : selectedIndex;
+  // Annnimate Gaussian Wave Expanding Physics
+  const animateTo = useCallback(
+    (targetIndex: number) => {
+      const b = 0.7; // Gaussian falloff width
+      const c = 5.0; // Peak expand factor for active panel
+      const v = 0.38; // Compression factor for non-active panels
+      const h = 1.22; // Initial subtle zoom
+      const y = 6; // Image parallax shift percentage
+      const w = 5; // Blur in px for neighbor panels
+      const x = 0.65; // Dim darkness for neighbor panels
+      const g = 0.82; // Brightness at rest (all equal)
+      const duration = targetIndex < 0 ? 0.65 : 0.55;
+      const ease = "power3.out";
 
+      // Gaussian distribution around active panel
+      const q = (i: number) => {
+        if (targetIndex < 0) return 0;
+        if (i === targetIndex) return 1;
+        const dist = Math.abs(i - targetIndex);
+        return Math.exp(-(dist * dist) / (2 * b * b));
+      };
+
+      // Flex-grow value per panel
+      const L = (i: number) => {
+        return targetIndex < 0 ? 1 : v + (c - v) * q(i);
+      };
+
+      // 1. Panels flexGrow expansion & compression
+      panelsRef.current.forEach((panel, i) => {
+        if (!panel) return;
+        gsap.to(panel, {
+          flexGrow: L(i),
+          duration,
+          ease,
+          overwrite: "auto",
+        });
+      });
+
+      // 2. Background images zoom & parallax
+      const isMobile = typeof window !== "undefined" && window.innerWidth <= 767;
+      imagesRef.current.forEach((img, i) => {
+        if (!img) return;
+        gsap.to(img, {
+          scale: targetIndex < 0 ? h : h - (h - 1) * q(i),
+          xPercent:
+            !isMobile && targetIndex >= 0 && i !== targetIndex
+              ? (i < targetIndex ? -1 : 1) * y * (1 - q(i))
+              : 0,
+          yPercent:
+            isMobile && targetIndex >= 0 && i !== targetIndex
+              ? (i < targetIndex ? -1 : 1) * y * (1 - q(i))
+              : 0,
+          duration,
+          ease,
+          force3D: true,
+          overwrite: "auto",
+        });
+      });
+
+      // 3. Shades: Gaussian backdrop blur and dim on neighbors
+      shadesRef.current.forEach((shade, i) => {
+        if (!shade) return;
+        const blurPx = targetIndex < 0 ? 0 : w * (1 - q(i));
+        const dimAlpha = targetIndex < 0 ? 1 - g : x * (1 - q(i));
+        gsap.to(shade, {
+          backdropFilter: `blur(${blurPx}px)`,
+          webkitBackdropFilter: `blur(${blurPx}px)`,
+          backgroundColor: `rgba(0, 0, 0, ${dimAlpha})`,
+          duration,
+          ease,
+          overwrite: "auto",
+        });
+      });
+
+      // 4. Scrims: Dark gradient rise on active panel
+      scrimsRef.current.forEach((scrim, i) => {
+        if (!scrim) return;
+        const isTarget = i === targetIndex;
+        gsap.to(scrim, {
+          opacity: isTarget ? 1 : 0,
+          duration: isTarget ? duration : 0.28,
+          ease,
+          overwrite: "auto",
+        });
+      });
+
+      // 5. Vertical sliver labels: slide out when blooming, slide in when compressed/rest
+      vlabelsRef.current.forEach((vlabel, i) => {
+        if (!vlabel) return;
+        const isTarget = i === targetIndex;
+        gsap.to(vlabel, {
+          xPercent: isTarget ? 115 : 0,
+          opacity: isTarget ? 0 : 1,
+          duration: duration * 0.75,
+          ease,
+          overwrite: "auto",
+        });
+      });
+
+      // 6. Text content reveal (Container, Title, Subtitle, Quote, Actions)
+      sections.forEach((_, i) => {
+        const isTarget = i === targetIndex;
+        const textWrap = textWrapsRef.current[i];
+        const titleEl = titlesRef.current[i];
+        const labelEl = labelsRef.current[i];
+        const extraEl = extrasRef.current[i];
+
+        if (textWrap) {
+          gsap.to(textWrap, {
+            opacity: isTarget ? 1 : 0,
+            duration: isTarget ? 0.35 : 0.2,
+            overwrite: "auto",
+          });
+        }
+
+        if (titleEl) {
+          gsap.to(titleEl, {
+            yPercent: isTarget ? 0 : 115,
+            y: 0,
+            opacity: isTarget ? 1 : 0,
+            duration: isTarget ? 0.5 : 0.24,
+            delay: isTarget ? 0.06 : 0,
+            ease: "expo.out",
+            force3D: true,
+            overwrite: "auto",
+          });
+        }
+
+        if (labelEl) {
+          gsap.to(labelEl, {
+            yPercent: isTarget ? 0 : 115,
+            y: 0,
+            opacity: isTarget ? 1 : 0,
+            duration: isTarget ? 0.5 : 0.24,
+            delay: isTarget ? 0.1 : 0,
+            ease: "expo.out",
+            force3D: true,
+            overwrite: "auto",
+          });
+        }
+
+        if (extraEl) {
+          gsap.to(extraEl, {
+            yPercent: isTarget ? 0 : 25,
+            y: 0,
+            opacity: isTarget ? 1 : 0,
+            duration: isTarget ? 0.5 : 0.2,
+            delay: isTarget ? 0.14 : 0,
+            ease: "expo.out",
+            force3D: true,
+            overwrite: "auto",
+          });
+        }
+      });
+    },
+    [sections]
+  );
+
+  // Initialize and run initial expand
   useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 960);
-    };
-    checkMobile();
-    window.addEventListener("resize", checkMobile);
-    return () => window.removeEventListener("resize", checkMobile);
+    animateTo(initialIndex);
+  }, [animateTo, initialIndex]);
+
+  // Handle panel hover
+  const handlePanelMouseEnter = (index: number) => {
+    setActiveIndex(index);
+    animateTo(index);
+  };
+
+  // Handle mouse leave container: return to locked panel or rest
+  const handleContainerMouseLeave = () => {
+    setActiveIndex(lockedIndex);
+    animateTo(lockedIndex);
+  };
+
+  // Handle panel click
+  const handlePanelClick = (index: number) => {
+    if (lockedIndex === index && activeIndex === index) {
+      // Toggle off to rest state
+      setLockedIndex(-1);
+      setActiveIndex(-1);
+      animateTo(-1);
+    } else {
+      setLockedIndex(index);
+      setActiveIndex(index);
+      animateTo(index);
+    }
+  };
+
+  // Modal open & close
+  const openModal = useCallback((sec: BioSection) => {
+    setModalSection(sec);
   }, []);
 
-  // Animació de tancament suau amb GSAP
   const closeModal = useCallback(() => {
     if (modalTimelineRef.current) {
       modalTimelineRef.current.kill();
     }
-
     const backdrop = modalBackdropRef.current;
     const card = modalCardRef.current;
     if (!backdrop || !card) {
@@ -59,26 +250,22 @@ export default function ExpandingStrip({
 
     tl.to(card, {
       opacity: 0,
-      y: 30,
-      scale: 0.94,
-      duration: 0.22,
+      y: 25,
+      scale: 0.95,
+      duration: 0.2,
       ease: "power2.in",
     }).to(
       backdrop,
       {
         opacity: 0,
-        duration: 0.2,
+        duration: 0.18,
         ease: "power2.in",
       },
-      "-=0.1"
+      "-=0.08"
     );
   }, []);
 
-  const openModal = useCallback((sec: BioSection) => {
-    setModalSection(sec);
-  }, []);
-
-  // Animació d'entrada espectacular en obrir el popup (Llegir la crònica completa)
+  // Modal opening animation
   useEffect(() => {
     if (!modalSection) return;
 
@@ -97,59 +284,52 @@ export default function ExpandingStrip({
     const tl = gsap.timeline();
     modalTimelineRef.current = tl;
 
-    // 1. Teló de fons amb enfosquiment i desenfocament suau
     tl.fromTo(
       backdrop,
       { opacity: 0 },
-      { opacity: 1, duration: 0.35, ease: "power2.out" }
+      { opacity: 1, duration: 0.3, ease: "power2.out" }
     );
 
-    // 2. Floriment físic de la targeta modal (escala, translació i subtil perspectiva 3D)
     tl.fromTo(
       card,
       {
         opacity: 0,
-        y: 50,
-        scale: 0.90,
-        rotateX: 4,
-        transformPerspective: 1000,
+        y: 40,
+        scale: 0.92,
       },
       {
         opacity: 1,
         y: 0,
         scale: 1,
-        rotateX: 0,
-        duration: 0.52,
+        duration: 0.45,
         ease: "power3.out",
       },
-      "-=0.25"
+      "-=0.2"
     );
 
-    // 3. Botó de tancament amb gir i aparició elàstica
     if (closeBtn) {
       tl.fromTo(
         closeBtn,
-        { opacity: 0, scale: 0.6, rotation: -90 },
-        { opacity: 1, scale: 1, rotation: 0, duration: 0.35, ease: "back.out(2)" },
-        "-=0.35"
+        { opacity: 0, scale: 0.7, rotation: -90 },
+        { opacity: 1, scale: 1, rotation: 0, duration: 0.3, ease: "back.out(2)" },
+        "-=0.3"
       );
     }
 
-    // 4. Stagger dels blocs de contingut intern
     const innerElements = [header, media, quote, body, fites, tags].filter(Boolean);
     if (innerElements.length > 0) {
       tl.fromTo(
         innerElements,
-        { opacity: 0, y: 16 },
-        { opacity: 1, y: 0, duration: 0.38, stagger: 0.05, ease: "power2.out" },
-        "-=0.3"
+        { opacity: 0, y: 15 },
+        { opacity: 1, y: 0, duration: 0.35, stagger: 0.04, ease: "power2.out" },
+        "-=0.25"
       );
     }
   }, [modalSection]);
 
-  // Navegació amb teclat
-  const handleKeyDown = useCallback(
-    (e: KeyboardEvent) => {
+  // Keyboard navigation
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
       if (modalSection) {
         if (e.key === "Escape") closeModal();
         return;
@@ -157,171 +337,203 @@ export default function ExpandingStrip({
 
       if (e.key === "ArrowRight" || e.key === "ArrowDown") {
         e.preventDefault();
-        setSelectedIndex((prev) => (prev + 1) % sections.length);
+        const next = activeIndex < 0 ? 0 : (activeIndex + 1) % sections.length;
+        setLockedIndex(next);
+        setActiveIndex(next);
+        animateTo(next);
+        panelsRef.current[next]?.focus();
       } else if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
         e.preventDefault();
-        setSelectedIndex((prev) => (prev - 1 + sections.length) % sections.length);
+        const prev = activeIndex <= 0 ? sections.length - 1 : activeIndex - 1;
+        setLockedIndex(prev);
+        setActiveIndex(prev);
+        animateTo(prev);
+        panelsRef.current[prev]?.focus();
       } else if (e.key === "Enter" || e.key === " ") {
-        // Obri la fitxa completa de la secció activa
-        const current = sections[activeIndex];
-        if (current) {
+        if (activeIndex >= 0 && sections[activeIndex]) {
           e.preventDefault();
-          openModal(current);
+          openModal(sections[activeIndex]);
         }
       }
-    },
-    [modalSection, sections, activeIndex, closeModal, openModal]
-  );
+    };
 
-  useEffect(() => {
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [handleKeyDown]);
+  }, [modalSection, activeIndex, sections, closeModal, openModal, animateTo]);
 
   return (
-    <div className="expanding-strip-wrapper" ref={containerRef}>
-      {/* Contenidor Annnimate Expanding Strip (5 posicions) */}
+    <div className="exs_container_wrapper">
+      {/* Official Annnimate Expanding Strip Component */}
       <div
-        className="expanding-strip-container"
-        onMouseLeave={() => setHoveredIndex(null)}
+        ref={containerRef}
+        className="exs_wrap"
+        data-anm-expanding-strip
+        data-anm-expand="5.0"
+        data-anm-min="0.38"
+        data-anm-duration="0.55"
+        data-anm-falloff="0.7"
+        data-anm-zoom="1.22"
+        data-anm-pan="6"
+        data-anm-blur="5"
+        data-anm-dim="0.65"
+        role="group"
+        aria-label="Cinc etapes biogràfiques de Miquel Gil"
+        tabIndex={0}
+        onMouseLeave={handleContainerMouseLeave}
       >
         {sections.map((sec, idx) => {
-          const isActive = idx === activeIndex;
-          const isCompressed = !isActive;
+          const isExpanded = idx === activeIndex;
 
           return (
             <div
               key={sec.id}
-              id={`strip-panel-${sec.id}`}
-              role="region"
-              aria-label={`Secció ${sec.num}: ${sec.title}`}
-              aria-expanded={isActive}
+              ref={(el) => {
+                panelsRef.current[idx] = el;
+              }}
+              className={`exs_panel ${isExpanded ? "is-expanded" : "is-compressed"}`}
+              data-anm-exs-panel
+              data-title={sec.title}
+              data-label={`${sec.period} · ${sec.subtitle}`}
               tabIndex={0}
-              className={`expanding-strip-panel ${isActive ? "is-active" : "is-compressed"}`}
-              onMouseEnter={() => {
-                if (!isMobile) setHoveredIndex(idx);
-              }}
-              onClick={() => {
-                setSelectedIndex(idx);
-                setHoveredIndex(null);
-              }}
-              onFocus={() => setSelectedIndex(idx)}
+              role="button"
+              aria-label={`Etapa ${sec.num}: ${sec.title}`}
+              aria-expanded={isExpanded}
+              onMouseEnter={() => handlePanelMouseEnter(idx)}
+              onClick={() => handlePanelClick(idx)}
+              onFocus={() => handlePanelMouseEnter(idx)}
             >
-              {/* Fotografia de fons */}
-              <div className="expanding-strip__bg-wrap">
-                <img
-                  src={sec.image}
-                  alt={sec.imageAlt}
-                  className="expanding-strip__bg-img"
-                  loading="lazy"
-                />
-                <div className="expanding-strip__overlay" />
-                <div className="expanding-strip__grain" />
-              </div>
+              {/* Vertical Slim Label (Visible when strip is compressed or at rest) */}
+              <span className="exs_vlabel" data-anm-exs-vlabel aria-hidden={isExpanded}>
+                <span
+                  ref={(el) => {
+                    vlabelsRef.current[idx] = el;
+                  }}
+                  className="exs_vlabel_inner"
+                >
+                  <span className="exs_vlabel_num">{sec.num}</span>
+                  <span className="exs_vlabel_dot">·</span>
+                  <span className="exs_vlabel_title">{sec.title}</span>
+                </span>
+              </span>
 
-              {/* VISTA COMPRIMIDA (Quan una altra secció està activa o al repòs) */}
+              {/* Background Image with GSAP Parallax Pan & Zoom */}
+              <img
+                ref={(el) => {
+                  imagesRef.current[idx] = el;
+                }}
+                className="exs_img"
+                src={sec.image}
+                alt={sec.imageAlt}
+                loading="lazy"
+                draggable={false}
+              />
+
+              {/* Dynamic Backdrop Blur & Dim Shade */}
               <div
-                className={`expanding-strip__compressed ${
-                  isCompressed ? "is-visible" : "is-hidden"
-                }`}
-                aria-hidden={isActive}
-              >
-                <div className="expanding-strip__comp-top">
-                  <span className="expanding-strip__comp-num">{sec.num}</span>
-                  <span className="expanding-strip__comp-dot" />
-                </div>
+                ref={(el) => {
+                  shadesRef.current[idx] = el;
+                }}
+                className="exs_shade"
+                data-anm-exs-shade
+                aria-hidden="true"
+              />
 
-                <div className="expanding-strip__comp-middle">
-                  <span className="expanding-strip__comp-title">{sec.title}</span>
-                </div>
-
-                <div className="expanding-strip__comp-bottom">
-                  <span className="expanding-strip__comp-period">{sec.period}</span>
-                </div>
-              </div>
-
-              {/* VISTA EXPANDIDA (Annnimate 4.0 bloom: El títol i contingut s'eleven) */}
+              {/* Bottom Gradient Scrim */}
               <div
-                className={`expanding-strip__expanded ${
-                  isActive ? "is-visible" : "is-hidden"
-                }`}
-                aria-hidden={!isActive}
+                ref={(el) => {
+                  scrimsRef.current[idx] = el;
+                }}
+                className="exs_scrim"
+                data-anm-exs-scrim
+                aria-hidden="true"
+              />
+
+              {/* Bottom Text Content with Staggered Rise */}
+              <div
+                ref={(el) => {
+                  textWrapsRef.current[idx] = el;
+                }}
+                className={`exs_text ${isExpanded ? "is-visible" : "is-hidden"}`}
+                data-anm-exs-text
               >
-                <div className="expanding-strip__exp-inner">
-                  {/* Barra superior de metadades */}
-                  <div className="expanding-strip__exp-meta">
-                    <div className="expanding-strip__exp-badge">
-                      <span className="exp-badge__num">SECCIÓ {sec.num}</span>
-                      <span className="exp-badge__sep">/</span>
-                      <span className="exp-badge__period">{sec.period}</span>
-                    </div>
-                    <span className="expanding-strip__exp-kicker">{sec.subtitle}</span>
-                  </div>
+                {/* Period Badge (/start chromatic style: stark red badge) */}
+                <div className="exs_badge_wrap">
+                  <span className="exs_badge">
+                    ETAPA {sec.num} <span className="exs_badge_sep">/</span> {sec.period}
+                  </span>
+                </div>
 
-                  {/* Títol principal amb animació ascendent */}
-                  <h3 className="expanding-strip__exp-title">{sec.title}</h3>
+                {/* Primary Title (Grifinito L) */}
+                <p className="exs_title">
+                  <span
+                    ref={(el) => {
+                      titlesRef.current[idx] = el;
+                    }}
+                    className="exs_title_inner"
+                    data-anm-exs-title
+                  >
+                    {sec.title}
+                  </span>
+                </p>
 
-                  {/* Cita destacada d'arxiu */}
+                {/* Subtitle Label (Graphik) */}
+                <p className="exs_label">
+                  <span
+                    ref={(el) => {
+                      labelsRef.current[idx] = el;
+                    }}
+                    className="exs_label_inner"
+                    data-anm-exs-label
+                  >
+                    {sec.subtitle}
+                  </span>
+                </p>
+
+                {/* Extra Content & Action Buttons */}
+                <div
+                  ref={(el) => {
+                    extrasRef.current[idx] = el;
+                  }}
+                  className="exs_extra"
+                >
                   {sec.quote && (
-                    <blockquote className="expanding-strip__exp-quote">
+                    <blockquote className="exs_quote">
                       «{sec.quote}»
                     </blockquote>
                   )}
 
-                  {/* Text narratiu editorial */}
-                  <div className="expanding-strip__exp-prose">
-                    <p className="expanding-strip__exp-summary">{sec.summary}</p>
-                    <p className="expanding-strip__exp-p2">{sec.paragraphs[1]}</p>
-                  </div>
+                  <div className="exs_actions">
+                    <button
+                      type="button"
+                      className="exs_btn_chronicle"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        openModal(sec);
+                      }}
+                    >
+                      <span>Llegir crònica completa</span>
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                        <line x1="5" y1="12" x2="19" y2="12" />
+                        <polyline points="12 5 19 12 12 19" />
+                      </svg>
+                    </button>
 
-                  {/* Fites i etiquetes clau de la secció */}
-                  <div className="expanding-strip__exp-footer">
-                    <div className="expanding-strip__exp-tags">
-                      {sec.tags.slice(0, 4).map((tag) => (
-                        <span key={tag} className="expanding-strip__tag">
-                          {tag}
-                        </span>
-                      ))}
-                    </div>
-
-                    <div className="expanding-strip__exp-actions">
+                    {onOpenChronology && (
                       <button
                         type="button"
-                        className="expanding-strip__btn-expand"
+                        className="exs_btn_fites"
                         onClick={(e) => {
                           e.stopPropagation();
-                          setModalSection(sec);
+                          onOpenChronology();
                         }}
                       >
-                        <span>Llegir crònica completa</span>
-                        <svg
-                          width="16"
-                          height="16"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        >
-                          <path d="M5 12h14" />
-                          <path d="M12 5l7 7-7 7" />
+                        <span>Fites històriques</span>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <line x1="12" y1="5" x2="12" y2="19" />
+                          <polyline points="19 12 12 19 5 12" />
                         </svg>
                       </button>
-
-                      {onOpenChronology && (
-                        <button
-                          type="button"
-                          className="expanding-strip__btn-ghost"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            onOpenChronology();
-                          }}
-                        >
-                          <span>Veure fites històriques</span>
-                        </button>
-                      )}
-                    </div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -330,7 +542,7 @@ export default function ExpandingStrip({
         })}
       </div>
 
-      {/* MODAL DE CRÒNICA HISTÒRICA COMPLETA */}
+      {/* FULL CHRONICLE MODAL (Refactored to /start chromatic palette: Black, White & Red) */}
       {modalSection && (
         <div
           ref={modalBackdropRef}
@@ -345,6 +557,7 @@ export default function ExpandingStrip({
             className="expanding-modal-card"
             onClick={(e) => e.stopPropagation()}
           >
+            {/* Close Button X (Explicit click handler & pointerEvents fix) */}
             <button
               type="button"
               className="expanding-modal__close"
@@ -352,9 +565,10 @@ export default function ExpandingStrip({
                 e.stopPropagation();
                 closeModal();
               }}
-              aria-label="Tancar crònica"
+              aria-label="Tancar crònica (Esc)"
+              title="Tancar crònica (Esc)"
             >
-              <svg width="20" height="20" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" style={{ pointerEvents: "none" }}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ pointerEvents: "none" }}>
                 <line x1="18" y1="6" x2="6" y2="18" />
                 <line x1="6" y1="6" x2="18" y2="18" />
               </svg>
@@ -362,7 +576,8 @@ export default function ExpandingStrip({
 
             <div className="expanding-modal__header">
               <div className="expanding-modal__meta">
-                <span className="modal-meta__num">SECCIÓ {modalSection.num}</span>
+                <span className="modal-meta__num">ETAPA {modalSection.num}</span>
+                <span className="modal-meta__sep">/</span>
                 <span className="modal-meta__period">{modalSection.period}</span>
               </div>
               <h2 id="modal-section-title" className="expanding-modal__title">
@@ -394,7 +609,7 @@ export default function ExpandingStrip({
 
             {modalSection.keyMilestones.length > 0 && (
               <div className="expanding-modal__fites">
-                <h4 className="modal-fites__title">Fites d'aquesta etapa</h4>
+                <h4 className="modal-fites__title">Fites clau d'aquesta etapa</h4>
                 <div className="modal-fites__grid">
                   {modalSection.keyMilestones.map((fita, idx) => (
                     <div key={idx} className="modal-fita__item">
