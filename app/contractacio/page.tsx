@@ -14,11 +14,10 @@ export default function ContractacioPage() {
     <main className="contractacio-page-container">
       <ContractacioClient />
       <InkBloomFooter
-        color="#e20000"
-        colorOuter="#ff3b30"
+        color="#b80018"
+        colorOuter="#ff0528"
         ground="transparent"
         edge="bottom"
-        minimal={true}
       />
     </main>
   );

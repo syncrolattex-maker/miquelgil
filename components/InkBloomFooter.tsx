@@ -6,12 +6,11 @@ import gsap from "gsap";
 import "./InkBloomFooter.css";
 
 interface InkBloomFooterProps {
-  color?: string; // Core ink color, default: #e20000
-  colorOuter?: string; // Outer glow tint, default: #ff3b30
+  color?: string; // Core ink color, default: #b80018 (deep vivid blood crimson)
+  colorOuter?: string; // Outer glow tint, default: #ff0528 (intense saturated electric red)
   ground?: string; // Background color, default: transparent
   edge?: "top" | "bottom"; // Bloom edge, default: bottom
   height?: number; // Height in px
-  minimal?: boolean; // Minimalist mode: refined spread and lighter density
 }
 
 const vertexShader = `
@@ -165,6 +164,7 @@ const fragmentShader = `
     float body = exp(-FALLOFF * pow(x, FEATHER));
     float a = body * (1.0 - CARVE * detail * (1.0 - strand));
     a = clamp(a * (uDensity + DENSE * grip), 0.0, 1.0);
+    a = pow(a, 0.82); // Vibrant ink pigment body
     a *= 1.0 - smoothstep(FLOOR, 1.0, p.y);
     a *= 1.0 - smoothstep(GONE, 1.0, uCollapse);
 
@@ -172,6 +172,7 @@ const fragmentShader = `
     a = clamp(a + tri / 255.0 * smoothstep(0.0, 0.02, a), 0.0, 1.0);
 
     vec3 col = mix(uColorOuter, uColor, smoothstep(GRADE_LO, GRADE_HI, body));
+    col = clamp(col * 1.05, 0.0, 1.0);
     gl_FragColor = vec4(col * a, a);
   }
 `;
@@ -187,11 +188,10 @@ function hexToVec3(hex: string): THREE.Vector3 {
 }
 
 export default function InkBloomFooter({
-  color = "#e20000",
-  colorOuter = "#ff3b30",
+  color = "#b80018",
+  colorOuter = "#ff0528",
   ground = "transparent",
   edge = "bottom",
-  minimal = true,
 }: InkBloomFooterProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -228,17 +228,17 @@ export default function InkBloomFooter({
       uColor: { value: hexToVec3(color) },
       uColorOuter: { value: hexToVec3(colorOuter) },
       uEdge: { value: edgeCode },
-      uSpread: { value: minimal ? 0.16 : 0.35 },
-      uDetail: { value: minimal ? 0.5 : 0.7 },
-      uDensity: { value: minimal ? 0.42 : 0.8 },
-      uFocal: { value: new THREE.Vector2(0.5, -0.35) },
-      uAim: { value: new THREE.Vector2(0.5, 0.5) },
-      uRoot: { value: new THREE.Vector2(0.5, 0.5) },
-      uStretch: { value: minimal ? 7.0 : 6.0 },
+      uSpread: { value: 0.35 }, // Annnimate default for rich fluid wash
+      uDetail: { value: 0.75 }, // Annnimate default for crisp detailed filaments
+      uDensity: { value: 0.95 }, // Rich vivid pigment density
+      uFocal: { value: new THREE.Vector2(0.98, -0.35) }, // Annnimate directional fan
+      uAim: { value: new THREE.Vector2(0.5, 0.0) },
+      uRoot: { value: new THREE.Vector2(0.5, 0.0) },
+      uStretch: { value: 6.0 }, // Annnimate stretch
       uTime: { value: 0 },
       uPull: { value: 0 },
-      uReach: { value: minimal ? 0.58 : 0.85 },
-      uZone: { value: minimal ? 0.26 : 0.45 },
+      uReach: { value: 0.88 }, // Annnimate reach
+      uZone: { value: 0.42 }, // Annnimate zone
       uCollapse: { value: 0 },
     };
 
@@ -321,7 +321,7 @@ export default function InkBloomFooter({
       const h = container.offsetHeight;
       if (w === 0 || h === 0) return;
       renderer.setSize(w, h, false);
-      uniforms.uResolution.value.set(w, h);
+      uniforms.uResolution.value.set(renderer.domElement.width, renderer.domElement.height);
       renderScene();
     };
 
@@ -392,7 +392,7 @@ export default function InkBloomFooter({
         renderer.forceContextLoss();
       }
     };
-  }, [color, colorOuter, ground, edge, minimal]);
+  }, [color, colorOuter, ground, edge]);
 
   return (
     <footer
