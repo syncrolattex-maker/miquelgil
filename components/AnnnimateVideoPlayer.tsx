@@ -1,29 +1,43 @@
 "use client";
 
 import React, { useState, useRef, useEffect, useCallback } from "react";
+import gsap from "gsap";
+import { Flip } from "gsap/Flip";
 import "./AnnnimateVideoPlayer.css";
 
-interface AnnnimateVideoPlayerProps {
+// Register GSAP Flip plugin safely in browser
+if (typeof window !== "undefined") {
+  gsap.registerPlugin(Flip);
+}
+
+export interface AnnnimateVideoPlayerProps {
   src: string;
   poster?: string;
   title?: string;
   credits?: string;
+  duration?: number; // flip transition duration, default: 0.9s (Annnimate spec)
 }
 
 export default function AnnnimateVideoPlayer({
   src,
   poster = "/video/nineta_frame.jpg",
-  title = "Nineta",
+  title = "Nineta — Videoclip Oficial",
   credits = "Tubal Perales, Vicent Todolí i Enric Alepuz",
+  duration = 0.9,
 }: AnnnimateVideoPlayerProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const surfaceRef = useRef<HTMLDivElement | null>(null);
+  const backdropRef = useRef<HTMLDivElement | null>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const scrubBarRef = useRef<HTMLDivElement | null>(null);
+  const volumeBarRef = useRef<HTMLDivElement | null>(null);
+
   const hideControlsTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const flipTimelineRef = useRef<gsap.core.Timeline | null>(null);
 
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [currentTime, setCurrentTime] = useState<number>(0);
-  const [duration, setDuration] = useState<number>(0);
+  const [videoDuration, setVideoDuration] = useState<number>(0);
   const [bufferedEnd, setBufferedEnd] = useState<number>(0);
   const [volume, setVolume] = useState<number>(1);
   const [isMuted, setIsMuted] = useState<boolean>(false);
@@ -32,17 +46,17 @@ export default function AnnnimateVideoPlayer({
   const [showControls, setShowControls] = useState<boolean>(true);
   const [isScrubbing, setIsScrubbing] = useState<boolean>(false);
 
-  // Scrubber hover preview
-  const [isHoveringScrubber, setIsHoveringScrubber] = useState<boolean>(false);
-  const [hoverTime, setHoverTime] = useState<number>(0);
-  const [hoverPosPercent, setHoverPosPercent] = useState<number>(0);
+  // Scrubber hover state
+  const [isHoveringScrub, setIsHoveringScrub] = useState<boolean>(false);
+  const [hoverScrubTime, setHoverScrubTime] = useState<number>(0);
+  const [hoverScrubPercent, setHoverScrubPercent] = useState<number>(0);
 
-  // Formatting helper: seconds to M:SS or MM:SS
-  const formatTime = (timeInSeconds: number) => {
-    if (isNaN(timeInSeconds) || timeInSeconds < 0) return "0:00";
-    const minutes = Math.floor(timeInSeconds / 60);
-    const seconds = Math.floor(timeInSeconds % 60);
-    return `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
+  // Format seconds to M:SS
+  const formatTime = (secs: number) => {
+    if (isNaN(secs) || secs < 0) return "0:00";
+    const m = Math.floor(secs / 60);
+    const s = Math.floor(secs % 60);
+    return `${m}:${s < 10 ? "0" : ""}${s}`;
   };
 
   // Play / Pause toggle
@@ -51,9 +65,10 @@ export default function AnnnimateVideoPlayer({
     if (!video) return;
 
     if (video.paused || video.ended) {
-      video.play().then(() => setIsPlaying(true)).catch((err) => {
-        console.warn("Playback error:", err);
-      });
+      video
+        .play()
+        .then(() => setIsPlaying(true))
+        .catch((err) => console.warn("Playback error:", err));
     } else {
       video.pause();
       setIsPlaying(false);
@@ -66,32 +81,30 @@ export default function AnnnimateVideoPlayer({
     if (!video || isScrubbing) return;
     setCurrentTime(video.currentTime);
 
-    // Buffer tracking
     if (video.buffered.length > 0) {
-      const lastBufferedIndex = video.buffered.length - 1;
-      setBufferedEnd(video.buffered.end(lastBufferedIndex));
+      const last = video.buffered.length - 1;
+      setBufferedEnd(video.buffered.end(last));
     }
   };
 
-  // Metadata loaded
   const handleLoadedMetadata = () => {
     const video = videoRef.current;
     if (!video) return;
-    setDuration(video.duration);
+    setVideoDuration(video.duration);
   };
 
-  // Autohide controls logic
+  // Autohide controls during playback
   const resetControlsTimer = useCallback(() => {
     setShowControls(true);
     if (hideControlsTimerRef.current) {
       clearTimeout(hideControlsTimerRef.current);
     }
-    if (isPlaying && !isScrubbing && !isHoveringScrubber) {
+    if (isPlaying && !isScrubbing && !isHoveringScrub) {
       hideControlsTimerRef.current = setTimeout(() => {
         setShowControls(false);
-      }, 2500);
+      }, 2600);
     }
-  }, [isPlaying, isScrubbing, isHoveringScrubber]);
+  }, [isPlaying, isScrubbing, isHoveringScrub]);
 
   useEffect(() => {
     resetControlsTimer();
@@ -100,15 +113,88 @@ export default function AnnnimateVideoPlayer({
     };
   }, [isPlaying, resetControlsTimer]);
 
-  // Volume & Mute handlers
-  const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newVol = parseFloat(e.target.value);
-    setVolume(newVol);
-    if (videoRef.current) {
-      videoRef.current.volume = newVol;
-      videoRef.current.muted = newVol === 0;
-      setIsMuted(newVol === 0);
+  // ANNNIMATE FLIP EXPANSION ANIMATION
+  // Grows out of its slot to fill the entire viewport, and flies back on close,
+  // without ever stopping or reloading the video!
+  const toggleFullscreen = useCallback(() => {
+    const container = containerRef.current;
+    const surface = surfaceRef.current;
+    const backdrop = backdropRef.current;
+    if (!container || !surface) return;
+
+    if (flipTimelineRef.current) {
+      flipTimelineRef.current.kill();
     }
+
+    const willBeFullscreen = !isFullscreen;
+    setIsFullscreen(willBeFullscreen);
+
+    // 1. Capture current first position & bounding box with GSAP Flip
+    const state = Flip.getState(surface);
+
+    // 2. Toggle class so surface targets its fullwidth/fullscreen fixed layout
+    if (willBeFullscreen) {
+      container.classList.add("vp_is_lifted", "vp_is_expanded");
+      document.body.style.overflow = "hidden";
+    } else {
+      container.classList.remove("vp_is_expanded");
+      document.body.style.overflow = "";
+    }
+
+    // 3. FLIP from old rect to new rect with smooth Annnimate exponential curve
+    const tl = gsap.timeline({
+      onComplete: () => {
+        if (!willBeFullscreen) {
+          container.classList.remove("vp_is_lifted");
+        }
+        flipTimelineRef.current = null;
+      },
+    });
+    flipTimelineRef.current = tl;
+
+    tl.add(
+      Flip.from(state, {
+        duration,
+        ease: "expo.inOut",
+      }),
+      0
+    );
+
+    // Smoothly square off corners when expanding, or round again when returning
+    tl.to(
+      surface,
+      {
+        borderRadius: willBeFullscreen ? 0 : 20,
+        duration,
+        ease: "expo.inOut",
+      },
+      0
+    );
+
+    // Dim or brighten backdrop
+    if (backdrop) {
+      tl.to(
+        backdrop,
+        {
+          autoAlpha: willBeFullscreen ? 0.85 : 0,
+          duration,
+          ease: "expo.inOut",
+        },
+        0
+      );
+    }
+  }, [isFullscreen, duration]);
+
+  // Volume & Mute
+  const handleVolumeTrackClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!volumeBarRef.current || !videoRef.current) return;
+    const rect = volumeBarRef.current.getBoundingClientRect();
+    const ratio = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+    setVolume(ratio);
+    videoRef.current.volume = ratio;
+    const muted = ratio === 0;
+    videoRef.current.muted = muted;
+    setIsMuted(muted);
   };
 
   const toggleMute = () => {
@@ -128,341 +214,364 @@ export default function AnnnimateVideoPlayer({
 
   const toggleLoop = () => {
     if (!videoRef.current) return;
-    const nextLoop = !isLooping;
-    videoRef.current.loop = nextLoop;
-    setIsLooping(nextLoop);
+    const next = !isLooping;
+    videoRef.current.loop = next;
+    setIsLooping(next);
   };
-
-  // Fullscreen handler
-  const toggleFullscreen = useCallback(() => {
-    const container = containerRef.current;
-    if (!container) return;
-
-    if (!document.fullscreenElement) {
-      if (container.requestFullscreen) {
-        container.requestFullscreen().catch(() => {
-          setIsFullscreen(true);
-        });
-      } else {
-        setIsFullscreen(true);
-      }
-    } else {
-      if (document.exitFullscreen) {
-        document.exitFullscreen();
-      }
-      setIsFullscreen(false);
-    }
-  }, []);
-
-  // Listen to fullscreen changes
-  useEffect(() => {
-    const onFullscreenChange = () => {
-      setIsFullscreen(!!document.fullscreenElement);
-    };
-    document.addEventListener("fullscreenchange", onFullscreenChange);
-    return () => {
-      document.removeEventListener("fullscreenchange", onFullscreenChange);
-    };
-  }, []);
 
   // Keyboard accessibility
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Only process when focused inside container or playing
-      if (!containerRef.current?.contains(document.activeElement) && !isFullscreen) {
-        return;
-      }
+      // Ignore typing in input fields
+      const target = e.target as HTMLElement;
+      if (target && (target.tagName === "INPUT" || target.tagName === "TEXTAREA")) return;
 
-      if (e.code === "Space" || e.key === "k") {
-        e.preventDefault();
-        togglePlay();
-      } else if (e.key === "f") {
+      if (e.key === "Escape" && isFullscreen) {
         e.preventDefault();
         toggleFullscreen();
-      } else if (e.key === "m") {
+      } else if (e.key === "f" || e.key === "F") {
+        e.preventDefault();
+        toggleFullscreen();
+      } else if (e.code === "Space" || e.key === "k" || e.key === "K") {
+        e.preventDefault();
+        togglePlay();
+      } else if (e.key === "m" || e.key === "M") {
         e.preventDefault();
         toggleMute();
+      } else if (e.key === "l" || e.key === "L") {
+        e.preventDefault();
+        toggleLoop();
       } else if (e.key === "ArrowLeft") {
         e.preventDefault();
         if (videoRef.current) {
-          videoRef.current.currentTime = Math.max(0, videoRef.current.currentTime - 5);
-          setCurrentTime(videoRef.current.currentTime);
+          const t = Math.max(0, videoRef.current.currentTime - 5);
+          videoRef.current.currentTime = t;
+          setCurrentTime(t);
         }
       } else if (e.key === "ArrowRight") {
         e.preventDefault();
         if (videoRef.current) {
-          videoRef.current.currentTime = Math.min(duration, videoRef.current.currentTime + 5);
-          setCurrentTime(videoRef.current.currentTime);
+          const t = Math.min(videoDuration, videoRef.current.currentTime + 5);
+          videoRef.current.currentTime = t;
+          setCurrentTime(t);
         }
-      } else if (e.key === "ArrowUp") {
-        e.preventDefault();
-        setVolume((v) => {
-          const next = Math.min(1, v + 0.1);
-          if (videoRef.current) videoRef.current.volume = next;
-          return next;
-        });
-      } else if (e.key === "ArrowDown") {
-        e.preventDefault();
-        setVolume((v) => {
-          const next = Math.max(0, v - 0.1);
-          if (videoRef.current) videoRef.current.volume = next;
-          return next;
-        });
       }
     };
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [togglePlay, toggleFullscreen, duration, isFullscreen]);
+  }, [isFullscreen, toggleFullscreen, togglePlay, videoDuration]);
 
-  // Scrub bar mouse/touch interactions
-  const calculateScrubPosition = (clientX: number) => {
-    if (!scrubBarRef.current || duration === 0) return 0;
+  // Continuous Scrubber interactions
+  const handleScrubMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!scrubBarRef.current || videoDuration === 0) return;
     const rect = scrubBarRef.current.getBoundingClientRect();
-    const clampedX = Math.max(0, Math.min(clientX - rect.left, rect.width));
-    return (clampedX / rect.width) * duration;
+    const ratio = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+    setIsHoveringScrub(true);
+    setHoverScrubPercent(ratio * 100);
+    setHoverScrubTime(ratio * videoDuration);
   };
 
-  const handleScrubberMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!scrubBarRef.current || duration === 0) return;
-    const rect = scrubBarRef.current.getBoundingClientRect();
-    const clampedX = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
-    const percent = (clampedX / rect.width) * 100;
-    const timeAtPos = (clampedX / rect.width) * duration;
-
-    setIsHoveringScrubber(true);
-    setHoverPosPercent(percent);
-    setHoverTime(timeAtPos);
+  const handleScrubMouseLeave = () => {
+    setIsHoveringScrub(false);
   };
 
-  const handleScrubberMouseLeave = () => {
-    setIsHoveringScrubber(false);
-  };
-
-  const handleScrubberMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+  const handleScrubMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!scrubBarRef.current || videoDuration === 0) return;
     setIsScrubbing(true);
-    const newTime = calculateScrubPosition(e.clientX);
+    const rect = scrubBarRef.current.getBoundingClientRect();
+    const ratio = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+    const newTime = ratio * videoDuration;
     setCurrentTime(newTime);
-    if (videoRef.current) {
-      videoRef.current.currentTime = newTime;
-    }
+    if (videoRef.current) videoRef.current.currentTime = newTime;
 
-    const onMouseMove = (moveEvent: MouseEvent) => {
-      const moveTime = calculateScrubPosition(moveEvent.clientX);
-      setCurrentTime(moveTime);
-      if (videoRef.current) {
-        videoRef.current.currentTime = moveTime;
-      }
+    const onMove = (me: MouseEvent) => {
+      const curRatio = Math.max(0, Math.min(1, (me.clientX - rect.left) / rect.width));
+      const curTime = curRatio * videoDuration;
+      setCurrentTime(curTime);
+      if (videoRef.current) videoRef.current.currentTime = curTime;
     };
 
-    const onMouseUp = () => {
+    const onUp = () => {
       setIsScrubbing(false);
-      window.removeEventListener("mousemove", onMouseMove);
-      window.removeEventListener("mouseup", onMouseUp);
+      window.removeEventListener("mousemove", onMove);
+      window.removeEventListener("mouseup", onUp);
     };
 
-    window.addEventListener("mousemove", onMouseMove);
-    window.addEventListener("mouseup", onMouseUp);
+    window.addEventListener("mousemove", onMove);
+    window.addEventListener("mouseup", onUp);
   };
 
-  // Progress percentages
-  const progressPercent = duration > 0 ? (currentTime / duration) * 100 : 0;
-  const bufferPercent = duration > 0 ? (bufferedEnd / duration) * 100 : 0;
+  const progressPercent = videoDuration > 0 ? (currentTime / videoDuration) * 100 : 0;
+  const bufferPercent = videoDuration > 0 ? (bufferedEnd / videoDuration) * 100 : 0;
+  const currentVolume = isMuted ? 0 : volume;
 
   return (
     <div
       ref={containerRef}
-      className={`ann-player ${isFullscreen ? "is-fullscreen" : ""} ${
-        isPlaying ? "is-playing" : "is-paused"
-      }`}
-      tabIndex={0}
+      className={`vp_player ${isFullscreen ? "vp_is_expanded vp_is_lifted" : ""}`}
+      data-anm-video-player
+      data-anm-duration={duration}
+      data-anm-ease="annnimateInOut"
+      data-anm-radius="20"
+      data-anm-backdrop="0.8"
+      data-anm-fit="cover"
+      data-anm-native-fullscreen="false"
       onMouseMove={resetControlsTimer}
       onMouseEnter={() => setShowControls(true)}
       onMouseLeave={() => isPlaying && setShowControls(false)}
-      aria-label="Reproductor de vídeo Nineta de Miquel Gil"
+      aria-label={`Reproductor de vídeo ${title}`}
     >
-      {/* Video element */}
-      <video
-        ref={videoRef}
-        src={src}
-        poster={poster}
-        playsInline
-        preload="metadata"
-        className="ann-player-video"
-        onClick={togglePlay}
-        onTimeUpdate={handleTimeUpdate}
-        onLoadedMetadata={handleLoadedMetadata}
-        onEnded={() => setIsPlaying(false)}
+      {/* 1. Backdrop for dimming page behind the player when growing */}
+      <div
+        ref={backdropRef}
+        className="vp_backdrop"
+        data-anm-vp-backdrop
+        onClick={isFullscreen ? toggleFullscreen : undefined}
+        aria-hidden={!isFullscreen}
       />
 
-      {/* Top Header Badge (Title & HD indicator) */}
-      <div className={`ann-player-topbar ${showControls || !isPlaying ? "is-visible" : ""}`}>
-        <div className="ann-player-topbar-info">
-          <span className="ann-player-topbar-tag">CLIP OFICIAL</span>
-          <span className="ann-player-topbar-title">{title}</span>
-        </div>
-        <span className="ann-player-badge-hd">HD 1080p</span>
-      </div>
-
-      {/* Center Big Play/Pause Button */}
-      <button
-        type="button"
-        className={`ann-player-center-play ${
-          isPlaying ? "is-hidden" : "is-visible"
-        }`}
-        onClick={togglePlay}
-        aria-label={isPlaying ? "Pausar vídeo" : "Reproduir vídeo"}
-      >
-        <div className="ann-player-play-icon-wrap">
-          <svg viewBox="0 0 24 24" width="28" height="28" fill="currentColor">
-            <polygon points="7 4 20 12 7 20 7 4" />
-          </svg>
-        </div>
-      </button>
-
-      {/* Bottom Controls Bar */}
+      {/* 2. The Animated Surface that FLIP-grows out of its slot to fill the viewport */}
       <div
-        className={`ann-player-controls ${
-          showControls || !isPlaying || isScrubbing ? "is-visible" : ""
-        }`}
+        ref={surfaceRef}
+        className="vp_surface"
+        data-anm-vp-surface
+        tabIndex={0}
+        role="region"
+        aria-label={`Vídeo ${title}`}
+        onClick={togglePlay}
       >
-        {/* Scrubber / Progress Bar */}
+        {/* Video Element (Keeps playing continuously without moving in DOM) */}
+        <video
+          ref={videoRef}
+          className="vp_video"
+          data-anm-vp-video
+          src={src}
+          poster={poster}
+          playsInline
+          preload="metadata"
+          onTimeUpdate={handleTimeUpdate}
+          onLoadedMetadata={handleLoadedMetadata}
+          onEnded={() => setIsPlaying(false)}
+        />
+
+        {/* Subtle Dark Gradient Scrim at bottom */}
+        <span className="vp_scrim" data-anm-vp-scrim aria-hidden="true" />
+
+        {/* Top Header Badge (Title & HD indicator) */}
         <div
-          ref={scrubBarRef}
-          className="ann-player-scrubber"
-          onMouseMove={handleScrubberMouseMove}
-          onMouseLeave={handleScrubberMouseLeave}
-          onMouseDown={handleScrubberMouseDown}
-          role="slider"
-          aria-label="Progrés del vídeo"
-          aria-valuemin={0}
-          aria-valuemax={duration}
-          aria-valuenow={currentTime}
+          className={`vp_topbar ${showControls || !isPlaying ? "is-visible" : "is-hidden"}`}
+          onClick={(e) => e.stopPropagation()}
         >
-          {/* Hover Time Tooltip */}
-          {isHoveringScrubber && (
-            <div
-              className="ann-player-tooltip"
-              style={{ left: `${hoverPosPercent}%` }}
-            >
-              {formatTime(hoverTime)}
-            </div>
-          )}
-
-          {/* Background Track */}
-          <div className="ann-player-track-bg" />
-
-          {/* Buffer Progress */}
-          <div
-            className="ann-player-track-buffer"
-            style={{ width: `${Math.min(100, bufferPercent)}%` }}
-          />
-
-          {/* Played Progress */}
-          <div
-            className="ann-player-track-played"
-            style={{ width: `${progressPercent}%` }}
-          >
-            <div className="ann-player-track-thumb" />
+          <div className="vp_topbar_info">
+            <span className="vp_tag">CLIP OFICIAL</span>
+            <span className="vp_title">{title}</span>
+          </div>
+          <div className="vp_topbar_actions">
+            <span className="vp_hd_badge">HD 1080p</span>
+            {isFullscreen && (
+              <button
+                type="button"
+                className="vp_close_btn"
+                onClick={toggleFullscreen}
+                aria-label="Tancar pantalla completa (Esc)"
+                title="Tancar pantalla completa (Esc)"
+              >
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="18" y1="6" x2="6" y2="18"></line>
+                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+              </button>
+            )}
           </div>
         </div>
 
-        {/* Action Controls Row */}
-        <div className="ann-player-actions">
-          {/* LEFT: Play/Pause & Time */}
-          <div className="ann-player-actions-left">
+        {/* Big Center Play / Pause Icon Button */}
+        <button
+          type="button"
+          className={`vp_big_play ${isPlaying ? "is-hidden" : "is-visible"}`}
+          data-anm-vp-big-play
+          aria-label={isPlaying ? "Pausar vídeo" : "Reproduir vídeo"}
+          onClick={(e) => {
+            e.stopPropagation();
+            togglePlay();
+          }}
+        >
+          <svg className="vp_big_play_icon" viewBox="0 0 24 24" width="28" height="28" fill="currentColor">
+            <polygon points="7 4.2 20 12 7 19.8" />
+          </svg>
+        </button>
+
+        {/* Bottom Floating Glass Control Bar */}
+        <div
+          className={`vp_bar ${showControls || !isPlaying || isScrubbing ? "is-visible" : "is-hidden"}`}
+          data-anm-vp-bar
+          onClick={(e) => e.stopPropagation()}
+        >
+          <span className="vp_bar_bg" data-anm-vp-bar-bg aria-hidden="true" />
+          <div className="vp_bar_inner" data-anm-vp-bar-inner>
+            {/* Play/Pause Button */}
             <button
               type="button"
-              className="ann-player-btn ann-player-btn--play"
+              className="vp_btn vp_btn--play"
+              data-anm-vp-play
               onClick={togglePlay}
-              aria-label={isPlaying ? "Pausa (Espai)" : "Reproduir (Espai)"}
-              title={isPlaying ? "Pausa (Espai)" : "Reproduir (Espai)"}
+              aria-label={isPlaying ? "Pausar (Espai)" : "Reproduir (Espai)"}
+              title={isPlaying ? "Pausar (Espai)" : "Reproduir (Espai)"}
             >
               {isPlaying ? (
-                <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
-                  <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
+                <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor">
+                  <rect x="3.5" y="3" width="3" height="10" rx="1" />
+                  <rect x="9.5" y="3" width="3" height="10" rx="1" />
                 </svg>
               ) : (
-                <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
-                  <polygon points="6 4 20 12 6 20 6 4" />
+                <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor" style={{ marginLeft: "1px" }}>
+                  <path d="M4.5 2.8v10.4L13 8z" />
                 </svg>
               )}
             </button>
 
-            {/* Time Stamp */}
-            <div className="ann-player-time">
-              <span className="ann-player-time-current">{formatTime(currentTime)}</span>
-              <span className="ann-player-time-sep">/</span>
-              <span className="ann-player-time-total">{formatTime(duration)}</span>
-            </div>
-          </div>
+            {/* Time Indicator */}
+            <span className="vp_time">
+              <span data-anm-vp-current>{formatTime(currentTime)}</span>
+              <span className="vp_time_sep"> / </span>
+              <span className="vp_time_total" data-anm-vp-duration>{formatTime(videoDuration)}</span>
+            </span>
 
-          {/* RIGHT: Volume, Loop, Fullscreen */}
-          <div className="ann-player-actions-right">
-            {/* Volume Group */}
-            <div className="ann-player-volume-group">
-              <button
-                type="button"
-                className="ann-player-btn ann-player-btn--volume"
-                onClick={toggleMute}
-                aria-label={isMuted ? "Activar so (M)" : "Silenciar (M)"}
-                title={isMuted ? "Activar so (M)" : "Silenciar (M)"}
+            {/* Scrubber Progress Slider */}
+            <div
+              ref={scrubBarRef}
+              className="vp_slider vp_scrub"
+              data-anm-vp-scrub
+              role="slider"
+              tabIndex={0}
+              aria-label="Avançar / Retrocedir vídeo"
+              aria-valuemin={0}
+              aria-valuemax={videoDuration}
+              aria-valuenow={currentTime}
+              aria-valuetext={`${formatTime(currentTime)} de ${formatTime(videoDuration)}`}
+              onMouseMove={handleScrubMouseMove}
+              onMouseLeave={handleScrubMouseLeave}
+              onMouseDown={handleScrubMouseDown}
+            >
+              <span className="vp_track" data-anm-vp-scrub-track>
+                <span
+                  className="vp_track_buffered"
+                  style={{ width: `${Math.min(100, bufferPercent)}%` }}
+                />
+                <span
+                  className="vp_track_fill"
+                  style={{ width: `${progressPercent}%` }}
+                />
+              </span>
+
+              {/* Scrubber Thumb */}
+              <span
+                className="vp_thumb_pos"
+                style={{ left: `${progressPercent}%` }}
               >
-                {isMuted || volume === 0 ? (
-                  <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
-                    <path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z" />
-                  </svg>
-                ) : volume < 0.5 ? (
-                  <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
-                    <path d="M18.5 12c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM5 9v6h4l5 5V4L9 9H5z" />
-                  </svg>
-                ) : (
-                  <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
-                    <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z" />
-                  </svg>
-                )}
-              </button>
+                <span className="vp_thumb" data-anm-vp-scrub-thumb />
+              </span>
 
-              <input
-                type="range"
-                min="0"
-                max="1"
-                step="0.05"
-                value={isMuted ? 0 : volume}
-                onChange={handleVolumeChange}
-                className="ann-player-volume-slider"
-                aria-label="Volum d'àudio"
-              />
+              {/* Hover Tooltip */}
+              {isHoveringScrub && (
+                <span
+                  className="vp_tip_pos"
+                  style={{ left: `${hoverScrubPercent}%` }}
+                >
+                  <span className="vp_tip" data-anm-vp-tip>
+                    {formatTime(hoverScrubTime)}
+                  </span>
+                </span>
+              )}
             </div>
 
-            {/* Loop Toggle */}
+            {/* Volume Button */}
             <button
               type="button"
-              className={`ann-player-btn ann-player-btn--loop ${isLooping ? "is-active" : ""}`}
-              onClick={toggleLoop}
-              aria-label={isLooping ? "Bucle activat" : "Repetir vídeo"}
-              title={isLooping ? "Bucle activat" : "Repetir vídeo"}
+              className="vp_btn vp_mute"
+              data-anm-vp-mute
+              onClick={toggleMute}
+              aria-label={isMuted || currentVolume === 0 ? "Activar so (M)" : "Silenciar (M)"}
+              title={isMuted || currentVolume === 0 ? "Activar so (M)" : "Silenciar (M)"}
             >
-              <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
-                <path d="M7 7h10v3l4-4-4-4v3H5v6h2V7zm10 10H7v-3l-4 4 4 4v-3h12v-6h-2v4z" />
+              {isMuted || currentVolume === 0 ? (
+                <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor">
+                  <path d="M2.5 6h2.2L8 3.2v9.6L4.7 10H2.5z" />
+                  <path d="M10.8 6.2l3 3.6M13.8 6.2l-3 3.6" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                </svg>
+              ) : currentVolume < 0.5 ? (
+                <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor">
+                  <path d="M2.5 6h2.2L8 3.2v9.6L4.7 10H2.5z" />
+                  <path d="M10.5 5.8a3.2 3.2 0 0 1 0 4.4" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                </svg>
+              ) : (
+                <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor">
+                  <path d="M2.5 6h2.2L8 3.2v9.6L4.7 10H2.5z" />
+                  <path d="M10.5 5.8a3.2 3.2 0 0 1 0 4.4M12.4 4a5.8 5.8 0 0 1 0 8" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                </svg>
+              )}
+            </button>
+
+            {/* Volume Mini Slider */}
+            <div
+              ref={volumeBarRef}
+              className="vp_slider vp_volume"
+              data-anm-vp-volume
+              role="slider"
+              tabIndex={0}
+              aria-label="Volum d'àudio"
+              aria-valuemin={0}
+              aria-valuemax={100}
+              aria-valuenow={Math.round(currentVolume * 100)}
+              onClick={handleVolumeTrackClick}
+            >
+              <span className="vp_track" data-anm-vp-volume-track>
+                <span
+                  className="vp_track_fill"
+                  style={{ width: `${currentVolume * 100}%` }}
+                />
+              </span>
+              <span
+                className="vp_thumb_pos"
+                style={{ left: `${currentVolume * 100}%` }}
+              >
+                <span className="vp_thumb" data-anm-vp-volume-thumb />
+              </span>
+            </div>
+
+            {/* Loop Toggle Button */}
+            <button
+              type="button"
+              className={`vp_btn vp_btn--loop ${isLooping ? "is-active" : ""}`}
+              data-anm-vp-loop
+              onClick={toggleLoop}
+              aria-label={isLooping ? "Desactivar bucle (L)" : "Activar bucle (L)"}
+              title={isLooping ? "Desactivar bucle (L)" : "Activar bucle (L)"}
+            >
+              <svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M3 8.5V6.5a2 2 0 0 1 2-2h7.5M13 7.5v2a2 2 0 0 1-2 2H3.5" />
+                <path d="M11 2.5l2 2-2 2M5 9.5l-2 2 2 2" />
+                {isLooping && <circle cx="8" cy="8" r="1.4" fill="currentColor" />}
               </svg>
             </button>
 
-            {/* Fullscreen Button */}
+            {/* Fullscreen / Fullwidth FLIP Button */}
             <button
               type="button"
-              className="ann-player-btn ann-player-btn--fullscreen"
+              className="vp_btn vp_btn--fullscreen"
+              data-anm-vp-fullscreen
               onClick={toggleFullscreen}
-              aria-label={isFullscreen ? "Sortir de pantalla completa (F)" : "Pantalla completa (F)"}
-              title={isFullscreen ? "Sortir de pantalla completa (F)" : "Pantalla completa (F)"}
+              aria-label={isFullscreen ? "Sortir de pantalla completa (F / Esc)" : "Pantalla completa (F)"}
+              title={isFullscreen ? "Sortir de pantalla completa (F / Esc)" : "Pantalla completa (F)"}
             >
               {isFullscreen ? (
-                <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
-                  <path d="M5 16h3v3h2v-5H5v2zm3-8H5v2h5V5H8v3zm6 11h2v-3h3v-2h-5v5zm2-11V5h-2v5h5V8h-3z" />
+                <svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M6 2.5V6H2.5M13.5 6H10V2.5M10 13.5V10h3.5M2.5 10H6v3.5" />
                 </svg>
               ) : (
-                <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
-                  <path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z" />
+                <svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M2.5 6V2.5H6M10 2.5h3.5V6M13.5 10v3.5H10M6 13.5H2.5V10" />
                 </svg>
               )}
             </button>
