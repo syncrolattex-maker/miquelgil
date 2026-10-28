@@ -30,12 +30,22 @@ export default function AudioPlayerBottom({
   const isFirstRender = useRef(true);
 
   const [currentTime, setCurrentTime] = useState<number>(0);
-  const [duration, setDuration] = useState<number>(30); // 30s preview default
+  const [duration, setDuration] = useState<number>(
+    currentTrack.duration ? currentTrack.duration / 1000 : 30
+  );
   const [volume, setVolume] = useState<number>(0.85);
   const [isMuted, setIsMuted] = useState<boolean>(false);
   const [isPlaylistOpen, setIsPlaylistOpen] = useState<boolean>(false);
   const [isMinimized, setIsMinimized] = useState<boolean>(false);
   const [isSeeking, setIsSeeking] = useState<boolean>(false);
+
+  // Sync track duration when currentTrack changes
+  useEffect(() => {
+    if (currentTrack.duration) {
+      setDuration(currentTrack.duration / 1000);
+    }
+    setCurrentTime(0);
+  }, [currentTrack]);
 
   // Sync audio play/pause with isPlaying prop
   useEffect(() => {
@@ -265,8 +275,8 @@ export default function AudioPlayerBottom({
       >
         <div className="playlist-drawer-header">
           <div className="playlist-drawer-title-group">
-            <span className="playlist-drawer-badge">Mostres oficials</span>
-            <h4 className="playlist-drawer-title">Pistes de Spotify (10 temes)</h4>
+            <span className="playlist-drawer-badge">Cançons completes</span>
+            <h4 className="playlist-drawer-title">1 Cançó sencera de cada disc (10 temes)</h4>
           </div>
           <button
             type="button"
@@ -319,7 +329,13 @@ export default function AudioPlayerBottom({
                 </div>
 
                 <div className="playlist-item-right">
-                  <span className="playlist-item-tag">30s preview</span>
+                  {track.isFullTrack ? (
+                    <span className="playlist-item-tag playlist-item-tag--full">
+                      Cançó sencera · {formatTime(track.duration ? track.duration / 1000 : 0)}
+                    </span>
+                  ) : (
+                    <span className="playlist-item-tag">30s preview</span>
+                  )}
                   <a
                     href={track.spotifyUrl}
                     target="_blank"
@@ -452,7 +468,11 @@ export default function AudioPlayerBottom({
                 <span className="bottom-player-title" title={currentTrack.title}>
                   {currentTrack.title}
                 </span>
-                <span className="bottom-player-badge">PREVIEW</span>
+                {currentTrack.isFullTrack ? (
+                  <span className="bottom-player-badge bottom-player-badge--full">CANÇÓ SENCERA</span>
+                ) : (
+                  <span className="bottom-player-badge">PREVIEW</span>
+                )}
               </div>
               <span className="bottom-player-album" title={currentTrack.album}>
                 {currentTrack.album} {currentTrack.year ? `(${currentTrack.year})` : ""}
@@ -569,8 +589,8 @@ export default function AudioPlayerBottom({
                 isPlaylistOpen ? "is-active" : ""
               }`}
               onClick={() => setIsPlaylistOpen((prev) => !prev)}
-              title="Veure les 10 pistes de Spotify"
-              aria-label="Veure llista de pistes"
+              title="Veure les 10 cançons completes (1 de cada disc)"
+              aria-label="Veure llista de cançons completes"
             >
               <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2">
                 <line x1="8" y1="6" x2="21" y2="6" strokeLinecap="round" />
@@ -580,7 +600,7 @@ export default function AudioPlayerBottom({
                 <circle cx="3.5" cy="12" r="1.5" fill="currentColor" stroke="none" />
                 <circle cx="3.5" cy="18" r="1.5" fill="currentColor" stroke="none" />
               </svg>
-              <span className="bottom-player-action-label">Pistes (10)</span>
+              <span className="bottom-player-action-label">10 Cançons</span>
             </button>
 
             {/* Control de volum */}

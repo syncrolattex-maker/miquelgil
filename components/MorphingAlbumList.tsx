@@ -6,9 +6,29 @@ import {
   type SpotifyTrack,
   findSpotifyTrack,
   findSpotifyTrackForAlbum,
+  getFullTrackForAlbum,
 } from "@/lib/spotifyTracks";
 import gsap from "gsap";
 import "./MorphingAlbumList.css";
+
+// Helper to format ms to mm:ss
+function formatDurationMs(ms?: number): string {
+  if (!ms) return "";
+  const totalSecs = Math.round(ms / 1000);
+  const m = Math.floor(totalSecs / 60);
+  const s = totalSecs % 60;
+  return `${m}:${s < 10 ? "0" : ""}${s}`;
+}
+
+function normalizeStr(s: string): string {
+  return s
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/^[\d#]+\.?\s*[-–—]?\s*/, "")
+    .replace(/[''’`]/g, "")
+    .replace(/[^a-z0-9]/g, "");
+}
 
 // High-resolution clean cover map
 const ALBUM_COVERS: Record<string, string> = {
@@ -233,12 +253,14 @@ export default function MorphingAlbumList({
   };
 
   const currentAlbumPreviewTrack = selectedAlbum
-    ? findSpotifyTrackForAlbum(selectedAlbum.title, selectedAlbum.tracks)
+    ? findSpotifyTrackForAlbum(selectedAlbum.title, selectedAlbum.tracks, selectedAlbum.slug)
     : null;
   const isSelectedAlbumPlaying =
     selectedAlbum &&
     isPlaying &&
-    currentTrack.album.toLowerCase().includes(selectedAlbum.title.toLowerCase());
+    (currentTrack.albumSlug === selectedAlbum.slug ||
+      currentTrack.album.toLowerCase().includes(selectedAlbum.title.toLowerCase()) ||
+      selectedAlbum.title.toLowerCase().includes(currentTrack.album.toLowerCase()));
 
   return (
     <div className="mlst_stage" ref={stageRef} data-anm-morphing-list data-anm-duration={duration}>
@@ -344,7 +366,11 @@ export default function MorphingAlbumList({
                     <button
                       type="button"
                       className={`disco-sleeve-play-badge ${isSelectedAlbumPlaying ? "is-playing" : ""}`}
-                      aria-label={isSelectedAlbumPlaying ? "Pausar reproducció" : `Reproduir mostra de ${selectedAlbum.title}`}
+                      aria-label={
+                        isSelectedAlbumPlaying
+                          ? "Pausar reproducció"
+                          : `Reproduir cançó sencera de ${selectedAlbum.title}`
+                      }
                       onClick={(e) => {
                         e.stopPropagation();
                         onPlayTrack(currentAlbumPreviewTrack);
@@ -357,11 +383,36 @@ export default function MorphingAlbumList({
                           <polygon points="6 4 20 12 6 20 6 4" />
                         )}
                       </svg>
-                      <span>{isSelectedAlbumPlaying ? "Reproduint" : "Escoltar mostra"}</span>
+                      <span>
+                        {isSelectedAlbumPlaying
+                          ? "Reproduint cançó sencera"
+                          : "Reproduir cançó sencera"}
+                      </span>
                     </button>
                   )}
                 </div>
               </div>
+
+              {/* Featured Full Song Highlight Card */}
+              {currentAlbumPreviewTrack && (
+                <div
+                  className={`disco-sleeve-featured-card ${isSelectedAlbumPlaying ? "is-playing" : ""}`}
+                  onClick={() => onPlayTrack(currentAlbumPreviewTrack)}
+                  title={`Reproduir cançó completa: ${currentAlbumPreviewTrack.title}`}
+                >
+                  <div className="disco-sleeve-featured-header">
+                    <span className="disco-sleeve-featured-pill">CANÇÓ COMPLETA</span>
+                    {currentAlbumPreviewTrack.duration && (
+                      <span className="disco-sleeve-featured-time">
+                        {formatDurationMs(currentAlbumPreviewTrack.duration)}
+                      </span>
+                    )}
+                  </div>
+                  <div className="disco-sleeve-featured-title">
+                    {currentAlbumPreviewTrack.title}
+                  </div>
+                </div>
+              )}
 
               {/* Spotify Link Button */}
               <a
@@ -434,11 +485,23 @@ export default function MorphingAlbumList({
 
                 <div className="disco-tracks-list" role="list">
                   {selectedAlbum.tracks.map((trackName, tIdx) => {
-                    const matchedSpotify = findSpotifyTrack(trackName);
+                    const cleanTrack = normalizeStr(trackName);
+                    const cleanFullTrack = currentAlbumPreviewTrack
+                      ? normalizeStr(currentAlbumPreviewTrack.title)
+                      : "";
+                    const isThisTheFullTrack = Boolean(
+                      currentAlbumPreviewTrack &&
+                        cleanFullTrack &&
+                        (cleanTrack === cleanFullTrack ||
+                          cleanTrack.includes(cleanFullTrack) ||
+                          cleanFullTrack.includes(cleanTrack))
+                    );
+
                     const isThisTrackPlaying =
                       isPlaying &&
-                      matchedSpotify &&
-                      currentTrack.id === matchedSpotify.id;
+                      currentAlbumPreviewTrack &&
+                      currentTrack.id === currentAlbumPreviewTrack.id &&
+                      (isThisTheFullTrack || !selectedAlbum.tracks.some((t) => normalizeStr(t) === cleanFullTrack));
 
                     const trackNumberStr = String(tIdx + 1).padStart(2, "0");
 
@@ -446,14 +509,19 @@ export default function MorphingAlbumList({
                       <div
                         key={`${selectedAlbum.slug}-${tIdx}`}
                         role="listitem"
-                        className={`disco-track-card ${isThisTrackPlaying ? "is-active" : ""}`}
+                        className={`disco-track-card ${isThisTrackPlaying ? "is-active" : ""} ${
+                          isThisTheFullTrack ? "is-full-track" : ""
+                        }`}
                         onClick={() => {
-                          if (matchedSpotify) {
-                            onPlayTrack(matchedSpotify);
-                          } else if (currentAlbumPreviewTrack) {
+                          if (currentAlbumPreviewTrack) {
                             onPlayTrack(currentAlbumPreviewTrack);
                           }
                         }}
+                        title={
+                          isThisTheFullTrack
+                            ? `Reproduir cançó sencera: ${trackName}`
+                            : `Reproduir cançó completa de l'àlbum (${currentAlbumPreviewTrack?.title})`
+                        }
                       >
                         <div className="disco-track-left">
                           <span className="disco-track-num">{trackNumberStr}</span>
@@ -461,25 +529,31 @@ export default function MorphingAlbumList({
                         </div>
 
                         <div className="disco-track-right">
-                          {matchedSpotify ? (
+                          {isThisTheFullTrack ? (
                             <>
-                              {isThisTrackPlaying ? (
+                              <span className="disco-track-badge-full">
+                                <span className="disco-track-full-dot" />
+                                Cançó sencera
+                              </span>
+                              {currentAlbumPreviewTrack?.duration && (
+                                <span className="disco-track-duration">
+                                  {formatDurationMs(currentAlbumPreviewTrack.duration)}
+                                </span>
+                              )}
+                              {isThisTrackPlaying && (
                                 <div className="disco-eq-bars" aria-label="Reproduint àudio">
                                   <span className="disco-eq-bar" />
                                   <span className="disco-eq-bar" />
                                   <span className="disco-eq-bar" />
                                 </div>
-                              ) : (
-                                <span className="disco-track-badge-preview">Mostra</span>
                               )}
-
                               <button
                                 type="button"
                                 className="disco-track-play-btn"
                                 aria-label={
                                   isThisTrackPlaying
                                     ? `Pausar ${trackName}`
-                                    : `Reproduir mostra de ${trackName}`
+                                    : `Reproduir cançó sencera: ${trackName}`
                                 }
                               >
                                 <svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor">
@@ -492,16 +566,19 @@ export default function MorphingAlbumList({
                               </button>
                             </>
                           ) : (
-                            <button
-                              type="button"
-                              className="disco-track-play-btn"
-                              aria-label={`Reproduir àlbum ${selectedAlbum.title}`}
-                              title="Reproduir àudio de l'àlbum"
-                            >
-                              <svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor">
-                                <polygon points="6 4 20 12 6 20 6 4" />
-                              </svg>
-                            </button>
+                            <>
+                              <span className="disco-track-badge-sample">Pista de l&apos;àlbum</span>
+                              <button
+                                type="button"
+                                className="disco-track-play-btn"
+                                aria-label={`Reproduir cançó de ${selectedAlbum.title}`}
+                                title={`Reproduir ${currentAlbumPreviewTrack?.title || "cançó sencera"}`}
+                              >
+                                <svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor">
+                                  <polygon points="6 4 20 12 6 20 6 4" />
+                                </svg>
+                              </button>
+                            </>
                           )}
                         </div>
                       </div>

@@ -336,6 +336,7 @@ export const albums: Album[] = [
       "Viajero",
       "Dinero Negro",
       "Sahariana",
+      "Sant Joan",
       "Bon Matí",
       "Vampiro",
       "Esa Oscura Voz En Off",

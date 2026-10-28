@@ -356,6 +356,69 @@
   border-color: #E20000;
 }
 
+/* Targeta destacada de Cançó Completa a la columna esquerra sota el vinil */
+.disco-sleeve-featured-card {
+  margin-top: 14px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  background-color: rgba(34, 197, 94, 0.08);
+  border: 1px solid rgba(34, 197, 94, 0.22);
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  user-select: none;
+}
+
+.disco-sleeve-featured-card:hover {
+  background-color: rgba(34, 197, 94, 0.14);
+  border-color: rgba(34, 197, 94, 0.4);
+  transform: translateY(-1px);
+}
+
+.disco-sleeve-featured-card.is-playing {
+  background-color: rgba(34, 197, 94, 0.18);
+  border-color: #22c55e;
+  box-shadow: 0 4px 16px rgba(34, 197, 94, 0.2);
+}
+
+.disco-sleeve-featured-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.disco-sleeve-featured-pill {
+  font-family: 'GRAPHIK', sans-serif;
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: #15803d;
+  background: rgba(34, 197, 94, 0.18);
+  padding: 2px 7px;
+  border-radius: 4px;
+  text-transform: uppercase;
+}
+
+.disco-sleeve-featured-time {
+  font-family: 'GRAPHIK', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  color: #166534;
+}
+
+.disco-sleeve-featured-title {
+  font-family: 'GRAPHIK', sans-serif;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #14532d;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 /* Metadades a sota de la caràtula */
 .disco-cover-meta {
   margin-top: 18px;
@@ -626,6 +689,88 @@
 .disco-track-card.is-active .disco-track-badge-preview {
   background-color: rgba(255, 59, 48, 0.25);
   color: #FF3B30;
+}
+
+/* Badge de cançó sencera destacada */
+.disco-track-badge-full {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 9px;
+  border-radius: 9999px;
+  background-color: rgba(34, 197, 94, 0.12);
+  color: #15803d;
+  border: 1px solid rgba(34, 197, 94, 0.28);
+  font-family: 'GRAPHIK', sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.disco-track-card.is-active .disco-track-badge-full {
+  background-color: rgba(34, 197, 94, 0.25);
+  color: #4ade80;
+  border-color: rgba(74, 222, 128, 0.4);
+}
+
+.disco-track-full-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: #22c55e;
+  display: inline-block;
+}
+
+.disco-track-card.is-active .disco-track-full-dot {
+  background-color: #4ade80;
+  box-shadow: 0 0 6px rgba(74, 222, 128, 0.8);
+}
+
+.disco-track-badge-sample {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 7px;
+  border-radius: 4px;
+  background-color: rgba(0, 0, 0, 0.04);
+  color: #888b89;
+  font-family: 'GRAPHIK', sans-serif;
+  font-size: 9.5px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.disco-track-card.is-active .disco-track-badge-sample {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.disco-track-duration {
+  font-family: 'GRAPHIK', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  color: #15803d;
+  letter-spacing: 0.02em;
+}
+
+.disco-track-card.is-active .disco-track-duration {
+  color: #4ade80;
+}
+
+.disco-track-card.is-full-track {
+  background-color: rgba(34, 197, 94, 0.04);
+  border-color: rgba(34, 197, 94, 0.16);
+}
+
+.disco-track-card.is-full-track:hover {
+  background-color: rgba(34, 197, 94, 0.09);
+  border-color: rgba(34, 197, 94, 0.3);
+}
+
+.disco-track-card.is-full-track.is-active {
+  background-color: #0f2416;
+  border-color: #22c55e;
 }
 
 .disco-track-play-btn {
@@ -916,6 +1061,14 @@
   background: rgba(212, 163, 89, 0.1);
   padding: 2px 6px;
   border-radius: 4px;
+}
+
+.playlist-item-tag--full {
+  color: #4ade80;
+  background: rgba(34, 197, 94, 0.15);
+  border: 1px solid rgba(34, 197, 94, 0.35);
+  font-weight: 600;
+  letter-spacing: 0.03em;
 }
 
 .playlist-item-spotify {
@@ -1224,6 +1377,12 @@
   border-radius: 4px;
   letter-spacing: 0.06em;
   flex-shrink: 0;
+}
+
+.bottom-player-badge--full {
+  background-color: rgba(34, 197, 94, 0.18);
+  color: #4ade80;
+  border-color: rgba(34, 197, 94, 0.45);
 }
 
 .bottom-player-album {
