@@ -24,8 +24,8 @@ export default function Home() {
           <div className="home__content-bg">
             <img
               decoding="async"
-              src="/images/viatgerO1.jpg"
-              alt="Miquel Gil - Viatger"
+              src="/images/miquel_gil_inicio.jpg"
+              alt="Miquel Gil"
               className="home__img"
             />
           </div>
