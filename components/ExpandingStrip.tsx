@@ -23,6 +23,7 @@ export default function ExpandingStrip({
   const containerRef = useRef<HTMLDivElement>(null);
   const modalBackdropRef = useRef<HTMLDivElement>(null);
   const modalCardRef = useRef<HTMLDivElement>(null);
+  const modalTimelineRef = useRef<gsap.core.Timeline | null>(null);
 
   // Determinar active index: hover prevaleix en desktop; si no hi ha hover, selectedIndex
   const activeIndex = hoveredIndex !== null ? hoveredIndex : selectedIndex;
@@ -38,6 +39,10 @@ export default function ExpandingStrip({
 
   // Animació de tancament suau amb GSAP
   const closeModal = useCallback(() => {
+    if (modalTimelineRef.current) {
+      modalTimelineRef.current.kill();
+    }
+
     const backdrop = modalBackdropRef.current;
     const card = modalCardRef.current;
     if (!backdrop || !card) {
@@ -50,6 +55,7 @@ export default function ExpandingStrip({
         setModalSection(null);
       },
     });
+    modalTimelineRef.current = tl;
 
     tl.to(card, {
       opacity: 0,
@@ -89,6 +95,7 @@ export default function ExpandingStrip({
     const tags = card.querySelector(".expanding-modal__tags");
 
     const tl = gsap.timeline();
+    modalTimelineRef.current = tl;
 
     // 1. Teló de fons amb enfosquiment i desenfocament suau
     tl.fromTo(
@@ -341,10 +348,13 @@ export default function ExpandingStrip({
             <button
               type="button"
               className="expanding-modal__close"
-              onClick={closeModal}
+              onClick={(e) => {
+                e.stopPropagation();
+                closeModal();
+              }}
               aria-label="Tancar crònica"
             >
-              <svg width="20" height="20" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+              <svg width="20" height="20" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" style={{ pointerEvents: "none" }}>
                 <line x1="18" y1="6" x2="6" y2="18" />
                 <line x1="6" y1="6" x2="18" y2="18" />
               </svg>
