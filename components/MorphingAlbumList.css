@@ -1,0 +1,466 @@
+/* ==========================================================================
+   ANNIMATE MORPHING LIST COMPONENT (DISCOGRAFIA - MIQUEL GIL)
+   Basat fidelment en https://annnimate.com/animations/morphing-list
+   Tipografia: Grifinito L (Titulars) i Graphik (Metadades, Cos & Botons)
+   ========================================================================== */
+
+.mlst_stage {
+  --margin: 40px;
+  --mlst-bg: #FFFFFF;
+  --mlst-surface: #FFFFFF;
+  --mlst-fg: #111211;
+  --mlst-soft: rgba(17, 18, 17, 0.75);
+  --mlst-dim: rgba(17, 18, 17, 0.52);
+  --mlst-line: rgba(0, 0, 0, 0.08);
+  --mlst-radius: 14px;
+  --mlst-ease: cubic-bezier(0.3, 0.9, 0.1, 1);
+  --mlst-accent: #E20000;
+  position: relative;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px var(--margin) 100px;
+  background-color: var(--mlst-bg);
+  color: var(--mlst-fg);
+  font-family: var(--font-graphik), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  box-sizing: border-box;
+}
+
+/* --------------------------------------------------------------------------
+   LIST CONTAINER
+   -------------------------------------------------------------------------- */
+.mlst_list {
+  width: min(980px, 100%);
+  margin: 0 auto;
+  padding: 0;
+  list-style: none;
+  border-bottom: 1px solid var(--mlst-line);
+}
+
+.mlst_item {
+  padding: 6px 0;
+  border-top: 1px solid var(--mlst-line);
+  list-style: none;
+}
+
+/* --------------------------------------------------------------------------
+   ROW BUTTON (INTERACTIVE ITEM)
+   -------------------------------------------------------------------------- */
+.mlst_row {
+  display: grid;
+  grid-template-columns: 56px minmax(0, 1.4fr) 140px 90px 60px 24px;
+  align-items: center;
+  column-gap: 24px;
+  width: 100%;
+  padding: 10px 18px 10px 12px;
+  border: 0;
+  border-radius: var(--mlst-radius);
+  background-color: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  box-sizing: border-box;
+  transition: background-color 0.35s var(--mlst-ease), transform 0.35s var(--mlst-ease);
+}
+
+.mlst_row:hover {
+  background-color: rgba(0, 0, 0, 0.035);
+  transform: translateX(4px);
+}
+
+.mlst_row:focus-visible {
+  outline: 2px solid var(--mlst-accent);
+  outline-offset: 2px;
+  background-color: rgba(0, 0, 0, 0.03);
+}
+
+.mlst_row.is-active {
+  visibility: hidden;
+}
+
+/* Row elements */
+.mlst_thumb {
+  display: block;
+  width: 56px;
+  height: 56px;
+  aspect-ratio: 1 / 1;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+  background-color: #f0f0f0;
+}
+
+.mlst_img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.mlst_title {
+  justify-self: start;
+  font-family: var(--font-grifinito), Georgia, serif;
+  font-size: 26px;
+  font-weight: 500;
+  letter-spacing: -0.015em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+  color: var(--mlst-fg);
+}
+
+.mlst_meta {
+  font-family: var(--font-graphik), sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: var(--mlst-dim);
+  white-space: nowrap;
+}
+
+.mlst_meta_discipline {
+  justify-self: start;
+  color: var(--mlst-soft);
+}
+
+.mlst_meta_tracks {
+  justify-self: start;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--mlst-accent);
+  background: rgba(226, 0, 0, 0.06);
+  padding: 3px 8px;
+  border-radius: 9999px;
+}
+
+.mlst_meta_year {
+  justify-self: end;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--mlst-fg);
+}
+
+.mlst_arrow {
+  justify-self: end;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--mlst-dim);
+  transition: transform 0.3s ease, color 0.3s ease;
+}
+
+.mlst_row:hover .mlst_arrow {
+  transform: translateX(4px);
+  color: var(--mlst-accent);
+}
+
+/* --------------------------------------------------------------------------
+   MORPHED PANEL DIALOG
+   -------------------------------------------------------------------------- */
+.mlst_panel {
+  width: min(1060px, calc(100vw - var(--margin) * 2));
+  max-width: none;
+  max-height: calc(100dvh - var(--margin) * 2);
+  margin: auto;
+  padding: 0;
+  border: 0;
+  border-radius: var(--mlst-radius);
+  background-color: var(--mlst-surface);
+  color: var(--mlst-fg);
+  overflow: hidden;
+  box-shadow: 0 25px 70px -15px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(0, 0, 0, 0.08);
+}
+
+.mlst_panel:focus,
+.mlst_panel:focus-visible {
+  outline: none;
+}
+
+.mlst_panel::backdrop {
+  background-color: rgba(10, 10, 10, 0.65);
+  backdrop-filter: blur(8px);
+  animation: mlst-backdrop-in 0.4s ease forwards;
+}
+
+@keyframes mlst-backdrop-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.mlst_panel_inner {
+  display: grid;
+  grid-template-columns: 420px 1fr;
+  max-height: calc(100dvh - var(--margin) * 2);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+/* Left column: Vinyl sleeve, Artwork, Audio action */
+.mlst_panel_media {
+  position: relative;
+  background: linear-gradient(180deg, #F8F7F4 0%, #EFEFEA 100%);
+  padding: 40px 32px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 28px;
+  border-right: 1px solid var(--mlst-line);
+}
+
+.mlst_panel_media .disco-sleeve-stage {
+  max-width: 320px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+/* Right column: Content, description & tracklist */
+.mlst_panel_content {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding: 40px 44px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+/* Close button */
+.mlst_close {
+  position: absolute;
+  top: 24px;
+  right: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: 0;
+  border-radius: 9999px;
+  background-color: rgba(0, 0, 0, 0.06);
+  color: var(--mlst-fg);
+  cursor: pointer;
+  transition: background-color 0.25s var(--mlst-ease), transform 0.25s var(--mlst-ease);
+  z-index: 10;
+}
+
+.mlst_close:hover {
+  background-color: rgba(0, 0, 0, 0.12);
+  transform: rotate(90deg);
+}
+
+.mlst_glyph {
+  width: 18px;
+  height: 18px;
+}
+
+/* Panel Header */
+.mlst_panel_head {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-right: 48px;
+}
+
+.mlst_panel_title {
+  font-family: var(--font-grifinito), Georgia, serif;
+  font-size: clamp(38px, 4.5vw, 54px);
+  font-weight: 500;
+  letter-spacing: -0.025em;
+  line-height: 1.05;
+  color: var(--mlst-fg);
+  margin: 0;
+}
+
+.mlst_panel_metas {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-top: 6px;
+}
+
+/* Panel Body Description */
+.mlst_panel_body {
+  border-top: 1px solid var(--mlst-line);
+  padding-top: 20px;
+}
+
+.mlst_text {
+  font-family: var(--font-graphik), sans-serif;
+  font-size: 15px;
+  line-height: 1.65;
+  color: var(--mlst-soft);
+  margin: 0;
+}
+
+/* --------------------------------------------------------------------------
+   VIEW TRANSITION RULES (Hardware Accelerated Morphing)
+   -------------------------------------------------------------------------- */
+::view-transition-group(mlst-surface),
+::view-transition-group(mlst-media),
+::view-transition-group(mlst-title),
+::view-transition-group(mlst-meta-0),
+::view-transition-group(mlst-meta-1),
+::view-transition-group(mlst-meta-2),
+::view-transition-group(mlst-meta-3) {
+  animation-duration: var(--mlst-dur, 0.55s);
+  animation-timing-function: cubic-bezier(0.3, 0.9, 0.1, 1);
+}
+
+.mlst-vt::view-transition-group(root) {
+  animation-duration: var(--mlst-dur, 0.55s);
+}
+
+.mlst-vt .mlst_row.is-morphing,
+.mlst-vt .mlst_panel {
+  border-radius: 0;
+}
+
+::view-transition-image-pair(mlst-surface) {
+  overflow: hidden;
+  animation: mlst-surface-radius var(--mlst-dur, 0.55s) cubic-bezier(0.3, 0.9, 0.1, 1) both;
+}
+
+@keyframes mlst-surface-radius {
+  from { border-radius: var(--mlst-r-from, 14px); }
+  to { border-radius: var(--mlst-r-to, 14px); }
+}
+
+::view-transition-old(mlst-surface),
+::view-transition-new(mlst-surface) {
+  width: 100%;
+  height: 100%;
+  mix-blend-mode: normal;
+}
+
+::view-transition-new(mlst-surface) {
+  animation: none;
+}
+
+::view-transition-old(mlst-surface) {
+  animation-name: mlst-surface-out;
+}
+
+::view-transition-old(mlst-media),
+::view-transition-new(mlst-media) {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.mlst-vt-open::view-transition-old(mlst-media),
+.mlst-vt-close::view-transition-new(mlst-media) {
+  animation: none;
+  opacity: 0;
+}
+
+.mlst-vt-open::view-transition-new(mlst-media),
+.mlst-vt-close::view-transition-old(mlst-media) {
+  animation: none;
+  opacity: 1;
+}
+
+::view-transition-old(mlst-title),
+::view-transition-new(mlst-title),
+::view-transition-old(mlst-meta-0),
+::view-transition-new(mlst-meta-0),
+::view-transition-old(mlst-meta-1),
+::view-transition-new(mlst-meta-1),
+::view-transition-old(mlst-meta-2),
+::view-transition-new(mlst-meta-2) {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: top left;
+  animation-duration: 0.25s;
+  mix-blend-mode: normal;
+}
+
+@keyframes mlst-surface-out {
+  0%, 55% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+/* --------------------------------------------------------------------------
+   RESPONSIVE DESIGN (TABLET & MOBILE)
+   -------------------------------------------------------------------------- */
+@media (max-width: 900px) {
+  .mlst_panel_inner {
+    grid-template-columns: 1fr;
+  }
+
+  .mlst_panel_media {
+    border-right: none;
+    border-bottom: 1px solid var(--mlst-line);
+    padding: 30px 24px;
+  }
+
+  .mlst_panel_content {
+    padding: 30px 24px 36px;
+  }
+
+  .mlst_row {
+    grid-template-columns: 50px minmax(0, 1fr) 120px 60px 20px;
+    column-gap: 16px;
+  }
+
+  .mlst_meta_tracks {
+    display: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .mlst_stage {
+    --margin: 16px;
+    padding: 24px var(--margin) 80px;
+  }
+
+  .mlst_row {
+    grid-template-columns: 44px minmax(0, 1fr) auto 20px;
+    column-gap: 14px;
+    padding: 8px 12px 8px 8px;
+  }
+
+  .mlst_thumb {
+    width: 44px;
+    height: 44px;
+  }
+
+  .mlst_title {
+    font-size: 20px;
+  }
+
+  .mlst_meta_discipline {
+    display: none;
+  }
+
+  .mlst_meta_year {
+    font-size: 13px;
+  }
+
+  .mlst_panel {
+    border-radius: 12px;
+  }
+
+  .mlst_panel_content {
+    padding: 24px 18px 30px;
+    gap: 20px;
+  }
+
+  .mlst_close {
+    top: 14px;
+    right: 14px;
+  }
+
+  .mlst_panel_title {
+    font-size: 32px;
+  }
+}
