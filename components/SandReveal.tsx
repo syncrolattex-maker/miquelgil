@@ -70,6 +70,7 @@ export default function SandReveal({
     dragStart: null as { x: number; y: number } | null,
     lastW: 0,
     lastH: 0,
+    isMobile: false,
   });
 
   const sample = useCallback((x: number, y: number) => {
@@ -200,58 +201,135 @@ export default function SandReveal({
     const s = stateRef.current;
     if (!s.heightmap || !s.coarseNoise) return;
 
-    // "Montoncito" orgànic d'arena centrat exclusivament sobre el bloc de text
-    // A fora del perímetre del monticle, depth = 0 (100% transparent: fons blanc net)
-    const cx = 0.50;
-    const cy = 0.50;
-    const rx = 0.54;
-    const ry = 0.54;
+    const isMob = s.isMobile;
 
-    for (let y = 0; y < s.gridH; y++) {
-      for (let x = 0; x < s.gridW; x++) {
-        const i = y * s.gridW + x;
-        const nx = x / s.gridW;
-        const ny = y / s.gridH;
+    if (!isMob) {
+      // =========================================================================
+      // DESKTOP: Degradat d'esquerra a dreta (sense tapar la imatge)
+      // L'arena cobreix la zona de text a l'esquerra i s'esvaeix de forma orgànica
+      // abans d'arribar a la fotografia de la dreta.
+      // No està limitada a un requadre, sinó que s'estén àmpliament per tota la columna.
+      // =========================================================================
+      for (let y = 0; y < s.gridH; y++) {
+        for (let x = 0; x < s.gridW; x++) {
+          const i = y * s.gridW + x;
+          const nx = x / s.gridW;
+          const ny = y / s.gridH;
 
-        // Distància normalitzada al centre del monticle
-        const dx = (nx - cx) / rx;
-        const dy = (ny - cy) / ry;
-        const angle = Math.atan2(dy, dx);
+          // Pertorbació orgànica dels contorns de les dunes al llarg de l'alçada
+          const duneWarp =
+            0.045 * Math.sin(ny * 6.5 + 0.5) +
+            0.03 * Math.sin(ny * 12.0 - 0.8) +
+            0.015 * Math.cos(ny * 20.0 + nx * 4.0);
 
-        // Pertorbació orgànica dels marges per emular la caiguda natural de l'arena amb el vent
-        const windWarp =
-          0.045 * Math.sin(angle * 3 + 1.2) +
-          0.035 * Math.sin(angle * 5 - 0.9) +
-          0.02 * Math.cos(angle * 7 + 0.4) +
-          0.025 * Math.sin(nx * 14 + ny * 9);
+          // Pendent de degradat d'esquerra a dreta:
+          // nx <= xSolid: arena profunda i compacta cobrint el text
+          // xSolid < nx < xFadeEnd: descens suau i orgànic cap a 0 (degradat ampli i progressiu)
+          // nx >= xFadeEnd: 0 absolut d'arena, mai toca la imatge de la dreta
+          const xSolid = 0.22 + duneWarp * 0.3;
+          const xFadeEnd = 0.84 + duneWarp;
 
-        // Perfil de monticle duna: pla i gruixut al centre (tapa el text) i pendent suau a les vores
-        const shape = Math.pow(Math.abs(dx), 3.0) + Math.pow(Math.abs(dy), 2.6) + windWarp;
-        const dist = Math.sqrt(Math.max(0, shape));
+          let xFalloff = 0;
+          if (nx <= xSolid) {
+            xFalloff = 1.0;
+          } else if (nx < xFadeEnd) {
+            const t = (xFadeEnd - nx) / (xFadeEnd - xSolid);
+            xFalloff = Math.pow(t, 1.35);
+          } else {
+            xFalloff = 0;
+          }
 
-        if (dist >= 1.0) {
-          // A fora del montoncito: 0 arena, completament transparent
-          s.heightmap[i] = 0;
-          continue;
+          // A dalt i a baix l'arena abasta pràcticament tota l'alçada (sensació de paisatge ampli)
+          let yFalloff = 1.0;
+          if (ny < 0.02) {
+            yFalloff = ny / 0.02;
+          } else if (ny > 0.98) {
+            yFalloff = (1.0 - ny) / 0.02;
+          }
+
+          const base = xFalloff * yFalloff;
+          if (base <= 0.002) {
+            s.heightmap[i] = 0;
+            continue;
+          }
+
+          let depth = base * 5.2;
+
+          // Rínxols de vent mediterrani i crestes suaus de duna
+          const windRipples = 0.22 * Math.sin(nx * 14.0 + ny * 8.0 + duneWarp * 8.0) * base;
+          const duneRidge = Math.sin((nx * 1.6 - ny * 0.35) * Math.PI * 2.0) * 0.16 * base;
+          depth += windRipples + duneRidge;
+
+          // Textura granulada orgànica
+          const flecks = s.coarseNoise[i] > 0.8 ? s.coarseNoise[i] * 0.24 * base : 0;
+          depth = Math.max(0, depth * (0.96 + s.coarseNoise[i] * 0.08) + flecks);
+
+          s.heightmap[i] = depth;
         }
+      }
+    } else {
+      // =========================================================================
+      // MÒBIL: L'arena entra de BAIX a DALT donant sensació real de platja
+      // Imatge a dalt, text a baix. L'arena és densa a la part inferior de la
+      // pantalla i s'enfila cap amunt trobant-se amb la riba de la foto.
+      // Abasta tot l'ample de la pantalla sense caixes tancades.
+      // =========================================================================
+      for (let y = 0; y < s.gridH; y++) {
+        for (let x = 0; x < s.gridW; x++) {
+          const i = y * s.gridW + x;
+          const nx = x / s.gridW;
+          const ny = y / s.gridH;
 
-        // Corba de perfil suau del monticle (Hermite smoothstep)
-        const t = 1.0 - dist;
-        const smooth = t * t * (3 - 2 * t);
+          // Línia de marea i riba orgànica
+          const shoreWarp =
+            0.04 * Math.sin(nx * 7.0 + 0.4) +
+            0.025 * Math.sin(nx * 15.0 - 1.0) +
+            0.015 * Math.cos(nx * 24.0 + 1.5);
 
-        // Alçària del monticle: ~5.0 al centre (tapa completament tot el text), baixant a 0 als marges
-        let depth = smooth * 5.0;
+          // Entrada de baix a dalt:
+          // ny >= ySolid: arena compacta a la part inferior sobre el text i enllaços
+          // yShoreline < ny < ySolid: pendent ascendent suau cap a la riba
+          // ny <= yShoreline: 0 absolut d'arena just on connecta amb la foto de dalt
+          const ySolid = 0.34 + shoreWarp * 0.4;
+          const yShoreline = 0.04 + shoreWarp;
 
-        // Ondulacions suaus de duna i cresta orgànica
-        const ripple = 0.25 * Math.sin(nx * 15 + ny * 10) * smooth;
-        const crest = Math.max(0, 1 - Math.abs(dx * 0.7 + dy * 0.5) * 2.0) * 0.45 * smooth;
-        depth += ripple + crest;
+          let yFalloff = 0;
+          if (ny >= ySolid) {
+            yFalloff = 1.0;
+          } else if (ny > yShoreline) {
+            const t = (ny - yShoreline) / (ySolid - yShoreline);
+            yFalloff = Math.pow(t, 1.25);
+          } else {
+            yFalloff = 0;
+          }
 
-        // Textura fina de grans d'arena
-        const flecks = s.coarseNoise[i] > 0.82 ? s.coarseNoise[i] * 0.22 * smooth : 0;
-        depth = Math.max(0, depth * (0.97 + s.coarseNoise[i] * 0.05) + flecks);
+          // Abasta tot l'ample de la pantalla de vora a vora sense caixes
+          let xFalloff = 1.0;
+          if (nx < 0.015) {
+            xFalloff = nx / 0.015;
+          } else if (nx > 0.985) {
+            xFalloff = (1.0 - nx) / 0.015;
+          }
 
-        s.heightmap[i] = depth;
+          const base = yFalloff * xFalloff;
+          if (base <= 0.002) {
+            s.heightmap[i] = 0;
+            continue;
+          }
+
+          let depth = base * 5.2;
+
+          // Rínxols de l'onatge i marques de marea horitzontals
+          const tideRipples = 0.26 * Math.sin(ny * 20.0 + shoreWarp * 10.0) * base;
+          const beachContour = Math.sin((ny * 2.2 + nx * 0.35) * Math.PI * 2) * 0.15 * base;
+          depth += tideRipples + beachContour;
+
+          // Grans d'arena de platja
+          const flecks = s.coarseNoise[i] > 0.8 ? s.coarseNoise[i] * 0.22 * base : 0;
+          depth = Math.max(0, depth * (0.96 + s.coarseNoise[i] * 0.08) + flecks);
+
+          s.heightmap[i] = depth;
+        }
       }
     }
   }, []);
@@ -428,6 +506,11 @@ export default function SandReveal({
     s.lastW = w;
     s.lastH = h;
 
+    const isMobile = w <= 768 || (w < 860 && w < h);
+    s.isMobile = isMobile;
+    const brush = isMobile ? Math.min(brushSize, 65) : brushSize;
+    s.brush = clamp(brush, 24, 140);
+
     const dpr = Math.min(1.25, window.devicePixelRatio || 1, 1200 / Math.max(w, h));
     const width = Math.max(1, Math.round(w * dpr));
     const height = Math.max(1, Math.round(h * dpr));
@@ -467,11 +550,25 @@ export default function SandReveal({
     s.settleTime = 0;
     s.needsRedraw = true;
 
-    // Subtilíssim traç inicial sobre "Si vols" per suggerir que l'arena es pot apartar
+    // Traç inicial subtil i orgànic sobre "Si vols" per convidar a apartar l'arena
     if (starterCue) {
-      const p1: StrokePoint = { x: 0.16, y: 0.22, time: 0 };
-      const p2: StrokePoint = { x: 0.26, y: 0.24, time: 100 };
-      const p3: StrokePoint = { x: 0.35, y: 0.21, time: 200 };
+      const subtitle = container.querySelector(".contacte-subtitle");
+
+      let startX = isMobile ? 0.18 : 0.20;
+      let startY = isMobile ? 0.28 : 0.40;
+
+      if (subtitle) {
+        const cRect = container.getBoundingClientRect();
+        const sRect = subtitle.getBoundingClientRect();
+        if (cRect.width > 0 && cRect.height > 0) {
+          startX = clamp((sRect.left - cRect.left + 35) / cRect.width, 0.08, 0.45);
+          startY = clamp((sRect.top - cRect.top + 30) / cRect.height, 0.12, 0.65);
+        }
+      }
+
+      const p1: StrokePoint = { x: startX, y: startY, time: 0 };
+      const p2: StrokePoint = { x: startX + (isMobile ? 0.22 : 0.15), y: startY + 0.02, time: 100 };
+      const p3: StrokePoint = { x: startX + (isMobile ? 0.35 : 0.26), y: startY - 0.01, time: 200 };
 
       sweep([p1, p2, p3]);
       for (let i = 0; i < 4; i++) {
