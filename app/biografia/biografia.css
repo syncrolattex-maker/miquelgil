@@ -126,7 +126,8 @@
 }
 
 .bio-editorial__badge {
-  font-family: var(--font-mono, monospace);
+  font-family: 'GRAPHIK', sans-serif;
+  font-weight: 600;
   font-size: 0.76rem;
   color: #d4a359;
   letter-spacing: 0.1em;
@@ -181,7 +182,8 @@
 }
 
 .bio-chrono__kicker {
-  font-family: var(--font-mono, monospace);
+  font-family: 'GRAPHIK', sans-serif;
+  font-weight: 600;
   font-size: 0.78rem;
   color: #d4a359;
   letter-spacing: 0.1em;
@@ -242,11 +244,11 @@
 }
 
 .chrono-row__year {
-  font-family: var(--font-mono, monospace);
-  font-size: 1.05rem;
+  font-family: 'Coign', 'GRAPHIK', sans-serif;
+  font-size: 1.35rem;
   font-weight: 700;
   color: #d4a359;
-  letter-spacing: -0.01em;
+  letter-spacing: 0.02em;
 }
 
 .chrono-row__text {
@@ -277,7 +279,8 @@
 }
 
 .bio-venues__kicker {
-  font-family: var(--font-mono, monospace);
+  font-family: 'GRAPHIK', sans-serif;
+  font-weight: 600;
   font-size: 0.8rem;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -337,7 +340,8 @@
 }
 
 .bio-venue-card__territory {
-  font-family: var(--font-mono, monospace);
+  font-family: 'GRAPHIK', sans-serif;
+  font-weight: 600;
   font-size: 0.72rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;

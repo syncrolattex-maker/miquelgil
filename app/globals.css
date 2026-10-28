@@ -1,26 +1,68 @@
+/* ============================================================
+   TIPOGRAFIES OFICIALS MIQUEL GIL: COIGN, GRIFINITO L, GRAPHIK
+   ============================================================ */
+
+/* 1. COIGN — Tipografia de gran impacte, xifres hero i títols capitals */
 @font-face {
-  font-family: "Manic";
-  src: url("/fonts/MANIC.woff2") format("woff2"),
-    url("/fonts/MANIC.woff") format("woff");
-  font-weight: normal;
+  font-family: 'Coign';
   font-style: normal;
+  font-weight: normal;
   font-display: swap;
+  src: url('/fonts/Coign37B.woff2') format('woff2');
 }
 
 @font-face {
-  font-family: "Archivo";
-  src: url("/fonts/archivo-latin.woff2") format("woff2");
-  font-weight: 100 900;
+  font-family: 'Coign';
   font-style: normal;
+  font-weight: 700;
   font-display: swap;
+  src: url('/fonts/Coign37B.woff2') format('woff2');
+}
+
+/* 2. GRIFINITO L — Tipografia poètica i d'arrel per a titulars i cites */
+@font-face {
+  font-family: 'GRIFINITO L';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/grifinito.woff2') format('woff2'),
+       url('/fonts/grifinito.woff') format('woff'),
+       url('/fonts/grifinito.ttf') format('truetype');
 }
 
 @font-face {
-  font-family: "Manic Alt";
-  src: url("/fonts/MANIC-Alternates2.woff2") format("woff2");
-  font-weight: normal;
+  font-family: 'GRIFINITO L';
   font-style: normal;
+  font-weight: 600;
   font-display: swap;
+  src: url('/fonts/grifinito.woff2') format('woff2'),
+       url('/fonts/grifinito.woff') format('woff'),
+       url('/fonts/grifinito.ttf') format('truetype');
+}
+
+/* 3. GRAPHIK — Tipografia editorial, cos de text, UI i navegació */
+@font-face {
+  font-family: 'GRAPHIK';
+  font-style: normal;
+  font-weight: 300;
+  font-display: swap;
+  src: url('/fonts/Graphik-Light.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'GRAPHIK';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/Graphik-Regular.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'GRAPHIK';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('/fonts/Graphik-Bold.woff2') format('woff2');
 }
 
 :root {
@@ -31,12 +73,17 @@
   --white: #ffffff;
   --accent: #805681;
   --red: #ff0000;
+  --gold: #d4a359;
   --rail: 0px;
   --line: rgba(255, 255, 255, 0.2);
   --line-dark: rgba(0, 0, 0, 0.16);
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
-  --font-manic: "Manic", "Manic Alt", cursive;
-  --font-body: "Archivo", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --font-coign: 'Coign', sans-serif;
+  --font-grifinito: 'GRIFINITO L', serif;
+  --font-graphik: 'GRAPHIK', sans-serif;
+  --font-display: 'GRIFINITO L', serif;
+  --font-body: 'GRAPHIK', sans-serif;
+  --font-mono: 'Coign', 'GRAPHIK', sans-serif;
 }
 
 * {
@@ -56,7 +103,7 @@ html {
 body {
   background: var(--bg);
   color: var(--white);
-  font-family: var(--font-body);
+  font-family: var(--font-graphik), sans-serif;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
   overflow-x: hidden;
@@ -274,7 +321,7 @@ button {
 }
 
 .menu__link {
-  font-family: var(--font-manic);
+  font-family: var(--font-grifinito);
   font-size: clamp(44px, 7vw, 104px);
   line-height: 1.02;
   letter-spacing: -0.02em;
@@ -340,7 +387,7 @@ button {
 }
 
 .display {
-  font-family: var(--font-manic);
+  font-family: var(--font-grifinito);
   font-weight: normal;
   line-height: 0.94;
   letter-spacing: -0.015em;
@@ -503,7 +550,7 @@ button {
 }
 
 .home__name {
-  font-family: var(--font-manic);
+  font-family: var(--font-coign);
   color: var(--white);
   font-size: clamp(58px, 11.5vw, 150px);
   line-height: 0.92;
@@ -513,7 +560,7 @@ button {
 }
 
 .home__album {
-  font-family: var(--font-manic);
+  font-family: var(--font-grifinito);
   color: var(--ink);
   font-size: clamp(44px, 7.5vw, 96px);
   line-height: 1;
@@ -739,7 +786,7 @@ button {
 }
 
 .streaming__label {
-  font-family: var(--font-manic);
+  font-family: var(--font-grifinito);
   font-size: clamp(24px, 3vw, 40px);
 }
 
@@ -785,14 +832,14 @@ button {
 }
 
 .chapter__num {
-  font-family: var(--font-manic);
+  font-family: var(--font-coign);
   font-size: clamp(40px, 5vw, 72px);
   line-height: 1;
   color: var(--accent);
 }
 
 .chapter__title {
-  font-family: var(--font-manic);
+  font-family: var(--font-grifinito);
   font-size: clamp(34px, 4.6vw, 68px);
   line-height: 1;
   margin: 0 0 28px;
@@ -810,7 +857,7 @@ button {
 }
 
 .chapter__body p:first-child::first-letter {
-  font-family: var(--font-manic);
+  font-family: var(--font-grifinito);
   font-size: 3.1em;
   float: left;
   line-height: 0.8;
@@ -898,7 +945,7 @@ button {
 }
 
 .album__title {
-  font-family: var(--font-manic);
+  font-family: var(--font-grifinito);
   font-size: clamp(34px, 5vw, 68px);
   line-height: 1;
   margin: 0;
@@ -957,7 +1004,7 @@ button {
 }
 
 .year__num {
-  font-family: var(--font-manic);
+  font-family: var(--font-coign);
   font-size: clamp(34px, 4.5vw, 62px);
   line-height: 1;
   position: sticky;
@@ -1043,7 +1090,7 @@ button {
 .agenda-note {
   font-size: clamp(22px, 3vw, 42px);
   line-height: 1.25;
-  font-family: var(--font-manic);
+  font-family: var(--font-grifinito);
   max-width: 22ch;
   margin: 0;
 }
@@ -1074,7 +1121,7 @@ button {
 }
 
 .mural-block h3 {
-  font-family: var(--font-manic);
+  font-family: var(--font-grifinito);
   font-size: clamp(40px, 6vw, 90px);
   line-height: 0.95;
   margin: 0 0 24px;
@@ -1119,7 +1166,7 @@ button {
   justify-content: space-between;
   gap: 20px;
   padding: clamp(20px, 3vw, 34px) 0;
-  font-family: var(--font-manic);
+  font-family: var(--font-grifinito);
   font-size: clamp(24px, 3.4vw, 46px);
   line-height: 1;
   transition: color 0.25s var(--ease);
@@ -1445,7 +1492,7 @@ button {
 
 .home__name {
   color: #FFFFFF;
-  font-family: "Manic", Sans-serif;
+  font-family: 'Coign', 'GRAPHIK', Sans-serif;
   font-size: 136px;
   font-weight: 600;
   line-height: 100px;
@@ -1460,10 +1507,10 @@ button {
 
 .home__album {
   color: #000000;
-  font-family: "Manic", Sans-serif;
+  font-family: 'GRIFINITO L', serif;
   font-size: 86px;
   font-weight: 500;
-  letter-spacing: -5px;
+  letter-spacing: -3px;
   margin: 0px 0px 0px 100px;
   line-height: 1.1;
 }
@@ -2144,14 +2191,6 @@ button {
    EXACT MIQUELGIL.COM BIOGRAFIA (HORIZONTAL SCROLL EXPERIENCE)
    ============================================================ */
 
-@font-face {
-  font-family: 'Maelstorm';
-  font-style: normal;
-  font-weight: normal;
-  font-display: swap;
-  src: url('/fonts/Maelstrom-Sans-Bold.woff2') format('woff2');
-}
-
 .bio-viewport {
   position: relative;
   width: 100vw;
@@ -2199,9 +2238,9 @@ button {
   padding: 40px 60px;
 }
 
-/* Giant background numbers in Maelstorm font */
+/* Giant background numbers in Coign font */
 .bio-num-giant {
-  font-family: 'Maelstorm', Sans-serif;
+  font-family: 'Coign', Sans-serif;
   font-size: 500px;
   line-height: 0.8;
   color: rgba(255, 255, 255, 0.08);
@@ -2657,7 +2696,7 @@ button {
 /* Tipografías y Colores Originales de Contacte */
 .contacte-root-wrapper .elementor-element-9093221 .qodef-m-title {
   color: #D10000 !important;
-  font-family: "Maelstorm", Sans-serif !important;
+  font-family: "Coign", Sans-serif !important;
   font-size: clamp(55px, 6vw, 85px) !important;
   line-height: 75px !important;
   letter-spacing: 2.8px !important;

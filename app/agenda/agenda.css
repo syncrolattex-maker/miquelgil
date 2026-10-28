@@ -257,10 +257,11 @@
 }
 
 .agenda-card-year {
-  font-family: 'GRIFINITO L', serif;
-  font-size: 20px;
+  font-family: 'Coign', 'GRAPHIK', sans-serif;
+  font-size: 26px;
   font-weight: 700;
   color: #000000;
+  letter-spacing: 0.02em;
 }
 
 .agenda-card-status-pill {

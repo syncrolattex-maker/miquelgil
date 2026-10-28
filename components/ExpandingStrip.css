@@ -139,8 +139,8 @@
 }
 
 .expanding-strip__comp-num {
-  font-family: var(--font-mono, monospace);
-  font-size: 0.78rem;
+  font-family: 'Coign', 'GRAPHIK', sans-serif;
+  font-size: 0.95rem;
   font-weight: 700;
   color: #d4a359;
   letter-spacing: 0.06em;
@@ -244,7 +244,8 @@
   background: rgba(212, 163, 89, 0.15);
   border: 1px solid rgba(212, 163, 89, 0.35);
   border-radius: 9999px;
-  font-family: var(--font-mono, monospace);
+  font-family: 'GRAPHIK', sans-serif;
+  font-weight: 600;
   font-size: 0.76rem;
   letter-spacing: 0.06em;
   color: #e5b974;
@@ -450,7 +451,8 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  font-family: var(--font-mono, monospace);
+  font-family: 'GRAPHIK', sans-serif;
+  font-weight: 600;
   font-size: 0.8rem;
   color: #d4a359;
 }
@@ -528,7 +530,8 @@
 
 .modal-fites__title {
   margin: 0;
-  font-family: var(--font-mono, monospace);
+  font-family: 'GRAPHIK', sans-serif;
+  font-weight: 600;
   font-size: 0.85rem;
   text-transform: uppercase;
   letter-spacing: 0.08em;
@@ -551,11 +554,12 @@
 }
 
 .modal-fita__year {
-  font-family: var(--font-mono, monospace);
+  font-family: 'Coign', 'GRAPHIK', sans-serif;
   font-weight: 700;
   color: #d4a359;
-  font-size: 0.9rem;
+  font-size: 1.15rem;
   min-width: 48px;
+  letter-spacing: 0.02em;
 }
 
 .modal-fita__text {
@@ -571,7 +575,7 @@
 }
 
 .modal-tag {
-  font-family: var(--font-mono, monospace);
+  font-family: 'GRAPHIK', sans-serif;
   font-size: 0.78rem;
   color: rgba(255, 255, 255, 0.45);
 }
