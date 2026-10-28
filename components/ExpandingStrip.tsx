@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef, useCallback } from "react";
+import gsap from "gsap";
 import type { BioSection } from "@/app/biografia/bioData";
 import "./ExpandingStrip.css";
 
@@ -20,6 +21,8 @@ export default function ExpandingStrip({
   const [modalSection, setModalSection] = useState<BioSection | null>(null);
   const [isMobile, setIsMobile] = useState<boolean>(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  const modalBackdropRef = useRef<HTMLDivElement>(null);
+  const modalCardRef = useRef<HTMLDivElement>(null);
 
   // Determinar active index: hover prevaleix en desktop; si no hi ha hover, selectedIndex
   const activeIndex = hoveredIndex !== null ? hoveredIndex : selectedIndex;
@@ -33,11 +36,115 @@ export default function ExpandingStrip({
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
+  // Animació de tancament suau amb GSAP
+  const closeModal = useCallback(() => {
+    const backdrop = modalBackdropRef.current;
+    const card = modalCardRef.current;
+    if (!backdrop || !card) {
+      setModalSection(null);
+      return;
+    }
+
+    const tl = gsap.timeline({
+      onComplete: () => {
+        setModalSection(null);
+      },
+    });
+
+    tl.to(card, {
+      opacity: 0,
+      y: 30,
+      scale: 0.94,
+      duration: 0.22,
+      ease: "power2.in",
+    }).to(
+      backdrop,
+      {
+        opacity: 0,
+        duration: 0.2,
+        ease: "power2.in",
+      },
+      "-=0.1"
+    );
+  }, []);
+
+  const openModal = useCallback((sec: BioSection) => {
+    setModalSection(sec);
+  }, []);
+
+  // Animació d'entrada espectacular en obrir el popup (Llegir la crònica completa)
+  useEffect(() => {
+    if (!modalSection) return;
+
+    const backdrop = modalBackdropRef.current;
+    const card = modalCardRef.current;
+    if (!backdrop || !card) return;
+
+    const header = card.querySelector(".expanding-modal__header");
+    const closeBtn = card.querySelector(".expanding-modal__close");
+    const media = card.querySelector(".expanding-modal__media");
+    const quote = card.querySelector(".expanding-modal__quote");
+    const body = card.querySelector(".expanding-modal__body");
+    const fites = card.querySelector(".expanding-modal__fites");
+    const tags = card.querySelector(".expanding-modal__tags");
+
+    const tl = gsap.timeline();
+
+    // 1. Teló de fons amb enfosquiment i desenfocament suau
+    tl.fromTo(
+      backdrop,
+      { opacity: 0 },
+      { opacity: 1, duration: 0.35, ease: "power2.out" }
+    );
+
+    // 2. Floriment físic de la targeta modal (escala, translació i subtil perspectiva 3D)
+    tl.fromTo(
+      card,
+      {
+        opacity: 0,
+        y: 50,
+        scale: 0.90,
+        rotateX: 4,
+        transformPerspective: 1000,
+      },
+      {
+        opacity: 1,
+        y: 0,
+        scale: 1,
+        rotateX: 0,
+        duration: 0.52,
+        ease: "power3.out",
+      },
+      "-=0.25"
+    );
+
+    // 3. Botó de tancament amb gir i aparició elàstica
+    if (closeBtn) {
+      tl.fromTo(
+        closeBtn,
+        { opacity: 0, scale: 0.6, rotation: -90 },
+        { opacity: 1, scale: 1, rotation: 0, duration: 0.35, ease: "back.out(2)" },
+        "-=0.35"
+      );
+    }
+
+    // 4. Stagger dels blocs de contingut intern
+    const innerElements = [header, media, quote, body, fites, tags].filter(Boolean);
+    if (innerElements.length > 0) {
+      tl.fromTo(
+        innerElements,
+        { opacity: 0, y: 16 },
+        { opacity: 1, y: 0, duration: 0.38, stagger: 0.05, ease: "power2.out" },
+        "-=0.3"
+      );
+    }
+  }, [modalSection]);
+
   // Navegació amb teclat
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
       if (modalSection) {
-        if (e.key === "Escape") setModalSection(null);
+        if (e.key === "Escape") closeModal();
         return;
       }
 
@@ -52,11 +159,11 @@ export default function ExpandingStrip({
         const current = sections[activeIndex];
         if (current) {
           e.preventDefault();
-          setModalSection(current);
+          openModal(current);
         }
       }
     },
-    [modalSection, sections, activeIndex]
+    [modalSection, sections, activeIndex, closeModal, openModal]
   );
 
   useEffect(() => {
@@ -219,20 +326,22 @@ export default function ExpandingStrip({
       {/* MODAL DE CRÒNICA HISTÒRICA COMPLETA */}
       {modalSection && (
         <div
+          ref={modalBackdropRef}
           className="expanding-modal-backdrop"
-          onClick={() => setModalSection(null)}
+          onClick={closeModal}
           role="dialog"
           aria-modal="true"
           aria-labelledby="modal-section-title"
         >
           <div
+            ref={modalCardRef}
             className="expanding-modal-card"
             onClick={(e) => e.stopPropagation()}
           >
             <button
               type="button"
               className="expanding-modal__close"
-              onClick={() => setModalSection(null)}
+              onClick={closeModal}
               aria-label="Tancar crònica"
             >
               <svg width="20" height="20" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">

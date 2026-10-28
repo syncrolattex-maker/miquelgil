@@ -384,29 +384,19 @@
 }
 
 /* ==========================================================================
-   MODAL DE CRÒNICA HISTÒRICA COMPLETA
+   MODAL DE CRÒNICA HISTÒRICA COMPLETA (Controlat per GSAP)
    ========================================================================== */
 .expanding-modal-backdrop {
   position: fixed;
   inset: 0;
   z-index: 9999;
-  background: rgba(0, 0, 0, 0.8);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  background: rgba(4, 5, 8, 0.88);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 24px;
-  animation: modalFadeIn 0.3s cubic-bezier(0.25, 1, 0.5, 1);
-}
-
-@keyframes modalFadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
 }
 
 .expanding-modal-card {
@@ -416,25 +406,15 @@
   max-height: 90vh;
   overflow-y: auto;
   background: #0d0f14;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 20px;
+  border: 1px solid rgba(212, 163, 89, 0.25);
+  border-radius: 22px;
   padding: 40px;
-  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.9);
+  box-shadow: 0 32px 90px rgba(0, 0, 0, 0.95), 0 0 0 1px rgba(212, 163, 89, 0.12);
   display: flex;
   flex-direction: column;
   gap: 24px;
-  animation: modalSlideUp 0.35s cubic-bezier(0.25, 1, 0.5, 1);
-}
-
-@keyframes modalSlideUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px) scale(0.98);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
+  will-change: transform, opacity;
+  transform-origin: center center;
 }
 
 .expanding-modal__close {
