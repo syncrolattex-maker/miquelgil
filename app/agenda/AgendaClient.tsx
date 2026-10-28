@@ -421,7 +421,6 @@ export default function AgendaClient() {
       <section className="agenda-showcase-section" aria-label="Baralla interactiva de concerts">
         <div className="agenda-showcase-inner">
           <div className="agenda-deck-header">
-            <span className="agenda-deck-kicker">Efecte MadewithGSAP 025 · Randomize &amp; Focus</span>
             <h2 className="agenda-deck-title">Cartell de Concerts</h2>
             <p className="agenda-deck-subtitle">
               Passa el cursor per sobre de la baralla per separar les cartes i enfocar cada data. Fes clic a qualsevol concert per obrir-ne la fitxa sencera.
