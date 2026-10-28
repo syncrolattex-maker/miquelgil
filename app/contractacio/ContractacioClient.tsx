@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useState } from "react";
-import { bookingInfo, downloads, liveFormats } from "@/lib/site";
+import React, { useState, useRef, useEffect, useCallback } from "react";
+import gsap from "gsap";
+import { bookingInfo, downloads } from "@/lib/site";
 
 interface FormatDetail {
   id: string;
@@ -101,6 +102,8 @@ const FORMAT_DETAILS: FormatDetail[] = [
 
 export default function ContractacioClient() {
   const [selectedFormat, setSelectedFormat] = useState<string>("duo");
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+
   const [formData, setFormData] = useState({
     entity: "",
     city: "",
@@ -112,6 +115,10 @@ export default function ContractacioClient() {
     notes: "",
   });
 
+  const modalBackdropRef = useRef<HTMLDivElement>(null);
+  const modalCardRef = useRef<HTMLDivElement>(null);
+  const modalTimelineRef = useRef<gsap.core.Timeline | null>(null);
+
   const activeFormatObj =
     FORMAT_DETAILS.find((f) => f.id === selectedFormat) || FORMAT_DETAILS[0];
 
@@ -122,13 +129,115 @@ export default function ContractacioClient() {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSelectFormatFromCard = (formatId: string) => {
+  // Open modal with specific format preselected
+  const handleOpenModal = (formatId: string) => {
     setSelectedFormat(formatId);
-    const formEl = document.getElementById("formulari-contractacio");
-    if (formEl) {
-      formEl.scrollIntoView({ behavior: "smooth" });
-    }
+    setIsModalOpen(true);
   };
+
+  // Smooth GSAP Close animation
+  const handleCloseModal = useCallback(() => {
+    if (modalTimelineRef.current) {
+      modalTimelineRef.current.kill();
+    }
+    const backdrop = modalBackdropRef.current;
+    const card = modalCardRef.current;
+    if (!backdrop || !card) {
+      setIsModalOpen(false);
+      return;
+    }
+
+    const tl = gsap.timeline({
+      onComplete: () => {
+        setIsModalOpen(false);
+      },
+    });
+    modalTimelineRef.current = tl;
+
+    tl.to(card, {
+      opacity: 0,
+      y: 25,
+      scale: 0.94,
+      duration: 0.22,
+      ease: "power2.in",
+    }).to(
+      backdrop,
+      {
+        opacity: 0,
+        duration: 0.2,
+        ease: "power2.in",
+      },
+      "-=0.1"
+    );
+  }, []);
+
+  // GSAP Entrance animation when modal opens
+  useEffect(() => {
+    if (!isModalOpen) return;
+
+    const backdrop = modalBackdropRef.current;
+    const card = modalCardRef.current;
+    if (!backdrop || !card) return;
+
+    const header = card.querySelector(".contract-modal-header");
+    const closeBtn = card.querySelector(".contract-modal-close");
+    const formFields = card.querySelectorAll(".contract-field-group, .contract-fields-row, .contract-submit-btn");
+
+    const tl = gsap.timeline();
+    modalTimelineRef.current = tl;
+
+    tl.fromTo(
+      backdrop,
+      { opacity: 0 },
+      { opacity: 1, duration: 0.32, ease: "power2.out" }
+    );
+
+    tl.fromTo(
+      card,
+      {
+        opacity: 0,
+        y: 40,
+        scale: 0.92,
+      },
+      {
+        opacity: 1,
+        y: 0,
+        scale: 1,
+        duration: 0.46,
+        ease: "power3.out",
+      },
+      "-=0.2"
+    );
+
+    if (closeBtn) {
+      tl.fromTo(
+        closeBtn,
+        { opacity: 0, scale: 0.6, rotation: -90 },
+        { opacity: 1, scale: 1, rotation: 0, duration: 0.3, ease: "back.out(2)" },
+        "-=0.28"
+      );
+    }
+
+    if (formFields.length > 0) {
+      tl.fromTo(
+        formFields,
+        { opacity: 0, y: 12 },
+        { opacity: 1, y: 0, duration: 0.3, stagger: 0.035, ease: "power2.out" },
+        "-=0.25"
+      );
+    }
+  }, [isModalOpen]);
+
+  // Keyboard shortcut: Escape to close
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && isModalOpen) {
+        handleCloseModal();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isModalOpen, handleCloseModal]);
 
   const generateMailtoUrl = () => {
     const subject = `Sol·licitud de contractació: ${activeFormatObj.name} — ${formData.city || "Nova data"}`;
@@ -184,9 +293,13 @@ Moltes gràcies.`;
             <a href="#documents" className="contract-quick-pill">
               Dossier artístic
             </a>
-            <a href="#formulari-contractacio" className="contract-quick-pill contract-quick-pill--red">
+            <button
+              type="button"
+              className="contract-quick-pill contract-quick-pill--red"
+              onClick={() => handleOpenModal("duo")}
+            >
               Sol·licitar disponibilitat
-            </a>
+            </button>
           </div>
         </div>
       </header>
@@ -206,74 +319,69 @@ Moltes gràcies.`;
           </div>
 
           <div className="contract-formats-grid">
-            {FORMAT_DETAILS.map((fmt) => {
-              const isSelected = selectedFormat === fmt.id;
-              return (
-                <div
-                  key={fmt.id}
-                  className={`contract-format-card ${isSelected ? "is-selected" : ""}`}
-                >
-                  <div className="contract-card-top">
-                    <span className="contract-card-badge">{fmt.badge}</span>
-                    <span className="contract-card-duration">{fmt.duration}</span>
+            {FORMAT_DETAILS.map((fmt) => (
+              <div key={fmt.id} className="contract-format-card">
+                <div className="contract-card-top">
+                  <span className="contract-card-badge">{fmt.badge}</span>
+                  <span className="contract-card-duration">{fmt.duration}</span>
+                </div>
+
+                <h3 className="contract-card-name">{fmt.name}</h3>
+                <p className="contract-card-sub">{fmt.subtitle}</p>
+
+                <div className="contract-card-details">
+                  <div className="contract-detail-block">
+                    <span className="contract-detail-label">Músics a l&apos;escenari:</span>
+                    <ul className="contract-musicians-list">
+                      {fmt.musicians.map((m, idx) => (
+                        <li key={idx}>{m}</li>
+                      ))}
+                    </ul>
                   </div>
 
-                  <h3 className="contract-card-name">{fmt.name}</h3>
-                  <p className="contract-card-sub">{fmt.subtitle}</p>
-
-                  <div className="contract-card-details">
-                    <div className="contract-detail-block">
-                      <span className="contract-detail-label">Músics a l&apos;escenari:</span>
-                      <ul className="contract-musicians-list">
-                        {fmt.musicians.map((m, idx) => (
-                          <li key={idx}>{m}</li>
-                        ))}
-                      </ul>
-                    </div>
-
-                    <div className="contract-detail-block">
-                      <span className="contract-detail-label">Espais ideals:</span>
-                      <p className="contract-detail-text">{fmt.idealVenues}</p>
-                    </div>
-
-                    <div className="contract-detail-block">
-                      <span className="contract-detail-label">Exemple recent de referència:</span>
-                      <p className="contract-detail-text contract-detail-text--highlight">
-                        {fmt.recentHighlight}
-                      </p>
-                    </div>
-
-                    <div className="contract-detail-block">
-                      <span className="contract-detail-label">Requeriments tècnics bàsics:</span>
-                      <p className="contract-detail-text">{fmt.technicalSummary}</p>
-                    </div>
+                  <div className="contract-detail-block">
+                    <span className="contract-detail-label">Espais ideals:</span>
+                    <p className="contract-detail-text">{fmt.idealVenues}</p>
                   </div>
 
-                  <div className="contract-card-actions">
-                    <button
-                      type="button"
-                      className="contract-card-btn contract-card-btn--primary"
-                      onClick={() => handleSelectFormatFromCard(fmt.id)}
-                    >
-                      Demanar disponibilitat
-                    </button>
+                  <div className="contract-detail-block">
+                    <span className="contract-detail-label">Exemple recent de referència:</span>
+                    <p className="contract-detail-text contract-detail-text--highlight">
+                      {fmt.recentHighlight}
+                    </p>
+                  </div>
 
-                    <a
-                      href={fmt.riderLink}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="contract-card-btn contract-card-btn--secondary"
-                      title={`Descarregar Rider tècnic de ${fmt.name}`}
-                    >
-                      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2">
-                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3" />
-                      </svg>
-                      <span>Rider tècnic</span>
-                    </a>
+                  <div className="contract-detail-block">
+                    <span className="contract-detail-label">Requeriments tècnics bàsics:</span>
+                    <p className="contract-detail-text">{fmt.technicalSummary}</p>
                   </div>
                 </div>
-              );
-            })}
+
+                <div className="contract-card-actions">
+                  {/* Clicking this button opens the booking modal preselected for this format */}
+                  <button
+                    type="button"
+                    className="contract-card-btn contract-card-btn--primary"
+                    onClick={() => handleOpenModal(fmt.id)}
+                  >
+                    Demanar disponibilitat
+                  </button>
+
+                  <a
+                    href={fmt.riderLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="contract-card-btn contract-card-btn--secondary"
+                    title={`Descarregar Rider tècnic de ${fmt.name}`}
+                  >
+                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3" />
+                    </svg>
+                    <span>Rider tècnic</span>
+                  </a>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </section>
@@ -412,204 +520,228 @@ Moltes gràcies.`;
       </section>
 
       {/* ============================================================
-          SECCIÓ 3: FORMULARI DE DISPONIBILITAT PER A PROGRAMADORS
+          OFICINA DE MANAGEMENT EN PETIT (Discret, compacte i elegant)
           ============================================================ */}
-      <section id="formulari-contractacio" className="contract-section">
-        <div className="contract-section-inner">
-          <div className="contract-booking-split">
-            {/* Columna esquerra: Formulari interactiu */}
-            <div className="contract-form-col">
-              <span className="contract-section-kicker">Formulari directe</span>
-              <h2 className="contract-section-title">Sol·licitud de disponibilitat</h2>
-              <p className="contract-section-subtitle">
-                Ompli aquest formulari amb les dades bàsiques de la proposta i el nostre equip
-                de producció es posarà en contacte amb vosté en un termini de 24-48 hores.
+      <section className="contract-mgmt-compact-section" aria-label="Oficina de Management">
+        <div className="contract-mgmt-compact-inner">
+          <div className="contract-mgmt-compact-header">
+            <span className="contract-mgmt-compact-badge">Oficina de Management</span>
+            <span className="contract-mgmt-compact-title">Gusmà Gil · PPF Produccions Culturals</span>
+          </div>
+
+          <div className="contract-mgmt-compact-info">
+            <a
+              href={`mailto:${bookingInfo.managementEmail}`}
+              className="contract-mgmt-compact-link"
+              title="Enviar correu a management"
+            >
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+                <polyline points="22,6 12,13 2,6" />
+              </svg>
+              <span>{bookingInfo.managementEmail}</span>
+            </a>
+            <span className="contract-mgmt-compact-sep">·</span>
+            <span className="contract-mgmt-compact-text">Direcció de Producció i Booking Oficial</span>
+            <span className="contract-mgmt-compact-sep">·</span>
+            <span className="contract-mgmt-compact-note">
+              Admet contractació directa i tramitació mitjançant Plataforma de Contractació Pública
+            </span>
+          </div>
+        </div>
+      </section>
+
+      {/* ============================================================
+          POPUP MODAL DEL FORMULARI (ANIMACIÓ GSAP PER AL FORMAT SELECCIONAT)
+          ============================================================ */}
+      {isModalOpen && (
+        <div
+          ref={modalBackdropRef}
+          className="contract-modal-backdrop"
+          onClick={handleCloseModal}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="contract-modal-title"
+        >
+          <div
+            ref={modalCardRef}
+            className="contract-modal-card"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Botó de tancament 'X' */}
+            <button
+              type="button"
+              className="contract-modal-close"
+              onClick={handleCloseModal}
+              aria-label="Tancar formulari (Esc)"
+              title="Tancar formulari (Esc)"
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ pointerEvents: "none" }}>
+                <line x1="18" y1="6" x2="6" y2="18" />
+                <line x1="6" y1="6" x2="18" y2="18" />
+              </svg>
+            </button>
+
+            {/* Capçalera del Modal */}
+            <div className="contract-modal-header">
+              <span className="contract-modal-kicker">Sol·licitud de Disponibilitat</span>
+              <h2 id="contract-modal-title" className="contract-modal-title">
+                {activeFormatObj.name}
+              </h2>
+              <p className="contract-modal-desc">
+                Ompli aquest formulari i l&apos;equip de management de Miquel Gil respondrà amb
+                la disponibilitat i pressupost detallat en 24-48 hores.
               </p>
 
-              <form
-                className="contract-form"
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  window.location.href = generateMailtoUrl();
-                }}
-              >
-                {/* Selecció de Format */}
+              {/* Format Preseleccionat Indicator */}
+              <div className="contract-modal-format-badge">
+                <span className="format-badge-dot" />
+                <span>Format preseleccionat: <strong>{activeFormatObj.name}</strong> ({activeFormatObj.duration})</span>
+              </div>
+            </div>
+
+            {/* Formulari amb acció Mailto */}
+            <form
+              className="contract-form"
+              onSubmit={(e) => {
+                e.preventDefault();
+                window.location.href = generateMailtoUrl();
+              }}
+            >
+              {/* Selector de format (per si vol canviar) */}
+              <div className="contract-field-group">
+                <label className="contract-label">Format de concert *</label>
+                <select
+                  name="selectedFormat"
+                  value={selectedFormat}
+                  onChange={(e) => setSelectedFormat(e.target.value)}
+                  className="contract-select"
+                >
+                  {FORMAT_DETAILS.map((f) => (
+                    <option key={f.id} value={f.id}>
+                      {f.name} — {f.subtitle} ({f.duration})
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="contract-fields-row">
                 <div className="contract-field-group">
-                  <label className="contract-label">Format de concert desitjat *</label>
-                  <select
-                    name="selectedFormat"
-                    value={selectedFormat}
-                    onChange={(e) => setSelectedFormat(e.target.value)}
-                    className="contract-select"
-                  >
-                    {FORMAT_DETAILS.map((f) => (
-                      <option key={f.id} value={f.id}>
-                        {f.name} — {f.subtitle} ({f.duration})
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div className="contract-fields-row">
-                  <div className="contract-field-group">
-                    <label className="contract-label">Entitat, Ajuntament o Festival *</label>
-                    <input
-                      type="text"
-                      name="entity"
-                      placeholder="Ex: Regidoria de Cultura de..."
-                      value={formData.entity}
-                      onChange={handleInputChange}
-                      required
-                      className="contract-input"
-                    />
-                  </div>
-
-                  <div className="contract-field-group">
-                    <label className="contract-label">Municipi o Comarca *</label>
-                    <input
-                      type="text"
-                      name="city"
-                      placeholder="Ex: Alcoi, Gandia, Manresa..."
-                      value={formData.city}
-                      onChange={handleInputChange}
-                      required
-                      className="contract-input"
-                    />
-                  </div>
-                </div>
-
-                <div className="contract-fields-row">
-                  <div className="contract-field-group">
-                    <label className="contract-label">Data o període previst</label>
-                    <input
-                      type="text"
-                      name="date"
-                      placeholder="Ex: Juliol 2026 / Tardor 2026"
-                      value={formData.date}
-                      onChange={handleInputChange}
-                      className="contract-input"
-                    />
-                  </div>
-
-                  <div className="contract-field-group">
-                    <label className="contract-label">Espai / Recinte previst</label>
-                    <input
-                      type="text"
-                      name="venue"
-                      placeholder="Ex: Teatre Municipal / Plaça Major"
-                      value={formData.venue}
-                      onChange={handleInputChange}
-                      className="contract-input"
-                    />
-                  </div>
-                </div>
-
-                <div className="contract-fields-row">
-                  <div className="contract-field-group">
-                    <label className="contract-label">Persona de contacte *</label>
-                    <input
-                      type="text"
-                      name="contactName"
-                      placeholder="Nom i cognoms"
-                      value={formData.contactName}
-                      onChange={handleInputChange}
-                      required
-                      className="contract-input"
-                    />
-                  </div>
-
-                  <div className="contract-field-group">
-                    <label className="contract-label">Correu electrònic *</label>
-                    <input
-                      type="email"
-                      name="email"
-                      placeholder="correu@entitat.cat"
-                      value={formData.email}
-                      onChange={handleInputChange}
-                      required
-                      className="contract-input"
-                    />
-                  </div>
-                </div>
-
-                <div className="contract-field-group">
-                  <label className="contract-label">Telèfon de contacte</label>
+                  <label className="contract-label">Entitat, Ajuntament o Festival *</label>
                   <input
-                    type="tel"
-                    name="phone"
-                    placeholder="+34 600 000 000"
-                    value={formData.phone}
+                    type="text"
+                    name="entity"
+                    placeholder="Ex: Regidoria de Cultura de..."
+                    value={formData.entity}
+                    onChange={handleInputChange}
+                    required
+                    className="contract-input"
+                  />
+                </div>
+
+                <div className="contract-field-group">
+                  <label className="contract-label">Municipi o Comarca *</label>
+                  <input
+                    type="text"
+                    name="city"
+                    placeholder="Ex: Alcoi, Gandia, Manresa..."
+                    value={formData.city}
+                    onChange={handleInputChange}
+                    required
+                    className="contract-input"
+                  />
+                </div>
+              </div>
+
+              <div className="contract-fields-row">
+                <div className="contract-field-group">
+                  <label className="contract-label">Data o període previst</label>
+                  <input
+                    type="text"
+                    name="date"
+                    placeholder="Ex: Juliol 2026 / Tardor 2026"
+                    value={formData.date}
                     onChange={handleInputChange}
                     className="contract-input"
                   />
                 </div>
 
                 <div className="contract-field-group">
-                  <label className="contract-label">Observacions o necessitats específiques</label>
-                  <textarea
-                    name="notes"
-                    rows={4}
-                    placeholder="Detalls sobre l'esdeveniment, cicle de concerts, condicions particulars d'escenari..."
-                    value={formData.notes}
+                  <label className="contract-label">Espai / Recinte previst</label>
+                  <input
+                    type="text"
+                    name="venue"
+                    placeholder="Ex: Teatre Municipal / Plaça Major"
+                    value={formData.venue}
                     onChange={handleInputChange}
-                    className="contract-textarea"
+                    className="contract-input"
+                  />
+                </div>
+              </div>
+
+              <div className="contract-fields-row">
+                <div className="contract-field-group">
+                  <label className="contract-label">Persona de contacte *</label>
+                  <input
+                    type="text"
+                    name="contactName"
+                    placeholder="Nom i cognoms"
+                    value={formData.contactName}
+                    onChange={handleInputChange}
+                    required
+                    className="contract-input"
                   />
                 </div>
 
-                <button type="submit" className="contract-submit-btn">
-                  <span>Generar i Enviar Sol·licitud</span>
-                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2">
-                    <line x1="22" y1="2" x2="11" y2="13" />
-                    <polygon points="22 2 15 22 11 13 2 9 22 2" />
-                  </svg>
-                </button>
-              </form>
-            </div>
-
-            {/* Columna dreta: Targeta oficial de Management */}
-            <div className="contract-management-col">
-              <div className="contract-mgmt-card">
-                <span className="contract-mgmt-badge">Oficina de Management</span>
-                <h3 className="contract-mgmt-title">Gusmà Gil</h3>
-                <p className="contract-mgmt-sub">Direcció de Producció i Booking Oficial</p>
-
-                <div className="contract-mgmt-details">
-                  <div className="contract-mgmt-item">
-                    <span className="contract-mgmt-lbl">Correu electrònic directe:</span>
-                    <a
-                      href={`mailto:${bookingInfo.managementEmail}`}
-                      className="contract-mgmt-link"
-                    >
-                      {bookingInfo.managementEmail}
-                    </a>
-                  </div>
-
-                  <div className="contract-mgmt-item">
-                    <span className="contract-mgmt-lbl">Agència de representació:</span>
-                    <span className="contract-mgmt-val">PPF Produccions Culturals</span>
-                  </div>
-
-                  <div className="contract-mgmt-item">
-                    <span className="contract-mgmt-lbl">Àmbit d&apos;actuació:</span>
-                    <span className="contract-mgmt-val">
-                      País Valencià, Catalunya, Illes Balears, Estat espanyol i circuits
-                      internacionals de World Music.
-                    </span>
-                  </div>
-                </div>
-
-                <div className="contract-mgmt-callout">
-                  <p>
-                    <strong>Nota per a contractació pública:</strong> Tota la contractació es
-                    pot gestionar de forma directa o mitjançant la plataforma de contractació del
-                    sector públic complint amb tots els requeriments legals i administratius.
-                  </p>
+                <div className="contract-field-group">
+                  <label className="contract-label">Correu electrònic *</label>
+                  <input
+                    type="email"
+                    name="email"
+                    placeholder="correu@entitat.cat"
+                    value={formData.email}
+                    onChange={handleInputChange}
+                    required
+                    className="contract-input"
+                  />
                 </div>
               </div>
-            </div>
+
+              <div className="contract-field-group">
+                <label className="contract-label">Telèfon de contacte</label>
+                <input
+                  type="tel"
+                  name="phone"
+                  placeholder="+34 600 000 000"
+                  value={formData.phone}
+                  onChange={handleInputChange}
+                  className="contract-input"
+                />
+              </div>
+
+              <div className="contract-field-group">
+                <label className="contract-label">Observacions o necessitats particulars</label>
+                <textarea
+                  name="notes"
+                  rows={3}
+                  placeholder="Detalls sobre l'esdeveniment, cicle de concerts, condicions particulars d'escenari..."
+                  value={formData.notes}
+                  onChange={handleInputChange}
+                  className="contract-textarea"
+                />
+              </div>
+
+              <button type="submit" className="contract-submit-btn">
+                <span>Generar i Enviar Sol·licitud per a {activeFormatObj.name}</span>
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2">
+                  <line x1="22" y1="2" x2="11" y2="13" />
+                  <polygon points="22 2 15 22 11 13 2 9 22 2" />
+                </svg>
+              </button>
+            </form>
           </div>
         </div>
-      </section>
+      )}
     </div>
   );
 }

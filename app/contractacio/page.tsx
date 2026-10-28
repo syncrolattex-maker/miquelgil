@@ -1,5 +1,5 @@
 import React from "react";
-import Footer from "@/components/Footer";
+import InkBloomFooter from "@/components/InkBloomFooter";
 import ContractacioClient from "./ContractacioClient";
 import "./contractacio.css";
 
@@ -13,7 +13,12 @@ export default function ContractacioPage() {
   return (
     <main className="contractacio-page-container">
       <ContractacioClient />
-      <Footer />
+      <InkBloomFooter
+        color="#ff0000"
+        colorOuter="#800000"
+        ground="#000000"
+        edge="bottom"
+      />
     </main>
   );
 }

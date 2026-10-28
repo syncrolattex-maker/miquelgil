@@ -1,0 +1,56 @@
+/* ==========================================================================
+   INNNIMATE INK BLOOM FOOTER — CURSOR EFFECT IN RED (#FF0000)
+   Reference: https://annnimate.com/animations/ink-bloom
+   ========================================================================== */
+
+.inkb_footer_container {
+  position: relative;
+  width: 100%;
+  min-height: 320px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background-color: #000000;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  cursor: default;
+  user-select: none;
+}
+
+.inkb_footer_canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  pointer-events: none;
+}
+
+.inkb_footer_content {
+  position: relative;
+  z-index: 5;
+  pointer-events: none;
+  text-align: center;
+  padding: clamp(24px, 4vw, 40px);
+}
+
+.inkb_footer_copyright {
+  font-family: 'GRAPHIK', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: clamp(13px, 1.1vw, 14.5px);
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  color: rgba(255, 255, 255, 0.85);
+  margin: 0;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.9), 0 0 20px rgba(0, 0, 0, 0.9);
+  transition: color 0.3s ease;
+}
+
+@media (max-width: 767px) {
+  .inkb_footer_container {
+    min-height: 180px;
+  }
+
+  .inkb_footer_copyright {
+    font-size: 12.5px;
+  }
+}
