@@ -205,11 +205,14 @@ export default function AgendaClient() {
       setSelectedConcert(null);
       return;
     }
+    backdrop.style.pointerEvents = "none";
     gsap.timeline({
-      onComplete: () => setSelectedConcert(null),
+      onComplete: () => {
+        setSelectedConcert(null);
+      },
     })
-      .to(card, { opacity: 0, y: 25, scale: 0.94, duration: 0.22, ease: "power2.in" })
-      .to(backdrop, { opacity: 0, duration: 0.18, ease: "power2.in" }, "-=0.1");
+      .to(card, { opacity: 0, y: 20, scale: 0.95, duration: 0.2, ease: "power2.in" })
+      .to(backdrop, { opacity: 0, duration: 0.16, ease: "power2.in" }, "-=0.08");
   }, []);
 
   // Modal entrance animation
@@ -219,13 +222,14 @@ export default function AgendaClient() {
     const card = modalCardRef.current;
     if (!backdrop || !card) return;
 
+    backdrop.style.pointerEvents = "auto";
     gsap.timeline()
-      .fromTo(backdrop, { opacity: 0 }, { opacity: 1, duration: 0.3, ease: "power2.out" })
+      .fromTo(backdrop, { opacity: 0 }, { opacity: 1, duration: 0.28, ease: "power2.out" })
       .fromTo(
         card,
-        { opacity: 0, y: 35, scale: 0.92 },
-        { opacity: 1, y: 0, scale: 1, duration: 0.42, ease: "power3.out" },
-        "-=0.18"
+        { opacity: 0, y: 30, scale: 0.94 },
+        { opacity: 1, y: 0, scale: 1, duration: 0.38, ease: "power3.out" },
+        "-=0.15"
       );
   }, [selectedConcert]);
 
@@ -346,7 +350,6 @@ export default function AgendaClient() {
                     color: concert.fg,
                   }}
                   onClick={() => setSelectedConcert(concert)}
-                  onTouchStart={() => handleCardTouchFocus(idx)}
                 >
                   {/* Top: format tag & year badge */}
                   <div className="deck-card-top">
@@ -406,7 +409,7 @@ export default function AgendaClient() {
       </section>
 
       {/* ============================================================
-          POPUP MODAL DE DETALL DEL CONCERT (ANIMACIÓ GSAP)
+          FITXA EXPANDIDA EN POPUP (LA PRÒPIA FITXA ÉS EL POPUP)
           ============================================================ */}
       {selectedConcert && (
         <div
@@ -417,92 +420,133 @@ export default function AgendaClient() {
           aria-modal="true"
           aria-labelledby="agenda-modal-title"
         >
-          <div
+          <article
             ref={modalCardRef}
-            className="agenda-modal-card"
-            style={{ borderTop: `4px solid ${selectedConcert.bg}` }}
+            className="agenda-expanded-deck-card"
+            style={{
+              backgroundColor: selectedConcert.bg,
+              color: selectedConcert.fg || "#111211",
+            }}
             onClick={(e) => e.stopPropagation()}
           >
-            <button
-              type="button"
-              className="agenda-modal-close"
-              onClick={handleCloseModal}
-              aria-label="Tancar finestra (Esc)"
-              title="Tancar (Esc)"
-            >
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                <line x1="18" y1="6" x2="6" y2="18" />
-                <line x1="6" y1="6" x2="18" y2="18" />
-              </svg>
-            </button>
-
-            <div className="agenda-modal-header">
-              <div className="agenda-modal-tags">
-                <span className="agenda-modal-badge" style={{ backgroundColor: selectedConcert.bg }}>
-                  {selectedConcert.badge}
-                </span>
-                <span className="agenda-modal-year">{selectedConcert.year}</span>
-                <span className="agenda-modal-status">{selectedConcert.statusText}</span>
+            {/* Capçalera exacta de la fitxa */}
+            <div className="deck-card-top expanded-card-top">
+              <div className="expanded-top-left">
+                <span className="deck-card-format">{selectedConcert.badge || selectedConcert.format}</span>
+                <span className="deck-card-year">{selectedConcert.year}</span>
               </div>
-              <h2 id="agenda-modal-title" className="agenda-modal-title">
-                {selectedConcert.title}
-              </h2>
-              <span className="agenda-modal-format">{selectedConcert.format}</span>
+              <button
+                type="button"
+                className="expanded-card-close"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleCloseModal();
+                }}
+                aria-label="Tancar fitxa (Esc)"
+                title="Tancar (Esc)"
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="18" y1="6" x2="6" y2="18" />
+                  <line x1="6" y1="6" x2="18" y2="18" />
+                </svg>
+              </button>
             </div>
 
-            <div className="agenda-modal-body">
-              <div className="agenda-modal-info-grid">
-                <div className="agenda-modal-info-item">
-                  <span className="info-label">Espai / Recinte:</span>
-                  <p className="info-val">
+            {/* Cos principal de la fitxa */}
+            <div className="deck-card-body expanded-card-body">
+              <h2 id="agenda-modal-title" className="deck-card-title expanded-card-title">
+                {selectedConcert.title}
+              </h2>
+
+              <div className="deck-card-meta expanded-card-meta">
+                <div className="deck-card-meta-row expanded-meta-row">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.2">
+                    <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" />
+                    <circle cx="12" cy="9" r="2.5" />
+                  </svg>
+                  <span>
                     <strong>{selectedConcert.venue}</strong>
-                  </p>
+                    {selectedConcert.city ? ` · ${selectedConcert.city}` : ""}
+                  </span>
                 </div>
-                <div className="agenda-modal-info-item">
-                  <span className="info-label">Població / Comarca:</span>
-                  <p className="info-val">{selectedConcert.city}</p>
+
+                <div className="deck-card-meta-row expanded-meta-row">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.2">
+                    <circle cx="12" cy="12" r="10" />
+                    <polyline points="12 6 12 12 16 14" />
+                  </svg>
+                  <span>{selectedConcert.dateStr}</span>
                 </div>
-                <div className="agenda-modal-info-item">
-                  <span className="info-label">Data i Horari:</span>
-                  <p className="info-val">{selectedConcert.dateStr}</p>
-                </div>
-                <div className="agenda-modal-info-item">
-                  <span className="info-label">Estat de la convocatòria:</span>
-                  <p className="info-val">{selectedConcert.statusText}</p>
-                </div>
+
+                {selectedConcert.format && (
+                  <div className="deck-card-meta-row expanded-meta-row">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.2">
+                      <path d="M9 18V5l12-2v13" />
+                      <circle cx="6" cy="18" r="3" />
+                      <circle cx="18" cy="16" r="3" />
+                    </svg>
+                    <span>Format: {selectedConcert.format}</span>
+                  </div>
+                )}
               </div>
 
-              <div className="agenda-modal-desc-box">
-                <span className="info-label">Crònica i detalls artístics:</span>
-                <p className="agenda-modal-desc-text">{selectedConcert.description}</p>
+              {/* Descripció i crònica completa */}
+              <div className="expanded-card-desc-box">
+                <p className="deck-card-desc expanded-card-desc">
+                  {selectedConcert.description}
+                </p>
               </div>
+            </div>
 
-              <div className="agenda-modal-actions">
+            {/* Línia separadora discontínua idèntica a la fitxa */}
+            <hr className="deck-card-divider expanded-card-divider" />
+
+            {/* Peu de la fitxa amb estat i accions */}
+            <div className="deck-card-footer expanded-card-footer">
+              <span className="deck-card-status expanded-card-status">
+                {selectedConcert.statusText}
+              </span>
+
+              <div className="expanded-card-actions">
                 {selectedConcert.infoUrl && (
                   <a
                     href={selectedConcert.infoUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="agenda-modal-btn agenda-modal-btn--primary"
+                    className="expanded-card-btn expanded-card-btn--primary"
                   >
-                    <span>Web oficial / Venda d&apos;entrades</span>
-                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2">
+                    <span>Web / Entrades</span>
+                    <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2.4">
+                      <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3" />
+                    </svg>
+                  </a>
+                )}
+                {selectedConcert.ticketUrl && selectedConcert.ticketUrl !== selectedConcert.infoUrl && (
+                  <a
+                    href={selectedConcert.ticketUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="expanded-card-btn expanded-card-btn--primary"
+                  >
+                    <span>Comprar Entrades</span>
+                    <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2.4">
                       <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3" />
                     </svg>
                   </a>
                 )}
                 <Link
                   href="/contractacio"
-                  className="agenda-modal-btn agenda-modal-btn--secondary"
+                  className="expanded-card-btn expanded-card-btn--secondary"
                 >
-                  <span>Dossier de contractació i riders</span>
-                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M5 12h14M12 5l7 7-7 7" />
+                  <span>Dossier i riders</span>
+                  <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2.4">
+                    <line x1="5" y1="12" x2="19" y2="12" />
+                    <polyline points="12 5 19 12 12 19" />
                   </svg>
                 </Link>
               </div>
             </div>
-          </div>
+          </article>
         </div>
       )}
 
