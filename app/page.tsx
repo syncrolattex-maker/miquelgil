@@ -1,6 +1,6 @@
 "use client";
 
-import FluidCanvas from "@/components/FluidCanvas";
+import GooeyHoverReveal from "@/components/GooeyHoverReveal";
 import Preloader from "@/components/Preloader";
 
 export default function Home() {
@@ -8,19 +8,30 @@ export default function Home() {
     <>
       <Preloader />
       <main className="home">
-        {/* Fondo con la imagen y el lienzo de simulación de fluidos */}
-        <div className="home__content-bg">
-          <img
-            decoding="async"
-            src="/images/viatgerO1.jpg"
-            alt="Miquel Gil - Viatger"
-            className="home__img"
-          />
-        </div>
+        {/* Gooey Hover Reveal: WebGL liquid metaball cutout uncovering Miquel Gil */}
+        <GooeyHoverReveal
+          blobCount={256}
+          blobRadius={180}
+          smoothness={75}
+          blobColor="#000000"
+          lifetime={2.5}
+          spawnDistance={40}
+          threshold={0.5}
+          cursorLag={0.35}
+          growDuration={0.12}
+          hintText="Mou el cursor per descobrir"
+        >
+          <div className="home__content-bg">
+            <img
+              decoding="async"
+              src="/images/viatgerO1.jpg"
+              alt="Miquel Gil - Viatger"
+              className="home__img"
+            />
+          </div>
+        </GooeyHoverReveal>
 
-        <FluidCanvas />
-
-        {/* Solo el botón de entrar/acceso */}
+        {/* Botó per accedir a la web */}
         <div className="home__actions-only">
           <a
             className="qodef-shortcode qodef-m qodef-qi-button qodef-html--link qodef-layout--outlined qodef-type--standard qodef-size--small qodef-icon--right qodef-hover--icon-move-horizontal-short"
