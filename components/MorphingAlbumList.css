@@ -15,6 +15,7 @@
   --mlst-radius: 14px;
   --mlst-ease: cubic-bezier(0.3, 0.9, 0.1, 1);
   --mlst-accent: #E20000;
+  --mlst-cover-size: min(520px, calc(100dvh - 80px));
   position: relative;
   width: 100%;
   display: flex;
@@ -169,8 +170,9 @@
    MORPHED PANEL DIALOG
    -------------------------------------------------------------------------- */
 .mlst_panel {
-  width: min(1060px, calc(100vw - var(--margin) * 2));
+  width: min(1040px, calc(100vw - var(--margin) * 2));
   max-width: none;
+  height: var(--mlst-cover-size);
   max-height: calc(100dvh - var(--margin) * 2);
   margin: auto;
   padding: 0;
@@ -204,20 +206,24 @@
 }
 
 .mlst_panel_inner {
+  position: relative;
   display: grid;
-  grid-template-columns: 460px 1fr;
-  max-height: calc(100dvh - var(--margin) * 2);
-  overflow-y: auto;
-  overscroll-behavior: contain;
+  grid-template-columns: var(--mlst-cover-size) 1fr;
+  height: 100%;
+  max-height: 100%;
+  overflow: hidden;
 }
 
 /* Left column: Pure High-Resolution Album Cover flush with panel */
 .mlst_panel_media {
   position: relative;
   width: 100%;
+  height: 100%;
   aspect-ratio: 1 / 1;
   overflow: hidden;
   background-color: #0b0c0b;
+  border-right: 1px solid var(--mlst-line);
+  flex-shrink: 0;
 }
 
 .mlst_panel_media .mlst_img {
@@ -227,27 +233,46 @@
   display: block;
 }
 
-/* Right column: Content, description & tracklist */
+/* Right column: Content, description & tracklist with independent smooth scroll */
 .mlst_panel_content {
   position: relative;
   display: flex;
   flex-direction: column;
   gap: 22px;
   padding: 36px 40px;
+  height: 100%;
+  max-height: 100%;
   overflow-y: auto;
   overscroll-behavior: contain;
+}
+
+.mlst_panel_content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.mlst_panel_content::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.03);
+}
+
+.mlst_panel_content::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.18);
+  border-radius: 9999px;
+}
+
+.mlst_panel_content::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.35);
 }
 
 /* Close button */
 .mlst_close {
   position: absolute;
-  top: 24px;
-  right: 24px;
+  top: 20px;
+  right: 20px;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 40px;
-  height: 40px;
+  width: 38px;
+  height: 38px;
   padding: 0;
   border: 0;
   border-radius: 9999px;
@@ -255,7 +280,7 @@
   color: var(--mlst-fg);
   cursor: pointer;
   transition: background-color 0.25s var(--mlst-ease), transform 0.25s var(--mlst-ease);
-  z-index: 10;
+  z-index: 25;
 }
 
 .mlst_close:hover {
@@ -264,8 +289,8 @@
 }
 
 .mlst_glyph {
-  width: 18px;
-  height: 18px;
+  width: 16px;
+  height: 16px;
 }
 
 /* Panel Header */
@@ -470,8 +495,16 @@
    RESPONSIVE DESIGN (TABLET & MOBILE)
    -------------------------------------------------------------------------- */
 @media (max-width: 900px) {
+  .mlst_panel {
+    height: auto;
+    max-height: calc(100dvh - var(--margin) * 2);
+  }
+
   .mlst_panel_inner {
     grid-template-columns: 1fr;
+    height: auto;
+    max-height: calc(100dvh - var(--margin) * 2);
+    overflow-y: auto;
   }
 
   .mlst_panel_media {
@@ -479,11 +512,27 @@
     border-bottom: 1px solid var(--mlst-line);
     width: 100%;
     aspect-ratio: 1 / 1;
+    height: auto;
+    max-height: 48vh;
     padding: 0;
   }
 
   .mlst_panel_content {
     padding: 30px 24px 36px;
+    height: auto;
+    max-height: none;
+    overflow-y: visible;
+  }
+
+  .mlst_close {
+    background-color: rgba(0, 0, 0, 0.45);
+    color: #FFFFFF;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+
+  .mlst_close:hover {
+    background-color: rgba(0, 0, 0, 0.7);
   }
 
   .mlst_row {

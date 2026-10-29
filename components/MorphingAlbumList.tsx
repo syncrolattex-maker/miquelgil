@@ -538,6 +538,24 @@ export default function MorphingAlbumList({
       >
         {selectedAlbum && (
           <div className="mlst_panel_inner">
+            {/* Close Button pinned at modal panel top-right */}
+            <button
+              type="button"
+              className="mlst_close"
+              data-anm-mlst-close
+              aria-label="Tancar panell"
+              onClick={handleClosePanel}
+            >
+              <svg className="mlst_glyph" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                <path
+                  d="M4 4L12 12M12 4L4 12"
+                  stroke="currentColor"
+                  strokeWidth="1.75"
+                  strokeLinecap="round"
+                />
+              </svg>
+            </button>
+
             {/* Left Column: Pure High-Res Album Cover flush with panel */}
             <div className="mlst_panel_media" data-anm-mlst-media>
               <img
@@ -551,23 +569,6 @@ export default function MorphingAlbumList({
 
             {/* Right Column: Title, Metas, Audio Bar, Description & Tracklist */}
             <div className="mlst_panel_content">
-              {/* Close Button */}
-              <button
-                type="button"
-                className="mlst_close"
-                data-anm-mlst-close
-                aria-label="Tancar panell"
-                onClick={handleClosePanel}
-              >
-                <svg className="mlst_glyph" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-                  <path
-                    d="M4 4L12 12M12 4L4 12"
-                    stroke="currentColor"
-                    strokeWidth="1.75"
-                    strokeLinecap="round"
-                  />
-                </svg>
-              </button>
 
               <div className="mlst_panel_head">
                 <span className="disco-album-kicker">
