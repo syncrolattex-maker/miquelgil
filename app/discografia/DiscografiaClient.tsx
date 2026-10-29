@@ -8,6 +8,7 @@ import {
 } from "@/lib/spotifyTracks";
 import AudioPlayerBottom from "@/components/AudioPlayerBottom";
 import MorphingAlbumList from "@/components/MorphingAlbumList";
+import InkBloom from "@/components/InkBloom";
 
 export default function DiscografiaClient() {
   const [currentTrack, setCurrentTrack] = useState<SpotifyTrack>(spotifyTracks[0]);
@@ -40,6 +41,14 @@ export default function DiscografiaClient() {
           HERO EDITORIAL
           ============================================================ */}
       <header className="disco-hero">
+        {/* InkBloom Effect at the top */}
+        <InkBloom
+          edge="top"
+          color="#b80018"
+          colorOuter="#ff0528"
+          ground="transparent"
+        />
+
         <div className="disco-hero-inner">
           <span className="disco-hero-eyebrow">
             Catàleg Oficial // 1996 — 2024

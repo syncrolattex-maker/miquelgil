@@ -1,4 +1,3 @@
-import InkBloomFooter from "@/components/InkBloomFooter";
 import DiscografiaClient from "./DiscografiaClient";
 import "./discografia.css";
 
@@ -11,12 +10,11 @@ export default function Discografia() {
   return (
     <main className="discografia-container">
       <DiscografiaClient />
-      <InkBloomFooter
-        color="#b80018"
-        colorOuter="#ff0528"
-        ground="transparent"
-        edge="bottom"
-      />
+      <footer className="disco-footer">
+        <p className="disco-footer-copyright">
+          © 2026 Miquel Gil — Tots els drets reservats
+        </p>
+      </footer>
     </main>
   );
 }

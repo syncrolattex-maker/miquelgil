@@ -31,9 +31,12 @@
   border-bottom: 1px solid rgba(0, 0, 0, 0.07);
   padding: clamp(60px, 8vw, 110px) clamp(24px, 5vw, 80px) clamp(40px, 5vw, 64px) clamp(88px, 7vw, 120px);
   box-sizing: border-box;
+  overflow: hidden;
 }
 
 .disco-hero-inner {
+  position: relative;
+  z-index: 2;
   max-width: 1200px;
   margin: 0 auto;
 }
@@ -1716,4 +1719,25 @@
     width: 36px;
     height: 36px;
   }
+}
+
+/* --------------------------------------------------------------------------
+   FOOTER EDITORIAL NET
+   -------------------------------------------------------------------------- */
+.disco-footer {
+  width: 100%;
+  padding: 40px var(--margin, 24px) 110px;
+  text-align: center;
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+  background-color: transparent;
+  box-sizing: border-box;
+}
+
+.disco-footer-copyright {
+  font-family: 'GRAPHIK', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: clamp(13px, 1.05vw, 14px);
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  color: rgba(17, 18, 17, 0.65);
+  margin: 0;
 }
