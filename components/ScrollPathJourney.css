@@ -1,0 +1,492 @@
+/* ScrollPathJourney.css - GSAP Vault Scroll Path Journey Effect for Miquel Gil Cronologia */
+
+.journey-scroll {
+  position: relative;
+  width: 100%;
+  background: #080808;
+  color: #ffffff;
+  padding-bottom: 120px;
+  overflow-x: clip;
+}
+
+/* Sticky Journey Status Bar */
+.journey-bar {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  height: 52px;
+  padding: 0 clamp(20px, 4vw, 56px);
+  background: rgba(8, 8, 8, 0.92);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  font-family: 'GRAPHIK', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 0.8125rem;
+  letter-spacing: 0.04em;
+}
+
+.journey-bar__title {
+  font-weight: 600;
+  color: #ffffff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.journey-bar__progress {
+  color: rgba(255, 255, 255, 0.6);
+  white-space: nowrap;
+}
+
+.journey-bar__progress span {
+  display: inline-block;
+  min-width: 2.8em;
+  color: #ff0000;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Journey Head */
+.journey-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+  gap: 2rem clamp(24px, 4vw, 64px);
+  align-items: end;
+  width: min(100% - 2 * clamp(20px, 4vw, 56px), 1100px);
+  margin: 0 auto;
+  padding: clamp(36px, 5vw, 64px) 0 clamp(24px, 3vw, 40px);
+}
+
+.journey-kicker {
+  font-family: 'GRAPHIK', sans-serif;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: #ff0000;
+  margin-bottom: 0.5rem;
+}
+
+.journey-head h2 {
+  font-family: 'Grifinito L', 'Coign', serif;
+  font-size: clamp(2.2rem, 4vw, 3.8rem);
+  font-weight: 400;
+  line-height: 1.1;
+  letter-spacing: 0.01em;
+  color: #ffffff;
+}
+
+.journey-lede {
+  font-family: 'GRAPHIK', sans-serif;
+  font-size: clamp(0.95rem, 1.3vw, 1.1rem);
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.journey-prompt {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-top: 1.2rem;
+  font-family: 'GRAPHIK', sans-serif;
+  font-size: 0.8125rem;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.journey-prompt strong {
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.journey-prompt__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #ff0000;
+  box-shadow: 0 0 8px rgba(255, 0, 0, 0.8);
+  animation: prompt-pulse 2s infinite ease-in-out;
+}
+
+@keyframes prompt-pulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.4); opacity: 0.6; }
+}
+
+/* Journey Stage */
+.journey-stage {
+  position: relative;
+  width: min(100% - 2 * clamp(20px, 4vw, 56px), 1100px);
+  margin: 0 auto;
+  isolation: isolate;
+}
+
+.journey-map {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.journey-map--mobile {
+  display: none;
+}
+
+.route-shadow,
+.route-progress,
+.route-motion {
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.route-shadow {
+  stroke: rgba(255, 255, 255, 0.18);
+  stroke-width: 2;
+  stroke-dasharray: 2 8;
+}
+
+.route-progress {
+  stroke: #ff0000;
+  stroke-width: 3.5;
+  filter: drop-shadow(0 0 6px rgba(255, 0, 0, 0.7));
+}
+
+.route-motion {
+  stroke: transparent;
+  stroke-width: 1;
+}
+
+/* Moving Marker Bead */
+.journey-marker {
+  position: absolute;
+  z-index: 20;
+  top: 0;
+  left: 0;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #ff0000;
+  box-shadow: 0 0 0 4px #080808, 0 0 0 6px #ff0000, 0 0 18px rgba(255, 0, 0, 0.9);
+  will-change: transform;
+}
+
+.journey-marker__nose {
+  position: absolute;
+  top: 50%;
+  right: -9px;
+  width: 8px;
+  height: 10px;
+  background: #ff0000;
+  clip-path: polygon(0 0, 100% 50%, 0 100%);
+  transform: translateY(-50%);
+}
+
+/* Checkpoint List */
+.checkpoint-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.checkpoint {
+  position: absolute;
+  z-index: 10;
+  left: var(--pin-x);
+  top: var(--pin-y);
+  width: clamp(250px, 32%, 350px);
+  padding: 0;
+  border: 0;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: transform 0.4s ease;
+}
+
+.checkpoint--right {
+  transform: translate(var(--pin-gap, 34px), -50%);
+}
+
+.checkpoint--left {
+  transform: translate(calc(-100% - var(--pin-gap, 34px)), -50%);
+}
+
+.checkpoint:hover {
+  z-index: 15;
+}
+
+.checkpoint:focus-visible {
+  outline: 2px solid #ff0000;
+  outline-offset: 6px;
+}
+
+/* Pin Connecting Line & Ring */
+.checkpoint-pin {
+  position: absolute;
+  top: 50%;
+  width: 14px;
+  height: 14px;
+  border: 2px solid #ffffff;
+  border-radius: 50%;
+  background: #080808;
+  transform: translate(-50%, -50%);
+  transition: background-color 0.3s ease, border-color 0.3s ease, transform 0.3s ease;
+}
+
+.checkpoint-pin::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  width: calc(var(--pin-gap, 34px) - 8px);
+  height: 1px;
+  background: rgba(255, 255, 255, 0.3);
+  transition: background-color 0.3s ease;
+}
+
+.checkpoint-pin::after {
+  content: '';
+  position: absolute;
+  inset: -3px;
+  border: 2px solid #ff0000;
+  border-radius: 50%;
+  opacity: 0;
+  transform: scale(1);
+}
+
+.checkpoint--right .checkpoint-pin {
+  left: calc(-1 * var(--pin-gap, 34px));
+}
+
+.checkpoint--right .checkpoint-pin::before {
+  left: 100%;
+  margin-left: 4px;
+}
+
+.checkpoint--left .checkpoint-pin {
+  left: calc(100% + var(--pin-gap, 34px));
+}
+
+.checkpoint--left .checkpoint-pin::before {
+  right: 100%;
+  margin-right: 4px;
+}
+
+/* Checkpoint Active & Passed States */
+.checkpoint.is-passed .checkpoint-pin {
+  background: #ff0000;
+  border-color: #ff0000;
+}
+
+.checkpoint.is-active .checkpoint-pin {
+  background: #ffffff;
+  border-color: #ff0000;
+  transform: translate(-50%, -50%) scale(1.2);
+}
+
+.checkpoint.is-active .checkpoint-pin::before {
+  background: #ff0000;
+}
+
+.checkpoint.is-active .checkpoint-pin::after {
+  animation: pin-ring 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes pin-ring {
+  0% { opacity: 1; transform: scale(1); }
+  100% { opacity: 0; transform: scale(3.5); }
+}
+
+/* Checkpoint Media Card */
+.checkpoint-media {
+  display: block;
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+  border-radius: 8px;
+  background: #141414;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  transition: border-color 0.4s ease, box-shadow 0.4s ease;
+}
+
+.checkpoint-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: filter 0.6s ease, opacity 0.6s ease, transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.checkpoint:not(.is-active):not(.is-passed) .checkpoint-media img {
+  filter: grayscale(1) contrast(0.85);
+  opacity: 0.55;
+  transform: scale(1.04);
+}
+
+.checkpoint.is-active .checkpoint-media {
+  border-color: rgba(255, 0, 0, 0.6);
+  box-shadow: 0 14px 40px rgba(255, 0, 0, 0.2);
+}
+
+.checkpoint.is-active .checkpoint-media img,
+.checkpoint.is-passed .checkpoint-media img {
+  filter: grayscale(0) contrast(1);
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* Checkpoint Typography */
+.checkpoint-copy {
+  display: block;
+  padding-top: 12px;
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
+
+.checkpoint-day {
+  display: block;
+  font-family: 'GRAPHIK', sans-serif;
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: #ff0000;
+  letter-spacing: 0.04em;
+  transition: color 0.3s ease;
+}
+
+.checkpoint strong {
+  display: block;
+  margin-top: 3px;
+  font-family: 'GRAPHIK', sans-serif;
+  font-size: 1.125rem;
+  font-weight: 700;
+  line-height: 1.25;
+  color: #ffffff;
+  letter-spacing: -0.01em;
+}
+
+.checkpoint-note {
+  display: block;
+  margin-top: 5px;
+  font-family: 'GRAPHIK', sans-serif;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.72);
+  transition: color 0.3s ease;
+}
+
+.checkpoint:hover strong {
+  color: #ff3344;
+}
+
+/* Full Timeline Toggle / Complete Ledger */
+.journey-archive-toggle {
+  display: flex;
+  justify-content: center;
+  margin-top: 60px;
+}
+
+.journey-archive-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 14px 28px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 9999px;
+  color: #ffffff;
+  font-family: 'GRAPHIK', sans-serif;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+}
+
+.journey-archive-btn:hover {
+  background: #ff0000;
+  border-color: #ff0000;
+  color: #ffffff;
+}
+
+.journey-full-ledger {
+  margin-top: 40px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding-top: 40px;
+}
+
+.ledger-row {
+  display: grid;
+  grid-template-columns: 140px 1fr;
+  gap: 1.5rem;
+  padding: 16px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  align-items: baseline;
+}
+
+.ledger-year {
+  font-family: 'GRAPHIK', sans-serif;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #ff0000;
+}
+
+.ledger-text {
+  font-family: 'GRAPHIK', sans-serif;
+  font-size: 0.9375rem;
+  line-height: 1.55;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  :root {
+    --pin-gap: 20px;
+  }
+
+  .journey-head {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1rem;
+    padding: 30px 0 20px;
+  }
+
+  .journey-head h2 {
+    font-size: 2.2rem;
+  }
+
+  .journey-map--desktop {
+    display: none;
+  }
+
+  .journey-map--mobile {
+    display: block;
+  }
+
+  .checkpoint,
+  .checkpoint--left,
+  .checkpoint--right {
+    left: var(--pin-x-m, 12%) !important;
+    top: var(--pin-y-m, 10%) !important;
+    width: calc(100% - 70px) !important;
+    transform: translate(22px, -50%) !important;
+  }
+
+  .checkpoint--left .checkpoint-pin,
+  .checkpoint--right .checkpoint-pin {
+    left: -22px !important;
+  }
+
+  .checkpoint--left .checkpoint-pin::before,
+  .checkpoint--right .checkpoint-pin::before {
+    left: 100% !important;
+    right: auto !important;
+    margin: 0 0 0 4px !important;
+    width: 14px !important;
+  }
+
+  .ledger-row {
+    grid-template-columns: 100px 1fr;
+    gap: 1rem;
+  }
+}

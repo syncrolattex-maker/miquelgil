@@ -1,0 +1,118 @@
+/* TighteningWordLines.css - MadeWithGSAP Tutorial 097 Effect */
+
+.mwg_effect097 {
+  position: relative;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 10vh 24px 18vh;
+  box-sizing: border-box;
+  overflow-x: clip;
+}
+
+.t097_header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1.5rem;
+  padding-bottom: 2rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  margin-bottom: 7vh;
+}
+
+.t097_kicker_head {
+  font-family: 'GRAPHIK', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: #ff0000;
+}
+
+.t097_author_head {
+  font-family: 'GRAPHIK', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.t097_content {
+  display: flex;
+  flex-direction: column;
+  gap: 7vh;
+}
+
+.t097_block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  width: 100%;
+}
+
+.t097_kicker {
+  display: inline-block;
+  font-family: 'GRAPHIK', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: #ff0000;
+  margin-bottom: 1.75rem;
+}
+
+.t097_quote_line {
+  font-family: 'Grifinito L', 'Coign', serif;
+  font-size: clamp(2rem, 4.4vw, 3.8rem);
+  font-weight: 400;
+  line-height: 1.25;
+  color: #ffffff;
+  text-align: center;
+  white-space: nowrap;
+  letter-spacing: 0.01em;
+  will-change: word-spacing, opacity;
+  padding: 0 10px;
+}
+
+.t097_body_line {
+  font-family: 'GRAPHIK', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: clamp(1.05rem, 1.8vw, 1.6rem);
+  font-weight: 400;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.92);
+  text-align: center;
+  white-space: nowrap;
+  will-change: word-spacing, opacity;
+  padding: 0 10px;
+}
+
+.t097_body_line em {
+  font-style: italic;
+  color: #ffffff;
+}
+
+@media (max-width: 768px) {
+  .mwg_effect097 {
+    padding: 6vh 16px 12vh;
+  }
+  
+  .t097_header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+    margin-bottom: 5vh;
+  }
+
+  .t097_quote_line {
+    white-space: normal;
+    word-break: normal;
+    line-height: 1.28;
+  }
+
+  .t097_body_line {
+    white-space: normal;
+    word-break: normal;
+    line-height: 1.55;
+  }
+}
