@@ -55,6 +55,80 @@ function setVTName(el: HTMLElement | null | undefined, name: string) {
   }
 }
 
+const RADIUS_PROPS = [
+  "borderTopLeftRadius",
+  "borderTopRightRadius",
+  "borderBottomRightRadius",
+  "borderBottomLeftRadius",
+] as const;
+
+function getMetrics(
+  rowEl: HTMLElement,
+  thumbEl: HTMLElement,
+  panelEl: HTMLElement,
+  mediaEl: HTMLElement
+) {
+  const o = panelEl.getBoundingClientRect(),
+    a = mediaEl.getBoundingClientRect(),
+    l = rowEl.getBoundingClientRect(),
+    r = thumbEl.getBoundingClientRect();
+  const s = Math.abs(a.left - o.left) < 3,
+    c = Math.abs(a.right - o.right) < 3,
+    u = Math.abs(a.top - o.top) < 3,
+    m = Math.abs(a.bottom - o.bottom) < 3;
+  return [
+    { touch: u && s }, // top-left
+    { touch: u && c }, // top-right
+    { touch: m && c }, // bottom-right
+    { touch: m && s }, // bottom-left
+  ];
+}
+
+function animateRadii(
+  type: "open" | "close",
+  dur: number,
+  metrics: { touch: boolean }[] | null
+) {
+  if (!metrics || typeof document === "undefined") return;
+  const o = type === "close" ? Math.min(0.08, 0.4 * dur) : 0;
+  const panelR = 14;
+  const thumbR = 8;
+  metrics.forEach((m, idx) => {
+    let keyframes: Keyframe[];
+    if (m.touch) {
+      if (type === "open") {
+        keyframes = [
+          { offset: 0, [RADIUS_PROPS[idx]]: `${thumbR}px` },
+          { offset: 1, [RADIUS_PROPS[idx]]: `${panelR}px` },
+        ];
+      } else {
+        keyframes = [
+          { offset: 0, [RADIUS_PROPS[idx]]: `${panelR}px` },
+          { offset: 1, [RADIUS_PROPS[idx]]: `${thumbR}px` },
+        ];
+      }
+    } else {
+      keyframes =
+        type === "open"
+          ? [
+              { offset: 0, [RADIUS_PROPS[idx]]: `${thumbR}px` },
+              { offset: 1, [RADIUS_PROPS[idx]]: "0px" },
+            ]
+          : [
+              { offset: 0, [RADIUS_PROPS[idx]]: "0px" },
+              { offset: 1, [RADIUS_PROPS[idx]]: `${thumbR}px` },
+            ];
+    }
+    document.documentElement.animate(keyframes, {
+      delay: 1000 * o,
+      duration: 1000 * (dur - o),
+      easing: "cubic-bezier(0.3, 0.9, 0.1, 1)",
+      fill: "both",
+      pseudoElement: "::view-transition-image-pair(mlst-media)",
+    });
+  });
+}
+
 interface MorphingAlbumListProps {
   albums: Album[];
   currentTrack: SpotifyTrack;
@@ -112,11 +186,10 @@ export default function MorphingAlbumList({
     const closeBtn = panel.querySelector<HTMLElement>(".mlst_close");
     const panelBody = panel.querySelector<HTMLElement>(".mlst_panel_body");
     const tracklist = panel.querySelector<HTMLElement>(".disco-tracklist-section");
-    const featuredSong = panel.querySelector<HTMLElement>(".disco-sleeve-featured-card");
-    const spotifyBtn = panel.querySelector<HTMLElement>(".disco-spotify-btn");
+    const playerBar = panel.querySelector<HTMLElement>(".disco-player-action-bar");
 
     const animateInternalContent = () => {
-      const riseItems = [panelBody, tracklist, featuredSong, spotifyBtn].filter(Boolean);
+      const riseItems = [panelBody, playerBar, tracklist].filter(Boolean);
       if (riseItems.length) {
         gsap.fromTo(
           riseItems,
@@ -167,6 +240,8 @@ export default function MorphingAlbumList({
     docEl.style.setProperty("--mlst-r-to", "14px");
     docEl.classList.add("mlst-vt", "mlst-vt-open");
 
+    let metrics: { touch: boolean }[] | null = null;
+
     const vt = (document as any).startViewTransition(() => {
       // Clear row names
       setVTName(rowEl, "");
@@ -190,14 +265,23 @@ export default function MorphingAlbumList({
         panel.showModal();
       }
 
+      if (rowMedia && panelMedia) {
+        metrics = getMetrics(rowEl, rowMedia, panel, panelMedia);
+      }
+
       // Initial state for internal panel details
       if (closeBtn) gsap.set(closeBtn, { autoAlpha: 0, scale: 0.75 });
-      const riseItems = [panelBody, tracklist, featuredSong, spotifyBtn].filter(Boolean);
+      const riseItems = [panelBody, playerBar, tracklist].filter(Boolean);
       if (riseItems.length) gsap.set(riseItems, { autoAlpha: 0, y: 18 });
     });
 
     if (vt && typeof vt.ready?.then === "function") {
-      vt.ready.then(animateInternalContent).catch(() => {});
+      vt.ready
+        .then(() => {
+          animateRadii("open", u, metrics);
+          animateInternalContent();
+        })
+        .catch(() => {});
     } else {
       animateInternalContent();
     }
@@ -255,8 +339,7 @@ export default function MorphingAlbumList({
     const closeBtn = panel.querySelector<HTMLElement>(".mlst_close");
     const panelBody = panel.querySelector<HTMLElement>(".mlst_panel_body");
     const tracklist = panel.querySelector<HTMLElement>(".disco-tracklist-section");
-    const featuredSong = panel.querySelector<HTMLElement>(".disco-sleeve-featured-card");
-    const spotifyBtn = panel.querySelector<HTMLElement>(".disco-spotify-btn");
+    const playerBar = panel.querySelector<HTMLElement>(".disco-player-action-bar");
 
     if (!supportsVT || isReduced) {
       gsap.to(panel, {
@@ -275,7 +358,7 @@ export default function MorphingAlbumList({
     }
 
     // Immediately fade out internal elements so morphing card is pristine
-    const fadeOutItems = [closeBtn, panelBody, tracklist, featuredSong, spotifyBtn].filter(Boolean);
+    const fadeOutItems = [closeBtn, panelBody, playerBar, tracklist].filter(Boolean);
     if (fadeOutItems.length) {
       gsap.to(fadeOutItems, {
         autoAlpha: 0,
@@ -299,6 +382,9 @@ export default function MorphingAlbumList({
     docEl.style.setProperty("--mlst-r-from", "14px");
     docEl.style.setProperty("--mlst-r-to", "14px");
     docEl.classList.add("mlst-vt", "mlst-vt-close");
+
+    const metrics =
+      rowMedia && panelMedia ? getMetrics(rowEl, rowMedia, panel, panelMedia) : null;
 
     const vt = (document as any).startViewTransition(() => {
       // Clear panel names
@@ -325,6 +411,14 @@ export default function MorphingAlbumList({
         panel.close();
       }
     });
+
+    if (vt && typeof vt.ready?.then === "function") {
+      vt.ready
+        .then(() => {
+          animateRadii("close", uClose, metrics);
+        })
+        .catch(() => {});
+    }
 
     if (vt && typeof vt.finished?.then === "function") {
       vt.finished.catch(() => {}).then(() => {
@@ -444,100 +538,18 @@ export default function MorphingAlbumList({
       >
         {selectedAlbum && (
           <div className="mlst_panel_inner">
-            {/* Left Column: Media, Vinyl Sleeve & Audio Action */}
+            {/* Left Column: Pure High-Res Album Cover flush with panel */}
             <div className="mlst_panel_media" data-anm-mlst-media>
-              <div
-                className="disco-sleeve-stage"
-                onClick={() => currentAlbumPreviewTrack && onPlayTrack(currentAlbumPreviewTrack)}
-                title={`Reproduir mostra de ${selectedAlbum.title}`}
-              >
-                {/* Vinyl Disc that slides out */}
-                <div className="disco-vinyl-disc" aria-hidden="true">
-                  <div
-                    className="disco-vinyl-label"
-                    style={{ backgroundImage: `url(${getCover(selectedAlbum)})` }}
-                  >
-                    <div className="disco-vinyl-hole" />
-                  </div>
-                </div>
-
-                {/* Album Cover Card */}
-                <div className="disco-sleeve-card">
-                  <img
-                    className="mlst_img disco-sleeve-img"
-                    src={getCover(selectedAlbum)}
-                    alt={selectedAlbum.title}
-                  />
-
-                  {/* Play badge button over cover */}
-                  {currentAlbumPreviewTrack && (
-                    <button
-                      type="button"
-                      className={`disco-sleeve-play-badge ${isSelectedAlbumPlaying ? "is-playing" : ""}`}
-                      aria-label={
-                        isSelectedAlbumPlaying
-                          ? "Pausar reproducció"
-                          : `Reproduir cançó sencera de ${selectedAlbum.title}`
-                      }
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onPlayTrack(currentAlbumPreviewTrack);
-                      }}
-                    >
-                      <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor">
-                        {isSelectedAlbumPlaying ? (
-                          <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
-                        ) : (
-                          <polygon points="6 4 20 12 6 20 6 4" />
-                        )}
-                      </svg>
-                      <span>
-                        {isSelectedAlbumPlaying
-                          ? "Reproduint cançó sencera"
-                          : "Reproduir cançó sencera"}
-                      </span>
-                    </button>
-                  )}
-                </div>
-              </div>
-
-              {/* Featured Full Song Highlight Card */}
-              {currentAlbumPreviewTrack && (
-                <div
-                  className={`disco-sleeve-featured-card ${isSelectedAlbumPlaying ? "is-playing" : ""}`}
-                  onClick={() => onPlayTrack(currentAlbumPreviewTrack)}
-                  title={`Reproduir cançó completa: ${currentAlbumPreviewTrack.title}`}
-                >
-                  <div className="disco-sleeve-featured-header">
-                    <span className="disco-sleeve-featured-pill">CANÇÓ COMPLETA</span>
-                    {currentAlbumPreviewTrack.duration && (
-                      <span className="disco-sleeve-featured-time">
-                        {formatDurationMs(currentAlbumPreviewTrack.duration)}
-                      </span>
-                    )}
-                  </div>
-                  <div className="disco-sleeve-featured-title">
-                    {currentAlbumPreviewTrack.title}
-                  </div>
-                </div>
-              )}
-
-              {/* Spotify Link Button */}
-              <a
-                href={`https://open.spotify.com/search/${encodeURIComponent(`Miquel Gil ${selectedAlbum.title}`)}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="disco-spotify-btn"
-                title={`Obrir ${selectedAlbum.title} a Spotify`}
-              >
-                <svg viewBox="0 0 24 24">
-                  <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.498 17.306c-.215.352-.676.463-1.028.248-2.816-1.72-6.36-2.11-10.536-1.157-.403.093-.808-.16-.9-.562-.092-.403.16-.807.563-.9 4.568-1.044 8.508-.598 11.653 1.343.352.215.463.676.248 1.028zm1.468-3.262c-.27.44-.848.578-1.288.308-3.224-1.982-8.14-2.557-11.954-1.399-.496.15-1.025-.133-1.176-.628-.15-.496.133-1.025.628-1.176 4.364-1.324 9.791-.684 13.482 1.583.44.27.578.848.308 1.288zm.126-3.41c-3.866-2.296-10.245-2.508-13.935-1.387-.593.18-1.22-.16-1.4-.753-.18-.593.16-1.22.753-1.4 4.24-1.288 11.284-1.04 15.68 1.57.533.316.708 1.01.392 1.543-.316.533-1.01.708-1.543.392z" />
-                </svg>
-                <span>Escolta a Spotify</span>
-              </a>
+              <img
+                className="mlst_img"
+                src={getCover(selectedAlbum)}
+                alt={selectedAlbum.title}
+                loading="eager"
+                decoding="async"
+              />
             </div>
 
-            {/* Right Column: Title, Metas, Description & Tracklist */}
+            {/* Right Column: Title, Metas, Audio Bar, Description & Tracklist */}
             <div className="mlst_panel_content">
               {/* Close Button */}
               <button
@@ -576,6 +588,63 @@ export default function MorphingAlbumList({
                   </span>
                 </div>
               </div>
+
+              {/* Featured Full Song Player & Spotify Link Bar */}
+              {currentAlbumPreviewTrack && (
+                <div className="disco-player-action-bar">
+                  <button
+                    type="button"
+                    className={`disco-full-song-btn ${isSelectedAlbumPlaying ? "is-playing" : ""}`}
+                    onClick={() => onPlayTrack(currentAlbumPreviewTrack)}
+                    title={`Reproduir cançó sencera: ${currentAlbumPreviewTrack.title}`}
+                  >
+                    <span className="disco-full-song-icon">
+                      <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                        {isSelectedAlbumPlaying ? (
+                          <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
+                        ) : (
+                          <polygon points="6 4 20 12 6 20 6 4" />
+                        )}
+                      </svg>
+                    </span>
+                    <div className="disco-full-song-info">
+                      <span className="disco-full-song-kicker">
+                        {isSelectedAlbumPlaying
+                          ? "REPRODUINT CANÇÓ SENCERA"
+                          : "REPRODUIR CANÇÓ SENCERA"}
+                      </span>
+                      <span className="disco-full-song-name">
+                        {currentAlbumPreviewTrack.title}
+                      </span>
+                    </div>
+                    {currentAlbumPreviewTrack.duration && (
+                      <span className="disco-full-song-duration">
+                        {formatDurationMs(currentAlbumPreviewTrack.duration)}
+                      </span>
+                    )}
+                    {isSelectedAlbumPlaying && (
+                      <div className="disco-eq-bars" aria-label="Reproduint àudio">
+                        <span className="disco-eq-bar" />
+                        <span className="disco-eq-bar" />
+                        <span className="disco-eq-bar" />
+                      </div>
+                    )}
+                  </button>
+
+                  <a
+                    href={`https://open.spotify.com/search/${encodeURIComponent(`Miquel Gil ${selectedAlbum.title}`)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="disco-spotify-btn"
+                    title={`Obrir ${selectedAlbum.title} a Spotify`}
+                  >
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                      <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.498 17.306c-.215.352-.676.463-1.028.248-2.816-1.72-6.36-2.11-10.536-1.157-.403.093-.808-.16-.9-.562-.092-.403.16-.807.563-.9 4.568-1.044 8.508-.598 11.653 1.343.352.215.463.676.248 1.028zm1.468-3.262c-.27.44-.848.578-1.288.308-3.224-1.982-8.14-2.557-11.954-1.399-.496.15-1.025-.133-1.176-.628-.15-.496.133-1.025.628-1.176 4.364-1.324 9.791-.684 13.482 1.583.44.27.578.848.308 1.288zm.126-3.41c-3.866-2.296-10.245-2.508-13.935-1.387-.593.18-1.22-.16-1.4-.753-.18-.593.16-1.22.753-1.4 4.24-1.288 11.284-1.04 15.68 1.57.533.316.708 1.01.392 1.543-.316.533-1.01.708-1.543.392z" />
+                    </svg>
+                    <span>Spotify</span>
+                  </a>
+                </div>
+              )}
 
               {/* Album Description */}
               <div className="mlst_panel_body" data-anm-mlst-body>

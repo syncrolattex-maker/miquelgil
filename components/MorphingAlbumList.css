@@ -205,29 +205,26 @@
 
 .mlst_panel_inner {
   display: grid;
-  grid-template-columns: 420px 1fr;
+  grid-template-columns: 460px 1fr;
   max-height: calc(100dvh - var(--margin) * 2);
   overflow-y: auto;
   overscroll-behavior: contain;
 }
 
-/* Left column: Vinyl sleeve, Artwork, Audio action */
+/* Left column: Pure High-Resolution Album Cover flush with panel */
 .mlst_panel_media {
   position: relative;
-  background: linear-gradient(180deg, #F8F7F4 0%, #EFEFEA 100%);
-  padding: 40px 32px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-start;
-  gap: 28px;
-  border-right: 1px solid var(--mlst-line);
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+  background-color: #0b0c0b;
 }
 
-.mlst_panel_media .disco-sleeve-stage {
-  max-width: 320px;
+.mlst_panel_media .mlst_img {
   width: 100%;
-  margin: 0 auto;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
 
 /* Right column: Content, description & tracklist */
@@ -235,8 +232,8 @@
   position: relative;
   display: flex;
   flex-direction: column;
-  gap: 24px;
-  padding: 40px 44px;
+  gap: 22px;
+  padding: 36px 40px;
   overflow-y: auto;
   overscroll-behavior: contain;
 }
@@ -309,6 +306,76 @@
   line-height: 1.65;
   color: var(--mlst-soft);
   margin: 0;
+}
+
+/* Audio Player & Spotify Action Bar */
+.disco-player-action-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+  padding: 12px 16px;
+  background: rgba(0, 0, 0, 0.035);
+  border: 1px solid rgba(0, 0, 0, 0.07);
+  border-radius: 12px;
+}
+
+.disco-full-song-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 18px;
+  border-radius: 9999px;
+  border: 0;
+  background-color: var(--mlst-accent, #E20000);
+  color: #FFFFFF;
+  cursor: pointer;
+  font-family: var(--font-graphik), sans-serif;
+  transition: all 0.25s var(--mlst-ease);
+}
+
+.disco-full-song-btn:hover {
+  background-color: #B80000;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(226, 0, 0, 0.3);
+}
+
+.disco-full-song-btn.is-playing {
+  background-color: #111211;
+}
+
+.disco-full-song-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.disco-full-song-info {
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+}
+
+.disco-full-song-kicker {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  opacity: 0.85;
+  text-transform: uppercase;
+}
+
+.disco-full-song-name {
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.disco-full-song-duration {
+  font-size: 12px;
+  font-weight: 500;
+  opacity: 0.85;
+  padding-left: 2px;
 }
 
 /* --------------------------------------------------------------------------
@@ -410,7 +477,9 @@
   .mlst_panel_media {
     border-right: none;
     border-bottom: 1px solid var(--mlst-line);
-    padding: 30px 24px;
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    padding: 0;
   }
 
   .mlst_panel_content {
