@@ -40,7 +40,7 @@ const CHECKPOINTS: CheckpointData[] = [
     badge: "h. 1971 · Prada",
     title: "Trobada amb Vicent Torrent",
     text: "Als 15 anys coneix Vicent Torrent a la Universitat Catalana d'Estiu de Prada; Torrent li proposa formar un grup.",
-    media: "/images/07-1978-6.jpg",
+    media: "/images/trobada-vicent-torrent.png",
     progress: 0.17,
     pinX: "74%",
     pinY: "17%",
