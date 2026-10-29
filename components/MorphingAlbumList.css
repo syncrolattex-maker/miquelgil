@@ -79,7 +79,8 @@
 }
 
 .mlst_row.is-active {
-  visibility: hidden;
+  opacity: 0.35;
+  transition: opacity 0.3s ease;
 }
 
 /* Row elements */
@@ -175,6 +176,8 @@
   color: var(--mlst-fg);
   overflow: hidden;
   box-shadow: 0 25px 70px -15px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(0, 0, 0, 0.08);
+  will-change: transform, opacity;
+  transform-origin: center center;
 }
 
 .mlst_panel:focus,
@@ -185,12 +188,15 @@
 .mlst_panel::backdrop {
   background-color: rgba(10, 10, 10, 0.65);
   backdrop-filter: blur(8px);
-  animation: mlst-backdrop-in 0.4s ease forwards;
+  -webkit-backdrop-filter: blur(8px);
+  opacity: 1;
+  transition: opacity 0.35s ease, backdrop-filter 0.35s ease;
 }
 
-@keyframes mlst-backdrop-in {
-  from { opacity: 0; }
-  to { opacity: 1; }
+.mlst_panel.is-closing::backdrop {
+  opacity: 0;
+  backdrop-filter: blur(0px);
+  -webkit-backdrop-filter: blur(0px);
 }
 
 .mlst_panel_inner {

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef, useCallback } from "react";
+import { flushSync } from "react-dom";
 import { type Album } from "@/lib/site";
 import {
   type SpotifyTrack,
@@ -44,12 +45,6 @@ const ALBUM_COVERS: Record<string, string> = {
   "terminal-sur": "/images/disco_1.jpg",
 };
 
-// Helper to set viewTransitionName safely
-function setVTName(el: HTMLElement | null | undefined, name: string) {
-  if (!el) return;
-  (el.style as any).viewTransitionName = name;
-}
-
 interface MorphingAlbumListProps {
   albums: Album[];
   currentTrack: SpotifyTrack;
@@ -74,175 +69,147 @@ export default function MorphingAlbumList({
   // Helper to get album cover
   const getCover = (album: Album) => ALBUM_COVERS[album.slug] || album.cover;
 
-  // View transitions support check
-  const supportsViewTransitions = useCallback(() => {
-    if (typeof document === "undefined") return false;
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return false;
-    return typeof (document as any).startViewTransition === "function";
-  }, []);
-
-  // Open album in morphing panel
+  // Open album in morphing panel with ultra-smooth GSAP FLIP transition
   const handleOpenAlbum = (album: Album, rowEl: HTMLButtonElement) => {
     if (isTransitioningRef.current) return;
     activeRowRef.current = rowEl;
     const panel = panelRef.current;
     if (!panel) return;
 
-    if (!supportsViewTransitions()) {
+    isTransitioningRef.current = true;
+    rowEl.classList.add("is-active");
+
+    const rowRect = rowEl.getBoundingClientRect();
+
+    // Synchronously render album contents so panel measurements are exact
+    flushSync(() => {
       setSelectedAlbum(album);
-      if (typeof panel.showModal === "function") {
-        panel.showModal();
-      }
-      return;
+    });
+
+    if (typeof panel.showModal === "function") {
+      panel.showModal();
     }
 
-    isTransitioningRef.current = true;
-    const docEl = document.documentElement;
-    docEl.style.setProperty("--mlst-dur", `${duration}s`);
-    docEl.classList.add("mlst-vt", "mlst-vt-open");
+    const panelRect = panel.getBoundingClientRect();
+    const deltaX = rowRect.left + rowRect.width / 2 - (panelRect.left + panelRect.width / 2);
+    const deltaY = rowRect.top + rowRect.height / 2 - (panelRect.top + panelRect.height / 2);
+    const scaleX = Math.max(0.18, rowRect.width / panelRect.width);
+    const scaleY = Math.max(0.08, rowRect.height / panelRect.height);
 
-    // Assign view-transition-names to source row elements
-    rowEl.classList.add("is-morphing");
-    setVTName(rowEl, "mlst-surface");
-    const mediaEl = rowEl.querySelector<HTMLElement>("[data-anm-mlst-media]");
-    setVTName(mediaEl, "mlst-media");
-    const titleEl = rowEl.querySelector<HTMLElement>("[data-anm-mlst-title]");
-    setVTName(titleEl, "mlst-title");
-    const metaEls = rowEl.querySelectorAll<HTMLElement>("[data-anm-mlst-meta]");
-    metaEls.forEach((el, idx) => {
-      setVTName(el, `mlst-meta-${idx}`);
-    });
+    const mediaCol = panel.querySelector<HTMLElement>(".mlst_panel_media");
+    const contentCol = panel.querySelector<HTMLElement>(".mlst_panel_content");
+    const closeBtn = panel.querySelector<HTMLElement>(".mlst_close");
 
-    const transition = (document as any).startViewTransition(() => {
-      // Clear row names
-      setVTName(rowEl, "");
-      setVTName(mediaEl, "");
-      setVTName(titleEl, "");
-      metaEls.forEach((el) => {
-        setVTName(el, "");
-      });
-
-      // Update React state to render panel contents
-      setSelectedAlbum(album);
-      if (typeof panel.showModal === "function") {
-        panel.showModal();
+    // Animate panel from the row position into full modal card
+    gsap.fromTo(
+      panel,
+      {
+        x: deltaX,
+        y: deltaY,
+        scaleX: scaleX,
+        scaleY: scaleY,
+        opacity: 0.85,
+        borderRadius: "14px",
+      },
+      {
+        x: 0,
+        y: 0,
+        scaleX: 1,
+        scaleY: 1,
+        opacity: 1,
+        borderRadius: "14px",
+        duration: duration || 0.55,
+        ease: "power3.out",
+        clearProps: "transform",
+        onComplete: () => {
+          isTransitioningRef.current = false;
+        },
       }
-      rowEl.classList.add("is-active");
+    );
 
-      // Set view-transition-names on destination panel elements
-      setVTName(panel, "mlst-surface");
-      const pMedia = panel.querySelector<HTMLElement>("[data-anm-mlst-media]");
-      setVTName(pMedia, "mlst-media");
-      const pTitle = panel.querySelector<HTMLElement>("[data-anm-mlst-title]");
-      setVTName(pTitle, "mlst-title");
-      const pMetas = panel.querySelectorAll<HTMLElement>("[data-anm-mlst-meta]");
-      pMetas.forEach((el, idx) => {
-        setVTName(el, `mlst-meta-${idx}`);
-      });
-    });
+    if (mediaCol) {
+      gsap.fromTo(
+        mediaCol,
+        { opacity: 0, scale: 0.94 },
+        { opacity: 1, scale: 1, duration: 0.45, ease: "power2.out", delay: 0.06 }
+      );
+    }
 
-    transition.finished
-      .catch(() => {})
-      .finally(() => {
-        // Cleanup transition styles
-        setVTName(panel, "");
-        const pMedia = panel.querySelector<HTMLElement>("[data-anm-mlst-media]");
-        setVTName(pMedia, "");
-        const pTitle = panel.querySelector<HTMLElement>("[data-anm-mlst-title]");
-        setVTName(pTitle, "");
-        const pMetas = panel.querySelectorAll<HTMLElement>("[data-anm-mlst-meta]");
-        pMetas.forEach((el) => {
-          setVTName(el, "");
-        });
+    if (contentCol) {
+      gsap.fromTo(
+        contentCol,
+        { opacity: 0, y: 16 },
+        { opacity: 1, y: 0, duration: 0.45, ease: "power2.out", delay: 0.1 }
+      );
+    }
 
-        rowEl.classList.remove("is-morphing");
-        docEl.classList.remove("mlst-vt", "mlst-vt-open");
-        docEl.style.removeProperty("--mlst-dur");
-        isTransitioningRef.current = false;
-      });
+    if (closeBtn) {
+      gsap.fromTo(
+        closeBtn,
+        { opacity: 0, scale: 0.75 },
+        { opacity: 1, scale: 1, duration: 0.35, ease: "back.out(1.5)", delay: 0.16 }
+      );
+    }
   };
 
-  // Close panel and morph back to row
+  // Close panel and smoothly minimize/morph back into the row
   const handleClosePanel = () => {
     if (isTransitioningRef.current) return;
     const panel = panelRef.current;
     const rowEl = activeRowRef.current;
-    if (!panel || !rowEl) {
-      if (panel && typeof panel.close === "function") panel.close();
-      setSelectedAlbum(null);
-      return;
-    }
+    if (!panel) return;
 
-    if (!supportsViewTransitions()) {
+    if (!rowEl) {
       if (typeof panel.close === "function") panel.close();
-      rowEl.classList.remove("is-active");
       setSelectedAlbum(null);
-      activeRowRef.current = null;
       return;
     }
 
     isTransitioningRef.current = true;
-    const docEl = document.documentElement;
-    const closeDur = duration * 0.8;
-    docEl.style.setProperty("--mlst-dur", `${closeDur}s`);
-    docEl.classList.add("mlst-vt", "mlst-vt-close");
+    panel.classList.add("is-closing");
 
-    // Set view-transition-names on panel elements before transition
-    setVTName(panel, "mlst-surface");
-    const pMedia = panel.querySelector<HTMLElement>("[data-anm-mlst-media]");
-    setVTName(pMedia, "mlst-media");
-    const pTitle = panel.querySelector<HTMLElement>("[data-anm-mlst-title]");
-    setVTName(pTitle, "mlst-title");
-    const pMetas = panel.querySelectorAll<HTMLElement>("[data-anm-mlst-meta]");
-    pMetas.forEach((el, idx) => {
-      setVTName(el, `mlst-meta-${idx}`);
-    });
+    const rowRect = rowEl.getBoundingClientRect();
+    const panelRect = panel.getBoundingClientRect();
+    const deltaX = rowRect.left + rowRect.width / 2 - (panelRect.left + panelRect.width / 2);
+    const deltaY = rowRect.top + rowRect.height / 2 - (panelRect.top + panelRect.height / 2);
+    const scaleX = Math.max(0.18, rowRect.width / panelRect.width);
+    const scaleY = Math.max(0.08, rowRect.height / panelRect.height);
 
-    const transition = (document as any).startViewTransition(() => {
-      // Clear panel names and close
-      setVTName(panel, "");
-      setVTName(pMedia, "");
-      setVTName(pTitle, "");
-      pMetas.forEach((el) => {
-        setVTName(el, "");
-      });
+    const mediaCol = panel.querySelector<HTMLElement>(".mlst_panel_media");
+    const contentCol = panel.querySelector<HTMLElement>(".mlst_panel_content");
+    const closeBtn = panel.querySelector<HTMLElement>(".mlst_close");
 
-      if (typeof panel.close === "function") panel.close();
-      rowEl.classList.remove("is-active");
+    if (contentCol) {
+      gsap.to(contentCol, { opacity: 0, duration: 0.18, ease: "power2.in" });
+    }
+    if (closeBtn) {
+      gsap.to(closeBtn, { opacity: 0, duration: 0.15, ease: "power2.in" });
+    }
+    if (mediaCol) {
+      gsap.to(mediaCol, { opacity: 0.4, duration: 0.25, ease: "power2.in" });
+    }
 
-      // Set names on destination row
-      rowEl.classList.add("is-morphing");
-      setVTName(rowEl, "mlst-surface");
-      const mediaEl = rowEl.querySelector<HTMLElement>("[data-anm-mlst-media]");
-      setVTName(mediaEl, "mlst-media");
-      const titleEl = rowEl.querySelector<HTMLElement>("[data-anm-mlst-title]");
-      setVTName(titleEl, "mlst-title");
-      const metaEls = rowEl.querySelectorAll<HTMLElement>("[data-anm-mlst-meta]");
-      metaEls.forEach((el, idx) => {
-        setVTName(el, `mlst-meta-${idx}`);
-      });
-    });
-
-    transition.finished
-      .catch(() => {})
-      .finally(() => {
-        setVTName(rowEl, "");
-        const mediaEl = rowEl.querySelector<HTMLElement>("[data-anm-mlst-media]");
-        setVTName(mediaEl, "");
-        const titleEl = rowEl.querySelector<HTMLElement>("[data-anm-mlst-title]");
-        setVTName(titleEl, "");
-        const metaEls = rowEl.querySelectorAll<HTMLElement>("[data-anm-mlst-meta]");
-        metaEls.forEach((el) => {
-          setVTName(el, "");
-        });
-
-        rowEl.classList.remove("is-morphing");
-        docEl.classList.remove("mlst-vt", "mlst-vt-close");
-        docEl.style.removeProperty("--mlst-dur");
+    gsap.to(panel, {
+      x: deltaX,
+      y: deltaY,
+      scaleX: scaleX,
+      scaleY: scaleY,
+      opacity: 0,
+      duration: (duration || 0.55) * 0.8,
+      ease: "power3.inOut",
+      onComplete: () => {
+        panel.classList.remove("is-closing");
+        if (typeof panel.close === "function") panel.close();
+        gsap.set(panel, { clearProps: "all" });
+        if (contentCol) gsap.set(contentCol, { clearProps: "all" });
+        if (mediaCol) gsap.set(mediaCol, { clearProps: "all" });
+        if (closeBtn) gsap.set(closeBtn, { clearProps: "all" });
+        rowEl.classList.remove("is-active");
         setSelectedAlbum(null);
         activeRowRef.current = null;
         isTransitioningRef.current = false;
-      });
+      },
+    });
   };
 
   // Close when clicking outside panel inner card

@@ -2,6 +2,7 @@
 
 import React, { useRef } from "react";
 import ExpandingStrip from "@/components/ExpandingStrip";
+import { BlockReveal, AnimatedTitle } from "@/components/TextAnimations";
 import { BIO_SECTIONS } from "./bioData";
 import { siteKeyMessage, chronologyFites } from "@/lib/site";
 import "./biografia.css";
@@ -66,24 +67,32 @@ export default function BiografiaClient() {
 
   return (
     <main className="bio-page">
-      {/* 1. HERO HEADER (Netejat segons instruccions: només títol i lead) */}
+      {/* 1. HERO HEADER */}
       <div className="bio-container">
         <header className="biografia-hero">
-          <h1 className="biografia-hero__title">
-            Miquel Gil: el cantador que no deixa d'explorar.
-          </h1>
+          <BlockReveal color="#FF0000" direction="lr" delay={100} duration={650}>
+            <h1 className="biografia-hero__title">
+              Miquel Gil: el cantador que no deixa d'explorar.
+            </h1>
+          </BlockReveal>
 
-          <p className="biografia-hero__lead">
-            {siteKeyMessage.tagline}. Des de la fundació d'Al Tall el 1975 fins a l'estrena de <em>Viatger</em> (2024), 
-            mig segle d'arrel valenciana, poesia contemporània i exploració sonora sense repetir mai fórmules.
-          </p>
+          <BlockReveal color="#111211" direction="lr" delay={250} duration={700}>
+            <p className="biografia-hero__lead">
+              {siteKeyMessage.tagline}. Des de la fundació d'Al Tall el 1975 fins a l'estrena de <em>Viatger</em> (2024), 
+              mig segle d'arrel valenciana, poesia contemporània i exploració sonora sense repetir mai fórmules.
+            </p>
+          </BlockReveal>
         </header>
       </div>
 
       {/* 2. SECCIÓ EXPANDING STRIP (100% FULLWIDTH EDGE-TO-EDGE) */}
       <section className="bio-strip-fullwidth" aria-label="Les cinc grans etapes biogràfiques">
         <div className="bio-strip-fullwidth__header">
-          <h2 className="bio-strip-header__title">Cinc Posicions, Una Vida de Música</h2>
+          <AnimatedTitle
+            text="CINC POSICIONS, UNA VIDA DE MÚSICA"
+            color="#FFFFFF"
+            className="bio-strip-header__title"
+          />
           <span className="bio-strip-header__desc">
             Explora les cinc etapes capitals de Miquel Gil passant el cursor o seleccionant cada panell.
           </span>
@@ -104,9 +113,11 @@ export default function BiografiaClient() {
         <section className="bio-editorial-section" aria-label="Síntesi de trajectòria">
           <div className="bio-editorial__quote-box">
             <span className="bio-editorial__badge">Veu i Territori</span>
-            <blockquote className="bio-editorial__big-quote">
-              «Quan Miquel Gil canta és la terra mateixa que s’expressa.»
-            </blockquote>
+            <BlockReveal color="#FF0000" direction="lr" delay={150} duration={700}>
+              <blockquote className="bio-editorial__big-quote">
+                «Quan Miquel Gil canta és la terra mateixa que s’expressa.»
+              </blockquote>
+            </BlockReveal>
             <span className="bio-editorial__author">
               Catarroja (Horta Sud, València) · 1956
             </span>
@@ -143,7 +154,11 @@ export default function BiografiaClient() {
         >
           <div className="bio-chrono-header">
             <span className="bio-chrono__kicker">Arxiu Històric</span>
-            <h2 className="bio-chrono__title">Cronologia: de Catarroja a l'Actualitat</h2>
+            <AnimatedTitle
+              text="CRONOLOGIA: DE CATARROJA A L'ACTUALITAT"
+              color="#FFFFFF"
+              className="bio-chrono__title"
+            />
             <p className="bio-chrono__desc">
               Totes les fites clau que han marcat la trajectòria professional i humana de Miquel Gil (1956 — 2026).
             </p>
@@ -163,9 +178,11 @@ export default function BiografiaClient() {
         <section className="bio-venues-section" aria-label="Escenaris i festivals internacionals">
           <div className="bio-venues__header">
             <span className="bio-venues__kicker">Circuits & Directes</span>
-            <h2 className="bio-venues__title">
-              Ha actuat als principals escenaris i festivals internacionals:
-            </h2>
+            <AnimatedTitle
+              text="PRINCIPALS ESCENARIS I FESTIVALS INTERNACIONALS"
+              color="#FFFFFF"
+              className="bio-venues__title"
+            />
             <p className="bio-venues__subtitle">
               De les grans sales simfòniques i teatres emblemàtics del país a referents internacionals de la world music a Europa i Amèrica.
             </p>

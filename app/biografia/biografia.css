@@ -199,6 +199,12 @@
   font-weight: 400;
   color: #ffffff;
   margin: 0;
+  line-height: 1.12;
+}
+
+.bio-chrono__title.animated-coign-title,
+.bio-venues__title.animated-coign-title {
+  line-height: 1.15;
 }
 
 .bio-chrono__desc {
@@ -248,11 +254,11 @@
 }
 
 .chrono-row__year {
-  font-family: 'Coign', 'GRAPHIK', sans-serif;
-  font-size: 1.45rem;
+  font-family: 'GRAPHIK', sans-serif;
+  font-size: 1.25rem;
   font-weight: 700;
   color: #ff0000;
-  letter-spacing: 0.02em;
+  letter-spacing: 0.03em;
 }
 
 .chrono-row__text {

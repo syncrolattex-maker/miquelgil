@@ -1,4 +1,4 @@
-import Footer from "@/components/Footer";
+import InkBloomFooter from "@/components/InkBloomFooter";
 import DiscografiaClient from "./DiscografiaClient";
 import "./discografia.css";
 
@@ -11,7 +11,12 @@ export default function Discografia() {
   return (
     <main className="discografia-container">
       <DiscografiaClient />
-      <Footer />
+      <InkBloomFooter
+        color="#b80018"
+        colorOuter="#ff0528"
+        ground="transparent"
+        edge="bottom"
+      />
     </main>
   );
 }
