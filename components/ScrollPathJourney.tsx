@@ -84,7 +84,7 @@ const CHECKPOINTS: CheckpointData[] = [
     badge: "1997 · Seminola",
     title: "'Buscando tu olor'",
     text: "Primer disc en solitari publicat amb el seu propi nom: Miquel Gil.",
-    media: "/images/disco_8.webp",
+    media: "/images/buscando-tu-olor-1997.jpg",
     progress: 0.53,
     pinX: "74%",
     pinY: "52%",
