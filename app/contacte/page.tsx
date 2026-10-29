@@ -11,10 +11,11 @@ export const metadata: Metadata = {
 export default function ContactePage() {
   return (
     <main className="contacte-page-root">
-      <div className="contacte-main-wrapper">
-        {/* Columna esquerra / Inferior mòbil: Mantell d'arena de platja interactiu */}
-        <section className="contacte-content-col" aria-label="Informació de contacte">
-          <SandReveal className="contacte-sand-full" starterCue={true} brushSize={80}>
+      {/* Mantell d'arena a pantalla completa (Full-screen canvas) */}
+      <SandReveal className="contacte-sand-fullscreen" starterCue={true} brushSize={85}>
+        <div className="contacte-main-wrapper">
+          {/* Columna esquerra: Informació de contacte */}
+          <section className="contacte-content-col" aria-label="Informació de contacte">
             <div className="contacte-text-block">
               <h2 className="contacte-subtitle">
                 Si vols posar-te en contacte amb mi, pots fer-ho a través de les diferents opcions.
@@ -64,16 +65,16 @@ export default function ContactePage() {
                 </div>
               </div>
             </div>
-          </SandReveal>
-        </section>
+          </section>
 
-        {/* Columna dreta: Fotografia de Miquel Gil a la platja (sense gens d'arena) amb degradat suau cap a blanc */}
-        <aside
-          className="contacte-photo-col"
-          role="img"
-          aria-label="Miquel Gil caminant per la vora de la mar a la platja"
-        />
-      </div>
+          {/* Columna dreta: Fotografia de Miquel Gil a la platja */}
+          <aside
+            className="contacte-photo-col"
+            role="img"
+            aria-label="Miquel Gil caminant per la vora de la mar a la platja"
+          />
+        </div>
+      </SandReveal>
     </main>
   );
 }

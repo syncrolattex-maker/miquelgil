@@ -205,10 +205,12 @@ export default function SandReveal({
 
     if (!isMob) {
       // =========================================================================
-      // DESKTOP: Degradat d'esquerra a dreta (sense tapar la imatge)
-      // L'arena cobreix la zona de text a l'esquerra i s'esvaeix de forma orgànica
-      // abans d'arribar a la fotografia de la dreta.
-      // No està limitada a un requadre, sinó que s'estén àmpliament per tota la columna.
+      // DESKTOP: Canvas a pantalla completa (Full screen 100vw x 100vh).
+      // Degradat d'esquerra a dreta (sense tapar la imatge):
+      // L'arena cobreix la zona de text a l'esquerra (nx <= 0.24)
+      // i descendeix suaument en pendent de duna orgànica fins arribar a 0
+      // just a la vora de la fotografia de la dreta (nx >= 0.48).
+      // Mai està limitada a un requadre, sinó que abasta tota la pantalla.
       // =========================================================================
       for (let y = 0; y < s.gridH; y++) {
         for (let x = 0; x < s.gridW; x++) {
@@ -224,10 +226,10 @@ export default function SandReveal({
 
           // Pendent de degradat d'esquerra a dreta:
           // nx <= xSolid: arena profunda i compacta cobrint el text
-          // xSolid < nx < xFadeEnd: descens suau i orgànic cap a 0 (degradat ampli i progressiu)
+          // xSolid < nx < xFadeEnd: descens suau i orgànic cap a 0
           // nx >= xFadeEnd: 0 absolut d'arena, mai toca la imatge de la dreta
-          const xSolid = 0.22 + duneWarp * 0.3;
-          const xFadeEnd = 0.84 + duneWarp;
+          const xSolid = 0.24 + duneWarp * 0.25;
+          const xFadeEnd = 0.48 + duneWarp * 0.35;
 
           let xFalloff = 0;
           if (nx <= xSolid) {
@@ -269,10 +271,12 @@ export default function SandReveal({
       }
     } else {
       // =========================================================================
-      // MÒBIL: L'arena entra de BAIX a DALT donant sensació real de platja
-      // Imatge a dalt, text a baix. L'arena és densa a la part inferior de la
-      // pantalla i s'enfila cap amunt trobant-se amb la riba de la foto.
-      // Abasta tot l'ample de la pantalla sense caixes tancades.
+      // MÒBIL: Canvas a pantalla completa. L'arena entra de BAIX a DALT (sensació de platja)
+      // Imatge a dalt (~36vh), text a baix (~64vh).
+      // L'arena és compacta a la part inferior sobre el text (ny >= ~0.52),
+      // puja suaument en pendent d'onatge (0.35 < ny < 0.52),
+      // i es queda a 0 a la part superior (ny <= 0.35) respectant la foto de la platja.
+      // Abasta tot l'ample de la pantalla (100vw) d'extrem a extrem sense requadre.
       // =========================================================================
       for (let y = 0; y < s.gridH; y++) {
         for (let x = 0; x < s.gridW; x++) {
@@ -290,8 +294,8 @@ export default function SandReveal({
           // ny >= ySolid: arena compacta a la part inferior sobre el text i enllaços
           // yShoreline < ny < ySolid: pendent ascendent suau cap a la riba
           // ny <= yShoreline: 0 absolut d'arena just on connecta amb la foto de dalt
-          const ySolid = 0.34 + shoreWarp * 0.4;
-          const yShoreline = 0.04 + shoreWarp;
+          const ySolid = 0.52 + shoreWarp * 0.25;
+          const yShoreline = 0.35 + shoreWarp * 0.35;
 
           let yFalloff = 0;
           if (ny >= ySolid) {
@@ -554,21 +558,21 @@ export default function SandReveal({
     if (starterCue) {
       const subtitle = container.querySelector(".contacte-subtitle");
 
-      let startX = isMobile ? 0.18 : 0.20;
-      let startY = isMobile ? 0.28 : 0.40;
+      let startX = isMobile ? 0.14 : 0.10;
+      let startY = isMobile ? 0.46 : 0.28;
 
       if (subtitle) {
         const cRect = container.getBoundingClientRect();
         const sRect = subtitle.getBoundingClientRect();
         if (cRect.width > 0 && cRect.height > 0) {
-          startX = clamp((sRect.left - cRect.left + 35) / cRect.width, 0.08, 0.45);
-          startY = clamp((sRect.top - cRect.top + 30) / cRect.height, 0.12, 0.65);
+          startX = clamp((sRect.left - cRect.left + 35) / cRect.width, 0.05, 0.40);
+          startY = clamp((sRect.top - cRect.top + 30) / cRect.height, 0.10, 0.65);
         }
       }
 
       const p1: StrokePoint = { x: startX, y: startY, time: 0 };
-      const p2: StrokePoint = { x: startX + (isMobile ? 0.22 : 0.15), y: startY + 0.02, time: 100 };
-      const p3: StrokePoint = { x: startX + (isMobile ? 0.35 : 0.26), y: startY - 0.01, time: 200 };
+      const p2: StrokePoint = { x: startX + (isMobile ? 0.20 : 0.12), y: startY + 0.02, time: 100 };
+      const p3: StrokePoint = { x: startX + (isMobile ? 0.32 : 0.22), y: startY - 0.01, time: 200 };
 
       sweep([p1, p2, p3]);
       for (let i = 0; i < 4; i++) {
@@ -615,14 +619,19 @@ export default function SandReveal({
       sweep([s.lastPointer, currentPt]);
       s.lastPointer = currentPt;
     } else if (s.pointerId === null) {
-      // Hovering: check if cursor is over a cleared link area
+      // Hovering: check if cursor is over a cleared link area or empty area
       const pt = getCanvasCoords(e);
       const sandAmount = sample(pt.x * s.gridW, pt.y * s.gridH);
-      if (sandAmount < 0.3) {
+      if (sandAmount < 0.25) {
         const elements = document.elementsFromPoint(e.clientX, e.clientY);
         const anchor = elements.find((el) => el.tagName === "A" || el.closest("a"));
         if (anchor) {
           canvas.style.cursor = "pointer";
+          return;
+        }
+        // If there is no sand at all under cursor (e.g. over the photo on the right)
+        if (sandAmount < 0.05) {
+          canvas.style.cursor = "default";
           return;
         }
       }

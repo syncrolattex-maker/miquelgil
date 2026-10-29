@@ -42,11 +42,17 @@
 .contacte-page-root {
   min-height: 100vh;
   background-color: #ffffff;
-  display: flex;
-  flex-direction: row;
   position: relative;
   overflow-x: hidden;
   width: 100%;
+}
+
+/* El mantell d'arena a pantalla completa (Full-screen canvas a tota la pantalla) */
+.contacte-sand-fullscreen {
+  position: relative;
+  width: 100%;
+  min-height: 100vh;
+  display: block;
 }
 
 /* Wrapper principal del contingut subjacent (columna de text + columna de foto) */
@@ -60,7 +66,7 @@
   position: relative;
 }
 
-/* Columna de contingut de text: s'estén àmpliament a l'esquerra fins trobar-se amb la foto */
+/* Columna de contingut de text */
 .contacte-content-col {
   flex: 1.15;
   min-width: 320px;
@@ -69,58 +75,42 @@
   z-index: 2;
   display: flex;
   flex-direction: column;
-  align-items: stretch;
-  justify-content: stretch;
+  justify-content: center;
   box-sizing: border-box;
   padding: 0;
   margin: 0;
 }
 
-/* El mantell d'arena cobreix tota la columna sense capsa tancada */
-.contacte-sand-full {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-}
-
-/* El component SandReveal actua sobre aquest contenidor */
+/* El component SandReveal actua sobre tot el viewport */
 .sand-reveal-container {
   position: relative;
   width: 100%;
-  height: 100%;
   min-height: 100vh;
   background: transparent;
   border: none;
   box-shadow: none;
   margin: 0;
   padding: 0;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
+  display: block;
 }
 
 .sand-reveal-content {
   position: relative;
   z-index: 1;
   width: 100%;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
+  min-height: 100vh;
+  display: block;
   background: transparent;
 }
 
-/* Canvas del mantell d'arena: cobreix absolutament tota la columna */
+/* Canvas del mantell d'arena: cobreix absolutament tota la pantalla (100vw x 100vh) */
 .sand-reveal-canvas {
   position: absolute;
-  inset: 0;
+  top: 0;
+  left: 0;
   width: 100%;
   height: 100%;
-  z-index: 5;
+  z-index: 10;
   touch-action: none;
   cursor: crosshair;
   background: transparent;
