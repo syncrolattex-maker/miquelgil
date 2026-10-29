@@ -45,6 +45,16 @@ const ALBUM_COVERS: Record<string, string> = {
   "terminal-sur": "/images/disco_1.jpg",
 };
 
+// Helper to safely set and remove view-transition-name
+function setVTName(el: HTMLElement | null | undefined, name: string) {
+  if (!el) return;
+  if (name) {
+    el.style.setProperty("view-transition-name", name);
+  } else {
+    el.style.removeProperty("view-transition-name");
+  }
+}
+
 interface MorphingAlbumListProps {
   albums: Album[];
   currentTrack: SpotifyTrack;
@@ -69,90 +79,151 @@ export default function MorphingAlbumList({
   // Helper to get album cover
   const getCover = (album: Album) => ALBUM_COVERS[album.slug] || album.cover;
 
-  // Open album in morphing panel with ultra-smooth GSAP FLIP transition
+  // Open album in morphing panel with official Annnimate Morphing-List mechanics
   const handleOpenAlbum = (album: Album, rowEl: HTMLButtonElement) => {
     if (isTransitioningRef.current) return;
     activeRowRef.current = rowEl;
     const panel = panelRef.current;
     if (!panel) return;
 
+    const u = duration || 0.55;
+    const supportsVT =
+      typeof document !== "undefined" &&
+      typeof (document as any).startViewTransition === "function";
+    const isReduced =
+      typeof window !== "undefined" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
     isTransitioningRef.current = true;
-    rowEl.classList.add("is-active");
 
-    const rowRect = rowEl.getBoundingClientRect();
+    // Retrieve row elements before DOM mutation
+    const rowMedia = rowEl.querySelector<HTMLElement>("[data-anm-mlst-media]");
+    const rowTitle = rowEl.querySelector<HTMLElement>("[data-anm-mlst-title]");
+    const rowMetas = Array.from(rowEl.querySelectorAll<HTMLElement>("[data-anm-mlst-meta]"));
 
-    // Synchronously render album contents so panel measurements are exact
+    // Synchronously update React state so the modal has complete album details
     flushSync(() => {
       setSelectedAlbum(album);
     });
 
-    if (typeof panel.showModal === "function") {
-      panel.showModal();
-    }
-
-    const panelRect = panel.getBoundingClientRect();
-    const deltaX = rowRect.left + rowRect.width / 2 - (panelRect.left + panelRect.width / 2);
-    const deltaY = rowRect.top + rowRect.height / 2 - (panelRect.top + panelRect.height / 2);
-    const scaleX = Math.max(0.18, rowRect.width / panelRect.width);
-    const scaleY = Math.max(0.08, rowRect.height / panelRect.height);
-
-    const mediaCol = panel.querySelector<HTMLElement>(".mlst_panel_media");
-    const contentCol = panel.querySelector<HTMLElement>(".mlst_panel_content");
+    const panelMedia = panel.querySelector<HTMLElement>("[data-anm-mlst-media]");
+    const panelTitle = panel.querySelector<HTMLElement>("[data-anm-mlst-title]");
+    const panelMetas = Array.from(panel.querySelectorAll<HTMLElement>("[data-anm-mlst-meta]"));
     const closeBtn = panel.querySelector<HTMLElement>(".mlst_close");
+    const panelBody = panel.querySelector<HTMLElement>(".mlst_panel_body");
+    const tracklist = panel.querySelector<HTMLElement>(".disco-tracklist-section");
+    const featuredSong = panel.querySelector<HTMLElement>(".disco-sleeve-featured-card");
+    const spotifyBtn = panel.querySelector<HTMLElement>(".disco-spotify-btn");
 
-    // Animate panel from the row position into full modal card
-    gsap.fromTo(
-      panel,
-      {
-        x: deltaX,
-        y: deltaY,
-        scaleX: scaleX,
-        scaleY: scaleY,
-        opacity: 0.85,
-        borderRadius: "14px",
-      },
-      {
-        x: 0,
-        y: 0,
-        scaleX: 1,
-        scaleY: 1,
-        opacity: 1,
-        borderRadius: "14px",
-        duration: duration || 0.55,
-        ease: "power3.out",
-        clearProps: "transform",
-        onComplete: () => {
-          isTransitioningRef.current = false;
-        },
+    const animateInternalContent = () => {
+      const riseItems = [panelBody, tracklist, featuredSong, spotifyBtn].filter(Boolean);
+      if (riseItems.length) {
+        gsap.fromTo(
+          riseItems,
+          { autoAlpha: 0, y: 18 },
+          {
+            autoAlpha: 1,
+            y: 0,
+            duration: 0.5,
+            stagger: 0.06,
+            ease: "cubic-bezier(0.3, 0.9, 0.1, 1)",
+            delay: 0.12,
+          }
+        );
       }
-    );
+      if (closeBtn) {
+        gsap.fromTo(
+          closeBtn,
+          { autoAlpha: 0, scale: 0.75 },
+          { autoAlpha: 1, scale: 1, duration: 0.35, ease: "power2.out", delay: 0.2 }
+        );
+      }
+    };
 
-    if (mediaCol) {
-      gsap.fromTo(
-        mediaCol,
-        { opacity: 0, scale: 0.94 },
-        { opacity: 1, scale: 1, duration: 0.45, ease: "power2.out", delay: 0.06 }
-      );
+    if (!supportsVT || isReduced) {
+      rowEl.classList.add("is-active");
+      if (typeof panel.showModal === "function") {
+        panel.showModal();
+      }
+      gsap.fromTo(panel, { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.35, ease: "power2.out" });
+      animateInternalContent();
+      isTransitioningRef.current = false;
+      return;
     }
 
-    if (contentCol) {
-      gsap.fromTo(
-        contentCol,
-        { opacity: 0, y: 16 },
-        { opacity: 1, y: 0, duration: 0.45, ease: "power2.out", delay: 0.1 }
-      );
+    // Set transition names on the row elements
+    setVTName(rowEl, "mlst-surface");
+    setVTName(rowMedia, "mlst-media");
+    setVTName(rowTitle, "mlst-title");
+    rowMetas.forEach((m, idx) => {
+      setVTName(m, `mlst-meta-${idx}`);
+    });
+
+    rowEl.classList.add("is-morphing");
+
+    const docEl = document.documentElement;
+    docEl.style.setProperty("--mlst-dur", `${u}s`);
+    docEl.style.setProperty("--mlst-r-from", "14px");
+    docEl.style.setProperty("--mlst-r-to", "14px");
+    docEl.classList.add("mlst-vt", "mlst-vt-open");
+
+    const vt = (document as any).startViewTransition(() => {
+      // Clear row names
+      setVTName(rowEl, "");
+      setVTName(rowMedia, "");
+      setVTName(rowTitle, "");
+      rowMetas.forEach((m) => {
+        setVTName(m, "");
+      });
+
+      // Assign names to panel elements
+      setVTName(panel, "mlst-surface");
+      setVTName(panelMedia, "mlst-media");
+      setVTName(panelTitle, "mlst-title");
+      panelMetas.forEach((m, idx) => {
+        setVTName(m, `mlst-meta-${idx}`);
+      });
+
+      rowEl.classList.add("is-active");
+
+      if (typeof panel.showModal === "function") {
+        panel.showModal();
+      }
+
+      // Initial state for internal panel details
+      if (closeBtn) gsap.set(closeBtn, { autoAlpha: 0, scale: 0.75 });
+      const riseItems = [panelBody, tracklist, featuredSong, spotifyBtn].filter(Boolean);
+      if (riseItems.length) gsap.set(riseItems, { autoAlpha: 0, y: 18 });
+    });
+
+    if (vt && typeof vt.ready?.then === "function") {
+      vt.ready.then(animateInternalContent).catch(() => {});
+    } else {
+      animateInternalContent();
     }
 
-    if (closeBtn) {
-      gsap.fromTo(
-        closeBtn,
-        { opacity: 0, scale: 0.75 },
-        { opacity: 1, scale: 1, duration: 0.35, ease: "back.out(1.5)", delay: 0.16 }
-      );
+    if (vt && typeof vt.finished?.then === "function") {
+      vt.finished.catch(() => {}).then(() => {
+        docEl.classList.remove("mlst-vt", "mlst-vt-open");
+        docEl.style.removeProperty("--mlst-dur");
+        docEl.style.removeProperty("--mlst-r-from");
+        docEl.style.removeProperty("--mlst-r-to");
+
+        setVTName(panel, "");
+        setVTName(panelMedia, "");
+        setVTName(panelTitle, "");
+        panelMetas.forEach((m) => {
+          setVTName(m, "");
+        });
+        rowEl.classList.remove("is-morphing");
+        isTransitioningRef.current = false;
+      });
+    } else {
+      isTransitioningRef.current = false;
     }
   };
 
-  // Close panel and smoothly minimize/morph back into the row
+  // Close panel and smoothly fold/morph back into the clicked row
   const handleClosePanel = () => {
     if (isTransitioningRef.current) return;
     const panel = panelRef.current;
@@ -165,51 +236,121 @@ export default function MorphingAlbumList({
       return;
     }
 
+    const supportsVT =
+      typeof document !== "undefined" &&
+      typeof (document as any).startViewTransition === "function";
+    const isReduced =
+      typeof window !== "undefined" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
     isTransitioningRef.current = true;
-    panel.classList.add("is-closing");
+    const uClose = (duration || 0.55) * 0.8;
 
-    const rowRect = rowEl.getBoundingClientRect();
-    const panelRect = panel.getBoundingClientRect();
-    const deltaX = rowRect.left + rowRect.width / 2 - (panelRect.left + panelRect.width / 2);
-    const deltaY = rowRect.top + rowRect.height / 2 - (panelRect.top + panelRect.height / 2);
-    const scaleX = Math.max(0.18, rowRect.width / panelRect.width);
-    const scaleY = Math.max(0.08, rowRect.height / panelRect.height);
-
-    const mediaCol = panel.querySelector<HTMLElement>(".mlst_panel_media");
-    const contentCol = panel.querySelector<HTMLElement>(".mlst_panel_content");
+    const rowMedia = rowEl.querySelector<HTMLElement>("[data-anm-mlst-media]");
+    const rowTitle = rowEl.querySelector<HTMLElement>("[data-anm-mlst-title]");
+    const rowMetas = Array.from(rowEl.querySelectorAll<HTMLElement>("[data-anm-mlst-meta]"));
+    const panelMedia = panel.querySelector<HTMLElement>("[data-anm-mlst-media]");
+    const panelTitle = panel.querySelector<HTMLElement>("[data-anm-mlst-title]");
+    const panelMetas = Array.from(panel.querySelectorAll<HTMLElement>("[data-anm-mlst-meta]"));
     const closeBtn = panel.querySelector<HTMLElement>(".mlst_close");
+    const panelBody = panel.querySelector<HTMLElement>(".mlst_panel_body");
+    const tracklist = panel.querySelector<HTMLElement>(".disco-tracklist-section");
+    const featuredSong = panel.querySelector<HTMLElement>(".disco-sleeve-featured-card");
+    const spotifyBtn = panel.querySelector<HTMLElement>(".disco-spotify-btn");
 
-    if (contentCol) {
-      gsap.to(contentCol, { opacity: 0, duration: 0.18, ease: "power2.in" });
-    }
-    if (closeBtn) {
-      gsap.to(closeBtn, { opacity: 0, duration: 0.15, ease: "power2.in" });
-    }
-    if (mediaCol) {
-      gsap.to(mediaCol, { opacity: 0.4, duration: 0.25, ease: "power2.in" });
+    if (!supportsVT || isReduced) {
+      gsap.to(panel, {
+        opacity: 0,
+        duration: 0.25,
+        ease: "power2.in",
+        onComplete: () => {
+          if (typeof panel.close === "function") panel.close();
+          rowEl.classList.remove("is-active");
+          setSelectedAlbum(null);
+          activeRowRef.current = null;
+          isTransitioningRef.current = false;
+        },
+      });
+      return;
     }
 
-    gsap.to(panel, {
-      x: deltaX,
-      y: deltaY,
-      scaleX: scaleX,
-      scaleY: scaleY,
-      opacity: 0,
-      duration: (duration || 0.55) * 0.8,
-      ease: "power3.inOut",
-      onComplete: () => {
-        panel.classList.remove("is-closing");
-        if (typeof panel.close === "function") panel.close();
-        gsap.set(panel, { clearProps: "all" });
-        if (contentCol) gsap.set(contentCol, { clearProps: "all" });
-        if (mediaCol) gsap.set(mediaCol, { clearProps: "all" });
-        if (closeBtn) gsap.set(closeBtn, { clearProps: "all" });
-        rowEl.classList.remove("is-active");
+    // Immediately fade out internal elements so morphing card is pristine
+    const fadeOutItems = [closeBtn, panelBody, tracklist, featuredSong, spotifyBtn].filter(Boolean);
+    if (fadeOutItems.length) {
+      gsap.to(fadeOutItems, {
+        autoAlpha: 0,
+        duration: 0.15,
+        ease: "power2.in",
+      });
+    }
+
+    // Set names on the panel elements
+    setVTName(panel, "mlst-surface");
+    setVTName(panelMedia, "mlst-media");
+    setVTName(panelTitle, "mlst-title");
+    panelMetas.forEach((m, idx) => {
+      setVTName(m, `mlst-meta-${idx}`);
+    });
+
+    rowEl.classList.add("is-morphing");
+
+    const docEl = document.documentElement;
+    docEl.style.setProperty("--mlst-dur", `${uClose}s`);
+    docEl.style.setProperty("--mlst-r-from", "14px");
+    docEl.style.setProperty("--mlst-r-to", "14px");
+    docEl.classList.add("mlst-vt", "mlst-vt-close");
+
+    const vt = (document as any).startViewTransition(() => {
+      // Clear panel names
+      setVTName(panel, "");
+      setVTName(panelMedia, "");
+      setVTName(panelTitle, "");
+      panelMetas.forEach((m) => {
+        setVTName(m, "");
+      });
+
+      // Restore row names
+      setVTName(rowEl, "mlst-surface");
+      setVTName(rowMedia, "mlst-media");
+      setVTName(rowTitle, "mlst-title");
+      rowMetas.forEach((m, idx) => {
+        setVTName(m, `mlst-meta-${idx}`);
+      });
+
+      // Restore row visibility
+      rowEl.classList.remove("is-active");
+
+      // Close modal
+      if (typeof panel.close === "function") {
+        panel.close();
+      }
+    });
+
+    if (vt && typeof vt.finished?.then === "function") {
+      vt.finished.catch(() => {}).then(() => {
+        docEl.classList.remove("mlst-vt", "mlst-vt-close");
+        docEl.style.removeProperty("--mlst-dur");
+        docEl.style.removeProperty("--mlst-r-from");
+        docEl.style.removeProperty("--mlst-r-to");
+
+        setVTName(rowEl, "");
+        setVTName(rowMedia, "");
+        setVTName(rowTitle, "");
+        rowMetas.forEach((m) => {
+          setVTName(m, "");
+        });
+        rowEl.classList.remove("is-morphing");
+
         setSelectedAlbum(null);
         activeRowRef.current = null;
         isTransitioningRef.current = false;
-      },
-    });
+      });
+    } else {
+      rowEl.classList.remove("is-morphing");
+      setSelectedAlbum(null);
+      activeRowRef.current = null;
+      isTransitioningRef.current = false;
+    }
   };
 
   // Close when clicking outside panel inner card

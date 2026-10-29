@@ -2,7 +2,7 @@
 
 import React, { useRef } from "react";
 import ExpandingStrip from "@/components/ExpandingStrip";
-import { BlockReveal, AnimatedTitle } from "@/components/TextAnimations";
+import RectangleTextReveal from "@/components/RectangleTextReveal";
 import TighteningWordLines from "@/components/TighteningWordLines";
 import ScrollPathJourney from "@/components/ScrollPathJourney";
 import { BIO_SECTIONS } from "./bioData";
@@ -72,28 +72,45 @@ export default function BiografiaClient() {
       {/* 1. HERO HEADER */}
       <div className="bio-container">
         <header className="biografia-hero">
-          <BlockReveal color="#FF0000" direction="lr" delay={100} duration={650}>
-            <h1 className="biografia-hero__title">
-              Miquel Gil: el cantador que no deixa d'explorar.
-            </h1>
-          </BlockReveal>
+          <RectangleTextReveal
+            lines={[
+              "Miquel Gil:",
+              "el cantador que no deixa d'explorar."
+            ]}
+            color="#FF0000"
+            direction="left"
+            tag="h1"
+            lineClassName="biografia-hero__title"
+            immediate
+            duration={0.9}
+          />
 
-          <BlockReveal color="#111211" direction="lr" delay={250} duration={700}>
-            <p className="biografia-hero__lead">
-              {siteKeyMessage.tagline}. Des de la fundació d'Al Tall el 1975 fins a l'estrena de <em>Viatger</em> (2024), 
-              mig segle d'arrel valenciana, poesia contemporània i exploració sonora sense repetir mai fórmules.
-            </p>
-          </BlockReveal>
+          <RectangleTextReveal
+            lines={[
+              `${siteKeyMessage.tagline}.`,
+              "Des de la fundació d'Al Tall el 1975 fins a l'estrena de Viatger (2024),",
+              "mig segle d'arrel valenciana, poesia contemporània i exploració sonora sense repetir mai fórmules."
+            ]}
+            color="#222222"
+            direction="left"
+            tag="p"
+            lineClassName="biografia-hero__lead"
+            immediate
+            delay={0.25}
+            duration={0.8}
+          />
         </header>
       </div>
 
       {/* 2. SECCIÓ EXPANDING STRIP (100% FULLWIDTH EDGE-TO-EDGE) */}
       <section className="bio-strip-fullwidth" aria-label="Les cinc grans etapes biogràfiques">
         <div className="bio-strip-fullwidth__header">
-          <AnimatedTitle
-            text="CINC POSICIONS, UNA VIDA DE MÚSICA"
-            color="#FFFFFF"
-            className="bio-strip-header__title"
+          <RectangleTextReveal
+            lines={["CINC POSICIONS, UNA VIDA DE MÚSICA"]}
+            color="#FF0000"
+            direction="left"
+            tag="h2"
+            lineClassName="bio-strip-header__title"
           />
           <span className="bio-strip-header__desc">
             Explora les cinc etapes capitals de Miquel Gil passant el cursor o seleccionant cada panell.
@@ -123,10 +140,12 @@ export default function BiografiaClient() {
         <section className="bio-venues-section" aria-label="Escenaris i festivals internacionals">
           <div className="bio-venues__header">
             <span className="bio-venues__kicker">Circuits & Directes</span>
-            <AnimatedTitle
-              text="PRINCIPALS ESCENARIS I FESTIVALS INTERNACIONALS"
-              color="#FFFFFF"
-              className="bio-venues__title"
+            <RectangleTextReveal
+              lines={["PRINCIPALS ESCENARIS I FESTIVALS INTERNACIONALS"]}
+              color="#FF0000"
+              direction="left"
+              tag="h2"
+              lineClassName="bio-venues__title"
             />
             <p className="bio-venues__subtitle">
               De les grans sales simfòniques i teatres emblemàtics del país a referents internacionals de la world music a Europa i Amèrica.

@@ -79,8 +79,12 @@
 }
 
 .mlst_row.is-active {
-  opacity: 0.35;
-  transition: opacity 0.3s ease;
+  visibility: hidden;
+}
+
+.mlst_row.is-morphing {
+  will-change: transform, opacity;
+  pointer-events: none;
 }
 
 /* Row elements */
