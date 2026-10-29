@@ -36,6 +36,41 @@ export default function PillarMenu() {
 
   const timelineRef = useRef<gsap.core.Timeline | null>(null);
 
+  // Audio SFX for menu interaction (UI Menu Click from Epidemic Sound)
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const audio = new Audio("/audio/menu-click.mp3");
+      audio.preload = "auto";
+      audio.volume = 0.65;
+      audioRef.current = audio;
+    }
+  }, []);
+
+  const playMenuSound = useCallback(() => {
+    try {
+      if (typeof window === "undefined") return;
+      if (audioRef.current) {
+        const audio = audioRef.current.cloneNode() as HTMLAudioElement;
+        audio.volume = 0.65;
+        const playPromise = audio.play();
+        if (playPromise !== undefined) {
+          playPromise.catch(() => {});
+        }
+      } else {
+        const audio = new Audio("/audio/menu-click.mp3");
+        audio.volume = 0.65;
+        const playPromise = audio.play();
+        if (playPromise !== undefined) {
+          playPromise.catch(() => {});
+        }
+      }
+    } catch {
+      // Ignore audio errors
+    }
+  }, []);
+
   // Set initial state of ticks
   useEffect(() => {
     if (tick0Ref.current && tick1Ref.current && tick2Ref.current) {
@@ -275,12 +310,13 @@ export default function PillarMenu() {
   }, []);
 
   const toggleMenu = useCallback(() => {
+    playMenuSound();
     if (isOpen) {
       closeMenu();
     } else {
       openMenu();
     }
-  }, [isOpen, closeMenu, openMenu]);
+  }, [isOpen, closeMenu, openMenu, playMenuSound]);
 
   // Close menu when navigating to another route
   useEffect(() => {
@@ -291,8 +327,14 @@ export default function PillarMenu() {
 
   // Support custom window events from external trigger buttons (like mobile header)
   useEffect(() => {
-    const handleOpen = () => openMenu();
-    const handleClose = () => closeMenu();
+    const handleOpen = () => {
+      playMenuSound();
+      openMenu();
+    };
+    const handleClose = () => {
+      playMenuSound();
+      closeMenu();
+    };
     const handleToggle = () => toggleMenu();
 
     window.addEventListener("anm-pillar:open", handleOpen);
@@ -304,18 +346,19 @@ export default function PillarMenu() {
       window.removeEventListener("anm-pillar:close", handleClose);
       window.removeEventListener("anm-pillar:toggle", handleToggle);
     };
-  }, [openMenu, closeMenu, toggleMenu]);
+  }, [openMenu, closeMenu, toggleMenu, playMenuSound]);
 
   // Close on Escape key
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape" && isOpen) {
+        playMenuSound();
         closeMenu();
       }
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isOpen, closeMenu]);
+  }, [isOpen, closeMenu, playMenuSound]);
 
   return (
     <div
@@ -325,7 +368,14 @@ export default function PillarMenu() {
       data-state={isOpen ? "open" : "closed"}
     >
       {/* Backdrop for outside click / dismiss */}
-      <div className="anm-pillar-backdrop" onClick={closeMenu} aria-hidden="true" />
+      <div
+        className="anm-pillar-backdrop"
+        onClick={() => {
+          playMenuSound();
+          closeMenu();
+        }}
+        aria-hidden="true"
+      />
 
       {/* Fixed anchor on screen */}
       <div className="anm-pillar-anchor" data-anm-kit-menu-pillar-anchor>
@@ -364,7 +414,10 @@ export default function PillarMenu() {
                           href={link.href}
                           className={`anm-pillar-row ${isActive ? "is-active" : ""}`}
                           data-anm-kit-menu-pillar-row
-                          onClick={closeMenu}
+                          onClick={() => {
+                            playMenuSound();
+                            closeMenu();
+                          }}
                         >
                           <span
                             className="anm-pillar-numeral"
@@ -392,7 +445,10 @@ export default function PillarMenu() {
                         href={sub.href}
                         className={`anm-pillar-sub ${pathname === sub.href ? "is-active" : ""}`}
                         data-anm-kit-menu-pillar-sub
-                        onClick={closeMenu}
+                        onClick={() => {
+                          playMenuSound();
+                          closeMenu();
+                        }}
                       >
                         {sub.label}
                       </a>
@@ -407,6 +463,7 @@ export default function PillarMenu() {
                     target="_blank"
                     rel="noopener noreferrer"
                     aria-label="Spotify"
+                    onClick={playMenuSound}
                   >
                     <i className="fab fa-spotify" />
                   </a>
@@ -415,6 +472,7 @@ export default function PillarMenu() {
                     target="_blank"
                     rel="noopener noreferrer"
                     aria-label="YouTube"
+                    onClick={playMenuSound}
                   >
                     <i className="fab fa-youtube" />
                   </a>
@@ -423,6 +481,7 @@ export default function PillarMenu() {
                     target="_blank"
                     rel="noopener noreferrer"
                     aria-label="Instagram"
+                    onClick={playMenuSound}
                   >
                     <i className="fab fa-instagram" />
                   </a>
@@ -431,6 +490,7 @@ export default function PillarMenu() {
                     target="_blank"
                     rel="noopener noreferrer"
                     aria-label="Facebook"
+                    onClick={playMenuSound}
                   >
                     <i className="fab fa-facebook-f" />
                   </a>
@@ -439,7 +499,14 @@ export default function PillarMenu() {
 
               {/* Column 2: Feature Image Tile */}
               <div className="anm-pillar-tile" data-anm-kit-menu-pillar-tile>
-                <a href="/discografia" className="anm-pillar-tile-link" onClick={closeMenu}>
+                <a
+                  href="/discografia"
+                  className="anm-pillar-tile-link"
+                  onClick={() => {
+                    playMenuSound();
+                    closeMenu();
+                  }}
+                >
                   <div className="anm-pillar-tile-media" data-anm-kit-menu-pillar-tile-media>
                     <img
                       ref={tileImgRef}
