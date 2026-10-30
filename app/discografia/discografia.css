@@ -63,7 +63,7 @@
 }
 
 .disco-hero-title {
-  font-family: 'Maelstrom', 'Maelstrom Sans', sans-serif;
+  font-family: 'Maelstrom Sans', sans-serif;
   font-size: clamp(56px, 8.4vw, 118px);
   line-height: 0.9;
   letter-spacing: 0.05em;
@@ -1026,9 +1026,9 @@
 }
 
 .playlist-item-index {
-  font-family: 'Maelstrom', 'GRAPHIK', sans-serif;
+  font-family: 'GRAPHIK', sans-serif;
   font-size: 13px;
-  font-weight: 700;
+  font-weight: 500;
   color: #6C706E;
   min-width: 20px;
 }

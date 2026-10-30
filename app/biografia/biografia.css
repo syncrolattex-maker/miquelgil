@@ -40,7 +40,7 @@
 }
 
 .biografia-hero__title {
-  font-family: 'Maelstrom', 'Maelstrom Sans', sans-serif;
+  font-family: 'Maelstrom Sans', sans-serif;
   font-size: clamp(54px, 8.5vw, 120px);
   font-weight: 700;
   line-height: 0.9;
@@ -85,13 +85,13 @@
 }
 
 .bio-strip-header__title {
-  font-family: 'Maelstrom', 'Maelstrom Sans', sans-serif;
+  font-family: 'GRIFINITO L', serif;
   font-size: clamp(34px, 4.5vw, 64px);
-  font-weight: 700;
+  font-weight: 600;
   color: #ffffff;
   margin: 0;
-  letter-spacing: 0.04em;
-  line-height: 0.92;
+  letter-spacing: -0.01em;
+  line-height: 0.95;
   text-transform: uppercase;
 }
 
@@ -303,13 +303,13 @@
 }
 
 .bio-venues__title {
-  font-family: 'Maelstrom', 'Maelstrom Sans', sans-serif;
+  font-family: 'GRIFINITO L', serif;
   font-size: clamp(34px, 4.5vw, 64px);
-  font-weight: 700;
+  font-weight: 600;
   color: #ffffff;
   margin: 0;
-  line-height: 0.92;
-  letter-spacing: 0.04em;
+  line-height: 0.95;
+  letter-spacing: -0.01em;
   text-transform: uppercase;
 }
 

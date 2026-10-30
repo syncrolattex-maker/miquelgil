@@ -158,8 +158,8 @@
 }
 
 .exs_vlabel_num {
-  font-family: 'Maelstrom', 'Maelstrom Sans', 'GRAPHIK', sans-serif;
-  font-size: 17px;
+  font-family: 'GRAPHIK', sans-serif;
+  font-size: 16px;
   font-weight: 700;
   color: var(--exs-red);
 }
@@ -544,8 +544,8 @@
 }
 
 .modal-fita__year {
-  font-family: 'Maelstrom', 'Maelstrom Sans', 'GRAPHIK', sans-serif;
-  font-size: 16px;
+  font-family: 'GRAPHIK', sans-serif;
+  font-size: 15px;
   font-weight: 700;
   color: var(--exs-red);
 }
