@@ -1,4 +1,4 @@
-import { BlockReveal, AnimatedTitle } from "@/components/TextAnimations";
+import { BlockReveal, AnimatedTitle, AnimatedDivider } from "@/components/TextAnimations";
 import AnnnimateVideoPlayer from "@/components/AnnnimateVideoPlayer";
 
 export const metadata = { title: "Inici — Miquel Gil" };
@@ -20,7 +20,7 @@ export default function Start() {
         </div>
 
         <div className="start-section-nineta__content">
-          <BlockReveal color="#FF0000" direction="lr" delay={100} duration={650}>
+          <BlockReveal color="#FF0000" direction="lr" delay={100} duration={650} fullWidth>
             <p className="start-desc--white">
               Per fi, ací teniu el Clip de Nineta. Un Western modern ambientat en
               un paissatge albuferenc crepuscular i distòpic. Una lluita interna que
@@ -44,7 +44,7 @@ export default function Start() {
       {/* SECCIÓ 2: VIATGER (Fons Clar / Beige) */}
       <section className="start-section-viatger">
         <div className="start-section-viatger__content">
-          <BlockReveal color="#FF0000" direction="lr" delay={150} duration={650}>
+          <BlockReveal color="#FF0000" direction="lr" delay={150} duration={650} fullWidth>
             <p className="start-desc--black">
               No és només un àlbum; és una crida a l'ànima, una invitació a
               explorar nous horitzons i a abraçar l'essència de la vida. A través
@@ -73,17 +73,39 @@ export default function Start() {
               href="https://open.spotify.com/intl-es/album/0nsEwLdHyVm27hZtQihPTl"
               target="_blank"
               rel="noopener noreferrer"
+              className="start-album-link"
+              title="Escolta el disc Viatger a Spotify"
             >
-              <img
-                decoding="async"
-                src="/images/portadaCD.webp"
-                alt="Portada disc Viatger"
-              />
+              <div className="start-album-wrapper">
+                {/* Vinyl record disc that slides out on hover */}
+                <div className="start-vinyl-disc" aria-hidden="true">
+                  <div className="start-vinyl-grooves" />
+                  <div className="start-vinyl-label">
+                    <span className="start-vinyl-center" />
+                  </div>
+                </div>
+
+                <div className="start-album-sleeve">
+                  <img
+                    decoding="async"
+                    src="/images/portadaCD.webp"
+                    alt="Portada disc Viatger de Miquel Gil"
+                  />
+                  <div className="start-album-glare" />
+                </div>
+              </div>
             </a>
           </BlockReveal>
-          <p className="start-cover-sub">
-            Pots escoltar el nou Lp a les principals xarxes
-          </p>
+
+          <a
+            href="https://open.spotify.com/intl-es/album/0nsEwLdHyVm27hZtQihPTl"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="start-cover-sub"
+          >
+            <span>Pots escoltar el nou LP a les principals plataformes</span>
+            <span className="start-cover-sub__arrow" aria-hidden="true">&rarr;</span>
+          </a>
         </div>
       </section>
 
@@ -113,22 +135,20 @@ export default function Start() {
               text="AL"
               color="#000000"
               className="start-big-title--black"
-              delay={200}
+              delay={180}
             />
             <AnimatedTitle
               as="p"
               text="PRINCIPAL"
               color="#000000"
               className="start-big-title--black"
-              delay={350}
+              delay={320}
             />
           </div>
 
-          <BlockReveal color="#F8EFE6" direction="lr" delay={250} duration={500}>
-            <div className="start-divider-red" />
-          </BlockReveal>
+          <AnimatedDivider color="#FF0000" delay={250} />
 
-          <BlockReveal color="#FF0000" direction="lr" delay={300} duration={700}>
+          <BlockReveal color="#FF0000" direction="lr" delay={300} duration={700} fullWidth>
             <div className="start-desc-stack">
               <p className="start-desc--black">
                 El passat dissabte, van viure una nit inoblidable al Teatre

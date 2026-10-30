@@ -9,6 +9,7 @@ interface BlockRevealProps {
   delay?: number;
   duration?: number;
   className?: string;
+  fullWidth?: boolean;
 }
 
 export function BlockReveal({
@@ -18,6 +19,7 @@ export function BlockReveal({
   delay = 0,
   duration = 600,
   className = "",
+  fullWidth = false,
 }: BlockRevealProps) {
   const [revealed, setRevealed] = useState(false);
   const [animating, setAnimating] = useState(false);
@@ -55,13 +57,19 @@ export function BlockReveal({
     <div
       ref={containerRef}
       className={`block-reveal-wrapper ${className}`}
-      style={{ position: "relative", display: "inline-block", overflow: "hidden" }}
+      style={{
+        position: "relative",
+        display: fullWidth ? "block" : "inline-block",
+        width: fullWidth ? "100%" : "auto",
+        overflow: revealed ? "visible" : "hidden",
+      }}
     >
       <div
         className="block-reveal-content"
         style={{
           opacity: revealed ? 1 : 0,
-          transition: "opacity 0.05s ease",
+          transform: revealed ? "translateY(0)" : "translateY(8px)",
+          transition: "opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1), transform 0.5s cubic-bezier(0.16, 1, 0.3, 1)",
         }}
       >
         {children}
@@ -139,6 +147,10 @@ export function AnimatedTitle({
             display: "inline-block",
             whiteSpace: "nowrap",
             marginRight: "0.25em",
+            paddingTop: "0.08em",
+            paddingBottom: "0.08em",
+            marginTop: "-0.08em",
+            marginBottom: "-0.08em",
           }}
         >
           {word.split("").map((char, cIdx) => (
@@ -147,11 +159,11 @@ export function AnimatedTitle({
               className="qodef-e-char-holder"
               style={{
                 display: "inline-block",
-                transform: visible ? "translateY(0)" : "translateY(110%)",
+                transform: visible ? "translateY(0)" : "translateY(115%)",
                 opacity: visible ? 1 : 0,
-                transition: `transform 0.65s cubic-bezier(0.25, 0.46, 0.45, 0.94) ${
-                  (wIdx * 5 + cIdx) * 35
-                }ms, opacity 0.5s ease ${(wIdx * 5 + cIdx) * 35}ms`,
+                transition: `transform 0.65s cubic-bezier(0.16, 1, 0.3, 1) ${
+                  (wIdx * 5 + cIdx) * 26
+                }ms, opacity 0.45s ease ${(wIdx * 5 + cIdx) * 26}ms`,
                 willChange: "transform, opacity",
               }}
             >
@@ -161,5 +173,46 @@ export function AnimatedTitle({
         </span>
       ))}
     </Tag>
+  );
+}
+
+export function AnimatedDivider({
+  color = "#FF0000",
+  delay = 250,
+  className = "",
+}: {
+  color?: string;
+  delay?: number;
+  className?: string;
+}) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [drawn, setDrawn] = useState(false);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setTimeout(() => {
+            setDrawn(true);
+          }, delay);
+          observer.unobserve(el);
+        }
+      },
+      { threshold: 0.15 }
+    );
+
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [delay]);
+
+  return (
+    <div
+      ref={ref}
+      className={`start-divider-red ${drawn ? "is-drawn" : ""} ${className}`}
+      style={{ backgroundColor: color }}
+    />
   );
 }
