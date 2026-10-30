@@ -63,14 +63,25 @@
 }
 
 .disco-hero-title {
-  font-family: 'GRIFINITO L', serif;
-  font-size: clamp(54px, 7.5vw, 108px);
-  line-height: 0.92;
-  letter-spacing: -0.02em;
+  font-family: 'Coign', sans-serif;
+  font-size: clamp(88px, 14.5vw, 195px);
+  line-height: 0.82;
+  letter-spacing: -0.04em;
   color: #000000;
+  margin: 0 0 16px 0;
+  font-weight: normal;
+  text-transform: uppercase;
+}
+
+.disco-hero-subtitle {
+  font-family: 'GRIFINITO L', serif;
+  font-size: clamp(26px, 3.4vw, 44px);
+  line-height: 1.14;
+  letter-spacing: -0.02em;
+  color: #111211;
   margin: 0 0 24px 0;
   font-weight: 400;
-  text-transform: uppercase;
+  max-width: 960px;
 }
 
 .disco-hero-lead {
@@ -830,7 +841,14 @@
   }
 
   .disco-hero-title {
-    font-size: clamp(48px, 12vw, 68px);
+    font-size: clamp(76px, 20vw, 110px);
+    line-height: 0.85;
+    margin-bottom: 12px;
+  }
+
+  .disco-hero-subtitle {
+    font-size: clamp(20px, 5.5vw, 26px);
+    line-height: 1.2;
     margin-bottom: 18px;
   }
 

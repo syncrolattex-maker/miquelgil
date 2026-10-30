@@ -54,8 +54,10 @@ export default function DiscografiaClient() {
             Catàleg Oficial // 1996 — 2024
           </span>
           <h1 className="disco-hero-title">Discografia</h1>
+          <p className="disco-hero-subtitle">
+            Vint-i-tres treballs discogràfics propis · Mig segle d&apos;arrel viva i fusió mediterrània
+          </p>
           <p className="disco-hero-lead">
-            Vint-i-tres treballs discogràfics propis i més de cent col·laboracions.
             Un viatge sonor per la música d&apos;arrel, la cançó d&apos;autor i la fusió
             mediterrània contemporània: de la polifonia tradicional al jazz, el flamenc
             i la música àrab culta.

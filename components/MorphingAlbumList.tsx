@@ -45,6 +45,20 @@ const ALBUM_COVERS: Record<string, string> = {
   "terminal-sur": "/images/disco_1.jpg",
 };
 
+// Poetic subtitles in Grifinito for each album
+const ALBUM_SUBTITLES: Record<string, string> = {
+  "viatger": "Un viatge vital ininterromput de saviesa, memòria i transformació",
+  "geometries": "La celebració poètica de Casasses, Estellés i Anna Montero",
+  "marcianes": "Cançó d'autor i maduresa amb una profunda personalitat mediterrània",
+  "jazz-manel-camp": "Fusió lliure de jazz contemporani i transmissió oral d'arrel",
+  "eixos": "Cruce de camins i sonoritats del món amb producció de Borja Penalba",
+  "en-concert": "L'energia crua i la complicitat compartida amb el públic en directe",
+  "kata": "L'arrel tradicional més profunda portada al World Music Charts Europe",
+  "organic": "L'obra fundacional que va marcar un abans i un després en la música d'arrel",
+  "buscando-tu-olor": "Primer treball en solitari amb el seu nom i inici d'un camí propi",
+  "terminal-sur": "Pioner absolut del mestissatge i la fusió sonora mediterrània",
+};
+
 // Helper to safely set and remove view-transition-name
 function setVTName(el: HTMLElement | null | undefined, name: string) {
   if (!el) return;
@@ -577,6 +591,11 @@ export default function MorphingAlbumList({
                 <h2 className="mlst_panel_title" data-anm-mlst-title>
                   {selectedAlbum.title}
                 </h2>
+                {ALBUM_SUBTITLES[selectedAlbum.slug] && (
+                  <p className="mlst_panel_subtitle">
+                    «{ALBUM_SUBTITLES[selectedAlbum.slug]}»
+                  </p>
+                )}
                 <div className="mlst_panel_metas" data-anm-mlst-metas>
                   <span className="disco-meta-pill disco-meta-pill--year" data-anm-mlst-meta>
                     {selectedAlbum.year}

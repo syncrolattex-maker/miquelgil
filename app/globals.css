@@ -40,6 +40,26 @@
        url('/fonts/grifinito.ttf') format('truetype');
 }
 
+@font-face {
+  font-family: 'Grifinito';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/grifinito.woff2') format('woff2'),
+       url('/fonts/grifinito.woff') format('woff'),
+       url('/fonts/grifinito.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Grifinito';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('/fonts/grifinito.woff2') format('woff2'),
+       url('/fonts/grifinito.woff') format('woff'),
+       url('/fonts/grifinito.ttf') format('truetype');
+}
+
 /* 3. GRAPHIK — Tipografia editorial, cos de text, UI i navegació */
 @font-face {
   font-family: 'GRAPHIK';

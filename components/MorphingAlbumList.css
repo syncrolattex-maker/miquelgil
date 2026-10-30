@@ -109,10 +109,12 @@
 
 .mlst_title {
   justify-self: start;
-  font-family: var(--font-grifinito), Georgia, serif;
-  font-size: 26px;
-  font-weight: 500;
-  letter-spacing: -0.015em;
+  font-family: 'Coign', sans-serif;
+  font-size: clamp(26px, 2.5vw, 36px);
+  font-weight: normal;
+  letter-spacing: -0.025em;
+  text-transform: uppercase;
+  line-height: 0.98;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -131,6 +133,10 @@
 
 .mlst_meta_discipline {
   justify-self: start;
+  font-family: 'GRIFINITO L', serif;
+  font-size: 16px;
+  font-style: italic;
+  letter-spacing: -0.01em;
   color: var(--mlst-soft);
 }
 
@@ -302,13 +308,24 @@
 }
 
 .mlst_panel_title {
-  font-family: var(--font-grifinito), Georgia, serif;
-  font-size: clamp(38px, 4.5vw, 54px);
-  font-weight: 500;
-  letter-spacing: -0.025em;
-  line-height: 1.05;
+  font-family: 'Coign', sans-serif;
+  font-size: clamp(52px, 6.8vw, 88px);
+  font-weight: normal;
+  letter-spacing: -0.035em;
+  line-height: 0.86;
   color: var(--mlst-fg);
+  text-transform: uppercase;
   margin: 0;
+}
+
+.mlst_panel_subtitle {
+  font-family: 'GRIFINITO L', serif;
+  font-size: clamp(21px, 2.5vw, 30px);
+  line-height: 1.18;
+  letter-spacing: -0.015em;
+  color: #222222;
+  margin: 2px 0 6px 0;
+  font-weight: 400;
 }
 
 .mlst_panel_metas {
@@ -563,7 +580,7 @@
   }
 
   .mlst_title {
-    font-size: 20px;
+    font-size: 27px;
   }
 
   .mlst_meta_discipline {
@@ -589,6 +606,12 @@
   }
 
   .mlst_panel_title {
-    font-size: 32px;
+    font-size: clamp(48px, 12vw, 64px);
+    line-height: 0.88;
+  }
+
+  .mlst_panel_subtitle {
+    font-size: clamp(20px, 5vw, 24px);
+    line-height: 1.2;
   }
 }
