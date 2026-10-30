@@ -22,12 +22,15 @@ Structured, editorial, physical tribut (skeuomorphism modern de vinils de 12 pol
 - **Display monumental**:
   - `font.family.display`: `'Maelstrom Sans', -apple-system, sans-serif`
   - *Regla d'or*: Exclusivament per a encapçalaments de secció gegants, xifres d'arxiu i monogrames heroics. Mai en paràgrafs ni blocs de lectura.
-- **Editorial poètic i literari**:
-  - `font.family.editorial`: `'GRIFINITO L', Georgia, 'Times New Roman', serif`
-  - *Regla d'or*: Títols d'àlbums (*Viatger*, *Geometries*, *Orgànic*, *Katà*), poesia musicada (Estellés, Casasses), descripcions líriques i cites crítiques.
-- **Micro-tipografia, UI i lectura tècnica**:
-  - `font.family.primary`: `'GRAPHIK', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`
-  - *Regla d'or*: Micro-metadades en caixes altes (`uppercase`) amb tracking obert, navegació, fitxes tècniques, botons i cos general.
+- **Micro-tipografia, UI i lectura tècnica primària**:
+  - `font.family.primary`: `'PP Neue Montreal', 'Ppneuemontreal', 'GRAPHIK', Arial, sans-serif` (`/fonts/PPNeueMontreal-Medium.woff2`)
+  - *Regla d'or*: Tipografia principal del sistema A24 / Miquel Gil: micro-metadades en caixes altes (`uppercase`) amb tracking obert, navegació de capítols, fitxes tècniques, botons i cos general.
+- **Editorial poètic i literari d'arrel**:
+  - `font.family.editorial`: `'PP Eiko', 'GRIFINITO L', Georgia, 'Times New Roman', serif` (`/fonts/PPEiko-Regular.woff2`)
+  - *Regla d'or*: Títols d'àlbums (*Viatger*, *Geometries*, *Orgànic*, *Katà*), poesia musicada (Estellés, Casasses, Montero), descripcions líriques i cites crítiques.
+- **Display històric d'arxiu i museu**:
+  - `font.family.archive`: `'PP Museum', 'GRIFINITO L', serif` (`/fonts/PPMuseum-Regular.woff2`)
+  - *Regla d'or*: Encapçalaments de contraportada de vinil, catalogació d'institucions i marques patrimonials.
 - **Codis i catalogació monoespaiada**:
   - `font.family.mono`: `ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace`
   - *Regla d'or*: Codis de matriu (`MG-08 // STEREO`), temporitzadors (`04:07`) i codis de barres.

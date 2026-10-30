@@ -8,7 +8,7 @@
   width: 100%;
   background-color: #000000;
   color: #FFFFFF;
-  font-family: 'GRAPHIK', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-family: 'PP Neue Montreal', 'Ppneuemontreal', 'GRAPHIK', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   overflow-x: hidden;
 }
 
@@ -291,7 +291,7 @@
 }
 
 .start-review-quote .quote-text {
-  font-family: 'GRIFINITO L', Georgia, serif;
+  font-family: 'PP Eiko', 'GRIFINITO L', Georgia, serif;
   font-size: 18px;
   line-height: 1.35;
   color: #E5E7E6;
@@ -383,9 +383,9 @@
 
 .start-desc--white {
   color: #FFFFFF;
-  font-family: "GRIFINITO L", Georgia, "Times New Roman", serif;
+  font-family: 'PP Eiko', "GRIFINITO L", Georgia, "Times New Roman", serif;
   font-size: clamp(22px, 2.3vw, 34px);
-  font-weight: 600;
+  font-weight: 400;
   font-style: normal;
   line-height: 1.25;
   letter-spacing: 0.02em;
@@ -448,9 +448,9 @@
 
 .start-desc--black {
   color: #000000;
-  font-family: "GRIFINITO L", Georgia, "Times New Roman", serif;
+  font-family: 'PP Eiko', "GRIFINITO L", Georgia, "Times New Roman", serif;
   font-size: clamp(22px, 2.3vw, 34px);
-  font-weight: 600;
+  font-weight: 400;
   font-style: normal;
   line-height: 1.25;
   letter-spacing: 0.02em;
@@ -723,8 +723,8 @@
 }
 
 .start-back-title {
-  font-family: 'Maelstrom Sans', sans-serif;
-  font-size: 13px;
+  font-family: 'PP Museum', 'Maelstrom Sans', sans-serif;
+  font-size: 13.5px;
   font-weight: 700;
   letter-spacing: 0.08em;
 }

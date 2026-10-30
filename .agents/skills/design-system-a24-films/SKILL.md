@@ -16,7 +16,10 @@ Deliver implementation-ready design-system guidance for A24 — Films and inspir
 
 ## Style Foundations
 - **Visual style**: Structured, accessible, physical-tribute, implementation-first
-- **Main font stack**: `font.family.primary=Ppneuemontreal, Graphik, Arial, sans-serif`, `font.size.base=16px`, `font.weight.base=500`, `font.lineHeight.base=22.4px`
+- **Main font stack**: `font.family.primary=PP Neue Montreal, Ppneuemontreal, Arial, sans-serif` (`PPNeueMontreal-Medium.woff2`), `font.size.base=16px`, `font.weight.base=500`, `font.lineHeight.base=22.4px`
+- **Editorial font stack**: `font.family.editorial=PP Eiko, GRIFINITO L, Georgia, serif` (`PPEiko-Regular.woff2`)
+- **Archive font stack**: `font.family.archive=PP Museum, serif` (`PPMuseum-Regular.woff2`)
+- **Monumental display**: `font.family.display=Maelstrom Sans, sans-serif`
 - **Typography scale**: `font.size.xs=10px`, `font.size.sm=16px`, `font.size.md=18px`, `font.size.lg=28px`, `font.size.xl=40px`, `font.size.2xl=160px`
 - **Color palette**: `color.text.primary=#000000`, `color.surface.muted=#f2f2f2`, `color.accent.visceral=#E20000`
 - **Spacing scale**: `space.1=8px`, `space.2=16px`, `space.3=24px`, `space.4=32px`
