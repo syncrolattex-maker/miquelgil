@@ -1,0 +1,1272 @@
+/* ============================================================
+   START ARCHIVE INTERACTIVE EXPERIENCE (DESIGN.md)
+   Miquel Gil — Arxiu Sonor i Discogràfic Interactiu
+   ============================================================ */
+
+.start-archive {
+  position: relative;
+  width: 100%;
+  background-color: #000000;
+  color: #FFFFFF;
+  font-family: 'GRAPHIK', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  overflow-x: hidden;
+}
+
+/* ============================================================
+   1. HEADER MINIMALISTA D'ARXIU (A24 ARCHIVE HEADER)
+   ============================================================ */
+.start-archive-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px clamp(20px, 4vw, 48px);
+  background: rgba(10, 10, 10, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  box-sizing: border-box;
+}
+
+.start-archive-header__brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.start-archive-header__title {
+  font-family: 'Maelstrom Sans', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: #FFFFFF;
+}
+
+.start-archive-header__sep {
+  color: #E20000;
+  font-weight: 700;
+  font-size: 13px;
+}
+
+.start-archive-header__sub {
+  font-family: 'GRAPHIK', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  color: #8E9290;
+  text-transform: uppercase;
+}
+
+.start-archive-header__nav {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.start-archive-header__pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #A5A9A7;
+  font-family: 'GRAPHIK', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease, transform 0.15s ease;
+}
+
+.start-archive-header__pill:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #FFFFFF;
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
+.start-archive-header__pill:active {
+  transform: scale(0.96);
+}
+
+.start-archive-header__pill.is-active {
+  background: #E20000;
+  border-color: #E20000;
+  color: #FFFFFF;
+  box-shadow: 0 0 14px rgba(226, 0, 0, 0.4);
+}
+
+.start-pill-num {
+  font-size: 9.5px;
+  opacity: 0.8;
+  font-family: monospace;
+}
+
+.start-audio-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  color: #FFFFFF;
+  font-family: 'GRAPHIK', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease;
+}
+
+.start-audio-btn:hover {
+  background: rgba(226, 0, 0, 0.15);
+  border-color: #E20000;
+  color: #FFFFFF;
+}
+
+.start-audio-btn:active {
+  transform: scale(0.96);
+}
+
+.start-audio-btn.is-playing {
+  background: #E20000;
+  border-color: #E20000;
+  box-shadow: 0 0 14px rgba(226, 0, 0, 0.5);
+}
+
+.start-audio-bars {
+  display: inline-flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 12px;
+}
+
+.start-audio-bars .bar {
+  width: 2px;
+  background-color: currentColor;
+  border-radius: 1px;
+  height: 4px;
+}
+
+.start-audio-btn.is-playing .bar-1 {
+  animation: audioWave 0.8s ease-in-out infinite alternate;
+}
+.start-audio-btn.is-playing .bar-2 {
+  animation: audioWave 0.6s ease-in-out infinite alternate 0.2s;
+}
+.start-audio-btn.is-playing .bar-3 {
+  animation: audioWave 0.9s ease-in-out infinite alternate 0.4s;
+}
+
+@keyframes audioWave {
+  0% { height: 3px; }
+  100% { height: 12px; }
+}
+
+/* ============================================================
+   ARCHIVE BADGES & METADATA ROWS
+   ============================================================ */
+.start-badge-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.start-archive-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.12);
+  color: #FFFFFF;
+  font-family: 'GRAPHIK', sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.start-archive-badge--red {
+  background: #E20000;
+  color: #FFFFFF;
+}
+
+.start-archive-tag {
+  font-family: 'GRAPHIK', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  color: #8E9290;
+  text-transform: uppercase;
+}
+
+.start-archive-tag--dark {
+  color: #555A57;
+}
+
+.start-chapter-indicator {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  margin-bottom: 18px;
+}
+
+.start-chapter-index {
+  font-family: 'Maelstrom Sans', sans-serif;
+  font-size: 26px;
+  font-weight: 700;
+  color: #E20000;
+  line-height: 1;
+}
+
+.start-chapter-total {
+  font-family: 'GRAPHIK', sans-serif;
+  font-size: 13px;
+  color: #6C716E;
+  font-weight: 600;
+}
+
+.start-chapter-title {
+  font-family: 'GRAPHIK', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: #A5A9A7;
+  text-transform: uppercase;
+  margin-left: 8px;
+}
+
+.start-chapter-indicator--dark .start-chapter-title {
+  color: #555A57;
+}
+
+.start-meta-credits-block {
+  margin-bottom: 20px;
+}
+
+.start-credits-label {
+  display: block;
+  font-family: 'GRAPHIK', sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: #8E9290;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+
+.start-meta-credits-block--dark .start-credits-label {
+  color: #6C716E;
+}
+
+.start-review-quote {
+  position: relative;
+  margin-top: 28px;
+  padding: 16px 20px;
+  background: rgba(255, 255, 255, 0.04);
+  border-left: 2px solid #E20000;
+  border-radius: 0 8px 8px 0;
+}
+
+.start-review-quote--dark {
+  background: rgba(0, 0, 0, 0.04);
+  border-left-color: #000000;
+}
+
+.start-review-quote .quote-mark {
+  position: absolute;
+  top: -6px;
+  left: 10px;
+  font-family: 'GRIFINITO L', Georgia, serif;
+  font-size: 40px;
+  color: rgba(226, 0, 0, 0.35);
+  line-height: 1;
+  pointer-events: none;
+}
+
+.start-review-quote .quote-text {
+  font-family: 'GRIFINITO L', Georgia, serif;
+  font-size: 18px;
+  line-height: 1.35;
+  color: #E5E7E6;
+  font-style: italic;
+  margin: 0;
+}
+
+.start-review-quote--dark .quote-text {
+  color: #222524;
+}
+
+.start-review-quote .quote-author {
+  display: block;
+  font-family: 'GRAPHIK', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: #E20000;
+  margin-top: 8px;
+  text-transform: uppercase;
+}
+
+/* ============================================================
+   SECCIÓ 1: NINETA (Fons Negre Sutge)
+   ============================================================ */
+.start-section-nineta {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  background-color: #000000;
+  padding-top: 80px;
+  box-sizing: border-box;
+}
+
+.start-section-nineta__video {
+  width: 56%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: clamp(24px, 4vw, 48px) clamp(20px, 3vw, 40px) clamp(24px, 4vw, 48px) clamp(80px, 7vw, 110px);
+  box-sizing: border-box;
+}
+
+.start-section-nineta__video .video-box {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  max-width: 860px;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 24px 60px -12px rgba(0, 0, 0, 0.9), 0 0 50px -10px rgba(226, 0, 0, 0.16);
+  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.5s ease;
+}
+
+.start-section-nineta__video .video-box:hover {
+  transform: translateY(-4px) scale(1.008);
+  box-shadow: 0 32px 75px -12px rgba(0, 0, 0, 0.95), 0 0 65px -5px rgba(226, 0, 0, 0.28);
+}
+
+.start-video-metadata {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 14px;
+  font-family: 'GRAPHIK', sans-serif;
+  font-size: 11px;
+  color: #6C716E;
+  letter-spacing: 0.05em;
+}
+
+.start-video-metadata strong {
+  color: #A5A9A7;
+  font-weight: 700;
+  margin-right: 4px;
+}
+
+.start-meta-sep {
+  color: rgba(255, 255, 255, 0.15);
+}
+
+.start-section-nineta__content {
+  width: 44%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 40px 60px 40px 40px;
+  box-sizing: border-box;
+}
+
+.start-desc--white {
+  color: #FFFFFF;
+  font-family: "GRIFINITO L", Georgia, "Times New Roman", serif;
+  font-size: clamp(22px, 2.3vw, 34px);
+  font-weight: 600;
+  font-style: normal;
+  line-height: 1.25;
+  letter-spacing: 0.02em;
+  max-width: 54ch;
+  text-wrap: balance;
+  margin: 0 0 16px 0;
+}
+
+.start-credits--white {
+  color: #D2D6D4;
+  font-family: "GRAPHIK", sans-serif;
+  font-size: clamp(13px, 1vw, 15px);
+  font-weight: 400;
+  line-height: 1.5;
+  letter-spacing: 0.02em;
+  margin: 0;
+}
+
+.start-big-title--red {
+  color: #FF0000;
+  font-family: 'Maelstrom Sans', sans-serif;
+  font-size: clamp(52px, 7vw, 92px);
+  line-height: 0.88;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  margin: 16px 0 0 0;
+  text-transform: uppercase;
+  white-space: nowrap;
+  transition: letter-spacing 0.3s cubic-bezier(0.16, 1, 0.3, 1), text-shadow 0.3s ease;
+  cursor: default;
+}
+
+.start-big-title--red:hover {
+  letter-spacing: 0.055em;
+  text-shadow: 0 0 28px rgba(255, 0, 0, 0.35);
+}
+
+/* ============================================================
+   SECCIÓ 2: VIATGER (Fons Paper Cru // 3D Interactive Vinyl)
+   ============================================================ */
+.start-section-viatger {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  background-color: #F8F0E6;
+  padding: 80px 0;
+  box-sizing: border-box;
+  color: #000000;
+}
+
+.start-section-viatger__content {
+  width: 48%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 40px 40px 40px 60px;
+  box-sizing: border-box;
+}
+
+.start-desc--black {
+  color: #000000;
+  font-family: "GRIFINITO L", Georgia, "Times New Roman", serif;
+  font-size: clamp(22px, 2.3vw, 34px);
+  font-weight: 600;
+  font-style: normal;
+  line-height: 1.25;
+  letter-spacing: 0.02em;
+  max-width: 54ch;
+  text-wrap: balance;
+  margin: 0 0 16px 0;
+}
+
+.start-credits--black {
+  color: #333635;
+  font-family: "GRAPHIK", sans-serif;
+  font-size: clamp(13px, 1vw, 15px);
+  font-weight: 500;
+  line-height: 1.5;
+  letter-spacing: 0.02em;
+  margin: 0;
+}
+
+.start-section-viatger__cover {
+  width: 52%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 40px;
+  box-sizing: border-box;
+}
+
+/* ============================================================
+   3D VINYL VISOR & FLIPPER (SKEUOMORPHISM MODERN)
+   ============================================================ */
+.start-vinyl-stage {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  perspective: 1400px;
+  width: 100%;
+  max-width: 540px;
+}
+
+.start-vinyl-flipper {
+  position: relative;
+  width: 100%;
+  max-width: 480px;
+  aspect-ratio: 1 / 1;
+  transform-style: preserve-3d;
+  transition: transform 0.75s cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: pointer;
+}
+
+.start-vinyl-flipper.is-flipped {
+  transform: rotateY(180deg);
+}
+
+.start-card-face {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  border-radius: 6px;
+}
+
+.start-card-face--front {
+  z-index: 2;
+  transform: rotateY(0deg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.start-card-face--back {
+  transform: rotateY(180deg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.start-album-wrapper {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.start-album-sleeve {
+  position: relative;
+  z-index: 2;
+  width: 90%;
+  aspect-ratio: 1 / 1;
+  border-radius: 4px;
+  overflow: hidden;
+  box-shadow: 0 20px 45px -8px rgba(0, 0, 0, 0.28), 0 6px 18px -4px rgba(0, 0, 0, 0.12);
+  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.5s ease;
+  background-color: #111111;
+}
+
+.start-album-sleeve img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.start-album-glare {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.28) 0%, rgba(255, 255, 255, 0) 50%, rgba(0, 0, 0, 0.2) 100%);
+  pointer-events: none;
+  opacity: 0.6;
+  transition: opacity 0.4s ease;
+}
+
+.start-sleeve-spine {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 4px;
+  background: linear-gradient(to right, rgba(0, 0, 0, 0.4), transparent);
+  pointer-events: none;
+}
+
+/* Vinyl Disc that slides out on hover */
+.start-vinyl-disc {
+  position: absolute;
+  top: 5%;
+  right: 0;
+  width: 88%;
+  height: 88%;
+  border-radius: 50%;
+  background: radial-gradient(circle, #1a1a1a 0%, #0d0d0d 65%, #050505 100%);
+  box-shadow: 0 14px 35px rgba(0, 0, 0, 0.4);
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform: translateX(0) rotate(0deg);
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.4s ease;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.start-vinyl-grooves {
+  position: absolute;
+  inset: 8px;
+  border-radius: 50%;
+  background: repeating-radial-gradient(
+    circle,
+    rgba(255, 255, 255, 0.045) 0px,
+    rgba(255, 255, 255, 0.045) 1px,
+    transparent 1px,
+    transparent 4px
+  );
+  pointer-events: none;
+}
+
+.start-vinyl-sheen {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: conic-gradient(
+    from 45deg,
+    rgba(255, 255, 255, 0.08) 0deg,
+    transparent 60deg,
+    rgba(255, 255, 255, 0.08) 120deg,
+    transparent 180deg,
+    rgba(255, 255, 255, 0.08) 240deg,
+    transparent 300deg,
+    rgba(255, 255, 255, 0.08) 360deg
+  );
+  pointer-events: none;
+}
+
+.start-vinyl-label {
+  width: 33%;
+  height: 33%;
+  border-radius: 50%;
+  background: #E20000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5), 0 0 10px rgba(0, 0, 0, 0.4);
+  position: relative;
+  z-index: 2;
+  color: #FFFFFF;
+}
+
+.start-vinyl-label-text {
+  font-family: 'Maelstrom Sans', sans-serif;
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+}
+
+.start-vinyl-center {
+  width: 13px;
+  height: 13px;
+  background: #F8F0E6;
+  border-radius: 50%;
+  box-shadow: inset 0 1px 4px rgba(0, 0, 0, 0.85);
+  margin: 3px 0;
+}
+
+.start-vinyl-label-sub {
+  font-family: monospace;
+  font-size: 6.5px;
+  opacity: 0.8;
+  letter-spacing: 0.05em;
+}
+
+/* Hover on vinyl stage */
+.start-vinyl-stage:hover .start-album-sleeve {
+  transform: rotateY(-6deg) rotateX(2deg) scale(1.02);
+  box-shadow: 0 28px 55px -10px rgba(0, 0, 0, 0.35);
+}
+
+.start-vinyl-stage:hover .start-vinyl-disc {
+  transform: translateX(55px) rotate(45deg);
+  opacity: 1;
+}
+
+.start-vinyl-stage:hover .start-album-glare {
+  opacity: 0.85;
+}
+
+.start-sleeve-hint {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 14px;
+  font-family: 'GRAPHIK', sans-serif;
+  font-size: 11.5px;
+  color: #6C716E;
+  letter-spacing: 0.04em;
+}
+
+.start-sleeve-hint__icon {
+  font-size: 14px;
+  color: #E20000;
+}
+
+/* CARA B: CONTRAPORTADA DE VINIL */
+.start-back-cover {
+  width: 90%;
+  aspect-ratio: 1 / 1;
+  background-color: #F1ECE4;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 4px;
+  box-shadow: 0 20px 45px -8px rgba(0, 0, 0, 0.28);
+  padding: 24px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  color: #111211;
+}
+
+.start-back-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 2px solid #000000;
+  padding-bottom: 8px;
+}
+
+.start-back-title {
+  font-family: 'Maelstrom Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+.start-back-matrix {
+  font-family: monospace;
+  font-size: 11px;
+  font-weight: 700;
+  color: #E20000;
+}
+
+.start-back-tracklist {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin: 12px 0;
+}
+
+.start-side-title {
+  display: block;
+  font-family: 'GRAPHIK', sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: #E20000;
+  margin-bottom: 6px;
+}
+
+.start-track-ol {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.start-track-ol li {
+  display: flex;
+  justify-content: space-between;
+  font-family: 'GRAPHIK', sans-serif;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: #2B2E2C;
+}
+
+.start-track-ol li small {
+  color: #6C716E;
+  font-family: monospace;
+}
+
+.start-back-poetry {
+  border-top: 1px dashed rgba(0, 0, 0, 0.15);
+  padding-top: 10px;
+}
+
+.start-poetry-quote {
+  font-family: 'GRIFINITO L', serif;
+  font-size: 14px;
+  font-style: italic;
+  line-height: 1.35;
+  margin: 0 0 4px 0;
+  color: #444745;
+}
+
+.start-poetry-author {
+  font-family: 'GRAPHIK', sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: #6C716E;
+  text-transform: uppercase;
+}
+
+.start-back-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  border-top: 1px solid rgba(0, 0, 0, 0.12);
+  padding-top: 10px;
+}
+
+.start-back-credits {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-family: 'GRAPHIK', sans-serif;
+  font-size: 9.5px;
+  color: #6C716E;
+}
+
+.start-back-credits small {
+  color: #8E9290;
+}
+
+.start-back-barcode {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.barcode-lines {
+  display: block;
+  width: 65px;
+  height: 22px;
+  background: repeating-linear-gradient(
+    to right,
+    #000 0px,
+    #000 2px,
+    transparent 2px,
+    transparent 3px,
+    #000 3px,
+    #000 5px,
+    transparent 5px,
+    transparent 7px
+  );
+}
+
+.barcode-num {
+  font-family: monospace;
+  font-size: 8px;
+  color: #444;
+}
+
+/* Vinyl Action Pills under the stage */
+.start-vinyl-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 24px;
+}
+
+.start-action-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 18px;
+  border-radius: 30px;
+  background-color: #FFFFFF;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  color: #111211;
+  font-family: 'GRAPHIK', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  text-decoration: none;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease;
+}
+
+.start-action-pill:hover {
+  background-color: #000000;
+  color: #FFFFFF;
+  border-color: #000000;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
+  transform: translateY(-1px);
+}
+
+.start-action-pill:active {
+  transform: scale(0.97);
+}
+
+.start-action-pill--flip {
+  background-color: #E20000;
+  color: #FFFFFF;
+  border-color: #E20000;
+}
+
+.start-action-pill--flip:hover {
+  background-color: #000000;
+  border-color: #000000;
+}
+
+.pill-kbd {
+  font-family: monospace;
+  font-size: 9.5px;
+  background: rgba(255, 255, 255, 0.25);
+  padding: 1px 5px;
+  border-radius: 3px;
+  margin-left: 2px;
+}
+
+.start-action-pill--playing {
+  background-color: #000000;
+  color: #FFFFFF;
+}
+
+.start-action-pill--spotify {
+  background-color: #1DB954;
+  color: #FFFFFF;
+  border-color: #1DB954;
+}
+
+.start-action-pill--spotify:hover {
+  background-color: #179843;
+  border-color: #179843;
+}
+
+/* ============================================================
+   SECCIÓ 3: PRESENTACIÓ AL PRINCIPAL (Concert Documental)
+   ============================================================ */
+.start-section-principal {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  background-color: #000000;
+  box-sizing: border-box;
+}
+
+.start-section-principal__photo {
+  width: 48%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  position: relative;
+  background-color: #000000;
+}
+
+.start-photo-overlay-tag {
+  position: absolute;
+  top: 32px;
+  left: 32px;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.start-section-principal__photo img {
+  width: 100%;
+  height: 100%;
+  min-height: 100vh;
+  object-fit: cover;
+  display: block;
+  transition: transform 1.2s cubic-bezier(0.16, 1, 0.3, 1), filter 0.8s ease;
+  filter: brightness(0.94) contrast(1.05);
+}
+
+.start-section-principal__photo:hover img {
+  transform: scale(1.03);
+  filter: brightness(1) contrast(1.08);
+}
+
+.start-photo-caption {
+  position: absolute;
+  bottom: 24px;
+  left: 32px;
+  z-index: 10;
+  font-family: 'GRAPHIK', sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: rgba(255, 255, 255, 0.7);
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(8px);
+  padding: 4px 10px;
+  border-radius: 4px;
+}
+
+.start-section-principal__content {
+  width: 52%;
+  background-color: #F8F0E6;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: clamp(48px, 6vw, 96px) clamp(32px, 5vw, 80px);
+  box-sizing: border-box;
+  color: #000000;
+}
+
+.start-big-title-stack {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 24px;
+}
+
+.start-big-title--black {
+  color: #000000;
+  font-family: 'Maelstrom Sans', sans-serif;
+  font-size: clamp(52px, 6.5vw, 86px);
+  line-height: 0.9;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  margin: 0;
+  text-transform: uppercase;
+  white-space: nowrap;
+  transition: letter-spacing 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: default;
+}
+
+.start-big-title--black:hover {
+  letter-spacing: 0.055em;
+}
+
+.start-desc-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin: 24px 0 28px 0;
+}
+
+.start-principal-guests {
+  margin-top: 8px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.start-guests-label {
+  display: block;
+  font-family: 'GRAPHIK', sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: #6C716E;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+
+.start-guests-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.start-guest-pill {
+  display: inline-block;
+  font-family: 'GRAPHIK', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  background: rgba(0, 0, 0, 0.06);
+  color: #222524;
+  padding: 4px 10px;
+  border-radius: 14px;
+}
+
+/* ============================================================
+   DOCK INFERIOR D'ARXIU FLOTANT (A24 ARCHIVE BOTTOM DOCK)
+   ============================================================ */
+.start-archive-dock {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 95;
+  width: calc(100% - 40px);
+  max-width: 920px;
+  box-sizing: border-box;
+}
+
+.start-dock-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 18px;
+  border-radius: 40px;
+  background: rgba(12, 12, 12, 0.88);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 16px 40px -8px rgba(0, 0, 0, 0.75);
+}
+
+.start-dock-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.start-dock-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background-color: #E20000;
+  box-shadow: 0 0 8px #E20000;
+}
+
+.start-dock-current {
+  font-family: 'GRAPHIK', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: #FFFFFF;
+  text-transform: uppercase;
+}
+
+.start-dock-nav {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.start-dock-nav-btn {
+  padding: 4px 10px;
+  border-radius: 16px;
+  background: transparent;
+  border: none;
+  color: #8E9290;
+  font-family: 'GRAPHIK', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: color 0.18s ease, background-color 0.18s ease;
+}
+
+.start-dock-nav-btn:hover {
+  color: #FFFFFF;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.start-dock-nav-btn.is-active {
+  color: #FFFFFF;
+  background: rgba(226, 0, 0, 0.25);
+  border: 1px solid rgba(226, 0, 0, 0.5);
+}
+
+.start-dock-shortcuts {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.shortcut-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: 'GRAPHIK', sans-serif;
+  font-size: 10px;
+  color: #8E9290;
+  letter-spacing: 0.04em;
+}
+
+.dock-kbd {
+  font-family: monospace;
+  font-size: 9px;
+  background: rgba(255, 255, 255, 0.14);
+  color: #FFFFFF;
+  padding: 1px 5px;
+  border-radius: 3px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* ============================================================
+   RESPONSIVE DESIGN (Tauletes i Mòbils)
+   ============================================================ */
+@media (max-width: 1024px) {
+  .start-archive-header {
+    padding-left: 84px;
+    padding-right: 18px;
+  }
+
+  .start-section-nineta,
+  .start-section-viatger,
+  .start-section-principal {
+    flex-direction: column;
+    min-height: auto;
+    padding: 70px 24px 90px 24px;
+  }
+
+  .start-section-nineta__video,
+  .start-section-nineta__content,
+  .start-section-viatger__content,
+  .start-section-viatger__cover,
+  .start-section-principal__photo,
+  .start-section-principal__content {
+    width: 100%;
+    padding: 24px 0;
+  }
+
+  .start-section-principal__photo img {
+    min-height: 480px;
+    height: 480px;
+  }
+
+  .start-archive-header__sub,
+  .start-dock-shortcuts {
+    display: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .start-archive-header {
+    padding-left: 76px;
+    padding-right: 14px;
+  }
+
+  .start-archive-header__nav {
+    display: none;
+  }
+
+  .start-audio-text {
+    display: none;
+  }
+
+  .start-audio-btn {
+    padding: 6px 10px;
+  }
+
+  .start-big-title--red,
+  .start-big-title--black {
+    font-size: 42px;
+  }
+
+  .start-dock-inner {
+    padding: 8px 14px;
+  }
+
+  .start-dock-center {
+    display: none;
+  }
+}
+
+/* ============================================================
+   ACCESSIBILITAT: PREFERS-REDUCED-MOTION
+   ============================================================ */
+@media (prefers-reduced-motion: reduce) {
+  .start-vinyl-flipper,
+  .start-vinyl-disc,
+  .start-album-sleeve,
+  .start-section-nineta__video .video-box,
+  .start-section-principal__photo img,
+  .start-big-title--red,
+  .start-big-title--black {
+    transition: opacity 0.2s ease !important;
+    transform: none !important;
+  }
+
+  .start-vinyl-flipper.is-flipped {
+    transform: none !important;
+  }
+
+  .start-card-face--front {
+    display: block;
+  }
+
+  .start-card-face--back {
+    display: block;
+    position: relative;
+    transform: none !important;
+    margin-top: 20px;
+  }
+}
