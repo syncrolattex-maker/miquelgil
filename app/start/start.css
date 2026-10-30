@@ -1,21 +1,23 @@
 /* ============================================================
-   START ARCHIVE INTERACTIVE EXPERIENCE (DESIGN.md)
-   Miquel Gil — Arxiu Sonor i Discogràfic Interactiu
+   A24 — FILMS / MIQUEL GIL: ARXIU SONOR I DISCOGRÀFIC
+   Inspirat en https://a24.raviklaassens.com/
+   Font Stack: PP Neue Montreal, PP Eiko, PP Museum, Maelstrom Sans
    ============================================================ */
 
-.start-archive {
+.a24-start-experience {
   position: relative;
   width: 100%;
   background-color: #000000;
-  color: #FFFFFF;
-  font-family: 'PP Neue Montreal', 'Ppneuemontreal', 'GRAPHIK', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  color: #000000;
+  font-family: 'PP Neue Montreal', 'Ppneuemontreal', 'GRAPHIK', Arial, sans-serif;
   overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
 }
 
 /* ============================================================
-   1. HEADER MINIMALISTA D'ARXIU (A24 ARCHIVE HEADER)
+   1. HEADER MINIMALISTA D'ARXIU (A24 TOP BAR)
    ============================================================ */
-.start-archive-header {
+.a24-header {
   position: fixed;
   top: 0;
   left: 0;
@@ -25,89 +27,95 @@
   align-items: center;
   justify-content: space-between;
   padding: 14px clamp(20px, 4vw, 48px);
-  background: rgba(10, 10, 10, 0.85);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+  background: rgba(14, 15, 14, 0.88);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   box-sizing: border-box;
 }
 
-.start-archive-header__brand {
-  display: flex;
+.a24-brand-btn {
+  display: inline-flex;
   align-items: center;
   gap: 10px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: none;
+  color: inherit;
 }
 
-.start-archive-header__title {
+.a24-brand-title {
   font-family: 'Maelstrom Sans', sans-serif;
-  font-size: 15px;
+  font-size: 15.5px;
   font-weight: 700;
   letter-spacing: 0.08em;
   color: #FFFFFF;
 }
 
-.start-archive-header__sep {
+.a24-brand-sep {
   color: #E20000;
   font-weight: 700;
   font-size: 13px;
 }
 
-.start-archive-header__sub {
-  font-family: 'GRAPHIK', sans-serif;
+.a24-brand-subtitle {
+  font-family: 'PP Neue Montreal', sans-serif;
   font-size: 11px;
-  font-weight: 600;
+  font-weight: 500;
   letter-spacing: 0.12em;
   color: #8E9290;
   text-transform: uppercase;
 }
 
-.start-archive-header__nav {
+.a24-header__nav {
   display: flex;
   align-items: center;
   gap: 8px;
 }
 
-.start-archive-header__pill {
+.a24-nav-pill {
   display: inline-flex;
   align-items: center;
   gap: 6px;
   padding: 6px 14px;
   border-radius: 20px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   color: #A5A9A7;
-  font-family: 'GRAPHIK', sans-serif;
+  font-family: 'PP Neue Montreal', sans-serif;
   font-size: 11px;
-  font-weight: 600;
+  font-weight: 500;
   letter-spacing: 0.06em;
   cursor: pointer;
   transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease, transform 0.15s ease;
 }
 
-.start-archive-header__pill:hover {
-  background: rgba(255, 255, 255, 0.12);
+.a24-nav-pill:hover {
+  background: rgba(255, 255, 255, 0.14);
   color: #FFFFFF;
   border-color: rgba(255, 255, 255, 0.25);
 }
 
-.start-archive-header__pill:active {
+.a24-nav-pill:active {
   transform: scale(0.96);
 }
 
-.start-archive-header__pill.is-active {
+.a24-nav-pill.is-active {
   background: #E20000;
   border-color: #E20000;
   color: #FFFFFF;
-  box-shadow: 0 0 14px rgba(226, 0, 0, 0.4);
+  box-shadow: 0 0 16px rgba(226, 0, 0, 0.45);
 }
 
-.start-pill-num {
+.a24-nav-index {
   font-size: 9.5px;
-  opacity: 0.8;
+  opacity: 0.85;
   font-family: monospace;
 }
 
-.start-audio-btn {
+.a24-audio-toggle {
   display: inline-flex;
   align-items: center;
   gap: 8px;
@@ -116,218 +124,366 @@
   background: rgba(255, 255, 255, 0.06);
   border: 1px solid rgba(255, 255, 255, 0.14);
   color: #FFFFFF;
-  font-family: 'GRAPHIK', sans-serif;
+  font-family: 'PP Neue Montreal', sans-serif;
   font-size: 11px;
-  font-weight: 700;
+  font-weight: 500;
   letter-spacing: 0.08em;
   cursor: pointer;
   transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease;
 }
 
-.start-audio-btn:hover {
-  background: rgba(226, 0, 0, 0.15);
+.a24-audio-toggle:hover {
+  background: rgba(226, 0, 0, 0.18);
   border-color: #E20000;
-  color: #FFFFFF;
 }
 
-.start-audio-btn:active {
+.a24-audio-toggle:active {
   transform: scale(0.96);
 }
 
-.start-audio-btn.is-playing {
+.a24-audio-toggle.is-playing {
   background: #E20000;
   border-color: #E20000;
-  box-shadow: 0 0 14px rgba(226, 0, 0, 0.5);
+  box-shadow: 0 0 16px rgba(226, 0, 0, 0.5);
 }
 
-.start-audio-bars {
+.a24-audio-bars {
   display: inline-flex;
   align-items: flex-end;
-  gap: 2px;
+  gap: 2.5px;
   height: 12px;
 }
 
-.start-audio-bars .bar {
+.a24-bar {
   width: 2px;
   background-color: currentColor;
   border-radius: 1px;
   height: 4px;
 }
 
-.start-audio-btn.is-playing .bar-1 {
-  animation: audioWave 0.8s ease-in-out infinite alternate;
+.a24-audio-toggle.is-playing .a24-bar-1 {
+  animation: a24Wave 0.8s ease-in-out infinite alternate;
 }
-.start-audio-btn.is-playing .bar-2 {
-  animation: audioWave 0.6s ease-in-out infinite alternate 0.2s;
+.a24-audio-toggle.is-playing .a24-bar-2 {
+  animation: a24Wave 0.6s ease-in-out infinite alternate 0.2s;
 }
-.start-audio-btn.is-playing .bar-3 {
-  animation: audioWave 0.9s ease-in-out infinite alternate 0.4s;
+.a24-audio-toggle.is-playing .a24-bar-3 {
+  animation: a24Wave 0.9s ease-in-out infinite alternate 0.4s;
 }
 
-@keyframes audioWave {
+@keyframes a24Wave {
   0% { height: 3px; }
   100% { height: 12px; }
 }
 
 /* ============================================================
-   ARCHIVE BADGES & METADATA ROWS
+   2. THE DISC STAGE (A24 SKEUOMORPHIC PHYSICAL MEDIA CRATE)
    ============================================================ */
-.start-badge-row {
+.a24-stage {
+  position: relative;
+  width: 100%;
+  background-color: #F4F2ED;
+  color: #111211;
+  padding: 120px clamp(24px, 5vw, 80px) 70px clamp(24px, 5vw, 80px);
+  box-sizing: border-box;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.a24-stage-inner {
+  max-width: 1200px;
+  margin: 0 auto;
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 12px;
-  margin-bottom: 20px;
+  text-align: center;
 }
 
-.start-archive-badge {
-  display: inline-block;
-  padding: 4px 10px;
-  border-radius: 4px;
-  background: rgba(255, 255, 255, 0.12);
-  color: #FFFFFF;
-  font-family: 'GRAPHIK', sans-serif;
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-}
-
-.start-archive-badge--red {
-  background: #E20000;
-  color: #FFFFFF;
-}
-
-.start-archive-tag {
-  font-family: 'GRAPHIK', sans-serif;
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.1em;
-  color: #8E9290;
-  text-transform: uppercase;
-}
-
-.start-archive-tag--dark {
-  color: #555A57;
-}
-
-.start-chapter-indicator {
-  display: flex;
-  align-items: baseline;
-  gap: 6px;
+.a24-stage-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 12px;
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 20px;
   margin-bottom: 18px;
 }
 
-.start-chapter-index {
-  font-family: 'Maelstrom Sans', sans-serif;
-  font-size: 26px;
-  font-weight: 700;
-  color: #E20000;
-  line-height: 1;
+.a24-kicker-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: #E20000;
 }
 
-.start-chapter-total {
-  font-family: 'GRAPHIK', sans-serif;
-  font-size: 13px;
-  color: #6C716E;
-  font-weight: 600;
-}
-
-.start-chapter-title {
-  font-family: 'GRAPHIK', sans-serif;
+.a24-kicker-text {
+  font-family: 'PP Neue Montreal', sans-serif;
   font-size: 11px;
-  font-weight: 700;
+  font-weight: 500;
   letter-spacing: 0.12em;
-  color: #A5A9A7;
-  text-transform: uppercase;
-  margin-left: 8px;
-}
-
-.start-chapter-indicator--dark .start-chapter-title {
   color: #555A57;
-}
-
-.start-meta-credits-block {
-  margin-bottom: 20px;
-}
-
-.start-credits-label {
-  display: block;
-  font-family: 'GRAPHIK', sans-serif;
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  color: #8E9290;
   text-transform: uppercase;
-  margin-bottom: 4px;
 }
 
-.start-meta-credits-block--dark .start-credits-label {
-  color: #6C716E;
+.a24-stage-headline {
+  font-family: 'PP Eiko', 'GRIFINITO L', Georgia, serif;
+  font-size: clamp(26px, 3.2vw, 44px);
+  font-weight: 400;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+  color: #000000;
+  max-width: 32ch;
+  margin: 0 0 54px 0;
+  text-wrap: balance;
 }
 
-.start-review-quote {
+/* HORIZONTAL DISC CRATE ROW */
+.a24-disc-row {
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  gap: clamp(24px, 4vw, 56px);
+  width: 100%;
+  padding: 20px 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.a24-disc-row::-webkit-scrollbar {
+  display: none;
+}
+
+.a24-disc-slot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+  outline: none;
+  transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.a24-disc-slot:hover {
+  transform: translateY(-8px);
+}
+
+.a24-disc-slot.is-selected {
+  transform: translateY(-12px);
+}
+
+.a24-disc-pod {
   position: relative;
-  margin-top: 28px;
-  padding: 16px 20px;
-  background: rgba(255, 255, 255, 0.04);
-  border-left: 2px solid #E20000;
-  border-radius: 0 8px 8px 0;
+  width: clamp(160px, 20vw, 240px);
+  aspect-ratio: 1 / 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.start-review-quote--dark {
-  background: rgba(0, 0, 0, 0.04);
-  border-left-color: #000000;
-}
-
-.start-review-quote .quote-mark {
+/* Red Hand-drawn / Visceral Ring highlight */
+.a24-disc-ring {
   position: absolute;
-  top: -6px;
-  left: 10px;
-  font-family: 'GRIFINITO L', Georgia, serif;
-  font-size: 40px;
-  color: rgba(226, 0, 0, 0.35);
-  line-height: 1;
+  inset: -10px;
+  border-radius: 50%;
+  border: 2px dashed rgba(226, 0, 0, 0.25);
+  opacity: 0;
+  transform: scale(0.92) rotate(-10deg);
+  transition: opacity 0.35s ease, transform 0.45s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.35s ease;
   pointer-events: none;
 }
 
-.start-review-quote .quote-text {
-  font-family: 'PP Eiko', 'GRIFINITO L', Georgia, serif;
-  font-size: 18px;
-  line-height: 1.35;
-  color: #E5E7E6;
-  font-style: italic;
-  margin: 0;
+.a24-disc-slot:hover .a24-disc-ring {
+  opacity: 0.6;
+  border-color: rgba(226, 0, 0, 0.5);
+  transform: scale(1.02) rotate(0deg);
 }
 
-.start-review-quote--dark .quote-text {
-  color: #222524;
+.a24-disc-slot.is-selected .a24-disc-ring {
+  opacity: 1;
+  border: 2.5px solid #E20000;
+  transform: scale(1.06) rotate(15deg);
+  box-shadow: 0 0 25px rgba(226, 0, 0, 0.3);
 }
 
-.start-review-quote .quote-author {
-  display: block;
-  font-family: 'GRAPHIK', sans-serif;
+/* The Physical Circular Disc */
+.a24-disc-body {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: radial-gradient(circle, #202020 0%, #101010 65%, #050505 100%);
+  box-shadow: 0 16px 36px -6px rgba(0, 0, 0, 0.28), 0 4px 12px rgba(0, 0, 0, 0.14);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.6s ease;
+}
+
+.a24-disc-slot:hover .a24-disc-body {
+  transform: rotate(25deg);
+  box-shadow: 0 24px 48px -8px rgba(0, 0, 0, 0.36);
+}
+
+.a24-disc-slot.is-selected .a24-disc-body {
+  transform: rotate(40deg);
+  box-shadow: 0 28px 56px -8px rgba(0, 0, 0, 0.42);
+}
+
+.a24-disc-art {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  opacity: 0.85;
+  mix-blend-mode: luminosity;
+  filter: contrast(1.15) brightness(0.9);
+  transition: opacity 0.4s ease, filter 0.4s ease;
+}
+
+.a24-disc-slot:hover .a24-disc-art,
+.a24-disc-slot.is-selected .a24-disc-art {
+  opacity: 1;
+  mix-blend-mode: normal;
+  filter: contrast(1.05) brightness(1);
+}
+
+.a24-disc-grooves {
+  position: absolute;
+  inset: 6px;
+  border-radius: 50%;
+  background: repeating-radial-gradient(
+    circle,
+    rgba(255, 255, 255, 0.05) 0px,
+    rgba(255, 255, 255, 0.05) 1px,
+    transparent 1px,
+    transparent 4px
+  );
+  pointer-events: none;
+}
+
+.a24-disc-sheen {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: conic-gradient(
+    from 30deg,
+    rgba(255, 255, 255, 0.12) 0deg,
+    transparent 60deg,
+    rgba(255, 255, 255, 0.12) 120deg,
+    transparent 180deg,
+    rgba(255, 255, 255, 0.12) 240deg,
+    transparent 300deg,
+    rgba(255, 255, 255, 0.12) 360deg
+  );
+  pointer-events: none;
+}
+
+.a24-disc-core {
+  position: relative;
+  z-index: 5;
+  width: 28%;
+  height: 28%;
+  border-radius: 50%;
+  background: #E20000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.6), 0 0 10px rgba(0, 0, 0, 0.4);
+}
+
+.a24-core-center {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #F4F2ED;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.85);
+}
+
+.a24-core-id {
+  position: absolute;
+  font-family: monospace;
+  font-size: 7px;
+  font-weight: 700;
+  color: #FFFFFF;
+  bottom: 4px;
+}
+
+.a24-disc-caption {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  margin-top: 16px;
+}
+
+.a24-caption-index {
+  font-family: monospace;
   font-size: 11px;
   font-weight: 700;
-  letter-spacing: 0.08em;
   color: #E20000;
-  margin-top: 8px;
-  text-transform: uppercase;
+}
+
+.a24-caption-title {
+  font-family: 'Maelstrom Sans', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: #111211;
+}
+
+.a24-caption-year {
+  font-family: 'PP Neue Montreal', sans-serif;
+  font-size: 11.5px;
+  font-weight: 500;
+  color: #6C716E;
+}
+
+.a24-stage-cue {
+  margin-top: 36px;
+  font-family: 'PP Neue Montreal', sans-serif;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  color: #8E9290;
+}
+
+.a24-stage-cue kbd {
+  font-family: monospace;
+  font-size: 10px;
+  background: rgba(0, 0, 0, 0.08);
+  padding: 1px 6px;
+  border-radius: 3px;
+  margin: 0 2px;
 }
 
 /* ============================================================
-   SECCIÓ 1: NINETA (Fons Negre Sutge)
+   3. FULL-BLEED EDITORIAL CHAPTERS (A24 CINEMA TAKEOVER)
    ============================================================ */
-.start-section-nineta {
+.a24-chapter {
+  position: relative;
+  width: 100%;
   min-height: 100vh;
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  background-color: #000000;
-  padding-top: 80px;
   box-sizing: border-box;
 }
 
-.start-section-nineta__video {
+.a24-chapter--dark {
+  background-color: #000000;
+  color: #FFFFFF;
+}
+
+.a24-chapter--light {
+  background-color: #F8F0E6;
+  color: #000000;
+}
+
+.a24-chapter-grid {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  min-height: 100vh;
+  box-sizing: border-box;
+}
+
+.a24-chapter-media {
   width: 56%;
   display: flex;
   flex-direction: column;
@@ -336,76 +492,197 @@
   box-sizing: border-box;
 }
 
-.start-section-nineta__video .video-box {
+.a24-chapter-info {
+  width: 44%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 48px 64px 48px 40px;
+  box-sizing: border-box;
+}
+
+.a24-chapter-viatger .a24-chapter-info {
+  width: 48%;
+  padding: 48px 40px 48px 64px;
+}
+
+.a24-chapter-viatger .a24-chapter-media--vinyl {
+  width: 52%;
+  padding: 48px;
+  align-items: center;
+}
+
+/* Metadata badges & Chapter numbers */
+.a24-media-meta-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.a24-stamp {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.12);
+  color: #FFFFFF;
+  font-family: 'PP Neue Montreal', sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.a24-stamp--red {
+  background: #E20000;
+  color: #FFFFFF;
+}
+
+.a24-meta-spec {
+  font-family: 'PP Neue Montreal', sans-serif;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  color: #8E9290;
+  text-transform: uppercase;
+}
+
+.a24-meta-spec--dark {
+  color: #555A57;
+}
+
+.a24-chapter-number {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  margin-bottom: 20px;
+}
+
+.a24-num-accent {
+  font-family: 'Maelstrom Sans', sans-serif;
+  font-size: 26px;
+  font-weight: 700;
+  color: #E20000;
+  line-height: 1;
+}
+
+.a24-num-slash {
+  font-family: 'PP Neue Montreal', sans-serif;
+  font-size: 13px;
+  color: #6C716E;
+  font-weight: 500;
+}
+
+.a24-num-label {
+  font-family: 'PP Neue Montreal', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: #A5A9A7;
+  text-transform: uppercase;
+  margin-left: 8px;
+}
+
+.a24-chapter-number--dark .a24-num-label {
+  color: #555A57;
+}
+
+/* Video Player in Nineta */
+.a24-video-box {
   width: 100%;
   aspect-ratio: 16 / 9;
   max-width: 860px;
   border-radius: 12px;
   overflow: hidden;
-  box-shadow: 0 24px 60px -12px rgba(0, 0, 0, 0.9), 0 0 50px -10px rgba(226, 0, 0, 0.16);
+  box-shadow: 0 24px 60px -12px rgba(0, 0, 0, 0.9), 0 0 50px -10px rgba(226, 0, 0, 0.18);
   transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.5s ease;
 }
 
-.start-section-nineta__video .video-box:hover {
+.a24-video-box:hover {
   transform: translateY(-4px) scale(1.008);
   box-shadow: 0 32px 75px -12px rgba(0, 0, 0, 0.95), 0 0 65px -5px rgba(226, 0, 0, 0.28);
 }
 
-.start-video-metadata {
+.a24-tech-row {
   display: flex;
   align-items: center;
   gap: 12px;
   margin-top: 14px;
-  font-family: 'GRAPHIK', sans-serif;
+  font-family: 'PP Neue Montreal', sans-serif;
   font-size: 11px;
   color: #6C716E;
   letter-spacing: 0.05em;
 }
 
-.start-video-metadata strong {
+.a24-tech-row strong {
   color: #A5A9A7;
   font-weight: 700;
   margin-right: 4px;
 }
 
-.start-meta-sep {
+.a24-tech-sep {
   color: rgba(255, 255, 255, 0.15);
 }
 
-.start-section-nineta__content {
-  width: 44%;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  padding: 40px 60px 40px 40px;
-  box-sizing: border-box;
-}
-
-.start-desc--white {
-  color: #FFFFFF;
-  font-family: 'PP Eiko', "GRIFINITO L", Georgia, "Times New Roman", serif;
+/* Exactly 1 paragraph in PP Eiko / Grifinito */
+.a24-desc-lead {
+  font-family: 'PP Eiko', 'GRIFINITO L', Georgia, 'Times New Roman', serif;
   font-size: clamp(22px, 2.3vw, 34px);
   font-weight: 400;
   font-style: normal;
   line-height: 1.25;
-  letter-spacing: 0.02em;
+  letter-spacing: 0.015em;
   max-width: 54ch;
   text-wrap: balance;
-  margin: 0 0 16px 0;
+  margin: 0 0 18px 0;
 }
 
-.start-credits--white {
-  color: #D2D6D4;
-  font-family: "GRAPHIK", sans-serif;
+.a24-desc-lead--white {
+  color: #FFFFFF;
+}
+
+.a24-desc-lead--black {
+  color: #000000;
+}
+
+.a24-credits-tag {
+  margin-bottom: 20px;
+}
+
+.a24-credits-label {
+  display: block;
+  font-family: 'PP Neue Montreal', sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: #8E9290;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+
+.a24-credits-tag--dark .a24-credits-label {
+  color: #6C716E;
+}
+
+.a24-credits-text {
+  font-family: 'PP Neue Montreal', sans-serif;
   font-size: clamp(13px, 1vw, 15px);
-  font-weight: 400;
+  font-weight: 500;
   line-height: 1.5;
   letter-spacing: 0.02em;
   margin: 0;
 }
 
-.start-big-title--red {
-  color: #FF0000;
+.a24-credits-text--white {
+  color: #D2D6D4;
+}
+
+.a24-credits-text--black {
+  color: #333635;
+}
+
+/* Monumental Maelstrom Sans Title */
+.a24-monumental-title {
   font-family: 'Maelstrom Sans', sans-serif;
   font-size: clamp(52px, 7vw, 92px);
   line-height: 0.88;
@@ -418,81 +695,93 @@
   cursor: default;
 }
 
-.start-big-title--red:hover {
+.a24-monumental-title--red {
+  color: #E20000;
+}
+
+.a24-monumental-title--red:hover {
   letter-spacing: 0.055em;
-  text-shadow: 0 0 28px rgba(255, 0, 0, 0.35);
+  text-shadow: 0 0 28px rgba(226, 0, 0, 0.35);
 }
 
-/* ============================================================
-   SECCIÓ 2: VIATGER (Fons Paper Cru // 3D Interactive Vinyl)
-   ============================================================ */
-.start-section-viatger {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  background-color: #F8F0E6;
-  padding: 80px 0;
-  box-sizing: border-box;
+.a24-monumental-title--black {
   color: #000000;
 }
 
-.start-section-viatger__content {
-  width: 48%;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  padding: 40px 40px 40px 60px;
-  box-sizing: border-box;
+.a24-monumental-title--black:hover {
+  letter-spacing: 0.055em;
 }
 
-.start-desc--black {
-  color: #000000;
-  font-family: 'PP Eiko', "GRIFINITO L", Georgia, "Times New Roman", serif;
-  font-size: clamp(22px, 2.3vw, 34px);
-  font-weight: 400;
-  font-style: normal;
-  line-height: 1.25;
-  letter-spacing: 0.02em;
-  max-width: 54ch;
-  text-wrap: balance;
-  margin: 0 0 16px 0;
+/* Quote Cards */
+.a24-quote-card {
+  position: relative;
+  margin-top: 28px;
+  padding: 16px 20px;
+  border-left: 2px solid #E20000;
+  border-radius: 0 8px 8px 0;
 }
 
-.start-credits--black {
-  color: #333635;
-  font-family: "GRAPHIK", sans-serif;
-  font-size: clamp(13px, 1vw, 15px);
-  font-weight: 500;
-  line-height: 1.5;
-  letter-spacing: 0.02em;
+.a24-quote-card--dark {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.a24-quote-card--light {
+  background: rgba(0, 0, 0, 0.04);
+  border-left-color: #000000;
+}
+
+.a24-quote-glyph {
+  position: absolute;
+  top: -6px;
+  left: 10px;
+  font-family: 'PP Eiko', 'GRIFINITO L', serif;
+  font-size: 40px;
+  color: rgba(226, 0, 0, 0.35);
+  line-height: 1;
+  pointer-events: none;
+}
+
+.a24-quote-prose {
+  font-family: 'PP Eiko', 'GRIFINITO L', Georgia, serif;
+  font-size: 18px;
+  line-height: 1.35;
+  font-style: italic;
   margin: 0;
 }
 
-.start-section-viatger__cover {
-  width: 52%;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  padding: 40px;
-  box-sizing: border-box;
+.a24-quote-card--dark .a24-quote-prose {
+  color: #E5E7E6;
+}
+
+.a24-quote-card--light .a24-quote-prose {
+  color: #222524;
+}
+
+.a24-quote-cite {
+  display: block;
+  font-family: 'PP Neue Montreal', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: #E20000;
+  margin-top: 8px;
+  text-transform: uppercase;
 }
 
 /* ============================================================
-   3D VINYL VISOR & FLIPPER (SKEUOMORPHISM MODERN)
+   VIATGER: 3D VINYL VISOR WITH 180° FLIP
    ============================================================ */
-.start-vinyl-stage {
+.a24-vinyl-box {
   position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
   perspective: 1400px;
   width: 100%;
-  max-width: 540px;
+  max-width: 520px;
 }
 
-.start-vinyl-flipper {
+.a24-vinyl-flipper {
   position: relative;
   width: 100%;
   max-width: 480px;
@@ -502,11 +791,11 @@
   cursor: pointer;
 }
 
-.start-vinyl-flipper.is-flipped {
+.a24-vinyl-flipper.is-flipped {
   transform: rotateY(180deg);
 }
 
-.start-card-face {
+.a24-face {
   position: absolute;
   inset: 0;
   width: 100%;
@@ -516,7 +805,7 @@
   border-radius: 6px;
 }
 
-.start-card-face--front {
+.a24-face--front {
   z-index: 2;
   transform: rotateY(0deg);
   display: flex;
@@ -524,14 +813,14 @@
   align-items: center;
 }
 
-.start-card-face--back {
+.a24-face--back {
   transform: rotateY(180deg);
   display: flex;
   flex-direction: column;
   align-items: center;
 }
 
-.start-album-wrapper {
+.a24-sleeve-pack {
   position: relative;
   width: 100%;
   height: 100%;
@@ -540,7 +829,7 @@
   justify-content: center;
 }
 
-.start-album-sleeve {
+.a24-sleeve-jacket {
   position: relative;
   z-index: 2;
   width: 90%;
@@ -552,14 +841,14 @@
   background-color: #111111;
 }
 
-.start-album-sleeve img {
+.a24-sleeve-jacket img {
   width: 100%;
   height: 100%;
   object-fit: cover;
   display: block;
 }
 
-.start-album-glare {
+.a24-sleeve-glare {
   position: absolute;
   inset: 0;
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.28) 0%, rgba(255, 255, 255, 0) 50%, rgba(0, 0, 0, 0.2) 100%);
@@ -568,7 +857,7 @@
   transition: opacity 0.4s ease;
 }
 
-.start-sleeve-spine {
+.a24-sleeve-spine {
   position: absolute;
   top: 0;
   bottom: 0;
@@ -578,8 +867,8 @@
   pointer-events: none;
 }
 
-/* Vinyl Disc that slides out on hover */
-.start-vinyl-disc {
+/* Vinyl Disc sliding out */
+.a24-slip-disc {
   position: absolute;
   top: 5%;
   right: 0;
@@ -598,7 +887,7 @@
   cursor: pointer;
 }
 
-.start-vinyl-grooves {
+.a24-slip-grooves {
   position: absolute;
   inset: 8px;
   border-radius: 50%;
@@ -612,7 +901,7 @@
   pointer-events: none;
 }
 
-.start-vinyl-sheen {
+.a24-slip-sheen {
   position: absolute;
   inset: 0;
   border-radius: 50%;
@@ -629,7 +918,7 @@
   pointer-events: none;
 }
 
-.start-vinyl-label {
+.a24-slip-label {
   width: 33%;
   height: 33%;
   border-radius: 50%;
@@ -644,14 +933,14 @@
   color: #FFFFFF;
 }
 
-.start-vinyl-label-text {
+.a24-label-title {
   font-family: 'Maelstrom Sans', sans-serif;
   font-size: 8px;
   font-weight: 700;
   letter-spacing: 0.1em;
 }
 
-.start-vinyl-center {
+.a24-label-hole {
   width: 13px;
   height: 13px;
   background: #F8F0E6;
@@ -660,46 +949,54 @@
   margin: 3px 0;
 }
 
-.start-vinyl-label-sub {
+.a24-label-rpm {
   font-family: monospace;
   font-size: 6.5px;
-  opacity: 0.8;
+  opacity: 0.85;
   letter-spacing: 0.05em;
 }
 
 /* Hover on vinyl stage */
-.start-vinyl-stage:hover .start-album-sleeve {
+.a24-vinyl-box:hover .a24-sleeve-jacket {
   transform: rotateY(-6deg) rotateX(2deg) scale(1.02);
   box-shadow: 0 28px 55px -10px rgba(0, 0, 0, 0.35);
 }
 
-.start-vinyl-stage:hover .start-vinyl-disc {
+.a24-vinyl-box:hover .a24-slip-disc {
   transform: translateX(55px) rotate(45deg);
   opacity: 1;
 }
 
-.start-vinyl-stage:hover .start-album-glare {
+.a24-vinyl-box:hover .a24-sleeve-glare {
   opacity: 0.85;
 }
 
-.start-sleeve-hint {
+.a24-flip-hint {
   display: flex;
   align-items: center;
   gap: 6px;
   margin-top: 14px;
-  font-family: 'GRAPHIK', sans-serif;
+  font-family: 'PP Neue Montreal', sans-serif;
   font-size: 11.5px;
   color: #6C716E;
   letter-spacing: 0.04em;
 }
 
-.start-sleeve-hint__icon {
+.a24-flip-hint kbd {
+  font-family: monospace;
+  font-size: 10px;
+  background: rgba(0, 0, 0, 0.08);
+  padding: 1px 5px;
+  border-radius: 3px;
+}
+
+.a24-flip-icon {
   font-size: 14px;
   color: #E20000;
 }
 
-/* CARA B: CONTRAPORTADA DE VINIL */
-.start-back-cover {
+/* Back Jacket (Cara B) */
+.a24-back-jacket {
   width: 90%;
   aspect-ratio: 1 / 1;
   background-color: #F1ECE4;
@@ -714,7 +1011,7 @@
   color: #111211;
 }
 
-.start-back-header {
+.a24-back-head {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -722,30 +1019,30 @@
   padding-bottom: 8px;
 }
 
-.start-back-title {
+.a24-back-head-title {
   font-family: 'PP Museum', 'Maelstrom Sans', sans-serif;
   font-size: 13.5px;
   font-weight: 700;
   letter-spacing: 0.08em;
 }
 
-.start-back-matrix {
+.a24-back-head-matrix {
   font-family: monospace;
   font-size: 11px;
   font-weight: 700;
   color: #E20000;
 }
 
-.start-back-tracklist {
+.a24-back-columns {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 16px;
   margin: 12px 0;
 }
 
-.start-side-title {
+.a24-col-side {
   display: block;
-  font-family: 'GRAPHIK', sans-serif;
+  font-family: 'PP Neue Montreal', sans-serif;
   font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.12em;
@@ -753,7 +1050,7 @@
   margin-bottom: 6px;
 }
 
-.start-track-ol {
+.a24-col-list {
   list-style: none;
   padding: 0;
   margin: 0;
@@ -762,27 +1059,27 @@
   gap: 5px;
 }
 
-.start-track-ol li {
+.a24-col-list li {
   display: flex;
   justify-content: space-between;
-  font-family: 'GRAPHIK', sans-serif;
+  font-family: 'PP Neue Montreal', sans-serif;
   font-size: 11.5px;
-  font-weight: 600;
+  font-weight: 500;
   color: #2B2E2C;
 }
 
-.start-track-ol li small {
+.a24-col-list li small {
   color: #6C716E;
   font-family: monospace;
 }
 
-.start-back-poetry {
+.a24-back-poem {
   border-top: 1px dashed rgba(0, 0, 0, 0.15);
   padding-top: 10px;
 }
 
-.start-poetry-quote {
-  font-family: 'GRIFINITO L', serif;
+.a24-poem-text {
+  font-family: 'PP Eiko', 'GRIFINITO L', serif;
   font-size: 14px;
   font-style: italic;
   line-height: 1.35;
@@ -790,8 +1087,8 @@
   color: #444745;
 }
 
-.start-poetry-author {
-  font-family: 'GRAPHIK', sans-serif;
+.a24-poem-by {
+  font-family: 'PP Neue Montreal', sans-serif;
   font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.08em;
@@ -799,7 +1096,7 @@
   text-transform: uppercase;
 }
 
-.start-back-footer {
+.a24-back-foot {
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
@@ -807,26 +1104,26 @@
   padding-top: 10px;
 }
 
-.start-back-credits {
+.a24-foot-col {
   display: flex;
   flex-direction: column;
   gap: 2px;
-  font-family: 'GRAPHIK', sans-serif;
+  font-family: 'PP Neue Montreal', sans-serif;
   font-size: 9.5px;
   color: #6C716E;
 }
 
-.start-back-credits small {
+.a24-foot-col small {
   color: #8E9290;
 }
 
-.start-back-barcode {
+.a24-foot-barcode {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
 }
 
-.barcode-lines {
+.a24-barcode-bars {
   display: block;
   width: 65px;
   height: 22px;
@@ -843,14 +1140,14 @@
   );
 }
 
-.barcode-num {
+.a24-barcode-num {
   font-family: monospace;
   font-size: 8px;
   color: #444;
 }
 
-/* Vinyl Action Pills under the stage */
-.start-vinyl-actions {
+/* Action Toolbar */
+.a24-vinyl-toolbar {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
@@ -858,7 +1155,7 @@
   margin-top: 24px;
 }
 
-.start-action-pill {
+.a24-btn {
   display: inline-flex;
   align-items: center;
   gap: 8px;
@@ -867,16 +1164,16 @@
   background-color: #FFFFFF;
   border: 1px solid rgba(0, 0, 0, 0.12);
   color: #111211;
-  font-family: 'GRAPHIK', sans-serif;
+  font-family: 'PP Neue Montreal', sans-serif;
   font-size: 12px;
-  font-weight: 700;
+  font-weight: 500;
   cursor: pointer;
   text-decoration: none;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
   transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease;
 }
 
-.start-action-pill:hover {
+.a24-btn:hover {
   background-color: #000000;
   color: #FFFFFF;
   border-color: #000000;
@@ -884,22 +1181,22 @@
   transform: translateY(-1px);
 }
 
-.start-action-pill:active {
+.a24-btn:active {
   transform: scale(0.97);
 }
 
-.start-action-pill--flip {
+.a24-btn--flip {
   background-color: #E20000;
   color: #FFFFFF;
   border-color: #E20000;
 }
 
-.start-action-pill--flip:hover {
+.a24-btn--flip:hover {
   background-color: #000000;
   border-color: #000000;
 }
 
-.pill-kbd {
+.a24-btn-kbd {
   font-family: monospace;
   font-size: 9.5px;
   background: rgba(255, 255, 255, 0.25);
@@ -908,35 +1205,37 @@
   margin-left: 2px;
 }
 
-.start-action-pill--playing {
+.a24-btn--playing {
   background-color: #000000;
   color: #FFFFFF;
 }
 
-.start-action-pill--spotify {
+.a24-btn--spotify {
   background-color: #1DB954;
   color: #FFFFFF;
   border-color: #1DB954;
 }
 
-.start-action-pill--spotify:hover {
+.a24-btn--spotify:hover {
   background-color: #179843;
   border-color: #179843;
 }
 
 /* ============================================================
-   SECCIÓ 3: PRESENTACIÓ AL PRINCIPAL (Concert Documental)
+   CAPÍTOL 03: PRESENTACIÓ AL PRINCIPAL (Split View)
    ============================================================ */
-.start-section-principal {
-  min-height: 100vh;
+.a24-chapter-principal {
+  background-color: #000000;
+}
+
+.a24-chapter--split {
   display: flex;
   flex-direction: row;
   align-items: stretch;
-  background-color: #000000;
-  box-sizing: border-box;
+  min-height: 100vh;
 }
 
-.start-section-principal__photo {
+.a24-split-photo {
   width: 48%;
   display: flex;
   flex-direction: column;
@@ -947,7 +1246,7 @@
   background-color: #000000;
 }
 
-.start-photo-overlay-tag {
+.a24-split-tag {
   position: absolute;
   top: 32px;
   left: 32px;
@@ -957,7 +1256,7 @@
   gap: 10px;
 }
 
-.start-section-principal__photo img {
+.a24-split-photo img {
   width: 100%;
   height: 100%;
   min-height: 100vh;
@@ -967,19 +1266,19 @@
   filter: brightness(0.94) contrast(1.05);
 }
 
-.start-section-principal__photo:hover img {
+.a24-split-photo:hover img {
   transform: scale(1.03);
   filter: brightness(1) contrast(1.08);
 }
 
-.start-photo-caption {
+.a24-split-caption {
   position: absolute;
   bottom: 24px;
   left: 32px;
   z-index: 10;
-  font-family: 'GRAPHIK', sans-serif;
+  font-family: 'PP Neue Montreal', sans-serif;
   font-size: 10px;
-  font-weight: 700;
+  font-weight: 500;
   letter-spacing: 0.12em;
   color: rgba(255, 255, 255, 0.7);
   background: rgba(0, 0, 0, 0.6);
@@ -988,7 +1287,7 @@
   border-radius: 4px;
 }
 
-.start-section-principal__content {
+.a24-split-content {
   width: 52%;
   background-color: #F8F0E6;
   display: flex;
@@ -999,46 +1298,28 @@
   color: #000000;
 }
 
-.start-big-title-stack {
+.a24-stack-title {
   display: flex;
   flex-direction: column;
   margin-bottom: 24px;
 }
 
-.start-big-title--black {
-  color: #000000;
-  font-family: 'Maelstrom Sans', sans-serif;
-  font-size: clamp(52px, 6.5vw, 86px);
-  line-height: 0.9;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  margin: 0;
-  text-transform: uppercase;
-  white-space: nowrap;
-  transition: letter-spacing 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-  cursor: default;
-}
-
-.start-big-title--black:hover {
-  letter-spacing: 0.055em;
-}
-
-.start-desc-stack {
+.a24-desc-stack {
   display: flex;
   flex-direction: column;
   gap: 16px;
   margin: 24px 0 28px 0;
 }
 
-.start-principal-guests {
+.a24-guests-section {
   margin-top: 8px;
   padding-top: 20px;
   border-top: 1px solid rgba(0, 0, 0, 0.1);
 }
 
-.start-guests-label {
+.a24-guests-title {
   display: block;
-  font-family: 'GRAPHIK', sans-serif;
+  font-family: 'PP Neue Montreal', sans-serif;
   font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.12em;
@@ -1047,17 +1328,17 @@
   margin-bottom: 10px;
 }
 
-.start-guests-pills {
+.a24-guests-list {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
 }
 
-.start-guest-pill {
+.a24-guest-chip {
   display: inline-block;
-  font-family: 'GRAPHIK', sans-serif;
+  font-family: 'PP Neue Montreal', sans-serif;
   font-size: 11px;
-  font-weight: 600;
+  font-weight: 500;
   background: rgba(0, 0, 0, 0.06);
   color: #222524;
   padding: 4px 10px;
@@ -1065,9 +1346,9 @@
 }
 
 /* ============================================================
-   DOCK INFERIOR D'ARXIU FLOTANT (A24 ARCHIVE BOTTOM DOCK)
+   4. A24 FLOATING STATUS DOCK (PERMANENT STATUS BAR)
    ============================================================ */
-.start-archive-dock {
+.a24-dock {
   position: fixed;
   bottom: 20px;
   left: 50%;
@@ -1078,7 +1359,7 @@
   box-sizing: border-box;
 }
 
-.start-dock-inner {
+.a24-dock-card {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -1091,13 +1372,13 @@
   box-shadow: 0 16px 40px -8px rgba(0, 0, 0, 0.75);
 }
 
-.start-dock-left {
+.a24-dock-status {
   display: flex;
   align-items: center;
   gap: 8px;
 }
 
-.start-dock-dot {
+.a24-dock-dot {
   width: 7px;
   height: 7px;
   border-radius: 50%;
@@ -1105,62 +1386,62 @@
   box-shadow: 0 0 8px #E20000;
 }
 
-.start-dock-current {
-  font-family: 'GRAPHIK', sans-serif;
+.a24-dock-readout {
+  font-family: 'PP Neue Montreal', sans-serif;
   font-size: 11px;
-  font-weight: 700;
+  font-weight: 500;
   letter-spacing: 0.08em;
   color: #FFFFFF;
   text-transform: uppercase;
 }
 
-.start-dock-nav {
+.a24-dock-switcher {
   display: flex;
   align-items: center;
   gap: 6px;
 }
 
-.start-dock-nav-btn {
+.a24-dock-btn {
   padding: 4px 10px;
   border-radius: 16px;
   background: transparent;
   border: none;
   color: #8E9290;
-  font-family: 'GRAPHIK', sans-serif;
+  font-family: 'PP Neue Montreal', sans-serif;
   font-size: 11px;
-  font-weight: 600;
+  font-weight: 500;
   cursor: pointer;
   transition: color 0.18s ease, background-color 0.18s ease;
 }
 
-.start-dock-nav-btn:hover {
+.a24-dock-btn:hover {
   color: #FFFFFF;
   background: rgba(255, 255, 255, 0.08);
 }
 
-.start-dock-nav-btn.is-active {
+.a24-dock-btn.is-selected {
   color: #FFFFFF;
   background: rgba(226, 0, 0, 0.25);
   border: 1px solid rgba(226, 0, 0, 0.5);
 }
 
-.start-dock-shortcuts {
+.a24-dock-shortcuts {
   display: flex;
   align-items: center;
   gap: 14px;
 }
 
-.shortcut-item {
+.a24-shortcut {
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  font-family: 'GRAPHIK', sans-serif;
+  font-family: 'PP Neue Montreal', sans-serif;
   font-size: 10px;
   color: #8E9290;
   letter-spacing: 0.04em;
 }
 
-.dock-kbd {
+.a24-shortcut kbd {
   font-family: monospace;
   font-size: 9px;
   background: rgba(255, 255, 255, 0.14);
@@ -1174,68 +1455,65 @@
    RESPONSIVE DESIGN (Tauletes i Mòbils)
    ============================================================ */
 @media (max-width: 1024px) {
-  .start-archive-header {
+  .a24-header {
     padding-left: 84px;
     padding-right: 18px;
   }
 
-  .start-section-nineta,
-  .start-section-viatger,
-  .start-section-principal {
+  .a24-chapter-grid,
+  .a24-chapter--split {
     flex-direction: column;
     min-height: auto;
-    padding: 70px 24px 90px 24px;
   }
 
-  .start-section-nineta__video,
-  .start-section-nineta__content,
-  .start-section-viatger__content,
-  .start-section-viatger__cover,
-  .start-section-principal__photo,
-  .start-section-principal__content {
+  .a24-chapter-media,
+  .a24-chapter-info,
+  .a24-chapter-viatger .a24-chapter-info,
+  .a24-chapter-viatger .a24-chapter-media--vinyl,
+  .a24-split-photo,
+  .a24-split-content {
     width: 100%;
-    padding: 24px 0;
+    padding: 32px 24px;
   }
 
-  .start-section-principal__photo img {
+  .a24-split-photo img {
     min-height: 480px;
     height: 480px;
   }
 
-  .start-archive-header__sub,
-  .start-dock-shortcuts {
+  .a24-brand-subtitle,
+  .a24-dock-shortcuts {
     display: none;
   }
 }
 
 @media (max-width: 640px) {
-  .start-archive-header {
+  .a24-header {
     padding-left: 76px;
     padding-right: 14px;
   }
 
-  .start-archive-header__nav {
+  .a24-header__nav {
     display: none;
   }
 
-  .start-audio-text {
+  .a24-audio-text {
     display: none;
   }
 
-  .start-audio-btn {
+  .a24-audio-toggle {
     padding: 6px 10px;
   }
 
-  .start-big-title--red,
-  .start-big-title--black {
+  .a24-monumental-title {
     font-size: 42px;
   }
 
-  .start-dock-inner {
+  .a24-dock-card {
     padding: 8px 14px;
   }
 
-  .start-dock-center {
+  .a24-dock-switcher {
     display: none;
   }
 }
@@ -1244,26 +1522,26 @@
    ACCESSIBILITAT: PREFERS-REDUCED-MOTION
    ============================================================ */
 @media (prefers-reduced-motion: reduce) {
-  .start-vinyl-flipper,
-  .start-vinyl-disc,
-  .start-album-sleeve,
-  .start-section-nineta__video .video-box,
-  .start-section-principal__photo img,
-  .start-big-title--red,
-  .start-big-title--black {
+  .a24-vinyl-flipper,
+  .a24-slip-disc,
+  .a24-sleeve-jacket,
+  .a24-video-box,
+  .a24-split-photo img,
+  .a24-monumental-title,
+  .a24-disc-body {
     transition: opacity 0.2s ease !important;
     transform: none !important;
   }
 
-  .start-vinyl-flipper.is-flipped {
+  .a24-vinyl-flipper.is-flipped {
     transform: none !important;
   }
 
-  .start-card-face--front {
+  .a24-face--front {
     display: block;
   }
 
-  .start-card-face--back {
+  .a24-face--back {
     display: block;
     position: relative;
     transform: none !important;
