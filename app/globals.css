@@ -1,14 +1,32 @@
 /* ============================================================
-   TIPOGRAFIES OFICIALS MIQUEL GIL: COIGN, GRIFINITO L, GRAPHIK
+   TIPOGRAFIES OFICIALS MIQUEL GIL: MAELSTROM, GRIFINITO L, GRAPHIK
    ============================================================ */
 
-/* 1. COIGN — Tipografia de gran impacte, xifres hero i títols capitals */
+/* 1. MAELSTROM (Klim Type Foundry) — Titulars monumentals i rompedors (Reverse-Contrast Display) */
+@font-face {
+  font-family: 'Maelstrom';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('/fonts/Maelstrom-Bold.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Maelstrom Sans';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('/fonts/Maelstrom-Sans-Bold.woff2') format('woff2');
+}
+
+/* Fallback & compatibilitat Coign */
 @font-face {
   font-family: 'Coign';
   font-style: normal;
   font-weight: normal;
   font-display: swap;
-  src: url('/fonts/Coign37B.woff2') format('woff2');
+  src: url('/fonts/Maelstrom-Bold.woff2') format('woff2'),
+       url('/fonts/Coign37B.woff2') format('woff2');
 }
 
 @font-face {
@@ -16,7 +34,8 @@
   font-style: normal;
   font-weight: 700;
   font-display: swap;
-  src: url('/fonts/Coign37B.woff2') format('woff2');
+  src: url('/fonts/Maelstrom-Bold.woff2') format('woff2'),
+       url('/fonts/Coign37B.woff2') format('woff2');
 }
 
 /* 2. GRIFINITO L — Tipografia poètica i d'arrel per a titulars i cites */
@@ -98,12 +117,13 @@
   --line: rgba(255, 255, 255, 0.2);
   --line-dark: rgba(0, 0, 0, 0.16);
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
-  --font-coign: 'Coign', sans-serif;
+  --font-maelstrom: 'Maelstrom', 'Maelstrom Sans', sans-serif;
+  --font-coign: 'Maelstrom', 'Maelstrom Sans', sans-serif;
   --font-grifinito: 'GRIFINITO L', serif;
   --font-graphik: 'GRAPHIK', sans-serif;
   --font-display: 'GRIFINITO L', serif;
   --font-body: 'GRAPHIK', sans-serif;
-  --font-mono: 'Coign', 'GRAPHIK', sans-serif;
+  --font-mono: 'Maelstrom', 'GRAPHIK', sans-serif;
 }
 
 * {
@@ -1501,11 +1521,11 @@ button {
 
 .home__name {
   color: #FFFFFF;
-  font-family: 'Coign', 'GRAPHIK', Sans-serif;
-  font-size: 136px;
-  font-weight: 600;
-  line-height: 100px;
-  letter-spacing: -2.6px;
+  font-family: 'Maelstrom', 'Maelstrom Sans', 'GRAPHIK', Sans-serif;
+  font-size: clamp(64px, 10vw, 136px);
+  font-weight: 700;
+  line-height: 0.92;
+  letter-spacing: 0.02em;
   word-spacing: 0px;
   -webkit-text-stroke-color: #000;
   stroke: #000;
@@ -1911,7 +1931,7 @@ button {
   font-style: normal;
   font-weight: normal;
   font-display: swap;
-  src: url('/fonts/Coign37B.woff2') format('woff2');
+  src: url('/fonts/Maelstrom-Bold.woff2') format('woff2');
 }
 
 /* Page /start container styles */
@@ -1985,11 +2005,11 @@ button {
 
 .start-big-title--red {
   color: #FF0000;
-  font-family: "Coign", Sans-serif;
-  font-size: 198px;
-  line-height: 150px;
-  font-weight: normal;
-  letter-spacing: -2px;
+  font-family: 'Maelstrom', 'Maelstrom Sans', sans-serif;
+  font-size: clamp(72px, 12vw, 170px);
+  line-height: 0.9;
+  font-weight: 700;
+  letter-spacing: 0.04em;
   margin: 0;
   text-transform: uppercase;
 }
@@ -2097,11 +2117,11 @@ button {
 
 .start-big-title--black {
   color: #000000;
-  font-family: "Coign", Sans-serif;
-  font-size: 198px;
-  line-height: 150px;
-  font-weight: normal;
-  letter-spacing: -2px;
+  font-family: 'Maelstrom', 'Maelstrom Sans', sans-serif;
+  font-size: clamp(72px, 12vw, 170px);
+  line-height: 0.9;
+  font-weight: 700;
+  letter-spacing: 0.04em;
   margin: 0;
   text-transform: uppercase;
 }
@@ -2275,9 +2295,9 @@ button {
   padding: 40px 60px;
 }
 
-/* Giant background numbers in Coign font */
+/* Giant background numbers in Maelstrom font */
 .bio-num-giant {
-  font-family: 'Coign', Sans-serif;
+  font-family: 'Maelstrom', 'Maelstrom Sans', sans-serif;
   font-size: 500px;
   line-height: 0.8;
   color: rgba(255, 255, 255, 0.08);
@@ -2316,9 +2336,9 @@ button {
 }
 
 .bio-hero-name {
-  font-family: 'Coign', Sans-serif;
-  font-size: 140px;
-  line-height: 110px;
+  font-family: 'Maelstrom', 'Maelstrom Sans', sans-serif;
+  font-size: clamp(64px, 10vw, 140px);
+  line-height: 0.92;
   color: #FFFFFF;
   margin: 0 0 24px 0;
   text-transform: uppercase;
@@ -2410,9 +2430,9 @@ button {
 }
 
 .bio-title-large {
-  font-family: 'Coign', Sans-serif;
-  font-size: 110px;
-  line-height: 95px;
+  font-family: 'Maelstrom', 'Maelstrom Sans', sans-serif;
+  font-size: clamp(54px, 8vw, 110px);
+  line-height: 0.92;
   color: #FFFFFF;
   margin: 0 0 24px 0;
   text-transform: uppercase;
@@ -2733,10 +2753,10 @@ button {
 /* Tipografías y Colores Originales de Contacte */
 .contacte-root-wrapper .elementor-element-9093221 .qodef-m-title {
   color: #D10000 !important;
-  font-family: "Coign", Sans-serif !important;
-  font-size: clamp(55px, 6vw, 85px) !important;
-  line-height: 75px !important;
-  letter-spacing: 2.8px !important;
+  font-family: "Maelstrom", "Maelstrom Sans", Sans-serif !important;
+  font-size: clamp(48px, 6vw, 85px) !important;
+  line-height: 1.05 !important;
+  letter-spacing: 0.05em !important;
 }
 
 .contacte-root-wrapper .elementor-element-d01ab72 .qodef-m-title {

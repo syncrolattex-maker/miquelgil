@@ -1,7 +1,7 @@
 /* ==========================================================================
    BIOGRAFIA PAGE — /START CHROMATIC RANGE ALIGNMENT
    Deep Black (#000000), White (#FFFFFF) & Signature Red (#FF0000)
-   Tipografies oficials: GRIFINITO L, COIGN & GRAPHIK
+   Tipografies oficials: GRIFINITO L, MAELSTROM & GRAPHIK
    ========================================================================== */
 
 .bio-page {
@@ -27,9 +27,9 @@
   gap: 64px;
 }
 
-/* ==========================================================================
+/* ============================================================
    HERO HEADER
-   ========================================================================== */
+   ============================================================ */
 .biografia-hero {
   display: flex;
   flex-direction: column;
@@ -40,11 +40,11 @@
 }
 
 .biografia-hero__title {
-  font-family: 'Coign', sans-serif;
-  font-size: clamp(68px, 11vw, 150px);
-  font-weight: normal;
-  line-height: 0.85;
-  letter-spacing: -0.035em;
+  font-family: 'Maelstrom', 'Maelstrom Sans', sans-serif;
+  font-size: clamp(54px, 8.5vw, 120px);
+  font-weight: 700;
+  line-height: 0.9;
+  letter-spacing: 0.05em;
   color: #ffffff;
   text-transform: uppercase;
   margin: 0;
@@ -85,13 +85,13 @@
 }
 
 .bio-strip-header__title {
-  font-family: 'Coign', sans-serif;
-  font-size: clamp(38px, 5.2vw, 72px);
-  font-weight: normal;
+  font-family: 'Maelstrom', 'Maelstrom Sans', sans-serif;
+  font-size: clamp(34px, 4.5vw, 64px);
+  font-weight: 700;
   color: #ffffff;
   margin: 0;
-  letter-spacing: -0.03em;
-  line-height: 0.88;
+  letter-spacing: 0.04em;
+  line-height: 0.92;
   text-transform: uppercase;
 }
 
@@ -303,13 +303,13 @@
 }
 
 .bio-venues__title {
-  font-family: 'Coign', sans-serif;
-  font-size: clamp(38px, 4.8vw, 68px);
-  font-weight: normal;
+  font-family: 'Maelstrom', 'Maelstrom Sans', sans-serif;
+  font-size: clamp(34px, 4.5vw, 64px);
+  font-weight: 700;
   color: #ffffff;
   margin: 0;
-  line-height: 0.88;
-  letter-spacing: -0.03em;
+  line-height: 0.92;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
 }
 

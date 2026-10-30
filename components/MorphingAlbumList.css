@@ -109,12 +109,12 @@
 
 .mlst_title {
   justify-self: start;
-  font-family: 'Coign', sans-serif;
-  font-size: clamp(26px, 2.5vw, 36px);
-  font-weight: normal;
-  letter-spacing: 0.05em;
+  font-family: 'Maelstrom', 'Maelstrom Sans', sans-serif;
+  font-size: clamp(20px, 1.8vw, 28px);
+  font-weight: 700;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
-  line-height: 0.98;
+  line-height: 1.05;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -308,11 +308,11 @@
 }
 
 .mlst_panel_title {
-  font-family: 'Coign', sans-serif;
-  font-size: clamp(56px, 7.5vw, 96px);
-  font-weight: normal;
-  letter-spacing: 0.08em;
-  line-height: 0.88;
+  font-family: 'Maelstrom', 'Maelstrom Sans', sans-serif;
+  font-size: clamp(38px, 5.5vw, 76px);
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  line-height: 0.92;
   color: var(--mlst-fg);
   text-transform: uppercase;
   margin: 0;

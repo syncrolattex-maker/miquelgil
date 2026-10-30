@@ -59,13 +59,13 @@
 }
 
 .contract-hero-title {
-  font-family: 'Coign', sans-serif;
-  font-size: clamp(84px, 14vw, 190px);
-  line-height: 0.84;
-  letter-spacing: -0.04em;
+  font-family: 'Maelstrom', 'Maelstrom Sans', sans-serif;
+  font-size: clamp(54px, 7.8vw, 110px);
+  line-height: 0.9;
+  letter-spacing: 0.05em;
   color: #000000;
   margin: 0 0 20px 0;
-  font-weight: normal;
+  font-weight: 700;
   text-transform: uppercase;
 }
 
@@ -159,13 +159,13 @@
 }
 
 .contract-section-title {
-  font-family: 'Coign', sans-serif;
-  font-size: clamp(44px, 5.5vw, 78px);
-  line-height: 0.88;
+  font-family: 'Maelstrom', 'Maelstrom Sans', sans-serif;
+  font-size: clamp(38px, 5.2vw, 68px);
+  line-height: 0.92;
   color: #000000;
   margin: 0 0 14px 0;
-  font-weight: normal;
-  letter-spacing: -0.03em;
+  font-weight: 700;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
 }
 

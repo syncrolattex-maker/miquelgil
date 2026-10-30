@@ -781,7 +781,7 @@ export default function AdminClient() {
                           </span>
                           <span
                             style={{
-                              fontFamily: "var(--font-coign, Georgia, serif)",
+                              fontFamily: "var(--font-maelstrom, var(--font-coign, Georgia, serif))",
                               fontSize: "0.95rem",
                               fontWeight: 700,
                               opacity: 0.6,
