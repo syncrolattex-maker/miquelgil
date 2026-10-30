@@ -1,37 +1,70 @@
 /* ==========================================================================
    DISCOGRAFIA — MIQUEL GIL
-   Redisseny editorial d'alta gamma (Art Direction & Micro-interaccions)
-   Tipografia: GRIFINITO L (Titulars) i GRAPHIK (Text editorial)
+   CASSETTE DESIGN SYSTEM (Apercu Pro 400 / Apercu Mono Pro / Hi-Vis Yellow #f0e226)
+   Canvass: Ink Black #19181a · Accent: Hi-Vis Yellow #f0e226 · Text: Bone #f5f4f0
    ========================================================================== */
 
 .discografia-container {
   width: 100%;
   min-height: 100vh;
-  background-color: #FFFFFF;
+  background-color: var(--color-ink-black, #19181a);
 }
 
-.discografia-page {
+.discografia-page,
+.discografia-page.cassette-theme {
   position: relative;
-  background-color: #FFFFFF;
-  color: #111211;
+  background-color: var(--color-ink-black, #19181a);
+  color: var(--color-bone, #f5f4f0);
   min-height: 100vh;
   width: 100%;
   overflow-x: hidden;
-  padding-bottom: 120px; /* Espai de seguretat per al reproductor persistent */
+  padding-bottom: 140px; /* Espai de seguretat per al reproductor persistent */
   box-sizing: border-box;
+  font-family: var(--font-apercu-pro), 'Inter', sans-serif;
+}
+
+/* Subtle photocopied / risograph grain background on page */
+.discografia-page.cassette-theme::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background-image: radial-gradient(rgba(245, 244, 240, 0.035) 1px, transparent 0);
+  background-size: 4px 4px;
+  pointer-events: none;
+  z-index: 0;
 }
 
 /* --------------------------------------------------------------------------
-   HERO EDITORIAL
+   AUDIO EQUALIZER BARS — TOP HEADER METRONOME
+   -------------------------------------------------------------------------- */
+.disco-top-equalizer-wrap {
+  width: 100%;
+  background: var(--color-ink-black, #19181a);
+  border-bottom: 1px solid var(--color-charcoal, #272727);
+  padding: 12px clamp(20px, 5vw, 80px) 4px;
+  box-sizing: border-box;
+  position: relative;
+  z-index: 3;
+}
+
+/* --------------------------------------------------------------------------
+   HERO EDITORIAL — CASSETTE DESIGN SYSTEM
    -------------------------------------------------------------------------- */
 .disco-hero {
   position: relative;
   width: 100%;
-  background: linear-gradient(180deg, #F8F7F4 0%, #FFFFFF 100%);
-  border-bottom: 1px solid rgba(0, 0, 0, 0.07);
-  padding: clamp(60px, 8vw, 110px) clamp(24px, 5vw, 80px) clamp(40px, 5vw, 64px) clamp(88px, 7vw, 120px);
+  background-color: var(--color-ink-black, #19181a);
+  border-bottom: 1px solid var(--color-charcoal, #272727);
+  padding: clamp(48px, 6vw, 84px) clamp(24px, 5vw, 80px) clamp(44px, 5vw, 68px) clamp(88px, 6.5vw, 110px);
   box-sizing: border-box;
   overflow: hidden;
+  z-index: 2;
+}
+
+@media (max-width: 768px) {
+  .disco-hero {
+    padding: clamp(60px, 8vw, 80px) 20px 36px 20px;
+  }
 }
 
 .disco-hero-inner {
@@ -41,88 +74,246 @@
   margin: 0 auto;
 }
 
-.disco-hero-eyebrow {
+/* 1. Section Badge (Two-line stacked pill 900px, 1px solid #f0e226) */
+.cassette-badge-wrap {
+  margin-bottom: 24px;
+}
+
+.cassette-section-badge {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 8px 20px;
+  border-radius: var(--radius-full, 900px);
+  border: 1px solid var(--color-hi-vis-yellow, #f0e226);
+  background: transparent;
+  color: var(--color-hi-vis-yellow, #f0e226);
+  font-family: var(--font-apercu-mono-pro), monospace;
+  font-size: var(--text-caption, 13px);
+  line-height: 1.15;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  user-select: none;
+}
+
+.cassette-badge-primary {
   display: inline-flex;
   align-items: center;
-  gap: 10px;
-  font-family: 'GRAPHIK', sans-serif;
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: #E20000;
-  margin-bottom: 16px;
+  gap: 8px;
+  font-weight: 500;
+  color: var(--color-hi-vis-yellow, #f0e226);
 }
 
-.disco-hero-eyebrow::before {
-  content: "";
-  display: inline-block;
-  width: 24px;
-  height: 2px;
-  background-color: #E20000;
+.cassette-asterisk {
+  color: var(--color-hi-vis-yellow, #f0e226);
+  font-size: 14px;
 }
 
-.disco-hero-title {
-  font-family: 'Coign', sans-serif;
-  font-size: clamp(100px, 16vw, 230px);
-  line-height: 0.84;
-  letter-spacing: 0.12em;
-  color: #000000;
-  margin: 0 0 20px 0;
-  font-weight: normal;
-  text-transform: uppercase;
+.cassette-badge-secondary {
+  font-size: 11px;
+  opacity: 0.85;
+  color: var(--color-bone, #f5f4f0);
+  letter-spacing: 0.08em;
 }
 
-.disco-hero-subtitle {
-  font-family: 'GRIFINITO L', serif;
-  font-size: clamp(26px, 3.4vw, 44px);
-  line-height: 1.14;
-  letter-spacing: -0.02em;
-  color: #111211;
+/* 2. Display Wordmark (Edge-to-edge electric Apercu/Coign in #f0e226, single line) */
+.disco-hero-wordmark {
+  font-family: var(--font-apercu-pro), 'Coign', sans-serif;
+  font-size: clamp(32px, 8.5vw, 126px);
+  line-height: 0.95;
+  letter-spacing: clamp(0.04em, 1.2vw, 0.16em);
+  color: var(--color-hi-vis-yellow, #f0e226);
   margin: 0 0 24px 0;
   font-weight: 400;
-  max-width: 960px;
+  text-transform: uppercase;
+  user-select: none;
+  white-space: nowrap;
+  width: 100%;
+  display: block;
 }
 
-.disco-hero-lead {
-  font-family: 'GRAPHIK', sans-serif;
-  font-size: clamp(16px, 1.35vw, 20px);
-  line-height: 1.6;
-  color: #444745;
-  max-width: 740px;
-  margin: 0 0 32px 0;
-}
-
-.disco-hero-stats {
+/* 3. City Label Row / Geographic & Catalog Liner Notes */
+.cassette-city-row {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 24px 36px;
-  padding-top: 24px;
-  border-top: 1px solid rgba(0, 0, 0, 0.08);
+  gap: 12px 16px;
+  padding: 14px 0;
+  border-top: 1px solid var(--color-charcoal, #272727);
+  border-bottom: 1px solid var(--color-charcoal, #272727);
+  margin-bottom: 36px;
+  font-family: var(--font-apercu-mono-pro), monospace;
+  font-size: var(--text-caption, 13px);
+  line-height: var(--leading-caption, 1.16);
+  color: var(--color-bone, #f5f4f0);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
 }
 
-.disco-stat-item {
+.city-cell {
+  color: var(--color-bone, #f5f4f0);
+}
+
+.city-sep {
+  color: var(--color-hi-vis-yellow, #f0e226);
+  font-size: 12px;
+}
+
+/* 4. Section Heading (37px weight 400 Bone) & Body Copy (15px weight 400) */
+.disco-hero-heading-block {
+  max-width: 980px;
+  margin-bottom: 32px;
+}
+
+.disco-hero-heading {
+  font-family: var(--font-apercu-pro), sans-serif;
+  font-size: clamp(26px, 3.2vw, var(--text-heading, 37px));
+  line-height: var(--leading-heading, 1.08);
+  font-weight: 400;
+  color: var(--color-bone, #f5f4f0);
+  margin: 0 0 18px 0;
+  letter-spacing: -0.01em;
+}
+
+.cassette-highlight-underline {
+  color: var(--color-bone, #f5f4f0);
+  border-bottom: 2px solid var(--color-hi-vis-yellow, #f0e226);
+  padding-bottom: 2px;
+  display: inline-block;
+}
+
+.disco-hero-body {
+  font-family: var(--font-apercu-pro), sans-serif;
+  font-size: var(--text-body, 15px);
+  line-height: var(--leading-body, 1.20);
+  font-weight: 400;
+  color: var(--color-sand, #d9d7ce);
+  letter-spacing: 0.04em;
+  margin: 0;
+  text-transform: uppercase;
+  max-width: 860px;
+}
+
+/* 5. Pill Buttons Cluster (Filled & Outlined 900px pills) */
+.cassette-actions-cluster {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 48px;
+}
+
+.cassette-pill-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 24px;
+  border-radius: var(--radius-full, 900px);
+  font-family: var(--font-apercu-mono-pro), monospace;
+  font-size: var(--text-caption, 13px);
+  font-weight: 500;
+  line-height: var(--leading-caption, 1.16);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-sizing: border-box;
+}
+
+.cassette-pill-btn .pill-icon {
+  font-size: 11px;
+}
+
+.cassette-pill-btn--filled {
+  background-color: var(--color-hi-vis-yellow, #f0e226);
+  color: var(--color-pure-black, #000000);
+  border: 1px solid var(--color-hi-vis-yellow, #f0e226);
+}
+
+.cassette-pill-btn--filled:hover {
+  background-color: #fff142;
+  border-color: #fff142;
+  transform: translateY(-1px);
+}
+
+.cassette-pill-btn--outlined {
+  background-color: transparent;
+  color: var(--color-hi-vis-yellow, #f0e226);
+  border: 1px solid var(--color-hi-vis-yellow, #f0e226);
+}
+
+.cassette-pill-btn--outlined:hover {
+  background-color: rgba(240, 226, 38, 0.12);
+  transform: translateY(-1px);
+}
+
+/* 6. 4-Column Logo Grid / Stats Grid with 1px Charcoal #272727 borders */
+.cassette-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  border: 1px solid var(--color-charcoal, #272727);
+  background: var(--color-ink-black, #19181a);
+  width: 100%;
+}
+
+.cassette-grid-cell {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 8px;
+  padding: 24px;
+  border-right: 1px solid var(--color-charcoal, #272727);
+  box-sizing: border-box;
 }
 
-.disco-stat-num {
-  font-family: 'GRIFINITO L', serif;
-  font-size: 28px;
+.cassette-grid-cell:last-child {
+  border-right: none;
+}
+
+.cassette-cell-num {
+  font-family: var(--font-apercu-pro), 'Coign', sans-serif;
+  font-size: clamp(32px, 3.8vw, 48px);
+  font-weight: 400;
   line-height: 1;
-  color: #000000;
-  font-weight: 600;
+  color: var(--color-hi-vis-yellow, #f0e226);
+  letter-spacing: -0.01em;
 }
 
-.disco-stat-lbl {
-  font-family: 'GRAPHIK', sans-serif;
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.08em;
+.cassette-cell-label {
+  font-family: var(--font-apercu-mono-pro), monospace;
+  font-size: var(--text-caption, 13px);
+  line-height: var(--leading-caption, 1.16);
+  font-weight: 400;
   text-transform: uppercase;
-  color: #777a78;
+  letter-spacing: 0.08em;
+  color: var(--color-sand, #d9d7ce);
+}
+
+@media (max-width: 900px) {
+  .cassette-stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .cassette-grid-cell:nth-child(2) {
+    border-right: none;
+  }
+  .cassette-grid-cell:nth-child(1),
+  .cassette-grid-cell:nth-child(2) {
+    border-bottom: 1px solid var(--color-charcoal, #272727);
+  }
+}
+
+@media (max-width: 580px) {
+  .cassette-stats-grid {
+    grid-template-columns: 1fr;
+  }
+  .cassette-grid-cell {
+    border-right: none;
+    border-bottom: 1px solid var(--color-charcoal, #272727);
+    padding: 18px 16px;
+  }
+  .cassette-grid-cell:last-child {
+    border-bottom: none;
+  }
 }
 
 /* --------------------------------------------------------------------------
@@ -195,7 +386,7 @@
 
 .disco-timeline-pill.is-active .disco-pill-year {
   opacity: 0.85;
-  color: #FF3B30;
+  color: var(--color-hi-vis-yellow, #f0e226);
 }
 
 /* --------------------------------------------------------------------------
@@ -359,14 +550,16 @@
 }
 
 .disco-sleeve-play-badge:hover {
-  background-color: #E20000;
-  border-color: #E20000;
+  background-color: var(--color-hi-vis-yellow, #f0e226);
+  border-color: var(--color-hi-vis-yellow, #f0e226);
+  color: var(--color-pure-black, #000000);
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(226, 0, 0, 0.4);
+  box-shadow: none;
 }
 
 .disco-sleeve-play-badge.is-playing {
-  background-color: #E20000;
+  background-color: var(--color-hi-vis-yellow, #f0e226);
+  color: var(--color-pure-black, #000000);
   border-color: #E20000;
 }
 
@@ -454,18 +647,21 @@
   gap: 6px;
   padding: 5px 12px;
   border-radius: 6px;
-  background-color: rgba(0, 0, 0, 0.05);
-  font-family: 'GRAPHIK', sans-serif;
-  font-size: 11px;
-  font-weight: 600;
-  color: #444745;
-  letter-spacing: 0.04em;
+  background-color: transparent;
+  border: 1px solid var(--color-charcoal, #272727);
+  border-radius: var(--radius-full, 900px);
+  font-family: var(--font-apercu-mono-pro), monospace;
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--color-bone, #f5f4f0);
+  letter-spacing: 0.06em;
   text-transform: uppercase;
+  padding: 4px 12px;
 }
 
 .disco-meta-pill--year {
-  background-color: #000000;
-  color: #FFFFFF;
+  border-color: var(--color-hi-vis-yellow, #f0e226);
+  color: var(--color-hi-vis-yellow, #f0e226);
 }
 
 .disco-spotify-btn {
@@ -473,29 +669,32 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
-  padding: 10px 18px;
-  border-radius: 8px;
-  background-color: #121312;
-  color: #FFFFFF;
-  font-family: 'GRAPHIK', sans-serif;
+  padding: 8px 18px;
+  border-radius: var(--radius-full, 900px);
+  background-color: transparent;
+  border: 1px solid var(--color-hi-vis-yellow, #f0e226);
+  color: var(--color-hi-vis-yellow, #f0e226);
+  font-family: var(--font-apercu-mono-pro), monospace;
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
   text-decoration: none;
-  transition: all 0.22s ease;
-  width: 100%;
+  transition: all 0.2s ease;
+  width: auto;
   box-sizing: border-box;
 }
 
 .disco-spotify-btn:hover {
-  background-color: #1DB954;
-  color: #000000;
+  background-color: rgba(240, 226, 38, 0.12);
+  color: var(--color-hi-vis-yellow, #f0e226);
   transform: translateY(-1px);
-  box-shadow: 0 6px 20px rgba(29, 185, 84, 0.35);
+  box-shadow: none;
 }
 
 .disco-spotify-btn svg {
-  width: 18px;
-  height: 18px;
+  width: 16px;
+  height: 16px;
   fill: currentColor;
 }
 
@@ -515,12 +714,12 @@
 }
 
 .disco-album-kicker {
-  font-family: 'GRAPHIK', sans-serif;
+  font-family: var(--font-apercu-mono-pro), monospace;
   font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.12em;
+  font-weight: 400;
+  color: var(--color-sand, #d9d7ce);
   text-transform: uppercase;
-  color: #E20000;
+  letter-spacing: 0.08em;
 }
 
 .disco-album-title {
@@ -565,48 +764,51 @@
   font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: #888b89;
+  color: var(--color-sand, #d9d7ce);
   margin: 0;
+  font-family: var(--font-apercu-mono-pro), monospace;
+  font-size: 13px;
+  letter-spacing: 0.08em;
 }
 
 .disco-tracklist-count {
-  font-family: 'GRAPHIK', sans-serif;
+  font-family: var(--font-apercu-mono-pro), monospace;
   font-size: 12px;
-  color: #888b89;
+  color: var(--color-sand, #d9d7ce);
+  letter-spacing: 0.06em;
 }
 
-/* Llista de pistes */
+/* Llista de pistes (Cassette Risograph System) */
 .disco-tracks-list {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 0;
+  border-top: 1px solid var(--color-charcoal, #272727);
 }
 
 .disco-track-card {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 10px 14px;
-  border-radius: 8px;
+  padding: 12px 14px;
+  border-radius: 0px;
   background-color: transparent;
-  border: 1px solid transparent;
-  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  border-bottom: 1px solid var(--color-charcoal, #272727);
+  transition: all 0.15s ease;
   cursor: pointer;
   user-select: none;
 }
 
 .disco-track-card:hover {
-  background-color: rgba(0, 0, 0, 0.035);
-  border-color: rgba(0, 0, 0, 0.06);
+  background-color: rgba(240, 226, 38, 0.06);
   transform: translateX(4px);
 }
 
 .disco-track-card.is-active {
-  background-color: #111211;
-  color: #FFFFFF;
-  border-color: #111211;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.16);
-  transform: translateX(6px);
+  background-color: rgba(240, 226, 38, 0.12);
+  color: var(--color-bone, #f5f4f0);
+  border-left: 2px solid var(--color-hi-vis-yellow, #f0e226);
+  transform: translateX(4px);
 }
 
 .disco-track-left {
@@ -617,30 +819,31 @@
 }
 
 .disco-track-num {
-  font-family: 'GRAPHIK', sans-serif;
-  font-size: 12px;
-  font-weight: 600;
-  color: #9da09e;
-  width: 20px;
+  font-family: var(--font-apercu-mono-pro), monospace;
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--color-sand, #d9d7ce);
+  width: 24px;
   flex-shrink: 0;
 }
 
 .disco-track-card.is-active .disco-track-num {
-  color: #FF3B30;
+  color: var(--color-hi-vis-yellow, #f0e226);
 }
 
 .disco-track-name {
-  font-family: 'GRAPHIK', sans-serif;
-  font-size: 14.5px;
-  font-weight: 600;
-  color: #1a1c1b;
+  font-family: var(--font-apercu-pro), sans-serif;
+  font-size: 15px;
+  font-weight: 400;
+  color: var(--color-bone, #f5f4f0);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  letter-spacing: 0.02em;
 }
 
 .disco-track-card.is-active .disco-track-name {
-  color: #FFFFFF;
+  color: var(--color-hi-vis-yellow, #f0e226);
 }
 
 .disco-track-right {
@@ -650,19 +853,19 @@
   flex-shrink: 0;
 }
 
-/* Indicador de reproducció i ecualitzador animat */
+/* Indicador de reproducció i ecualitzador animat (#f0e226) */
 .disco-eq-bars {
   display: flex;
   align-items: flex-end;
-  gap: 2.5px;
+  gap: 2px;
   height: 14px;
   width: 14px;
 }
 
 .disco-eq-bar {
   width: 2.5px;
-  background-color: #FF3B30;
-  border-radius: 1px;
+  background-color: var(--color-hi-vis-yellow, #f0e226);
+  border-radius: 0px;
 }
 
 .disco-eq-bar:nth-child(1) {
@@ -689,128 +892,127 @@
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  padding: 3px 8px;
-  border-radius: 4px;
-  background-color: rgba(226, 0, 0, 0.09);
-  color: #E20000;
-  font-family: 'GRAPHIK', sans-serif;
-  font-size: 10px;
-  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: var(--radius-full, 900px);
+  background-color: transparent;
+  border: 1px solid var(--color-charcoal, #272727);
+  color: var(--color-sand, #d9d7ce);
+  font-family: var(--font-apercu-mono-pro), monospace;
+  font-size: 11px;
+  font-weight: 400;
   letter-spacing: 0.06em;
   text-transform: uppercase;
 }
 
 .disco-track-card.is-active .disco-track-badge-preview {
-  background-color: rgba(255, 59, 48, 0.25);
-  color: #FF3B30;
+  border-color: var(--color-hi-vis-yellow, #f0e226);
+  color: var(--color-hi-vis-yellow, #f0e226);
 }
 
-/* Badge de cançó sencera destacada */
+/* Badge de cançó sencera destacada (Cassette Pill) */
 .disco-track-badge-full {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 3px 9px;
-  border-radius: 9999px;
-  background-color: rgba(34, 197, 94, 0.12);
-  color: #15803d;
-  border: 1px solid rgba(34, 197, 94, 0.28);
-  font-family: 'GRAPHIK', sans-serif;
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.05em;
+  padding: 3px 10px;
+  border-radius: var(--radius-full, 900px);
+  background-color: transparent;
+  color: var(--color-hi-vis-yellow, #f0e226);
+  border: 1px solid var(--color-hi-vis-yellow, #f0e226);
+  font-family: var(--font-apercu-mono-pro), monospace;
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
 }
 
 .disco-track-card.is-active .disco-track-badge-full {
-  background-color: rgba(34, 197, 94, 0.25);
-  color: #4ade80;
-  border-color: rgba(74, 222, 128, 0.4);
+  background-color: var(--color-hi-vis-yellow, #f0e226);
+  color: var(--color-pure-black, #000000);
+  font-weight: 500;
 }
 
 .disco-track-full-dot {
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
   border-radius: 50%;
-  background-color: #22c55e;
+  background-color: var(--color-hi-vis-yellow, #f0e226);
   display: inline-block;
 }
 
 .disco-track-card.is-active .disco-track-full-dot {
-  background-color: #4ade80;
-  box-shadow: 0 0 6px rgba(74, 222, 128, 0.8);
+  background-color: var(--color-pure-black, #000000);
 }
 
 .disco-track-badge-sample {
   display: inline-flex;
   align-items: center;
   padding: 2px 7px;
-  border-radius: 4px;
-  background-color: rgba(0, 0, 0, 0.04);
-  color: #888b89;
-  font-family: 'GRAPHIK', sans-serif;
-  font-size: 9.5px;
-  font-weight: 500;
-  letter-spacing: 0.04em;
+  border-radius: var(--radius-full, 900px);
+  background-color: transparent;
+  border: 1px solid var(--color-charcoal, #272727);
+  color: var(--color-sand, #d9d7ce);
+  font-family: var(--font-apercu-mono-pro), monospace;
+  font-size: 10px;
+  font-weight: 400;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
 }
 
 .disco-track-card.is-active .disco-track-badge-sample {
-  background-color: rgba(255, 255, 255, 0.1);
-  color: rgba(255, 255, 255, 0.7);
+  color: var(--color-hi-vis-yellow, #f0e226);
+  border-color: var(--color-hi-vis-yellow, #f0e226);
 }
 
 .disco-track-duration {
-  font-family: 'GRAPHIK', sans-serif;
+  font-family: var(--font-apercu-mono-pro), monospace;
   font-size: 12px;
-  font-weight: 600;
-  color: #15803d;
+  font-weight: 400;
+  color: var(--color-sand, #d9d7ce);
   letter-spacing: 0.02em;
 }
 
 .disco-track-card.is-active .disco-track-duration {
-  color: #4ade80;
+  color: var(--color-hi-vis-yellow, #f0e226);
 }
 
 .disco-track-card.is-full-track {
-  background-color: rgba(34, 197, 94, 0.04);
-  border-color: rgba(34, 197, 94, 0.16);
+  background-color: transparent;
 }
 
 .disco-track-card.is-full-track:hover {
-  background-color: rgba(34, 197, 94, 0.09);
-  border-color: rgba(34, 197, 94, 0.3);
+  background-color: rgba(240, 226, 38, 0.06);
 }
 
 .disco-track-card.is-full-track.is-active {
-  background-color: #0f2416;
-  border-color: #22c55e;
+  background-color: rgba(240, 226, 38, 0.12);
+  border-left: 2px solid var(--color-hi-vis-yellow, #f0e226);
 }
 
 .disco-track-play-btn {
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-full, 900px);
   display: flex;
   align-items: center;
   justify-content: center;
   background-color: transparent;
-  border: 1px solid rgba(0, 0, 0, 0.12);
-  color: #222;
+  border: 1px solid var(--color-charcoal, #272727);
+  color: var(--color-bone, #f5f4f0);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.15s ease;
 }
 
 .disco-track-card:hover .disco-track-play-btn {
-  background-color: #000000;
-  border-color: #000000;
-  color: #FFFFFF;
+  background-color: var(--color-hi-vis-yellow, #f0e226);
+  border-color: var(--color-hi-vis-yellow, #f0e226);
+  color: var(--color-pure-black, #000000);
 }
 
 .disco-track-card.is-active .disco-track-play-btn {
-  background-color: #FF3B30;
-  border-color: #FF3B30;
-  color: #FFFFFF;
+  background-color: var(--color-hi-vis-yellow, #f0e226);
+  border-color: var(--color-hi-vis-yellow, #f0e226);
+  color: var(--color-pure-black, #000000);
 }
 
 /* --------------------------------------------------------------------------
@@ -898,36 +1100,34 @@
 
 /* ==========================================================================
    REPRODUCTOR D'ÀUDIO PERSISTENT INFERIOR (AudioPlayerBottom)
+   CASSETTE SYSTEM: Ink Black #19181a · Hi-Vis Yellow #f0e226 · Bone #f5f4f0
    ========================================================================== */
 
-/* Playlist Drawer (Llista de mostres de Spotify desplegable) */
+/* Playlist Drawer (Llista de mostres desplegable estil Cassette) */
 .bottom-player-playlist-drawer {
   position: fixed;
   bottom: 114px;
-  right: clamp(24px, calc(50% - 500px), 120px);
-  width: min(460px, calc(100vw - 32px));
+  right: clamp(20px, calc(50% - 490px), 120px);
+  width: min(480px, calc(100vw - 32px));
   max-height: 460px;
-  background: rgba(16, 18, 17, 0.96);
-  backdrop-filter: blur(28px);
-  -webkit-backdrop-filter: blur(28px);
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  border-radius: 20px;
-  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.8),
-              0 0 0 1px rgba(212, 163, 89, 0.15);
+  background: var(--color-ink-black, #19181a);
+  border: 1px solid var(--color-charcoal, #272727);
+  border-radius: 0px;
+  box-shadow: none;
   z-index: 1049;
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   opacity: 0;
   pointer-events: none;
-  transform: translateY(16px) scale(0.97);
+  transform: translateY(12px);
 }
 
 .bottom-player-playlist-drawer.is-open {
   opacity: 1;
   pointer-events: auto;
-  transform: translateY(0) scale(1);
+  transform: translateY(0);
 }
 
 .playlist-drawer-header,
@@ -935,9 +1135,9 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 16px 20px;
-  background: rgba(10, 12, 11, 0.8);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 14px 18px;
+  background: var(--color-ink-black, #19181a);
+  border-bottom: 1px solid var(--color-charcoal, #272727);
 }
 
 .playlist-drawer-title-group {
@@ -947,50 +1147,52 @@
 }
 
 .playlist-drawer-badge {
-  font-family: 'GRAPHIK', sans-serif;
-  font-weight: 600;
-  font-size: 10px;
-  color: #d4a359;
+  font-family: var(--font-apercu-mono-pro), monospace;
+  font-weight: 400;
+  font-size: 11px;
+  color: var(--color-hi-vis-yellow, #f0e226);
   text-transform: uppercase;
   letter-spacing: 0.08em;
 }
 
 .playlist-drawer-title,
 .bottom-player-playlist-title {
-  font-family: 'GRAPHIK', sans-serif;
-  font-size: 14px;
-  font-weight: 700;
-  color: #FFFFFF;
+  font-family: var(--font-apercu-pro), sans-serif;
+  font-size: 15px;
+  font-weight: 400;
+  color: var(--color-bone, #f5f4f0);
   margin: 0;
+  letter-spacing: 0.02em;
 }
 
 .playlist-drawer-close,
 .bottom-player-playlist-close {
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: #A0A5A2;
+  background: transparent;
+  border: 1px solid var(--color-charcoal, #272727);
+  color: var(--color-bone, #f5f4f0);
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   width: 28px;
   height: 28px;
-  border-radius: 50%;
+  border-radius: var(--radius-full, 900px);
   transition: all 0.2s ease;
   font-size: 12px;
 }
 
 .playlist-drawer-close:hover,
 .bottom-player-playlist-close:hover {
-  background: rgba(255, 255, 255, 0.15);
-  color: #FFFFFF;
+  background: var(--color-hi-vis-yellow, #f0e226);
+  border-color: var(--color-hi-vis-yellow, #f0e226);
+  color: var(--color-pure-black, #000000);
 }
 
 .playlist-drawer-list,
 .bottom-player-playlist-list {
   list-style: none;
   margin: 0;
-  padding: 8px;
+  padding: 6px;
   overflow-y: auto;
   max-height: 380px;
 }
@@ -1001,21 +1203,28 @@
   align-items: center;
   justify-content: space-between;
   padding: 10px 12px;
-  border-radius: 10px;
+  border-radius: 0px;
+  border-bottom: 1px solid var(--color-charcoal, #272727);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.18s ease;
   gap: 12px;
+  background: transparent;
+}
+
+.playlist-drawer-item:last-child,
+.bottom-player-playlist-item:last-child {
+  border-bottom: none;
 }
 
 .playlist-drawer-item:hover,
 .bottom-player-playlist-item:hover {
-  background: rgba(255, 255, 255, 0.06);
+  background: rgba(240, 226, 38, 0.06);
 }
 
 .playlist-drawer-item.is-selected,
 .bottom-player-playlist-item.is-active {
-  background: rgba(212, 163, 89, 0.12);
-  border: 1px solid rgba(212, 163, 89, 0.3);
+  background: rgba(240, 226, 38, 0.12);
+  border-left: 2px solid var(--color-hi-vis-yellow, #f0e226);
 }
 
 .playlist-item-left {
@@ -1026,20 +1235,20 @@
 }
 
 .playlist-item-index {
-  font-family: 'Coign', 'GRAPHIK', sans-serif;
-  font-size: 13px;
-  font-weight: 500;
-  color: #6C706E;
-  min-width: 20px;
+  font-family: var(--font-apercu-mono-pro), monospace;
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--color-sand, #d9d7ce);
+  min-width: 22px;
 }
 
 .playlist-item-cover {
   width: 38px;
   height: 38px;
-  border-radius: 8px;
+  border-radius: 0px;
+  border: 1px solid var(--color-charcoal, #272727);
   object-fit: cover;
   flex-shrink: 0;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
 }
 
 .playlist-item-meta {
@@ -1050,23 +1259,24 @@
 }
 
 .playlist-item-title {
-  font-family: 'GRAPHIK', sans-serif;
-  font-size: 13.5px;
-  font-weight: 600;
-  color: #FFFFFF;
+  font-family: var(--font-apercu-pro), sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--color-bone, #f5f4f0);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-.playlist-drawer-item.is-selected .playlist-item-title {
-  color: #d4a359;
+.playlist-drawer-item.is-selected .playlist-item-title,
+.bottom-player-playlist-item.is-active .playlist-item-title {
+  color: var(--color-hi-vis-yellow, #f0e226);
 }
 
 .playlist-item-album {
-  font-family: 'GRAPHIK', sans-serif;
+  font-family: var(--font-apercu-mono-pro), monospace;
   font-size: 11px;
-  color: #8E9290;
+  color: var(--color-sand, #d9d7ce);
 }
 
 .playlist-item-right {
@@ -1077,24 +1287,24 @@
 }
 
 .playlist-item-tag {
-  font-family: 'GRAPHIK', sans-serif;
-  font-size: 9.5px;
-  color: #d4a359;
-  background: rgba(212, 163, 89, 0.1);
-  padding: 2px 6px;
-  border-radius: 4px;
+  font-family: var(--font-apercu-mono-pro), monospace;
+  font-size: 11px;
+  color: var(--color-hi-vis-yellow, #f0e226);
+  border: 1px solid var(--color-hi-vis-yellow, #f0e226);
+  padding: 2px 8px;
+  border-radius: var(--radius-full, 900px);
+  text-transform: uppercase;
 }
 
 .playlist-item-tag--full {
-  color: #4ade80;
-  background: rgba(34, 197, 94, 0.15);
-  border: 1px solid rgba(34, 197, 94, 0.35);
-  font-weight: 600;
-  letter-spacing: 0.03em;
+  color: var(--color-pure-black, #000000);
+  background: var(--color-hi-vis-yellow, #f0e226);
+  border: 1px solid var(--color-hi-vis-yellow, #f0e226);
+  font-weight: 500;
 }
 
 .playlist-item-spotify {
-  color: #8E9290;
+  color: var(--color-sand, #d9d7ce);
   display: flex;
   align-items: center;
   padding: 4px;
@@ -1102,13 +1312,11 @@
 }
 
 .playlist-item-spotify:hover {
-  color: #1DB954;
-  transform: scale(1.15);
+  color: var(--color-hi-vis-yellow, #f0e226);
 }
 
 /* ==========================================================================
-   REPRODUCTOR D'ÀUDIO FLOTANT (FLOATING ISLAND DOCK)
-   Animació GSAP per a minimització / expansió suau
+   REPRODUCTOR D'ÀUDIO FLOTANT — DOCK D'EQUIPAMENT CASSETTE
    ========================================================================== */
 .floating-audio-player,
 .bottom-audio-player {
@@ -1117,41 +1325,39 @@
   left: 50%;
   transform: translateX(-50%);
   width: min(1040px, calc(100vw - 48px));
-  height: 78px;
-  border-radius: 22px;
-  background: rgba(14, 16, 15, 0.92);
-  backdrop-filter: blur(28px);
-  -webkit-backdrop-filter: blur(28px);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  box-shadow: 0 20px 50px -10px rgba(0, 0, 0, 0.75),
-              0 0 0 1px rgba(212, 163, 89, 0.16);
+  height: 74px;
+  border-radius: var(--radius-full, 900px);
+  background: var(--color-ink-black, #19181a);
+  border: 1px solid var(--color-charcoal, #272727);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
   z-index: 1050;
   display: flex;
   align-items: center;
   box-sizing: border-box;
   overflow: hidden;
   user-select: none;
-  transition: box-shadow 0.3s ease, border-color 0.3s ease;
+  transition: border-color 0.2s ease;
+}
+
+.floating-audio-player:hover,
+.bottom-audio-player:hover {
+  border-color: var(--color-hi-vis-yellow, #f0e226);
 }
 
 .floating-audio-player.is-minimized,
 .bottom-audio-player.is-minimized {
   cursor: pointer;
-  background: rgba(16, 18, 17, 0.95);
-  border-color: rgba(212, 163, 89, 0.38);
-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.8),
-              0 0 24px rgba(212, 163, 89, 0.2);
+  background: var(--color-ink-black, #19181a);
+  border-color: var(--color-charcoal, #272727);
 }
 
 .floating-audio-player.is-minimized:hover,
 .bottom-audio-player.is-minimized:hover {
-  border-color: rgba(212, 163, 89, 0.6);
-  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.85),
-              0 0 32px rgba(212, 163, 89, 0.3);
+  border-color: var(--color-hi-vis-yellow, #f0e226);
 }
 
 /* ==========================================================================
-   VISTA MINIMITZADA (Dynamic Floating Pill)
+   VISTA MINIMITZADA (Cassette Pill Capsule)
    ========================================================================== */
 .floating-player-mini {
   width: 100%;
@@ -1159,19 +1365,19 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 12px 0 8px;
-  gap: 12px;
+  padding: 0 16px 0 12px;
+  gap: 14px;
   box-sizing: border-box;
 }
 
 .mini-cover-wrap {
   position: relative;
-  width: 38px;
-  height: 38px;
-  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  border-radius: 0px;
+  border: 1px solid var(--color-charcoal, #272727);
   overflow: hidden;
   flex-shrink: 0;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.6);
 }
 
 .mini-cover {
@@ -1180,27 +1386,8 @@
   object-fit: cover;
 }
 
-.mini-cover.is-spinning {
-  animation: miniVinylSpin 10s linear infinite;
-}
-
-@keyframes miniVinylSpin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
-
 .mini-pulse-ring {
-  position: absolute;
-  inset: 0;
-  border-radius: 50%;
-  border: 1px solid rgba(212, 163, 89, 0.5);
-  animation: miniPulseRing 2s cubic-bezier(0.2, 1, 0.3, 1) infinite;
-  pointer-events: none;
-}
-
-@keyframes miniPulseRing {
-  0% { transform: scale(0.9); opacity: 0.8; }
-  100% { transform: scale(1.35); opacity: 0; }
+  display: none;
 }
 
 .mini-info {
@@ -1211,35 +1398,37 @@
 }
 
 .mini-title {
-  font-family: 'GRAPHIK', sans-serif;
-  font-size: 13px;
-  font-weight: 600;
-  color: #FFFFFF;
+  font-family: var(--font-apercu-pro), sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--color-bone, #f5f4f0);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 .mini-artist {
-  font-family: 'GRAPHIK', sans-serif;
+  font-family: var(--font-apercu-mono-pro), monospace;
   font-size: 11px;
-  color: #8E9290;
+  color: var(--color-sand, #d9d7ce);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
 }
 
 .mini-eq-bars {
   display: flex;
   align-items: flex-end;
-  gap: 2.5px;
+  gap: 2px;
   height: 14px;
   flex-shrink: 0;
-  padding: 0 2px;
+  padding: 0 4px;
 }
 
 .mini-eq-bar {
-  width: 2.5px;
-  background-color: #d4a359;
-  border-radius: 1px;
-  animation: miniEqPulse 1s ease-in-out infinite alternate;
+  width: 3px;
+  background-color: var(--color-hi-vis-yellow, #f0e226);
+  border-radius: 0px;
+  animation: miniEqPulse 0.9s ease-in-out infinite alternate;
 }
 
 .mini-eq-bar:nth-child(1) { height: 35%; animation-delay: 0.1s; }
@@ -1247,7 +1436,7 @@
 .mini-eq-bar:nth-child(3) { height: 55%; animation-delay: 0.2s; }
 
 @keyframes miniEqPulse {
-  0% { height: 25%; }
+  0% { height: 20%; }
   100% { height: 100%; }
 }
 
@@ -1259,54 +1448,50 @@
 }
 
 .mini-play-btn {
-  width: 34px;
-  height: 34px;
-  border-radius: 50%;
-  background: #d4a359;
-  color: #0b0d11;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-full, 900px);
+  background: var(--color-hi-vis-yellow, #f0e226);
+  color: var(--color-pure-black, #000000);
   border: none;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: transform 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
-  box-shadow: 0 2px 8px rgba(212, 163, 89, 0.3);
+  transition: transform 0.15s ease, background 0.15s ease;
 }
 
 .mini-play-btn:hover {
-  transform: scale(1.08);
-  background: #e5b974;
-  box-shadow: 0 4px 14px rgba(212, 163, 89, 0.45);
+  background: #fff142;
+  transform: scale(1.05);
 }
 
 .mini-expand-btn {
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  color: rgba(255, 255, 255, 0.85);
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-full, 900px);
+  background: transparent;
+  border: 1px solid var(--color-charcoal, #272727);
+  color: var(--color-bone, #f5f4f0);
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.15s ease;
 }
 
 .mini-expand-btn:hover {
-  background: rgba(255, 255, 255, 0.18);
-  color: #ffffff;
-  border-color: rgba(212, 163, 89, 0.4);
-  transform: scale(1.08);
+  border-color: var(--color-hi-vis-yellow, #f0e226);
+  color: var(--color-hi-vis-yellow, #f0e226);
 }
 
 /* ==========================================================================
-   VISTA EXPANDIDA (Full Floating Island Card)
+   VISTA EXPANDIDA (Cassette Dock Island)
    ========================================================================== */
 .floating-player-expanded {
   width: 100%;
   height: 100%;
-  padding: 0 22px;
+  padding: 0 24px;
   display: grid;
   grid-template-columns: 260px 1fr 280px;
   align-items: center;
@@ -1324,11 +1509,11 @@
 
 .bottom-player-cover-wrap {
   position: relative;
-  width: 48px;
-  height: 48px;
-  border-radius: 10px;
+  width: 46px;
+  height: 46px;
+  border-radius: 0px;
+  border: 1px solid var(--color-charcoal, #272727);
   overflow: hidden;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
   flex-shrink: 0;
 }
 
@@ -1341,7 +1526,7 @@
 .bottom-player-playing-indicator {
   position: absolute;
   inset: 0;
-  background: rgba(0, 0, 0, 0.4);
+  background: rgba(0, 0, 0, 0.45);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1351,7 +1536,7 @@
 .bottom-player-playing-indicator .dot {
   width: 4px;
   height: 4px;
-  background-color: #d4a359;
+  background-color: var(--color-hi-vis-yellow, #f0e226);
   border-radius: 50%;
   animation: dotBlink 1.4s ease-in-out infinite both;
 }
@@ -1367,7 +1552,7 @@
 .bottom-player-info {
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: 2px;
   min-width: 0;
 }
 
@@ -1379,38 +1564,39 @@
 }
 
 .bottom-player-title {
-  font-family: 'GRAPHIK', sans-serif;
+  font-family: var(--font-apercu-pro), sans-serif;
   font-size: 14px;
-  font-weight: 600;
-  color: #FFFFFF;
+  font-weight: 400;
+  color: var(--color-bone, #f5f4f0);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 .bottom-player-badge {
-  background-color: rgba(212, 163, 89, 0.18);
-  color: #d4a359;
-  border: 1px solid rgba(212, 163, 89, 0.35);
-  font-family: 'GRAPHIK', sans-serif;
-  font-size: 9px;
-  font-weight: 700;
-  padding: 1px 6px;
-  border-radius: 4px;
+  background-color: transparent;
+  color: var(--color-hi-vis-yellow, #f0e226);
+  border: 1px solid var(--color-hi-vis-yellow, #f0e226);
+  font-family: var(--font-apercu-mono-pro), monospace;
+  font-size: 10px;
+  font-weight: 400;
+  padding: 1px 7px;
+  border-radius: var(--radius-full, 900px);
   letter-spacing: 0.06em;
+  text-transform: uppercase;
   flex-shrink: 0;
 }
 
 .bottom-player-badge--full {
-  background-color: rgba(34, 197, 94, 0.18);
-  color: #4ade80;
-  border-color: rgba(34, 197, 94, 0.45);
+  background-color: var(--color-hi-vis-yellow, #f0e226);
+  color: var(--color-pure-black, #000000);
+  font-weight: 500;
 }
 
 .bottom-player-album {
-  font-family: 'GRAPHIK', sans-serif;
-  font-size: 12px;
-  color: #8E9290;
+  font-family: var(--font-apercu-mono-pro), monospace;
+  font-size: 11px;
+  color: var(--color-sand, #d9d7ce);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -1423,7 +1609,7 @@
   align-items: center;
   gap: 6px;
   width: 100%;
-  max-width: 520px;
+  max-width: 500px;
   margin: 0 auto;
 }
 
@@ -1436,13 +1622,13 @@
 .bottom-player-btn {
   background: transparent;
   border: none;
-  color: #A0A5A2;
+  color: var(--color-sand, #d9d7ce);
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   transition: all 0.2s ease;
-  border-radius: 50%;
+  border-radius: var(--radius-full, 900px);
 }
 
 .bottom-player-btn--skip {
@@ -1450,27 +1636,25 @@
 }
 
 .bottom-player-btn--skip:hover {
-  color: #FFFFFF;
-  transform: scale(1.1);
+  color: var(--color-hi-vis-yellow, #f0e226);
 }
 
 .bottom-player-btn--play {
-  width: 38px;
-  height: 38px;
-  background-color: #FFFFFF;
-  color: #0b0d11;
-  box-shadow: 0 4px 14px rgba(255, 255, 255, 0.2);
+  width: 36px;
+  height: 36px;
+  background-color: var(--color-hi-vis-yellow, #f0e226);
+  color: var(--color-pure-black, #000000);
+  border: 1px solid var(--color-hi-vis-yellow, #f0e226);
 }
 
 .bottom-player-btn--play:hover {
-  transform: scale(1.06);
-  background-color: #F0F0F0;
+  background-color: #fff142;
+  transform: scale(1.05);
 }
 
 .bottom-player-btn--play.is-playing {
-  background-color: #d4a359;
-  color: #0b0d11;
-  box-shadow: 0 4px 16px rgba(212, 163, 89, 0.45);
+  background-color: var(--color-hi-vis-yellow, #f0e226);
+  color: var(--color-pure-black, #000000);
 }
 
 .bottom-player-scrubber-group {
@@ -1481,10 +1665,10 @@
 }
 
 .bottom-player-time {
-  font-family: 'GRAPHIK', sans-serif;
+  font-family: var(--font-apercu-mono-pro), monospace;
   font-size: 11px;
   font-variant-numeric: tabular-nums;
-  color: #8E9290;
+  color: var(--color-sand, #d9d7ce);
   min-width: 34px;
 }
 
@@ -1499,8 +1683,8 @@
 .bottom-player-progress-bar {
   flex: 1;
   height: 4px;
-  background-color: rgba(255, 255, 255, 0.12);
-  border-radius: 2px;
+  background-color: var(--color-charcoal, #272727);
+  border-radius: 0px;
   cursor: pointer;
   position: relative;
   transition: height 0.15s ease;
@@ -1512,21 +1696,20 @@
 
 .bottom-player-progress-fill {
   height: 100%;
-  background: linear-gradient(90deg, #d4a359 0%, #f3c784 100%);
-  border-radius: 2px;
+  background: var(--color-hi-vis-yellow, #f0e226);
+  border-radius: 0px;
   position: relative;
 }
 
 .bottom-player-progress-thumb {
   position: absolute;
-  right: -5px;
+  right: -4px;
   top: 50%;
   transform: translateY(-50%) scale(0);
-  width: 12px;
-  height: 12px;
-  background-color: #FFFFFF;
-  border-radius: 50%;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
+  width: 10px;
+  height: 10px;
+  background-color: var(--color-hi-vis-yellow, #f0e226);
+  border-radius: 0px;
   transition: transform 0.15s ease;
 }
 
@@ -1539,30 +1722,32 @@
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  gap: 14px;
+  gap: 12px;
 }
 
 .bottom-player-action-btn {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: #A0A5A2;
-  font-family: 'GRAPHIK', sans-serif;
-  font-size: 11.5px;
-  font-weight: 500;
-  padding: 6px 12px;
-  border-radius: 20px;
+  background: transparent;
+  border: 1px solid var(--color-charcoal, #272727);
+  color: var(--color-bone, #f5f4f0);
+  font-family: var(--font-apercu-mono-pro), monospace;
+  font-size: 11px;
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 6px 14px;
+  border-radius: var(--radius-full, 900px);
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .bottom-player-action-btn:hover,
 .bottom-player-action-btn.is-active {
-  background-color: rgba(255, 255, 255, 0.15);
-  color: #FFFFFF;
-  border-color: rgba(212, 163, 89, 0.35);
+  background-color: transparent;
+  color: var(--color-hi-vis-yellow, #f0e226);
+  border-color: var(--color-hi-vis-yellow, #f0e226);
 }
 
 .bottom-player-volume-wrap {
@@ -1574,7 +1759,7 @@
 .bottom-player-volume-btn {
   background: transparent;
   border: none;
-  color: #8E9290;
+  color: var(--color-sand, #d9d7ce);
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -1583,26 +1768,26 @@
 }
 
 .bottom-player-volume-btn:hover {
-  color: #FFFFFF;
+  color: var(--color-hi-vis-yellow, #f0e226);
 }
 
 .bottom-player-volume-slider {
-  width: 68px;
-  height: 4px;
+  width: 64px;
+  height: 3px;
   -webkit-appearance: none;
   appearance: none;
-  background: rgba(255, 255, 255, 0.15);
-  border-radius: 2px;
+  background: var(--color-charcoal, #272727);
+  border-radius: 0px;
   outline: none;
   cursor: pointer;
 }
 
 .bottom-player-volume-slider::-webkit-slider-thumb {
   -webkit-appearance: none;
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: #FFFFFF;
+  width: 9px;
+  height: 9px;
+  border-radius: 0px;
+  background: var(--color-hi-vis-yellow, #f0e226);
   cursor: pointer;
 }
 
@@ -1610,28 +1795,32 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  background-color: #1DB954;
-  color: #000000;
-  font-family: 'GRAPHIK', sans-serif;
-  font-size: 11.5px;
-  font-weight: 700;
+  background-color: transparent;
+  border: 1px solid var(--color-charcoal, #272727);
+  color: var(--color-bone, #f5f4f0);
+  font-family: var(--font-apercu-mono-pro), monospace;
+  font-size: 11px;
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
   padding: 6px 12px;
-  border-radius: 20px;
+  border-radius: var(--radius-full, 900px);
   transition: all 0.2s ease;
+  text-decoration: none;
 }
 
 .bottom-player-spotify-link:hover {
-  background-color: #1ed760;
-  transform: scale(1.04);
+  border-color: var(--color-hi-vis-yellow, #f0e226);
+  color: var(--color-hi-vis-yellow, #f0e226);
 }
 
 .bottom-player-minimize-toggle {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  color: #A0A5A2;
+  width: 30px;
+  height: 30px;
+  border-radius: var(--radius-full, 900px);
+  background: transparent;
+  border: 1px solid var(--color-charcoal, #272727);
+  color: var(--color-sand, #d9d7ce);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1641,41 +1830,8 @@
 }
 
 .bottom-player-minimize-toggle:hover {
-  background: rgba(255, 255, 255, 0.16);
-  color: #FFFFFF;
-  border-color: rgba(212, 163, 89, 0.45);
-  transform: scale(1.08);
-}
-
-/* Playlist Drawer Flotant */
-.bottom-player-playlist-drawer {
-  position: fixed;
-  bottom: 116px;
-  left: 50%;
-  transform: translateX(-50%) translateY(20px) scale(0.96);
-  width: min(500px, calc(100vw - 32px));
-  max-height: 440px;
-  background: rgba(16, 18, 17, 0.96);
-  backdrop-filter: blur(28px);
-  -webkit-backdrop-filter: blur(28px);
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  border-radius: 20px;
-  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.8),
-              0 0 0 1px rgba(212, 163, 89, 0.15);
-  z-index: 1049;
-  opacity: 0;
-  pointer-events: none;
-  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1),
-              opacity 0.3s ease;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
-
-.bottom-player-playlist-drawer.is-open {
-  opacity: 1;
-  pointer-events: auto;
-  transform: translateX(-50%) translateY(0) scale(1);
+  border-color: var(--color-hi-vis-yellow, #f0e226);
+  color: var(--color-hi-vis-yellow, #f0e226);
 }
 
 /* Responsivitat del Reproductor Flotant */
@@ -1690,7 +1846,7 @@
   }
 
   .bottom-player-center {
-    max-width: 300px;
+    max-width: 280px;
   }
 }
 
@@ -1698,6 +1854,8 @@
   .floating-audio-player,
   .bottom-audio-player {
     bottom: 16px;
+    height: 66px;
+    width: calc(100vw - 24px);
   }
 
   .floating-player-expanded {
@@ -1707,8 +1865,8 @@
   }
 
   .bottom-player-cover-wrap {
-    width: 42px;
-    height: 42px;
+    width: 38px;
+    height: 38px;
   }
 
   .bottom-player-title {
@@ -1717,7 +1875,7 @@
   }
 
   .bottom-player-album {
-    font-size: 11px;
+    font-size: 10.5px;
     max-width: 140px;
   }
 
@@ -1735,28 +1893,29 @@
   }
 
   .bottom-player-btn--play {
-    width: 36px;
-    height: 36px;
+    width: 34px;
+    height: 34px;
   }
 }
 
 /* --------------------------------------------------------------------------
-   FOOTER EDITORIAL NET
+   FOOTER EDITORIAL NET — CASSETTE
    -------------------------------------------------------------------------- */
 .disco-footer {
   width: 100%;
   padding: 40px var(--margin, 24px) 110px;
   text-align: center;
-  border-top: 1px solid rgba(0, 0, 0, 0.08);
-  background-color: transparent;
+  border-top: 1px solid var(--color-charcoal, #272727);
+  background-color: var(--color-ink-black, #19181a);
   box-sizing: border-box;
 }
 
 .disco-footer-copyright {
-  font-family: 'GRAPHIK', -apple-system, BlinkMacSystemFont, sans-serif;
-  font-size: clamp(13px, 1.05vw, 14px);
-  font-weight: 500;
-  letter-spacing: 0.04em;
-  color: rgba(17, 18, 17, 0.65);
+  font-family: var(--font-apercu-mono-pro), monospace;
+  font-size: 12px;
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-sand, #d9d7ce);
   margin: 0;
 }
