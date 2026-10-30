@@ -21,11 +21,11 @@ export default function Start() {
 
         <div className="start-section-nineta__content">
           <BlockReveal color="#FF0000" direction="lr" delay={100} duration={650}>
-            <h2 className="start-desc--white">
-              Per fi, ací teniu el Clip de Nineta. <br />
-              Un Western modern ambientat en un paissatge albuferenc crepuscular i
-              distòpic. Una lluita interna que desemboca en bogeria.
-            </h2>
+            <p className="start-desc--white">
+              Per fi, ací teniu el Clip de Nineta. Un Western modern ambientat en
+              un paissatge albuferenc crepuscular i distòpic. Una lluita interna que
+              desemboca en bogeria.
+            </p>
           </BlockReveal>
 
           <p className="start-credits--white">
@@ -33,6 +33,7 @@ export default function Start() {
           </p>
 
           <AnimatedTitle
+            as="p"
             text="NINETA"
             color="#FF0000"
             className="start-big-title--red"
@@ -44,14 +45,14 @@ export default function Start() {
       <section className="start-section-viatger">
         <div className="start-section-viatger__content">
           <BlockReveal color="#FF0000" direction="lr" delay={150} duration={650}>
-            <h2 className="start-desc--black">
+            <p className="start-desc--black">
               No és només un àlbum; és una crida a l'ànima, una invitació a
               explorar nous horitzons i a abraçar l'essència de la vida. A través
               de lletres i melodies envoltants, Miquel Gil ens transporta a un
               univers ric en emocions i experiències. Cada cançó és un viatge en si
               mateixa, una oportunitat per perdre's en els detalls i trobar
               significat en cada nota.
-            </h2>
+            </p>
           </BlockReveal>
 
           <p className="start-credits--black">
@@ -59,6 +60,7 @@ export default function Start() {
           </p>
 
           <AnimatedTitle
+            as="p"
             text="VIATGER"
             color="#FF0000"
             className="start-big-title--red"
@@ -98,28 +100,49 @@ export default function Start() {
         </div>
 
         <div className="start-section-principal__content">
-          <AnimatedTitle
-            text="PRESENTACIÓ AL PRINCIPAL"
-            color="#000000"
-            className="start-big-title--black"
-          />
+          <div className="start-big-title-stack">
+            <AnimatedTitle
+              as="p"
+              text="PRESENTACIÓ"
+              color="#000000"
+              className="start-big-title--black"
+              delay={0}
+            />
+            <AnimatedTitle
+              as="p"
+              text="AL"
+              color="#000000"
+              className="start-big-title--black"
+              delay={200}
+            />
+            <AnimatedTitle
+              as="p"
+              text="PRINCIPAL"
+              color="#000000"
+              className="start-big-title--black"
+              delay={350}
+            />
+          </div>
 
           <BlockReveal color="#F8EFE6" direction="lr" delay={250} duration={500}>
             <div className="start-divider-red" />
           </BlockReveal>
 
           <BlockReveal color="#FF0000" direction="lr" delay={300} duration={700}>
-            <h2 className="start-desc--black">
-              El passat dissabte, van viure una nit inoblidable al Teatre
-              Principal amb la presentació del nou disc de Miquel Gil, "Viatger".
-              L'atmosfera del teatre es va omplir d'emoció i expectació. <br />
-              <br />
-              Els col·laboradors especials, entre els quals es trobaven Pep Gimeno
-              "Botifarra", Vicent Torrent, Maria Bertomeu "La Maria", Noelia
-              Llorens "Titana" i Borja Penalba, van aportar la seva pròpia màgia a
-              la nit, enriquint les actuacions amb la seva presència única i les
-              seves interpretacions brillants.
-            </h2>
+            <div className="start-desc-stack">
+              <p className="start-desc--black">
+                El passat dissabte, van viure una nit inoblidable al Teatre
+                Principal amb la presentació del nou disc de Miquel Gil, &ldquo;Viatger&rdquo;.
+                L&rsquo;atmosfera del teatre es va omplir d&rsquo;emoció i expectació.
+              </p>
+              <p className="start-desc--black">
+                Els col·laboradors especials, entre els quals es trobaven Pep Gimeno
+                &ldquo;Botifarra&rdquo;, Vicent Torrent, Maria Bertomeu &ldquo;La Maria&rdquo;, Noelia
+                Llorens &ldquo;Titana&rdquo; i Borja Penalba, van aportar la seva pròpia màgia a
+                la nit, enriquint les actuacions amb la seva presència única i les
+                seves interpretacions brillants.
+              </p>
+            </div>
           </BlockReveal>
         </div>
       </section>

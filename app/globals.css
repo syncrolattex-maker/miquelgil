@@ -1982,34 +1982,39 @@ button {
 
 .start-desc--white {
   color: #FFFFFF;
-  font-family: "GRIFINITO L", Sans-serif;
-  font-size: 37px;
+  font-family: "GRIFINITO L", Georgia, "Times New Roman", serif;
+  font-size: clamp(22px, 2.3vw, 34px);
   font-weight: 600;
   font-style: normal;
-  line-height: 28px;
-  letter-spacing: 0.8px;
+  line-height: 1.25;
+  letter-spacing: 0.02em;
+  max-width: 54ch;
+  text-wrap: balance;
   margin: 0 0 20px 0;
 }
 
 .start-credits--white {
   color: #FFFFFF;
-  font-family: "GRAPHIK", Sans-serif;
-  font-size: 12px;
+  font-family: "GRAPHIK", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: clamp(13px, 1vw, 15px);
   font-weight: 400;
   font-style: italic;
-  line-height: 14px;
-  margin: 0 0 20px 0;
+  line-height: 1.5;
+  letter-spacing: 0.02em;
+  margin: 0 0 24px 0;
+  opacity: 0.85;
 }
 
 .start-big-title--red {
   color: #FF0000;
-  font-family: 'Maelstrom Sans', sans-serif;
-  font-size: clamp(72px, 12vw, 170px);
-  line-height: 0.9;
+  font-family: 'Maelstrom Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: clamp(52px, 7vw, 92px);
+  line-height: 0.88;
   font-weight: 700;
   letter-spacing: 0.04em;
   margin: 0;
   text-transform: uppercase;
+  white-space: nowrap;
 }
 
 /* Section 2: Viatger (Beige background) */
@@ -2031,23 +2036,27 @@ button {
 
 .start-desc--black {
   color: #000000;
-  font-family: "GRIFINITO L", Sans-serif;
-  font-size: 37px;
+  font-family: "GRIFINITO L", Georgia, "Times New Roman", serif;
+  font-size: clamp(22px, 2.3vw, 34px);
   font-weight: 600;
   font-style: normal;
-  line-height: 28px;
-  letter-spacing: 0.8px;
+  line-height: 1.25;
+  letter-spacing: 0.02em;
+  max-width: 54ch;
+  text-wrap: balance;
   margin: 0 0 20px 0;
 }
 
 .start-credits--black {
   color: #000000;
-  font-family: "GRAPHIK", Sans-serif;
-  font-size: 12px;
+  font-family: "GRAPHIK", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: clamp(13px, 1vw, 15px);
   font-weight: 400;
   font-style: italic;
-  line-height: 14px;
-  margin: 0 0 20px 0;
+  line-height: 1.5;
+  letter-spacing: 0.02em;
+  margin: 0 0 24px 0;
+  opacity: 0.85;
 }
 
 .start-section-viatger__cover {
@@ -2073,9 +2082,10 @@ button {
 
 .start-cover-sub {
   color: #333333;
-  font-family: "GRAPHIK", Sans-serif;
+  font-family: "GRAPHIK", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   font-size: 15px;
-  font-weight: 100;
+  font-weight: 400;
+  line-height: 1.5;
   margin-top: 15px;
   text-align: center;
 }
@@ -2111,37 +2121,72 @@ button {
   flex-direction: column;
   justify-content: center;
   padding: 40px 60px;
+  box-sizing: border-box;
 }
 
-.start-big-title--black {
+.start-big-title-stack {
+  display: flex;
+  flex-direction: column;
+  margin: 0 0 16px 0;
+  gap: 2px;
+}
+
+.start-big-title-stack .start-big-title--black {
   color: #000000;
-  font-family: 'Maelstrom Sans', sans-serif;
-  font-size: clamp(72px, 12vw, 170px);
-  line-height: 0.9;
+  font-family: 'Maelstrom Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: clamp(34px, 4.2vw, 64px);
+  line-height: 0.88;
   font-weight: 700;
   letter-spacing: 0.04em;
   margin: 0;
   text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.start-big-title--black {
+  color: #000000;
+  font-family: 'Maelstrom Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: clamp(52px, 7vw, 92px);
+  line-height: 0.88;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  margin: 0;
+  text-transform: uppercase;
+  white-space: nowrap;
 }
 
 .start-divider-red {
-  width: 55%;
-  height: 10px;
+  width: clamp(140px, 35vw, 240px);
+  height: 8px;
   background-color: #FF0000;
-  margin: 15px 0 25px 0;
+  margin: 16px 0 24px 0;
+}
+
+.start-desc-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 54ch;
+}
+
+.start-desc-stack .start-desc--black {
+  margin: 0;
 }
 
 /* Responsive adjustments */
 @media (max-width: 1024px) {
-  .start-big-title--red,
-  .start-big-title--black {
-    font-size: 130px;
-    line-height: 110px;
+  .start-big-title--red {
+    font-size: clamp(44px, 7.5vw, 76px);
+    line-height: 0.88;
+  }
+  .start-big-title-stack .start-big-title--black {
+    font-size: clamp(30px, 4.8vw, 52px);
+    line-height: 0.88;
   }
   .start-desc--white,
   .start-desc--black {
-    font-size: 28px;
-    line-height: 24px;
+    font-size: clamp(20px, 2.4vw, 26px);
+    line-height: 1.25;
   }
 }
 
@@ -2164,15 +2209,18 @@ button {
     width: 100%;
     padding: 30px 20px;
   }
-  .start-big-title--red,
-  .start-big-title--black {
-    font-size: 80px;
-    line-height: 75px;
+  .start-big-title--red {
+    font-size: clamp(38px, 11vw, 60px);
+    line-height: 0.9;
+  }
+  .start-big-title-stack .start-big-title--black {
+    font-size: clamp(28px, 8.2vw, 44px);
+    line-height: 0.9;
   }
   .start-desc--white,
   .start-desc--black {
-    font-size: 22px;
-    line-height: 20px;
+    font-size: 19px;
+    line-height: 1.3;
   }
   .start-section-principal__photo img {
     height: auto;

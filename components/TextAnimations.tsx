@@ -86,15 +86,19 @@ interface AnimatedTitleProps {
   text: string;
   color?: string;
   className?: string;
+  as?: "h1" | "h2" | "h3" | "p" | "div";
+  delay?: number;
 }
 
 export function AnimatedTitle({
   text,
   color = "#FF0000",
   className = "",
+  as = "h1",
+  delay = 0,
 }: AnimatedTitleProps) {
   const [visible, setVisible] = useState(false);
-  const ref = useRef<HTMLHeadingElement>(null);
+  const ref = useRef<HTMLElement>(null);
 
   useEffect(() => {
     const el = ref.current;
@@ -104,7 +108,9 @@ export function AnimatedTitle({
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
-            setVisible(true);
+            setTimeout(() => {
+              setVisible(true);
+            }, delay);
             observer.unobserve(entry.target);
           }
         });
@@ -114,18 +120,27 @@ export function AnimatedTitle({
 
     observer.observe(el);
     return () => observer.disconnect();
-  }, []);
+  }, [delay]);
 
   const words = text.split(" ");
+  const Tag = as as React.ElementType;
 
   return (
-    <h1
+    <Tag
       ref={ref}
       className={`qodef-m-title animated-coign-title ${className}`}
       style={{ color }}
     >
       {words.map((word, wIdx) => (
-        <span key={wIdx} className="qodef-e-word-holder" style={{ display: "inline-block", marginRight: "0.25em" }}>
+        <span
+          key={wIdx}
+          className="qodef-e-word-holder"
+          style={{
+            display: "inline-block",
+            whiteSpace: "nowrap",
+            marginRight: "0.25em",
+          }}
+        >
           {word.split("").map((char, cIdx) => (
             <span
               key={cIdx}
@@ -145,6 +160,6 @@ export function AnimatedTitle({
           ))}
         </span>
       ))}
-    </h1>
+    </Tag>
   );
 }
