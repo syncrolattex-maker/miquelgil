@@ -106,7 +106,39 @@
 @font-face {
   font-family: 'PP Neue Montreal';
   font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/PPNeueMontreal-Medium.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'PP Neue Montreal';
+  font-style: normal;
   font-weight: 500;
+  font-display: swap;
+  src: url('/fonts/PPNeueMontreal-Medium.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'PP Neue Montreal';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('/fonts/PPNeueMontreal-Medium.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'PP Neue Montreal';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('/fonts/PPNeueMontreal-Medium.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Ppneuemontreal';
+  font-style: normal;
+  font-weight: 400;
   font-display: swap;
   src: url('/fonts/PPNeueMontreal-Medium.woff2') format('woff2');
 }
@@ -115,6 +147,14 @@
   font-family: 'Ppneuemontreal';
   font-style: normal;
   font-weight: 500;
+  font-display: swap;
+  src: url('/fonts/PPNeueMontreal-Medium.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Ppneuemontreal';
+  font-style: normal;
+  font-weight: 700;
   font-display: swap;
   src: url('/fonts/PPNeueMontreal-Medium.woff2') format('woff2');
 }
@@ -128,11 +168,59 @@
   src: url('/fonts/PPEiko-Regular.woff2') format('woff2');
 }
 
-/* 6. PP MUSEUM (Pangram Pangram) — Display clàssic d'arxiu documental i institucional */
+@font-face {
+  font-family: 'PP Eiko';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('/fonts/PPEiko-Regular.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'PP Eiko';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('/fonts/PPEiko-Regular.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'PP Eiko';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('/fonts/PPEiko-Regular.woff2') format('woff2');
+}
+
+/* 6. PP MUSEUM (Pangram Pangram) — Display monumental d'arxiu documental i cultural */
 @font-face {
   font-family: 'PP Museum';
   font-style: normal;
   font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/PPMuseum-Regular.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'PP Museum';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('/fonts/PPMuseum-Regular.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'PP Museum';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('/fonts/PPMuseum-Regular.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'PP Museum';
+  font-style: normal;
+  font-weight: 700;
   font-display: swap;
   src: url('/fonts/PPMuseum-Regular.woff2') format('woff2');
 }

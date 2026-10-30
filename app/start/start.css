@@ -1,7 +1,7 @@
 /* ============================================================
    A24 — FILMS / MIQUEL GIL: ARXIU SONOR I DISCOGRÀFIC
    Inspirat en https://a24.raviklaassens.com/
-   Font Stack: PP Neue Montreal, PP Eiko, PP Museum, Maelstrom Sans
+   Font Stack Oficial: PP Neue Montreal, PP Eiko, PP Museum
    ============================================================ */
 
 .a24-start-experience {
@@ -9,7 +9,7 @@
   width: 100%;
   background-color: #000000;
   color: #000000;
-  font-family: 'PP Neue Montreal', 'Ppneuemontreal', 'GRAPHIK', Arial, sans-serif;
+  font-family: 'PP Neue Montreal', 'Ppneuemontreal', Arial, sans-serif;
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
 }
@@ -47,8 +47,8 @@
 }
 
 .a24-brand-title {
-  font-family: 'Maelstrom Sans', sans-serif;
-  font-size: 15.5px;
+  font-family: 'PP Museum', serif;
+  font-size: 16px;
   font-weight: 700;
   letter-spacing: 0.08em;
   color: #FFFFFF;
@@ -225,7 +225,7 @@
 }
 
 .a24-stage-headline {
-  font-family: 'PP Eiko', 'GRIFINITO L', Georgia, serif;
+  font-family: 'PP Eiko', serif;
   font-size: clamp(26px, 3.2vw, 44px);
   font-weight: 400;
   line-height: 1.25;
@@ -423,8 +423,8 @@
 }
 
 .a24-caption-title {
-  font-family: 'Maelstrom Sans', sans-serif;
-  font-size: 15px;
+  font-family: 'PP Museum', serif;
+  font-size: 16px;
   font-weight: 700;
   letter-spacing: 0.06em;
   color: #111211;
@@ -559,8 +559,8 @@
 }
 
 .a24-num-accent {
-  font-family: 'Maelstrom Sans', sans-serif;
-  font-size: 26px;
+  font-family: 'PP Museum', serif;
+  font-size: 30px;
   font-weight: 700;
   color: #E20000;
   line-height: 1;
@@ -624,9 +624,9 @@
   color: rgba(255, 255, 255, 0.15);
 }
 
-/* Exactly 1 paragraph in PP Eiko / Grifinito */
+/* Exactly 1 paragraph in PP Eiko */
 .a24-desc-lead {
-  font-family: 'PP Eiko', 'GRIFINITO L', Georgia, 'Times New Roman', serif;
+  font-family: 'PP Eiko', serif;
   font-size: clamp(22px, 2.3vw, 34px);
   font-weight: 400;
   font-style: normal;
@@ -681,13 +681,13 @@
   color: #333635;
 }
 
-/* Monumental Maelstrom Sans Title */
+/* Monumental PP Museum Title */
 .a24-monumental-title {
-  font-family: 'Maelstrom Sans', sans-serif;
+  font-family: 'PP Museum', serif;
   font-size: clamp(52px, 7vw, 92px);
-  line-height: 0.88;
+  line-height: 0.92;
   font-weight: 700;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.03em;
   margin: 16px 0 0 0;
   text-transform: uppercase;
   white-space: nowrap;
@@ -734,7 +734,7 @@
   position: absolute;
   top: -6px;
   left: 10px;
-  font-family: 'PP Eiko', 'GRIFINITO L', serif;
+  font-family: 'PP Eiko', serif;
   font-size: 40px;
   color: rgba(226, 0, 0, 0.35);
   line-height: 1;
@@ -742,7 +742,7 @@
 }
 
 .a24-quote-prose {
-  font-family: 'PP Eiko', 'GRIFINITO L', Georgia, serif;
+  font-family: 'PP Eiko', serif;
   font-size: 18px;
   line-height: 1.35;
   font-style: italic;
@@ -934,8 +934,8 @@
 }
 
 .a24-label-title {
-  font-family: 'Maelstrom Sans', sans-serif;
-  font-size: 8px;
+  font-family: 'PP Museum', serif;
+  font-size: 8.5px;
   font-weight: 700;
   letter-spacing: 0.1em;
 }
@@ -1020,8 +1020,8 @@
 }
 
 .a24-back-head-title {
-  font-family: 'PP Museum', 'Maelstrom Sans', sans-serif;
-  font-size: 13.5px;
+  font-family: 'PP Museum', serif;
+  font-size: 14px;
   font-weight: 700;
   letter-spacing: 0.08em;
 }
@@ -1079,7 +1079,7 @@
 }
 
 .a24-poem-text {
-  font-family: 'PP Eiko', 'GRIFINITO L', serif;
+  font-family: 'PP Eiko', serif;
   font-size: 14px;
   font-style: italic;
   line-height: 1.35;
