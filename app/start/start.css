@@ -1,17 +1,48 @@
 /* ============================================================
    A24 — FILMS / MIQUEL GIL: ARXIU SONOR I DISCOGRÀFIC
-   Inspirat en https://a24.raviklaassens.com/
+   Directrius oficials de disseny segons DESIGN.md (A24 — Films)
+   URL Referència: https://a24.raviklaassens.com/
    Font Stack Oficial: PP Neue Montreal, PP Eiko, PP Museum
    ============================================================ */
+
+:root {
+  --a24-text-primary: #000000;
+  --a24-text-secondary: #707572;
+  --a24-text-muted: #8E9290;
+  --a24-surface-muted: #f2f2f2;
+  --a24-surface-pure: #ffffff;
+  --a24-surface-dark: #000000;
+  --a24-space-1: 8px;
+  --a24-space-2: 16px;
+  --a24-space-3: 24px;
+  --a24-space-4: 32px;
+  --a24-space-5: 48px;
+  --a24-space-6: 64px;
+  --a24-radius-xs: 4px;
+  --a24-radius-pill: 30px;
+  --a24-motion-instant: 200ms;
+  --a24-motion-fast: 300ms;
+  --a24-font-primary: 'PP Neue Montreal', 'Ppneuemontreal', Arial, sans-serif;
+  --a24-font-display: 'PP Museum', serif;
+  --a24-font-editorial: 'PP Eiko', serif;
+}
 
 .a24-start-experience {
   position: relative;
   width: 100%;
-  background-color: #000000;
-  color: #000000;
-  font-family: 'PP Neue Montreal', 'Ppneuemontreal', Arial, sans-serif;
+  background-color: var(--a24-surface-dark);
+  color: var(--a24-text-primary);
+  font-family: var(--a24-font-primary);
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
+}
+
+/* Accessible Focus Ring Rule according to DESIGN.md */
+.a24-start-experience button:focus-visible,
+.a24-start-experience a:focus-visible,
+.a24-start-experience div[tabindex]:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 3px;
 }
 
 /* ============================================================
@@ -27,7 +58,7 @@
   align-items: center;
   justify-content: space-between;
   padding: 14px clamp(20px, 4vw, 48px);
-  background: rgba(14, 15, 14, 0.88);
+  background: rgba(10, 10, 10, 0.92);
   backdrop-filter: blur(18px);
   -webkit-backdrop-filter: blur(18px);
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
@@ -47,7 +78,7 @@
 }
 
 .a24-brand-title {
-  font-family: 'PP Museum', serif;
+  font-family: var(--a24-font-display);
   font-size: 16px;
   font-weight: 700;
   letter-spacing: 0.08em;
@@ -55,17 +86,17 @@
 }
 
 .a24-brand-sep {
-  color: #E20000;
+  color: #707572;
   font-weight: 700;
   font-size: 13px;
 }
 
 .a24-brand-subtitle {
-  font-family: 'PP Neue Montreal', sans-serif;
+  font-family: var(--a24-font-primary);
   font-size: 11px;
   font-weight: 500;
   letter-spacing: 0.12em;
-  color: #8E9290;
+  color: #A5A9A7;
   text-transform: uppercase;
 }
 
@@ -80,22 +111,22 @@
   align-items: center;
   gap: 6px;
   padding: 6px 14px;
-  border-radius: 20px;
+  border-radius: var(--a24-radius-pill);
   background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.14);
   color: #A5A9A7;
-  font-family: 'PP Neue Montreal', sans-serif;
+  font-family: var(--a24-font-primary);
   font-size: 11px;
   font-weight: 500;
   letter-spacing: 0.06em;
   cursor: pointer;
-  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease, transform 0.15s ease;
+  transition: background-color var(--a24-motion-instant) ease, border-color var(--a24-motion-instant) ease, color var(--a24-motion-instant) ease, transform 150ms ease;
 }
 
 .a24-nav-pill:hover {
   background: rgba(255, 255, 255, 0.14);
   color: #FFFFFF;
-  border-color: rgba(255, 255, 255, 0.25);
+  border-color: rgba(255, 255, 255, 0.3);
 }
 
 .a24-nav-pill:active {
@@ -103,10 +134,10 @@
 }
 
 .a24-nav-pill.is-active {
-  background: #E20000;
-  border-color: #E20000;
-  color: #FFFFFF;
-  box-shadow: 0 0 16px rgba(226, 0, 0, 0.45);
+  background: #FFFFFF;
+  border-color: #FFFFFF;
+  color: #000000;
+  box-shadow: 0 0 16px rgba(255, 255, 255, 0.3);
 }
 
 .a24-nav-index {
@@ -120,21 +151,21 @@
   align-items: center;
   gap: 8px;
   padding: 6px 14px;
-  border-radius: 20px;
+  border-radius: var(--a24-radius-pill);
   background: rgba(255, 255, 255, 0.06);
   border: 1px solid rgba(255, 255, 255, 0.14);
   color: #FFFFFF;
-  font-family: 'PP Neue Montreal', sans-serif;
+  font-family: var(--a24-font-primary);
   font-size: 11px;
   font-weight: 500;
   letter-spacing: 0.08em;
   cursor: pointer;
-  transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease;
+  transition: background-color var(--a24-motion-instant) ease, border-color var(--a24-motion-instant) ease, box-shadow var(--a24-motion-instant) ease, transform 150ms ease;
 }
 
 .a24-audio-toggle:hover {
-  background: rgba(226, 0, 0, 0.18);
-  border-color: #E20000;
+  background: rgba(255, 255, 255, 0.14);
+  border-color: rgba(255, 255, 255, 0.35);
 }
 
 .a24-audio-toggle:active {
@@ -142,9 +173,10 @@
 }
 
 .a24-audio-toggle.is-playing {
-  background: #E20000;
-  border-color: #E20000;
-  box-shadow: 0 0 16px rgba(226, 0, 0, 0.5);
+  background: #FFFFFF;
+  border-color: #FFFFFF;
+  color: #000000;
+  box-shadow: 0 0 16px rgba(255, 255, 255, 0.4);
 }
 
 .a24-audio-bars {
@@ -178,12 +210,13 @@
 
 /* ============================================================
    2. THE DISC STAGE (A24 SKEUOMORPHIC PHYSICAL MEDIA CRATE)
+   Escenari de catàleg amb fons #f2f2f2 (color.surface.muted)
    ============================================================ */
 .a24-stage {
   position: relative;
   width: 100%;
-  background-color: #F4F2ED;
-  color: #111211;
+  background-color: var(--a24-surface-muted);
+  color: var(--a24-text-primary);
   padding: 120px clamp(24px, 5vw, 80px) 70px clamp(24px, 5vw, 80px);
   box-sizing: border-box;
   border-bottom: 1px solid rgba(0, 0, 0, 0.08);
@@ -203,34 +236,34 @@
   align-items: center;
   gap: 8px;
   padding: 4px 12px;
-  background: rgba(0, 0, 0, 0.05);
-  border-radius: 20px;
-  margin-bottom: 18px;
+  background: rgba(0, 0, 0, 0.06);
+  border-radius: var(--a24-radius-pill);
+  margin-bottom: var(--a24-space-2);
 }
 
 .a24-kicker-dot {
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background-color: #E20000;
+  background-color: var(--a24-text-primary);
 }
 
 .a24-kicker-text {
-  font-family: 'PP Neue Montreal', sans-serif;
+  font-family: var(--a24-font-primary);
   font-size: 11px;
   font-weight: 500;
   letter-spacing: 0.12em;
-  color: #555A57;
+  color: var(--a24-text-secondary);
   text-transform: uppercase;
 }
 
 .a24-stage-headline {
-  font-family: 'PP Eiko', serif;
+  font-family: var(--a24-font-editorial);
   font-size: clamp(26px, 3.2vw, 44px);
   font-weight: 400;
   line-height: 1.25;
   letter-spacing: -0.01em;
-  color: #000000;
+  color: var(--a24-text-primary);
   max-width: 32ch;
   margin: 0 0 54px 0;
   text-wrap: balance;
@@ -278,29 +311,29 @@
   justify-content: center;
 }
 
-/* Red Hand-drawn / Visceral Ring highlight */
+/* Ink Disc Ring Highlight */
 .a24-disc-ring {
   position: absolute;
   inset: -10px;
   border-radius: 50%;
-  border: 2px dashed rgba(226, 0, 0, 0.25);
+  border: 1.5px dashed rgba(0, 0, 0, 0.2);
   opacity: 0;
   transform: scale(0.92) rotate(-10deg);
-  transition: opacity 0.35s ease, transform 0.45s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.35s ease;
+  transition: opacity var(--a24-motion-fast) ease, transform 0.45s cubic-bezier(0.16, 1, 0.3, 1), border-color var(--a24-motion-fast) ease;
   pointer-events: none;
 }
 
 .a24-disc-slot:hover .a24-disc-ring {
   opacity: 0.6;
-  border-color: rgba(226, 0, 0, 0.5);
+  border-color: rgba(0, 0, 0, 0.45);
   transform: scale(1.02) rotate(0deg);
 }
 
 .a24-disc-slot.is-selected .a24-disc-ring {
   opacity: 1;
-  border: 2.5px solid #E20000;
+  border: 2px solid var(--a24-text-primary);
   transform: scale(1.06) rotate(15deg);
-  box-shadow: 0 0 25px rgba(226, 0, 0, 0.3);
+  box-shadow: 0 0 25px rgba(0, 0, 0, 0.15);
 }
 
 /* The Physical Circular Disc */
@@ -310,7 +343,7 @@
   height: 100%;
   border-radius: 50%;
   background: radial-gradient(circle, #202020 0%, #101010 65%, #050505 100%);
-  box-shadow: 0 16px 36px -6px rgba(0, 0, 0, 0.28), 0 4px 12px rgba(0, 0, 0, 0.14);
+  box-shadow: 0 16px 36px -6px rgba(0, 0, 0, 0.24), 0 4px 12px rgba(0, 0, 0, 0.12);
   overflow: hidden;
   display: flex;
   align-items: center;
@@ -320,12 +353,12 @@
 
 .a24-disc-slot:hover .a24-disc-body {
   transform: rotate(25deg);
-  box-shadow: 0 24px 48px -8px rgba(0, 0, 0, 0.36);
+  box-shadow: 0 24px 48px -8px rgba(0, 0, 0, 0.32);
 }
 
 .a24-disc-slot.is-selected .a24-disc-body {
   transform: rotate(40deg);
-  box-shadow: 0 28px 56px -8px rgba(0, 0, 0, 0.42);
+  box-shadow: 0 28px 56px -8px rgba(0, 0, 0, 0.38);
 }
 
 .a24-disc-art {
@@ -383,18 +416,19 @@
   width: 28%;
   height: 28%;
   border-radius: 50%;
-  background: #E20000;
+  background: #111111;
+  border: 1px solid rgba(255, 255, 255, 0.2);
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.6), 0 0 10px rgba(0, 0, 0, 0.4);
+  box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.8), 0 0 10px rgba(0, 0, 0, 0.4);
 }
 
 .a24-core-center {
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  background: #F4F2ED;
+  background: var(--a24-surface-muted);
   box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.85);
 }
 
@@ -412,38 +446,38 @@
   flex-direction: column;
   align-items: center;
   gap: 3px;
-  margin-top: 16px;
+  margin-top: var(--a24-space-2);
 }
 
 .a24-caption-index {
   font-family: monospace;
   font-size: 11px;
   font-weight: 700;
-  color: #E20000;
+  color: var(--a24-text-secondary);
 }
 
 .a24-caption-title {
-  font-family: 'PP Museum', serif;
+  font-family: var(--a24-font-display);
   font-size: 16px;
   font-weight: 700;
   letter-spacing: 0.06em;
-  color: #111211;
+  color: var(--a24-text-primary);
 }
 
 .a24-caption-year {
-  font-family: 'PP Neue Montreal', sans-serif;
+  font-family: var(--a24-font-primary);
   font-size: 11.5px;
   font-weight: 500;
-  color: #6C716E;
+  color: var(--a24-text-secondary);
 }
 
 .a24-stage-cue {
   margin-top: 36px;
-  font-family: 'PP Neue Montreal', sans-serif;
+  font-family: var(--a24-font-primary);
   font-size: 11px;
   font-weight: 500;
   letter-spacing: 0.05em;
-  color: #8E9290;
+  color: var(--a24-text-secondary);
 }
 
 .a24-stage-cue kbd {
@@ -451,7 +485,7 @@
   font-size: 10px;
   background: rgba(0, 0, 0, 0.08);
   padding: 1px 6px;
-  border-radius: 3px;
+  border-radius: var(--a24-radius-xs);
   margin: 0 2px;
 }
 
@@ -466,13 +500,13 @@
 }
 
 .a24-chapter--dark {
-  background-color: #000000;
+  background-color: var(--a24-surface-dark);
   color: #FFFFFF;
 }
 
 .a24-chapter--light {
-  background-color: #F8F0E6;
-  color: #000000;
+  background-color: var(--a24-surface-muted);
+  color: var(--a24-text-primary);
 }
 
 .a24-chapter-grid {
@@ -523,32 +557,32 @@
 .a24-stamp {
   display: inline-block;
   padding: 4px 10px;
-  border-radius: 4px;
+  border-radius: var(--a24-radius-xs);
   background: rgba(255, 255, 255, 0.12);
   color: #FFFFFF;
-  font-family: 'PP Neue Montreal', sans-serif;
+  font-family: var(--a24-font-primary);
   font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
 }
 
-.a24-stamp--red {
-  background: #E20000;
+.a24-stamp--black {
+  background: #000000;
   color: #FFFFFF;
 }
 
 .a24-meta-spec {
-  font-family: 'PP Neue Montreal', sans-serif;
+  font-family: var(--a24-font-primary);
   font-size: 11px;
   font-weight: 500;
   letter-spacing: 0.1em;
-  color: #8E9290;
+  color: #A5A9A7;
   text-transform: uppercase;
 }
 
 .a24-meta-spec--dark {
-  color: #555A57;
+  color: var(--a24-text-secondary);
 }
 
 .a24-chapter-number {
@@ -559,22 +593,26 @@
 }
 
 .a24-num-accent {
-  font-family: 'PP Museum', serif;
+  font-family: var(--a24-font-display);
   font-size: 30px;
   font-weight: 700;
-  color: #E20000;
+  color: #FFFFFF;
   line-height: 1;
 }
 
+.a24-chapter-number--dark .a24-num-accent {
+  color: var(--a24-text-primary);
+}
+
 .a24-num-slash {
-  font-family: 'PP Neue Montreal', sans-serif;
+  font-family: var(--a24-font-primary);
   font-size: 13px;
-  color: #6C716E;
+  color: #707572;
   font-weight: 500;
 }
 
 .a24-num-label {
-  font-family: 'PP Neue Montreal', sans-serif;
+  font-family: var(--a24-font-primary);
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.12em;
@@ -584,7 +622,7 @@
 }
 
 .a24-chapter-number--dark .a24-num-label {
-  color: #555A57;
+  color: var(--a24-text-secondary);
 }
 
 /* Video Player in Nineta */
@@ -592,15 +630,15 @@
   width: 100%;
   aspect-ratio: 16 / 9;
   max-width: 860px;
-  border-radius: 12px;
+  border-radius: 8px;
   overflow: hidden;
-  box-shadow: 0 24px 60px -12px rgba(0, 0, 0, 0.9), 0 0 50px -10px rgba(226, 0, 0, 0.18);
+  box-shadow: 0 24px 60px -12px rgba(0, 0, 0, 0.9);
   transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.5s ease;
 }
 
 .a24-video-box:hover {
   transform: translateY(-4px) scale(1.008);
-  box-shadow: 0 32px 75px -12px rgba(0, 0, 0, 0.95), 0 0 65px -5px rgba(226, 0, 0, 0.28);
+  box-shadow: 0 32px 75px -12px rgba(0, 0, 0, 0.95);
 }
 
 .a24-tech-row {
@@ -608,25 +646,25 @@
   align-items: center;
   gap: 12px;
   margin-top: 14px;
-  font-family: 'PP Neue Montreal', sans-serif;
+  font-family: var(--a24-font-primary);
   font-size: 11px;
-  color: #6C716E;
+  color: #8E9290;
   letter-spacing: 0.05em;
 }
 
 .a24-tech-row strong {
-  color: #A5A9A7;
+  color: #FFFFFF;
   font-weight: 700;
   margin-right: 4px;
 }
 
 .a24-tech-sep {
-  color: rgba(255, 255, 255, 0.15);
+  color: rgba(255, 255, 255, 0.2);
 }
 
 /* Exactly 1 paragraph in PP Eiko */
 .a24-desc-lead {
-  font-family: 'PP Eiko', serif;
+  font-family: var(--a24-font-editorial);
   font-size: clamp(22px, 2.3vw, 34px);
   font-weight: 400;
   font-style: normal;
@@ -642,7 +680,7 @@
 }
 
 .a24-desc-lead--black {
-  color: #000000;
+  color: var(--a24-text-primary);
 }
 
 .a24-credits-tag {
@@ -651,7 +689,7 @@
 
 .a24-credits-label {
   display: block;
-  font-family: 'PP Neue Montreal', sans-serif;
+  font-family: var(--a24-font-primary);
   font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.12em;
@@ -661,11 +699,11 @@
 }
 
 .a24-credits-tag--dark .a24-credits-label {
-  color: #6C716E;
+  color: var(--a24-text-secondary);
 }
 
 .a24-credits-text {
-  font-family: 'PP Neue Montreal', sans-serif;
+  font-family: var(--a24-font-primary);
   font-size: clamp(13px, 1vw, 15px);
   font-weight: 500;
   line-height: 1.5;
@@ -681,9 +719,9 @@
   color: #333635;
 }
 
-/* Monumental PP Museum Title */
+/* Monumental PP Museum Titles */
 .a24-monumental-title {
-  font-family: 'PP Museum', serif;
+  font-family: var(--a24-font-display);
   font-size: clamp(52px, 7vw, 92px);
   line-height: 0.92;
   font-weight: 700;
@@ -695,17 +733,17 @@
   cursor: default;
 }
 
-.a24-monumental-title--red {
-  color: #E20000;
+.a24-monumental-title--white {
+  color: #FFFFFF;
 }
 
-.a24-monumental-title--red:hover {
+.a24-monumental-title--white:hover {
   letter-spacing: 0.055em;
-  text-shadow: 0 0 28px rgba(226, 0, 0, 0.35);
+  text-shadow: 0 0 28px rgba(255, 255, 255, 0.35);
 }
 
 .a24-monumental-title--black {
-  color: #000000;
+  color: var(--a24-text-primary);
 }
 
 .a24-monumental-title--black:hover {
@@ -717,32 +755,40 @@
   position: relative;
   margin-top: 28px;
   padding: 16px 20px;
-  border-left: 2px solid #E20000;
-  border-radius: 0 8px 8px 0;
+  border-radius: 0 var(--a24-radius-xs) var(--a24-radius-xs) 0;
 }
 
 .a24-quote-card--dark {
-  background: rgba(255, 255, 255, 0.04);
+  background: rgba(255, 255, 255, 0.05);
+  border-left: 2px solid #FFFFFF;
 }
 
 .a24-quote-card--light {
-  background: rgba(0, 0, 0, 0.04);
-  border-left-color: #000000;
+  background: var(--a24-surface-pure);
+  border-left: 2px solid var(--a24-text-primary);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
 }
 
 .a24-quote-glyph {
   position: absolute;
   top: -6px;
   left: 10px;
-  font-family: 'PP Eiko', serif;
+  font-family: var(--a24-font-editorial);
   font-size: 40px;
-  color: rgba(226, 0, 0, 0.35);
   line-height: 1;
   pointer-events: none;
 }
 
+.a24-quote-card--dark .a24-quote-glyph {
+  color: rgba(255, 255, 255, 0.2);
+}
+
+.a24-quote-card--light .a24-quote-glyph {
+  color: rgba(0, 0, 0, 0.15);
+}
+
 .a24-quote-prose {
-  font-family: 'PP Eiko', serif;
+  font-family: var(--a24-font-editorial);
   font-size: 18px;
   line-height: 1.35;
   font-style: italic;
@@ -759,11 +805,11 @@
 
 .a24-quote-cite {
   display: block;
-  font-family: 'PP Neue Montreal', sans-serif;
+  font-family: var(--a24-font-primary);
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.08em;
-  color: #E20000;
+  color: var(--a24-text-primary);
   margin-top: 8px;
   text-transform: uppercase;
 }
@@ -802,7 +848,7 @@
   height: 100%;
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
-  border-radius: 6px;
+  border-radius: var(--a24-radius-xs);
 }
 
 .a24-face--front {
@@ -834,7 +880,7 @@
   z-index: 2;
   width: 90%;
   aspect-ratio: 1 / 1;
-  border-radius: 4px;
+  border-radius: var(--a24-radius-xs);
   overflow: hidden;
   box-shadow: 0 20px 45px -8px rgba(0, 0, 0, 0.28), 0 6px 18px -4px rgba(0, 0, 0, 0.12);
   transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.5s ease;
@@ -922,19 +968,20 @@
   width: 33%;
   height: 33%;
   border-radius: 50%;
-  background: #E20000;
+  background: #111111;
+  border: 1px solid rgba(255, 255, 255, 0.25);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5), 0 0 10px rgba(0, 0, 0, 0.4);
+  box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.8), 0 0 10px rgba(0, 0, 0, 0.4);
   position: relative;
   z-index: 2;
   color: #FFFFFF;
 }
 
 .a24-label-title {
-  font-family: 'PP Museum', serif;
+  font-family: var(--a24-font-display);
   font-size: 8.5px;
   font-weight: 700;
   letter-spacing: 0.1em;
@@ -943,7 +990,7 @@
 .a24-label-hole {
   width: 13px;
   height: 13px;
-  background: #F8F0E6;
+  background: var(--a24-surface-muted);
   border-radius: 50%;
   box-shadow: inset 0 1px 4px rgba(0, 0, 0, 0.85);
   margin: 3px 0;
@@ -976,9 +1023,9 @@
   align-items: center;
   gap: 6px;
   margin-top: 14px;
-  font-family: 'PP Neue Montreal', sans-serif;
+  font-family: var(--a24-font-primary);
   font-size: 11.5px;
-  color: #6C716E;
+  color: var(--a24-text-secondary);
   letter-spacing: 0.04em;
 }
 
@@ -987,40 +1034,40 @@
   font-size: 10px;
   background: rgba(0, 0, 0, 0.08);
   padding: 1px 5px;
-  border-radius: 3px;
+  border-radius: var(--a24-radius-xs);
 }
 
 .a24-flip-icon {
   font-size: 14px;
-  color: #E20000;
+  color: var(--a24-text-primary);
 }
 
 /* Back Jacket (Cara B) */
 .a24-back-jacket {
   width: 90%;
   aspect-ratio: 1 / 1;
-  background-color: #F1ECE4;
+  background-color: var(--a24-surface-pure);
   border: 1px solid rgba(0, 0, 0, 0.12);
-  border-radius: 4px;
+  border-radius: var(--a24-radius-xs);
   box-shadow: 0 20px 45px -8px rgba(0, 0, 0, 0.28);
   padding: 24px;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  color: #111211;
+  color: var(--a24-text-primary);
 }
 
 .a24-back-head {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-bottom: 2px solid #000000;
+  border-bottom: 2px solid var(--a24-text-primary);
   padding-bottom: 8px;
 }
 
 .a24-back-head-title {
-  font-family: 'PP Museum', serif;
+  font-family: var(--a24-font-display);
   font-size: 14px;
   font-weight: 700;
   letter-spacing: 0.08em;
@@ -1030,7 +1077,7 @@
   font-family: monospace;
   font-size: 11px;
   font-weight: 700;
-  color: #E20000;
+  color: var(--a24-text-secondary);
 }
 
 .a24-back-columns {
@@ -1042,11 +1089,11 @@
 
 .a24-col-side {
   display: block;
-  font-family: 'PP Neue Montreal', sans-serif;
+  font-family: var(--a24-font-primary);
   font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.12em;
-  color: #E20000;
+  color: var(--a24-text-primary);
   margin-bottom: 6px;
 }
 
@@ -1062,14 +1109,14 @@
 .a24-col-list li {
   display: flex;
   justify-content: space-between;
-  font-family: 'PP Neue Montreal', sans-serif;
+  font-family: var(--a24-font-primary);
   font-size: 11.5px;
   font-weight: 500;
   color: #2B2E2C;
 }
 
 .a24-col-list li small {
-  color: #6C716E;
+  color: var(--a24-text-secondary);
   font-family: monospace;
 }
 
@@ -1079,20 +1126,20 @@
 }
 
 .a24-poem-text {
-  font-family: 'PP Eiko', serif;
+  font-family: var(--a24-font-editorial);
   font-size: 14px;
   font-style: italic;
   line-height: 1.35;
   margin: 0 0 4px 0;
-  color: #444745;
+  color: #333635;
 }
 
 .a24-poem-by {
-  font-family: 'PP Neue Montreal', sans-serif;
+  font-family: var(--a24-font-primary);
   font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.08em;
-  color: #6C716E;
+  color: var(--a24-text-secondary);
   text-transform: uppercase;
 }
 
@@ -1108,9 +1155,9 @@
   display: flex;
   flex-direction: column;
   gap: 2px;
-  font-family: 'PP Neue Montreal', sans-serif;
+  font-family: var(--a24-font-primary);
   font-size: 9.5px;
-  color: #6C716E;
+  color: var(--a24-text-secondary);
 }
 
 .a24-foot-col small {
@@ -1160,17 +1207,17 @@
   align-items: center;
   gap: 8px;
   padding: 9px 18px;
-  border-radius: 30px;
-  background-color: #FFFFFF;
-  border: 1px solid rgba(0, 0, 0, 0.12);
-  color: #111211;
-  font-family: 'PP Neue Montreal', sans-serif;
+  border-radius: var(--a24-radius-pill);
+  background-color: var(--a24-surface-pure);
+  border: 1px solid rgba(0, 0, 0, 0.14);
+  color: var(--a24-text-primary);
+  font-family: var(--a24-font-primary);
   font-size: 12px;
   font-weight: 500;
   cursor: pointer;
   text-decoration: none;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
-  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease;
+  transition: background-color var(--a24-motion-instant) ease, border-color var(--a24-motion-instant) ease, color var(--a24-motion-instant) ease, transform 150ms ease, box-shadow var(--a24-motion-instant) ease;
 }
 
 .a24-btn:hover {
@@ -1186,14 +1233,14 @@
 }
 
 .a24-btn--flip {
-  background-color: #E20000;
+  background-color: #000000;
   color: #FFFFFF;
-  border-color: #E20000;
+  border-color: #000000;
 }
 
 .a24-btn--flip:hover {
-  background-color: #000000;
-  border-color: #000000;
+  background-color: #222222;
+  border-color: #222222;
 }
 
 .a24-btn-kbd {
@@ -1201,7 +1248,7 @@
   font-size: 9.5px;
   background: rgba(255, 255, 255, 0.25);
   padding: 1px 5px;
-  border-radius: 3px;
+  border-radius: var(--a24-radius-xs);
   margin-left: 2px;
 }
 
@@ -1225,7 +1272,7 @@
    CAPÍTOL 03: PRESENTACIÓ AL PRINCIPAL (Split View)
    ============================================================ */
 .a24-chapter-principal {
-  background-color: #000000;
+  background-color: var(--a24-surface-dark);
 }
 
 .a24-chapter--split {
@@ -1243,7 +1290,7 @@
   align-items: center;
   overflow: hidden;
   position: relative;
-  background-color: #000000;
+  background-color: var(--a24-surface-dark);
 }
 
 .a24-split-tag {
@@ -1276,32 +1323,32 @@
   bottom: 24px;
   left: 32px;
   z-index: 10;
-  font-family: 'PP Neue Montreal', sans-serif;
+  font-family: var(--a24-font-primary);
   font-size: 10px;
   font-weight: 500;
   letter-spacing: 0.12em;
   color: rgba(255, 255, 255, 0.7);
-  background: rgba(0, 0, 0, 0.6);
+  background: rgba(0, 0, 0, 0.65);
   backdrop-filter: blur(8px);
   padding: 4px 10px;
-  border-radius: 4px;
+  border-radius: var(--a24-radius-xs);
 }
 
 .a24-split-content {
   width: 52%;
-  background-color: #F8F0E6;
+  background-color: var(--a24-surface-muted);
   display: flex;
   flex-direction: column;
   justify-content: center;
   padding: clamp(48px, 6vw, 96px) clamp(32px, 5vw, 80px);
   box-sizing: border-box;
-  color: #000000;
+  color: var(--a24-text-primary);
 }
 
 .a24-stack-title {
   display: flex;
   flex-direction: column;
-  margin-bottom: 24px;
+  margin-bottom: var(--a24-space-3);
 }
 
 .a24-desc-stack {
@@ -1319,11 +1366,11 @@
 
 .a24-guests-title {
   display: block;
-  font-family: 'PP Neue Montreal', sans-serif;
+  font-family: var(--a24-font-primary);
   font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.12em;
-  color: #6C716E;
+  color: var(--a24-text-secondary);
   text-transform: uppercase;
   margin-bottom: 10px;
 }
@@ -1336,7 +1383,7 @@
 
 .a24-guest-chip {
   display: inline-block;
-  font-family: 'PP Neue Montreal', sans-serif;
+  font-family: var(--a24-font-primary);
   font-size: 11px;
   font-weight: 500;
   background: rgba(0, 0, 0, 0.06);
@@ -1365,10 +1412,10 @@
   justify-content: space-between;
   padding: 10px 18px;
   border-radius: 40px;
-  background: rgba(12, 12, 12, 0.88);
+  background: rgba(12, 12, 12, 0.9);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.14);
   box-shadow: 0 16px 40px -8px rgba(0, 0, 0, 0.75);
 }
 
@@ -1382,12 +1429,12 @@
   width: 7px;
   height: 7px;
   border-radius: 50%;
-  background-color: #E20000;
-  box-shadow: 0 0 8px #E20000;
+  background-color: #FFFFFF;
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.6);
 }
 
 .a24-dock-readout {
-  font-family: 'PP Neue Montreal', sans-serif;
+  font-family: var(--a24-font-primary);
   font-size: 11px;
   font-weight: 500;
   letter-spacing: 0.08em;
@@ -1405,13 +1452,13 @@
   padding: 4px 10px;
   border-radius: 16px;
   background: transparent;
-  border: none;
-  color: #8E9290;
-  font-family: 'PP Neue Montreal', sans-serif;
+  border: 1px solid transparent;
+  color: #A5A9A7;
+  font-family: var(--a24-font-primary);
   font-size: 11px;
   font-weight: 500;
   cursor: pointer;
-  transition: color 0.18s ease, background-color 0.18s ease;
+  transition: color var(--a24-motion-instant) ease, background-color var(--a24-motion-instant) ease, border-color var(--a24-motion-instant) ease;
 }
 
 .a24-dock-btn:hover {
@@ -1421,8 +1468,8 @@
 
 .a24-dock-btn.is-selected {
   color: #FFFFFF;
-  background: rgba(226, 0, 0, 0.25);
-  border: 1px solid rgba(226, 0, 0, 0.5);
+  background: rgba(255, 255, 255, 0.16);
+  border-color: rgba(255, 255, 255, 0.35);
 }
 
 .a24-dock-shortcuts {
@@ -1435,9 +1482,9 @@
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  font-family: 'PP Neue Montreal', sans-serif;
+  font-family: var(--a24-font-primary);
   font-size: 10px;
-  color: #8E9290;
+  color: #A5A9A7;
   letter-spacing: 0.04em;
 }
 
@@ -1447,7 +1494,7 @@
   background: rgba(255, 255, 255, 0.14);
   color: #FFFFFF;
   padding: 1px 5px;
-  border-radius: 3px;
+  border-radius: var(--a24-radius-xs);
   border: 1px solid rgba(255, 255, 255, 0.2);
 }
 

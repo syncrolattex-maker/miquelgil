@@ -33,7 +33,7 @@ const PROJECTS: ProjectItem[] = [
     duration: "04:07",
     discImage: "/video/nineta_frame.jpg",
     description:
-      "Per fi, ací teniu el Clip de Nineta. Un Western modern ambientat en un paissatge albuferenc crepuscular i distòpic. Una lluita interna que desemboca en bogeria.",
+      "Per fi, ací teniu el Clip de Nineta. Un Western modern ambientat en un paisatge albuferenc crepuscular i distòpic. Una lluita interna que desemboca en bogeria.",
     creditsLabel: "DIRECCIÓ & CREACIÓ VISUAL",
     credits: "Tubal Perales, Vicent Todolí i Enric Alepuz",
     quote:
@@ -245,7 +245,7 @@ export default function StartClient() {
 
       {/* ============================================================
           2. THE DISC STAGE (A24 SKEUOMORPHIC PHYSICAL MEDIA CRATE)
-          Fila tàctil de discos físics sobre un escenari paper cru
+          Fila tàctil de discos físics sobre un escenari #f2f2f2
           ============================================================ */}
       <section className="a24-stage" aria-label="Escenari interactiu de discos físics">
         <div className="a24-stage-inner">
@@ -292,7 +292,7 @@ export default function StartClient() {
                       <div className="a24-disc-grooves" />
                       {/* Anisotropic light reflection */}
                       <div className="a24-disc-sheen" />
-                      {/* Center spindle & label */}
+                      {/* Center spindle & label (monochrome A24 style) */}
                       <div className="a24-disc-core">
                         <span className="a24-core-center" />
                         <span className="a24-core-id">{project.index}</span>
@@ -321,7 +321,7 @@ export default function StartClient() {
           3. FULL-BLEED EDITORIAL CHAPTERS (A24 CINEMA TAKEOVER)
           ============================================================ */}
 
-      {/* CAPÍTOL 01: NINETA (Dark Cinema // 16:9 Video) */}
+      {/* CAPÍTOL 01: NINETA (Dark Cinema #000000 // 16:9 Video) */}
       <section
         id="sec-nineta"
         className="a24-chapter a24-chapter--dark a24-chapter-nineta"
@@ -359,11 +359,11 @@ export default function StartClient() {
               <span className="a24-num-label">VIDEOCLIP OFICIAL</span>
             </div>
 
-            {/* Exactly 1 paragraph in PP Eiko / Grifinito */}
-            <BlockReveal color="#E20000" direction="lr" delay={100} duration={650} fullWidth>
+            {/* Exactly 1 paragraph in PP Eiko */}
+            <BlockReveal color="#ffffff" direction="lr" delay={100} duration={650} fullWidth>
               <p className="a24-desc-lead a24-desc-lead--white">
                 Per fi, ací teniu el Clip de Nineta. Un Western modern ambientat en
-                un paissatge albuferenc crepuscular i distòpic. Una lluita interna que
+                un paisatge albuferenc crepuscular i distòpic. Una lluita interna que
                 desemboca en bogeria.
               </p>
             </BlockReveal>
@@ -375,12 +375,12 @@ export default function StartClient() {
               </p>
             </div>
 
-            {/* Monumental Maelstrom Sans Title */}
+            {/* Monumental PP Museum Title in Pure White */}
             <AnimatedTitle
               as="h2"
               text="NINETA"
-              color="#E20000"
-              className="a24-monumental-title a24-monumental-title--red"
+              color="#FFFFFF"
+              className="a24-monumental-title a24-monumental-title--white"
             />
 
             <div className="a24-quote-card a24-quote-card--dark">
@@ -393,7 +393,7 @@ export default function StartClient() {
         </div>
       </section>
 
-      {/* CAPÍTOL 02: VIATGER (Paper Cru // 3D Vinyl Sleeve Flip) */}
+      {/* CAPÍTOL 02: VIATGER (Muted #f2f2f2 // 3D Vinyl Sleeve Flip) */}
       <section
         id="sec-viatger"
         className="a24-chapter a24-chapter--light a24-chapter-viatger"
@@ -408,14 +408,14 @@ export default function StartClient() {
             </div>
 
             <div className="a24-media-meta-bar">
-              <span className="a24-stamp a24-stamp--red">ARXIU #02</span>
+              <span className="a24-stamp a24-stamp--black">ARXIU #02</span>
               <span className="a24-meta-spec a24-meta-spec--dark">
                 TEMPS RECORD · CATÀLEG MG-08 · VINIL 33 RPM
               </span>
             </div>
 
-            {/* Exactly 1 paragraph in PP Eiko / Grifinito */}
-            <BlockReveal color="#E20000" direction="lr" delay={150} duration={650} fullWidth>
+            {/* Exactly 1 paragraph in PP Eiko */}
+            <BlockReveal color="#000000" direction="lr" delay={150} duration={650} fullWidth>
               <p className="a24-desc-lead a24-desc-lead--black">
                 No és només un àlbum; és una crida a l&apos;ànima, una invitació a
                 explorar nous horitzons i a abraçar l&apos;essència de la vida. A través
@@ -433,12 +433,12 @@ export default function StartClient() {
               </p>
             </div>
 
-            {/* Monumental Maelstrom Sans Title */}
+            {/* Monumental PP Museum Title in Pure Black */}
             <AnimatedTitle
               as="h2"
               text="VIATGER"
-              color="#E20000"
-              className="a24-monumental-title a24-monumental-title--red"
+              color="#000000"
+              className="a24-monumental-title a24-monumental-title--black"
             />
 
             <div className="a24-quote-card a24-quote-card--light">
@@ -469,7 +469,7 @@ export default function StartClient() {
                 {/* CARA A: PORTADA D'ART & VINIL EXTRAÏBLE */}
                 <div className="a24-face a24-face--front">
                   <div className="a24-sleeve-pack">
-                    {/* Vinyl disc sliding out */}
+                    {/* Vinyl disc sliding out with monochrome label */}
                     <div
                       className="a24-slip-disc"
                       aria-hidden="true"
@@ -601,7 +601,7 @@ export default function StartClient() {
         </div>
       </section>
 
-      {/* CAPÍTOL 03: PRESENTACIÓ AL PRINCIPAL (Split Cinema / Chronicle) */}
+      {/* CAPÍTOL 03: PRESENTACIÓ AL PRINCIPAL (Split View // #f2f2f2 surface) */}
       <section
         id="sec-principal"
         className="a24-chapter a24-chapter--split a24-chapter-principal"
@@ -633,7 +633,7 @@ export default function StartClient() {
             <span className="a24-num-label">CRÒNICA DE DIRECTE</span>
           </div>
 
-          {/* 3 lines monumental stack in Maelstrom Sans */}
+          {/* 3 lines monumental stack in PP Museum */}
           <div className="a24-stack-title">
             <AnimatedTitle
               as="h2"
@@ -658,10 +658,10 @@ export default function StartClient() {
             />
           </div>
 
-          <AnimatedDivider color="#E20000" delay={250} />
+          <AnimatedDivider color="#000000" delay={250} />
 
-          {/* Chronicle in PP Eiko / Grifinito */}
-          <BlockReveal color="#E20000" direction="lr" delay={300} duration={700} fullWidth>
+          {/* Chronicle in PP Eiko */}
+          <BlockReveal color="#000000" direction="lr" delay={300} duration={700} fullWidth>
             <div className="a24-desc-stack">
               <p className="a24-desc-lead a24-desc-lead--black">
                 El passat dissabte, van viure una nit inoblidable al Teatre
@@ -692,7 +692,7 @@ export default function StartClient() {
       </section>
 
       {/* ============================================================
-          4. A24 FLOATING STATUS DOCK (PERMANENT INTERACTIVE BAR)
+          4. A24 FLOATING STATUS DOCK (PERMANENT MINIMAL BAR)
           ============================================================ */}
       <footer className="a24-dock" role="contentinfo" aria-label="Estat d'arxiu i navegació permanent">
         <div className="a24-dock-card">
