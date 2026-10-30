@@ -112,7 +112,7 @@
   font-family: 'Coign', sans-serif;
   font-size: clamp(26px, 2.5vw, 36px);
   font-weight: normal;
-  letter-spacing: -0.025em;
+  letter-spacing: 0.05em;
   text-transform: uppercase;
   line-height: 0.98;
   white-space: nowrap;
@@ -309,10 +309,10 @@
 
 .mlst_panel_title {
   font-family: 'Coign', sans-serif;
-  font-size: clamp(52px, 6.8vw, 88px);
+  font-size: clamp(56px, 7.5vw, 96px);
   font-weight: normal;
-  letter-spacing: -0.035em;
-  line-height: 0.86;
+  letter-spacing: 0.08em;
+  line-height: 0.88;
   color: var(--mlst-fg);
   text-transform: uppercase;
   margin: 0;
@@ -608,6 +608,7 @@
   .mlst_panel_title {
     font-size: clamp(48px, 12vw, 64px);
     line-height: 0.88;
+    letter-spacing: 0.06em;
   }
 
   .mlst_panel_subtitle {

@@ -37,7 +37,7 @@
 .disco-hero-inner {
   position: relative;
   z-index: 2;
-  max-width: 1200px;
+  max-width: 1360px;
   margin: 0 auto;
 }
 
@@ -48,7 +48,7 @@
   font-family: 'GRAPHIK', sans-serif;
   font-size: 12px;
   font-weight: 700;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
   color: #E20000;
   margin-bottom: 16px;
@@ -64,11 +64,11 @@
 
 .disco-hero-title {
   font-family: 'Coign', sans-serif;
-  font-size: clamp(88px, 14.5vw, 195px);
-  line-height: 0.82;
-  letter-spacing: -0.04em;
+  font-size: clamp(100px, 16vw, 230px);
+  line-height: 0.84;
+  letter-spacing: 0.12em;
   color: #000000;
-  margin: 0 0 16px 0;
+  margin: 0 0 20px 0;
   font-weight: normal;
   text-transform: uppercase;
 }
@@ -841,8 +841,9 @@
   }
 
   .disco-hero-title {
-    font-size: clamp(76px, 20vw, 110px);
-    line-height: 0.85;
+    font-size: clamp(66px, 17.5vw, 84px);
+    line-height: 0.88;
+    letter-spacing: 0.08em;
     margin-bottom: 12px;
   }
 
