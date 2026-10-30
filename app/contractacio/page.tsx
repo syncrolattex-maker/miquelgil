@@ -1,5 +1,4 @@
 import React from "react";
-import InkBloomFooter from "@/components/InkBloomFooter";
 import ContractacioClient from "./ContractacioClient";
 import "./contractacio.css";
 
@@ -13,12 +12,11 @@ export default function ContractacioPage() {
   return (
     <main className="contractacio-page-container">
       <ContractacioClient />
-      <InkBloomFooter
-        color="#b80018"
-        colorOuter="#ff0528"
-        ground="transparent"
-        edge="bottom"
-      />
+      <footer className="contract-footer">
+        <p className="contract-footer-copyright">
+          © 2026 Miquel Gil — Tots els drets reservats
+        </p>
+      </footer>
     </main>
   );
 }

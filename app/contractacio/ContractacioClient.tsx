@@ -3,6 +3,7 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
 import gsap from "gsap";
 import { bookingInfo, downloads } from "@/lib/site";
+import InkBloom from "@/components/InkBloom";
 
 interface FormatDetail {
   id: string;
@@ -271,6 +272,14 @@ Moltes gràcies.`;
           HERO EDITORIAL
           ============================================================ */}
       <header className="contract-hero">
+        {/* InkBloom Effect at the top */}
+        <InkBloom
+          edge="top"
+          color="#b80018"
+          colorOuter="#ff0528"
+          ground="transparent"
+        />
+
         <div className="contract-hero-inner">
           <span className="contract-hero-eyebrow">
             Management & Programació // Temporada 2026 — 2027
