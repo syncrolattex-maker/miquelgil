@@ -468,6 +468,7 @@
   pointer-events: auto;
   cursor: grab;
   outline: none;
+  z-index: 10;
 }
 
 .a24-disc-rig:active {
@@ -680,12 +681,13 @@
 .a24-back-tracks {
   display: flex;
   justify-content: space-between;
-  width: 85%;
-  gap: 16px;
+  width: 100%;
+  gap: 12px;
   margin-top: 4px;
 }
 
 .a24-track-side {
+  width: 26%;
   text-align: left;
 }
 
@@ -710,16 +712,18 @@
 
 .a24-track-side li {
   font-family: var(--a24-font-primary);
-  font-size: 10px;
+  font-size: 9.5px;
   font-weight: 500;
+  line-height: 1.2;
   color: #333333;
   display: flex;
-  gap: 6px;
+  flex-direction: column;
+  gap: 0;
 }
 
 .a24-track-side li small {
   font-family: monospace;
-  font-size: 8.5px;
+  font-size: 8px;
   color: var(--a24-text-muted);
 }
 
@@ -797,7 +801,7 @@
   position: absolute;
   top: 48%;
   left: 48%;
-  transform: translate(32%, -52%) rotateY(-36deg) scale(0.82);
+  transform: translate(-8%, -52%) rotateY(-36deg) scale(0.82);
   width: clamp(340px, 45vh, 520px);
   aspect-ratio: 1 / 1;
   pointer-events: auto;
@@ -805,11 +809,36 @@
   opacity: 0.94;
   transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.4s ease;
   outline: none;
+  z-index: 5;
 }
 
 .a24-disc-queued:hover {
-  transform: translate(30%, -52%) rotateY(-32deg) scale(0.86);
+  transform: translate(-12%, -52%) rotateY(-32deg) scale(0.86);
   opacity: 1;
+}
+
+/* Previous disc recedes to the left, mirrored on the Y axis.
+   Only shown on wide screens where it cannot collide with the info column. */
+.a24-disc-queued--prev {
+  display: none;
+  transform: translate(-92%, -52%) rotateY(36deg) scale(0.82);
+  opacity: 0.88;
+}
+
+@media (min-width: 1400px) {
+  .a24-disc-queued--prev {
+    display: block;
+  }
+}
+
+.a24-disc-queued--prev:hover {
+  transform: translate(-88%, -52%) rotateY(32deg) scale(0.86);
+  opacity: 1;
+}
+
+.a24-disc-queued--prev .a24-queued-label {
+  right: auto;
+  left: 15%;
 }
 
 .a24-queued-disc {
@@ -1082,7 +1111,12 @@
   .a24-root {
     height: auto;
     min-height: 100vh;
-    overflow-y: auto;
+    overflow: visible;
+  }
+
+  .a24-main-stage {
+    height: auto;
+    min-height: 100vh;
   }
 
   .a24-nav-list {
@@ -1101,7 +1135,7 @@
     height: auto;
     min-height: 100vh;
     padding-top: 48px;
-    padding-bottom: 70px;
+    padding-bottom: 110px;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -1133,8 +1167,12 @@
     position: absolute;
     top: 50%;
     left: 44%;
-    transform: translate(62%, -50%) rotateY(-36deg) scale(0.68);
+    transform: translate(-8%, -50%) rotateY(-36deg) scale(0.68);
     width: 260px;
+  }
+
+  .a24-disc-queued--prev {
+    display: none;
   }
 
   .a24-testimonial-wrap {
@@ -1152,6 +1190,19 @@
     max-width: 320px;
   }
 
+  /* On the small disc the two-column tracklist and the poem cannot clear the
+     centre hole, so the back shows a clean printed label instead. */
+  .a24-back-content {
+    justify-content: space-between;
+    padding: 28px 24px 34px;
+  }
+
+  .a24-back-tracks,
+  .a24-back-poem,
+  .a24-back-notes {
+    display: none;
+  }
+
   .a24-bottom-dock {
     position: fixed;
     bottom: 12px;
@@ -1165,6 +1216,40 @@
 
   .a24-dock-shortcuts {
     display: none;
+  }
+}
+
+/* Compact phones: keep the centered nav from colliding with the sound toggle */
+@media (max-width: 420px) {
+  .a24-nav-list {
+    gap: 10px;
+  }
+
+  .a24-logo-text {
+    font-size: 12px;
+  }
+
+  .a24-nav-link {
+    font-size: 12px;
+  }
+
+  .a24-nav-logo {
+    margin-right: 0;
+  }
+
+  .a24-arrow {
+    font-size: 8px;
+  }
+
+  .a24-sound-btn {
+    padding: 4px 5px;
+  }
+
+  .a24-dropdown-menu {
+    left: auto;
+    right: 0;
+    transform: none;
+    min-width: 200px;
   }
 }
 

@@ -138,10 +138,13 @@ export default function StartClient() {
   const [isVideoModalOpen, setIsVideoModalOpen] = useState<boolean>(false);
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const indexRef = useRef<HTMLLIElement | null>(null);
 
   const currentFilm = FILMS[activeIndex];
   const nextIndex = (activeIndex + 1) % FILMS.length;
   const nextFilm = FILMS[nextIndex];
+  const prevIndex = (activeIndex - 1 + FILMS.length) % FILMS.length;
+  const prevFilm = FILMS[prevIndex];
 
   // Navigation handlers
   const goToNext = useCallback(() => {
@@ -188,6 +191,20 @@ export default function StartClient() {
     };
   }, []);
 
+  // Close the index dropdown when clicking outside of it
+  useEffect(() => {
+    if (!isIndexOpen) return;
+
+    const handlePointerDown = (e: MouseEvent) => {
+      if (indexRef.current && !indexRef.current.contains(e.target as Node)) {
+        setIsIndexOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handlePointerDown);
+    return () => document.removeEventListener("mousedown", handlePointerDown);
+  }, [isIndexOpen]);
+
   // Keyboard accessibility (Space to flip, Arrows to switch, M for audio, Enter for video)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -195,6 +212,15 @@ export default function StartClient() {
         e.target instanceof HTMLInputElement ||
         e.target instanceof HTMLTextAreaElement
       ) {
+        return;
+      }
+
+      // Let native buttons/links handle their own Space/Enter activation
+      const isNativeControl =
+        e.target instanceof HTMLElement &&
+        (e.target.closest("button") || e.target.closest("a"));
+
+      if (isNativeControl && (e.code === "Space" || e.key === "Enter")) {
         return;
       }
 
@@ -318,7 +344,7 @@ export default function StartClient() {
                     Directes
                   </a>
                 </li>
-                <li role="none" className="a24-nav-index-item">
+                <li role="none" className="a24-nav-index-item" ref={indexRef}>
                   <button
                     type="button"
                     className="a24-nav-link a24-index-btn"
@@ -469,6 +495,40 @@ export default function StartClient() {
             aria-label="Galeria de discs en 3D"
             role="region"
           >
+            {/* PREVIOUS DISC (RECEDING 3D DEPTH TO THE LEFT) */}
+            <div
+              className="a24-disc-queued a24-disc-queued--prev"
+              onClick={goToPrev}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  goToPrev();
+                }
+              }}
+              role="button"
+              tabIndex={0}
+              aria-label={`Disc anterior: ${prevFilm.title}. Clica per tornar enrere.`}
+              title={`Anterior: ${prevFilm.title}`}
+            >
+              <div className="a24-queued-disc">
+                <div className="a24-disc-rim" />
+                <div
+                  className="a24-disc-artwork"
+                  style={{ backgroundImage: `url(${prevFilm.discImage})` }}
+                />
+                <div className="a24-disc-grooves" />
+                <div className="a24-disc-reflection" />
+                <div className="a24-disc-hub">
+                  <div className="a24-disc-clamp" />
+                  <div className="a24-disc-hole" />
+                </div>
+              </div>
+              <span className="a24-queued-label">
+                &larr; {prevFilm.index} // {prevFilm.title}
+              </span>
+            </div>
+
             {/* ACTIVE DISC (CENTER STAGE) */}
             <div
               className={`a24-disc-rig ${isFlipped ? "is-flipped" : ""}`}
@@ -588,6 +648,13 @@ export default function StartClient() {
             <div
               className="a24-disc-queued"
               onClick={goToNext}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  goToNext();
+                }
+              }}
               role="button"
               tabIndex={0}
               aria-label={`Següent disc: ${nextFilm.title}. Clica per avançar.`}

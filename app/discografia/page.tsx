@@ -1,20 +1,15 @@
 import DiscografiaClient from "./DiscografiaClient";
-import "./discografia.css";
 
 export const metadata = {
   title: "Discografia — Miquel Gil",
-  description: "Discografia completa de Miquel Gil: de la música d'arrel a la fusió, del flamenc al jazz i la música àrab culta.",
+  description: "Arxiu 3D interactiu de la discografia oficial de Miquel Gil: de la música d'arrel a la fusió mediterrània (1988 — 2024).",
 };
 
 export default function Discografia() {
   return (
-    <main className="discografia-container">
+    <main className="w-screen h-screen overflow-hidden bg-[#141210] p-0 m-0">
+      <h1 className="sr-only">Discografia Oficial de Miquel Gil — Arxiu 3D Interactiu</h1>
       <DiscografiaClient />
-      <footer className="disco-footer">
-        <p className="disco-footer-copyright">
-          © 2026 Miquel Gil — Tots els drets reservats
-        </p>
-      </footer>
     </main>
   );
 }
