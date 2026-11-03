@@ -29,7 +29,6 @@ interface DiscHolderUserData {
   frontMat: THREE.MeshPhysicalMaterial;
   dragSpinX: number;
   dragSpinY: number;
-  flipAngleY: number;
   zeroGOffset: THREE.Vector3;
   zeroGRot: THREE.Vector3;
   zeroGTween: gsap.core.Timeline | null;
@@ -144,7 +143,6 @@ export default function DiscografiaClient() {
     let prevL = 0;
     let velocityVisual = 0;
     let kickBoost = 0;
-    let isFlippedBSide = false;
     let activeTween: gsap.core.Tween | null = null;
     let isDisposed = false;
 
@@ -422,7 +420,6 @@ export default function DiscografiaClient() {
         frontMat,
         dragSpinX: 0,
         dragSpinY: 0,
-        flipAngleY: 0,
         zeroGOffset: new THREE.Vector3(),
         zeroGRot: new THREE.Vector3(),
         zeroGTween: null,
@@ -1044,14 +1041,6 @@ export default function DiscografiaClient() {
       const clamped = Math.max(0, Math.min(N - 1, Math.round(targetIndex)));
       const distance = Math.abs(clamped - L);
 
-      // Resetear cara B si cambiamos de disco
-      if (clamped !== W && isFlippedBSide) {
-        isFlippedBSide = false;
-        if (discHolders[W]) {
-          gsap.to(discHolders[W].userData, { flipAngleY: 0, duration: 0.45, ease: 'power2.out' });
-        }
-      }
-
       // 2. Si el destino está a más de 5 discos, espera a cargar sus texturas antes de animar
       if (Math.abs(clamped - W) > SPEC.renderRadius) {
         await preloadAround(clamped, SPEC.renderRadius);
@@ -1500,23 +1489,6 @@ export default function DiscografiaClient() {
     container.addEventListener('click', onContainerClick);
 
     // ============================================================================
-    // 12. TECLADO (← →, Home, End, Enter, Espacio 180° en 0.75s power3.inOut)
-    // ============================================================================
-    function flipActiveDisc() {
-      const holder = discHolders[W];
-      if (!holder) return;
-      isFlippedBSide = !isFlippedBSide;
-      gsap.to(holder.userData, {
-        flipAngleY: isFlippedBSide ? Math.PI : 0,
-        duration: 0.75,
-        ease: 'power3.inOut'
-      });
-    }
-
-    const flipBtn = container.querySelector('#flip-disc-btn') as HTMLButtonElement | null;
-    if (flipBtn) flipBtn.addEventListener('click', flipActiveDisc);
-
-    // ============================================================================
     // 13. MENÚ INDEX Y CUSTOM EVENT 'discgallerynavigate'
     // ============================================================================
     const indexDrawer = container.querySelector('#index-drawer') as HTMLElement | null;
@@ -1605,9 +1577,6 @@ export default function DiscografiaClient() {
       } else if (e.key === 'Enter') {
         e.preventDefault();
         openFilmDetail(films[W], e.metaKey || e.ctrlKey);
-      } else if (e.key === ' ' || e.code === 'Space') {
-        e.preventDefault();
-        flipActiveDisc();
       }
     };
 
@@ -1689,7 +1658,7 @@ export default function DiscografiaClient() {
             p === W && absM < 0.01 ? 1 : Math.max(0.8, 1 - absM * 0.2 * 0.6);
           holder.scale.setScalar(baseScale + u.hoverWeight * 0.028);
 
-          // Rotación Y = -a + inclinaciones de flujo, flotabilidad hover en TODOS los discos, arrastre y volteo 180°
+          // Rotación Y = -a + inclinaciones de flujo, flotabilidad hover en TODOS los discos y arrastre
           const isAct = p === W;
           const rotX =
             flowSignal * SPEC.flowLean +
@@ -1701,7 +1670,7 @@ export default function DiscografiaClient() {
             -a +
             u.hoverTiltCurrentY +
             u.zeroGRot.y +
-            (isAct ? u.dragSpinY + u.flipAngleY : 0);
+            (isAct ? u.dragSpinY : 0);
           const rotZ =
             -flowSignal * SPEC.flowBank * 0.18 + u.zeroGRot.z + buoyRoll;
 
@@ -1724,7 +1693,7 @@ export default function DiscografiaClient() {
           holder.scale.setScalar(scale);
           holder.rotation.set(
             u.hoverTiltCurrentX + u.zeroGRot.x + (p === W ? u.dragSpinX : 0),
-            -a + u.hoverTiltCurrentY + u.zeroGRot.y + (p === W ? u.dragSpinY + u.flipAngleY : 0),
+            -a + u.hoverTiltCurrentY + u.zeroGRot.y + (p === W ? u.dragSpinY : 0),
             u.zeroGRot.z + buoyRoll
           );
         }
@@ -1774,7 +1743,6 @@ export default function DiscografiaClient() {
 
       if (prevBtn) prevBtn.removeEventListener('click', onPrevClick);
       if (nextBtn) nextBtn.removeEventListener('click', onNextClick);
-      if (flipBtn) flipBtn.removeEventListener('click', flipActiveDisc);
       if (toggleIndexBtn) toggleIndexBtn.removeEventListener('click', openIndexDrawer);
       if (closeIndexBtn) closeIndexBtn.removeEventListener('click', closeIndexDrawer);
       if (closeModalBtn) closeModalBtn.removeEventListener('click', onCloseModal);
@@ -1915,14 +1883,6 @@ export default function DiscografiaClient() {
       {/* PIE DE PÁGINA CON REGLA NUMÉRICA Y AYUDA */}
       <footer className="absolute bottom-0 left-0 w-full z-20 flex items-center justify-between px-6 py-5 pointer-events-none">
         <div className="flex items-center gap-5 pointer-events-auto">
-          <button
-            type="button"
-            id="flip-disc-btn"
-            data-disc-no-drag=""
-            className="a24-label hover:text-black transition-colors"
-          >
-            [SPACE] FLIP SIDE B
-          </button>
           <span id="scribble-status" className="a24-label">
             HOVER ACTIVE DISC FOR SCRIBBLE
           </span>
