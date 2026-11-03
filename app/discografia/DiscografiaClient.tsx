@@ -286,7 +286,7 @@ export default function DiscografiaClient() {
 
       // Anillo perimetral legal estilo A24 Optical Disc
       ctx.fillStyle = 'rgba(255,255,255,0.88)';
-      ctx.font = '600 18px "Helvetica Neue", Arial, sans-serif';
+      ctx.font = '600 18px "PP Neue Montreal", Arial, sans-serif';
       ctx.textAlign = 'center';
       ctx.fillText(`${film.title.toUpperCase()} · ${film.year} · A24 OPTICAL ARCHIVE`, cx, size * 0.93);
       ctx.restore();
@@ -1908,7 +1908,7 @@ export default function DiscografiaClient() {
         className="index-drawer fixed inset-0 z-30 bg-white/95 backdrop-blur-md opacity-0 invisible flex flex-col justify-between p-8"
       >
         <div className="flex justify-between items-center border-b border-black/10 pb-4">
-          <span className="a24-value font-semibold">CATALOGUE INDEX — 12 EDITIONS</span>
+          <span className="a24-title font-medium tracking-wide">CATALOGUE INDEX — 12 EDITIONS</span>
           <button
             type="button"
             id="close-index-btn"
@@ -1946,7 +1946,7 @@ export default function DiscografiaClient() {
         </div>
         <div className="max-w-3xl my-auto space-y-6">
           <div id="modal-year" className="a24-label"></div>
-          <h2 id="modal-title" className="text-4xl md:text-6xl font-bold uppercase tracking-tight"></h2>
+          <h2 id="modal-title" className="text-4xl md:text-6xl font-medium uppercase tracking-tight"></h2>
           <p id="modal-desc" className="text-sm text-black/70 leading-relaxed max-w-xl"></p>
           <div className="pt-4 flex gap-4">
             <a

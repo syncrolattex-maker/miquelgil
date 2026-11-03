@@ -161,6 +161,30 @@
 
 /* 5. PP EIKO (Pangram Pangram) — Serifa poètica d'alta expressió literària */
 @font-face {
+  font-family: 'PP Eiko Medium';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/PPEiko-Regular.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'PP Eiko Medium';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('/fonts/PPEiko-Regular.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'PP Eiko Medium';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('/fonts/PPEiko-Regular.woff2') format('woff2');
+}
+
+@font-face {
   font-family: 'PP Eiko';
   font-style: normal;
   font-weight: 400;
@@ -242,11 +266,14 @@
   --font-coign: 'Maelstrom Sans', sans-serif;
   --font-grifinito: 'GRIFINITO L', serif;
   --font-graphik: 'GRAPHIK', sans-serif;
-  --font-neue-montreal: 'PP Neue Montreal', 'Ppneuemontreal', 'GRAPHIK', Arial, sans-serif;
-  --font-eiko: 'PP Eiko', 'GRIFINITO L', Georgia, serif;
-  --font-museum: 'PP Museum', 'GRIFINITO L', serif;
-  --font-display: 'GRIFINITO L', serif;
-  --font-body: 'PP Neue Montreal', 'GRAPHIK', sans-serif;
+  --font-neue-montreal: 'PP Neue Montreal', 'Ppneuemontreal', Arial, sans-serif;
+  --font-eiko: 'PP Eiko Medium', 'PP Eiko', Georgia, serif;
+  --font-museum: 'PP Museum', serif;
+  --font-titles: 'PP Eiko Medium', 'PP Eiko', Georgia, serif;
+  --font-subtitles: 'PP Museum', serif;
+  --font-texts: 'PP Neue Montreal', 'Ppneuemontreal', Arial, sans-serif;
+  --font-display: 'PP Eiko Medium', 'PP Eiko', serif;
+  --font-body: 'PP Neue Montreal', 'Ppneuemontreal', Arial, sans-serif;
   --font-mono: 'GRAPHIK', monospace;
 }
 

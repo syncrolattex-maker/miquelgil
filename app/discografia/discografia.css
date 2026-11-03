@@ -1,4 +1,131 @@
-@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600&display=swap');
+/* ============================================================
+   TIPOGRAFIAS OFICIALS A24 / MIQUEL GIL OPTICAL ARCHIVE
+   - Títulos: PP Eiko Medium
+   - Subtítulos: PP Museum Font Family
+   - Textos, menús y demás: PP Neue Montreal Font Family
+   ============================================================ */
+
+/* 1. PP EIKO MEDIUM — Títulos */
+@font-face {
+  font-family: 'PP Eiko Medium';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/PPEiko-Regular.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'PP Eiko Medium';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('/fonts/PPEiko-Regular.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'PP Eiko Medium';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('/fonts/PPEiko-Regular.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'PP Eiko';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/PPEiko-Regular.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'PP Eiko';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('/fonts/PPEiko-Regular.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'PP Eiko';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('/fonts/PPEiko-Regular.woff2') format('woff2');
+}
+
+/* 2. PP MUSEUM — Subtítulos */
+@font-face {
+  font-family: 'PP Museum';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/PPMuseum-Regular.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'PP Museum';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('/fonts/PPMuseum-Regular.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'PP Museum';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('/fonts/PPMuseum-Regular.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'PP Museum';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('/fonts/PPMuseum-Regular.woff2') format('woff2');
+}
+
+/* 3. PP NEUE MONTREAL — Textos, menús y demás */
+@font-face {
+  font-family: 'PP Neue Montreal';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/PPNeueMontreal-Medium.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'PP Neue Montreal';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('/fonts/PPNeueMontreal-Medium.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'PP Neue Montreal';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('/fonts/PPNeueMontreal-Medium.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'PP Neue Montreal';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('/fonts/PPNeueMontreal-Medium.woff2') format('woff2');
+}
+
+:root,
+[data-disc-gallery] {
+  --font-titles: 'PP Eiko Medium', 'PP Eiko', Georgia, serif;
+  --font-subtitles: 'PP Museum', Georgia, serif;
+  --font-texts: 'PP Neue Montreal', 'Ppneuemontreal', -apple-system, BlinkMacSystemFont, Arial, sans-serif;
+}
 
 [data-disc-gallery],
 [data-disc-gallery] *,
@@ -7,7 +134,7 @@
   box-sizing: border-box;
   margin: 0;
   padding: 0;
-  font-family: 'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-family: var(--font-texts);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -34,6 +161,7 @@
   border: 0 solid rgba(17, 17, 17, 0.15);
   color: inherit;
   cursor: pointer;
+  font-family: var(--font-texts);
 }
 
 [data-disc-gallery] button:disabled {
@@ -43,6 +171,7 @@
 [data-disc-gallery] a {
   color: inherit;
   text-decoration: none;
+  font-family: var(--font-texts);
 }
 
 [data-disc-canvas] {
@@ -55,21 +184,80 @@
   display: block;
 }
 
+/* ============================================================
+   TÍTULOS: PP Eiko Medium
+   ============================================================ */
+.a24-serif-title,
+.a24-title,
+#ui-title,
+#modal-title,
+[data-disc-gallery] h1,
+[data-disc-gallery] h2,
+[data-disc-gallery] h3 {
+  font-family: var(--font-titles) !important;
+  font-weight: 500 !important;
+}
+
 .a24-serif-title {
-  font-family: 'Instrument Serif', Georgia, serif !important;
   font-size: clamp(2.1rem, 3.2vw, 3.1rem);
   line-height: 0.96;
   letter-spacing: -0.02em;
-  font-weight: 400;
   color: #111111;
 }
 
-.a24-desc {
+/* ============================================================
+   SUBTÍTULOS: PP Museum Font Family
+   ============================================================ */
+.a24-label,
+.a24-subtitle,
+#modal-year,
+#modal-slug,
+[data-subtitle] {
+  font-family: var(--font-subtitles) !important;
+  font-size: 10px;
+  line-height: 13px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: rgba(17, 17, 17, 0.45);
+  font-weight: 500;
+}
+
+/* ============================================================
+   TEXTOS, MENÚS Y DEMÁS: PP Neue Montreal Font Family
+   ============================================================ */
+.a24-desc,
+#ui-description,
+#modal-desc {
+  font-family: var(--font-texts) !important;
   font-size: 11.5px;
   line-height: 1.5;
   letter-spacing: -0.005em;
   color: rgba(17, 17, 17, 0.78);
   font-weight: 400;
+}
+
+.a24-value {
+  font-family: var(--font-texts) !important;
+  font-size: 11px;
+  line-height: 15px;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: #111111;
+  font-weight: 500;
+}
+
+[data-disc-gallery] nav,
+[data-disc-gallery] nav button,
+[data-disc-gallery] nav a,
+#ui-quick-list,
+#ui-quick-list button,
+#index-drawer,
+#close-index-btn,
+#close-modal-btn,
+#modal-ext-link,
+[data-disc-prev],
+[data-disc-next] {
+  font-family: var(--font-texts) !important;
 }
 
 .editorial-line {
@@ -88,24 +276,6 @@
 .line-inner {
   display: block;
   will-change: transform, opacity;
-}
-
-.a24-label {
-  font-size: 10px;
-  line-height: 13px;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  color: rgba(17, 17, 17, 0.45);
-  font-weight: 500;
-}
-
-.a24-value {
-  font-size: 11px;
-  line-height: 15px;
-  letter-spacing: 0.03em;
-  text-transform: uppercase;
-  color: #111111;
-  font-weight: 500;
 }
 
 .char-mask {
@@ -135,9 +305,9 @@
   transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.3s;
 }
 
-/* ==========================================================================
+/* ============================================================
    Tailwind Utility Equivalences for A24 Optical Archive Replica
-   ========================================================================== */
+   ============================================================ */
 
 [data-disc-gallery] .absolute { position: absolute; }
 [data-disc-gallery] .fixed { position: fixed; }
@@ -233,6 +403,7 @@
 [data-disc-gallery] .font-mono {
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 }
+[data-disc-gallery] .font-medium { font-weight: 500; }
 [data-disc-gallery] .font-semibold { font-weight: 600; }
 [data-disc-gallery] .font-bold { font-weight: 700; }
 [data-disc-gallery] .uppercase { text-transform: uppercase; }
