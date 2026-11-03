@@ -1,1843 +1,2191 @@
 'use client';
 
-import React, { useEffect, useRef, useState, useCallback } from 'react';
-import * as THREE from 'three';
-import gsap from 'gsap';
-import Link from 'next/link';
-import './discografia.css';
-
-/********************************************************************
- * 1. DATASET OFICIAL: DISCOGRAFIA DE MIQUEL GIL (1988–2024)
- ********************************************************************/
-export interface ReviewItem {
-  pub: string;
-  score: string;
-  quote: string;
-}
-
-export interface DiscItem {
-  id: string;
-  title: string;
-  shortTitle: string;
-  year: string;
-  category: 'estudi' | 'directe';
-  categoryLabel: string;
-  label: string;
-  producer: string;
-  single: string;
-  duration: string;
-  style: string;
-  coverUrl: string;
-  audioUrl: string;
-  spotifyUrl: string;
-  accolade: string;
-  palette: {
-    primary: string;
-    secondary: string;
-    accent: string;
-    text: string;
-  };
-  tracklist: string[];
-  synopsis: string;
-  reviews: ReviewItem[];
-}
-
-export const DISCOGRAFIA_MIQUEL_GIL: DiscItem[] = [
-  {
-    id: 'MG—001',
-    title: 'Viatger',
-    shortTitle: 'Viatger',
-    year: '2024',
-    category: 'estudi',
-    categoryLabel: "DISC D'ESTUDI",
-    label: 'Temps Record',
-    producer: 'Toni Xuclà & Miquel Gil',
-    single: 'Nineta',
-    duration: '4:07',
-    style: 'Arrel Mediterrània',
-    coverUrl: '/images/disco_8.webp',
-    audioUrl: '/audio/full/viatger_nineta.mp3',
-    spotifyUrl: 'https://open.spotify.com/search/Miquel%20Gil%20Nineta',
-    accolade: '25 ANYS DE TRAJECTÒRIA · ARREL VIVA',
-    palette: { primary: '#9C4127', secondary: '#1A110E', accent: '#E8B86D', text: '#FAF6F0' },
-    tracklist: [
-      '01. Nineta (4:07)',
-      '02. Viatger',
-      '03. Romanç de la lluna',
-      '04. Cants de batre',
-      '05. A la vora del riu',
-      '06. Jota de l’Horta',
-      '07. L’últim vaixell',
-      '08. Terra d’aigua'
-    ],
-    synopsis: "Celebració d’un quart de segle de trajectòria en solitari. Un viatge sonor que revisita i actualitza el cançoner mediterrani amb textures orgàniques, percussions ibèriques i una veu més madura i lliure que mai.",
-    reviews: [
-      { pub: 'Enderrock', score: 'DISC RECOMANAT', quote: 'Miquel Gil demostra a Viatger que la tradició no és cendra, sinó foc en moviment continu.' },
-      { pub: 'Diari La Veu', score: 'EXCEL·LENT', quote: 'Nineta sintetitza vint-i-cinc anys d’ofici i avantguarda des de l’Horta Sud.' }
-    ]
-  },
-  {
-    id: 'MG—002',
-    title: 'Geometries',
-    shortTitle: 'Geometries',
-    year: '2019',
-    category: 'estudi',
-    categoryLabel: "DISC D'ESTUDI",
-    label: 'Temps Record',
-    producer: 'Miquel Gil & Col·lectiu',
-    single: 'Geometries',
-    duration: '2:50',
-    style: 'Polifonia & Fusió',
-    coverUrl: '/images/disco_7.jpg',
-    audioUrl: '/audio/full/geometries_geometries.mp3',
-    spotifyUrl: 'https://open.spotify.com/search/Miquel%20Gil%20Geometries',
-    accolade: 'PREMI OVIDI MONTLLOR · ARQUITECTURA VOCAL',
-    palette: { primary: '#264653', secondary: '#0F1A20', accent: '#E9C46A', text: '#F4F6F7' },
-    tracklist: [
-      '01. Geometries (2:50)',
-      '02. Cançó de fer camí',
-      '03. El meu poble (Estellés)',
-      '04. Tres per quatre',
-      '05. Fandango de la Ribera',
-      '06. Línia d’ombra'
-    ],
-    synopsis: "Un treball d’orfebreria rítmica on els compassos d’amalgama, les jotes, els cants de batre i els poemes de Vicent Andrés Estellés i Enric Casasses prenen formes geomètriques contemporànies.",
-    reviews: [
-      { pub: 'Mondosonoro', score: '8.5 / 10', quote: 'Una arquitectura polifònica fascinant on les veus i les percussions dibuixen polígons emocionals.' }
-    ]
-  },
-  {
-    id: 'MG—003',
-    title: 'Per marcianes',
-    shortTitle: 'Per marcianes',
-    year: '2011',
-    category: 'estudi',
-    categoryLabel: "DISC D'ESTUDI",
-    label: 'Galileo MC',
-    producer: 'Eduard Navarro & Miquel Gil',
-    single: 'La Cileta',
-    duration: '4:00',
-    style: 'Folk Mutant',
-    coverUrl: '/images/disco_6.png',
-    audioUrl: '/audio/full/marcianes_la_cileta.mp3',
-    spotifyUrl: 'https://open.spotify.com/search/Miquel%20Gil%20La%20Cileta',
-    accolade: 'TRADICIÓ MUTANT I EXPERIMENTACIÓ',
-    palette: { primary: '#3A4F41', secondary: '#111814', accent: '#D4A373', text: '#F3F5F2' },
-    tracklist: [
-      '01. La Cileta (4:00)',
-      '02. Per marcianes',
-      '03. El carro',
-      '04. Malaguenya de Barxeta',
-      '05. Havanera del port',
-      '06. Cant de sega'
-    ],
-    synopsis: "Un punt d’inflexió sonor on el cant valencià d’estil dialoga sense complexos amb loops, cordes elèctriques i una actitud irreverent.",
-    reviews: [
-      { pub: 'World Music Central', score: 'FEATURED', quote: 'La Cileta és una mostra magistral de com fer ballar la tradició amb electricitat contemporània.' }
-    ]
-  },
-  {
-    id: 'MG—004',
-    title: 'Miquel Gil & Manel Camp Trio + David Pastor',
-    shortTitle: 'Gil & Camp Trio',
-    year: '2009',
-    category: 'directe',
-    categoryLabel: 'PROJECTE JAZZ & DIRECTE',
-    label: 'Picap',
-    producer: 'Manel Camp & Miquel Gil',
-    single: 'Cançó de Bressol',
-    duration: '5:58',
-    style: 'Jazz Mediterrani',
-    coverUrl: '/images/disco_4.png',
-    audioUrl: '/audio/full/jazz_manel_camp.mp3',
-    spotifyUrl: 'https://open.spotify.com/search/Miquel%20Gil%20Manel%20Camp',
-    accolade: 'JAZZ MEDITERRANI D’ALTA VOLADA',
-    palette: { primary: '#1D2D44', secondary: '#0B111A', accent: '#F0EBD8', text: '#FFFFFF' },
-    tracklist: [
-      '01. Cançó de Bressol (5:58)',
-      '02. Balada d’en Lucas',
-      '03. Vetlatori',
-      '04. Dansa del vent',
-      '05. Nocturn d’Albufera'
-    ],
-    synopsis: "El cim de la fusió entre la veu ancestral de Miquel Gil, el piano jazzístic de Manel Camp i la trompeta lírica de David Pastor.",
-    reviews: [
-      { pub: 'Cuadernos de Jazz', score: '5 ESTRELLES', quote: 'Un diàleg hipnòtic entre el cant d’estil i el jazz de cambra europeu.' }
-    ]
-  },
-  {
-    id: 'MG—005',
-    title: 'Eixos',
-    shortTitle: 'Eixos',
-    year: '2006',
-    category: 'estudi',
-    categoryLabel: "DISC D'ESTUDI",
-    label: 'Galileo MC',
-    producer: 'Miquel Gil',
-    single: 'Dels Meus Ulls',
-    duration: '3:33',
-    style: 'Mediterrània Cosmopolita',
-    coverUrl: '/images/disco_5.png',
-    audioUrl: '/audio/full/eixos_dels_meus_ulls.mp3',
-    spotifyUrl: 'https://open.spotify.com/search/Miquel%20Gil%20Dels%20Meus%20Ulls',
-    accolade: 'CARTOGRAFIA SONORA DE NORD A SUD',
-    palette: { primary: '#6F1D1B', secondary: '#1B0807', accent: '#FFE6A7', text: '#FFFDF9' },
-    tracklist: [
-      '01. Dels Meus Ulls (3:33)',
-      '02. Eixos',
-      '03. La pluja',
-      '04. Mercat de nit',
-      '05. Camí de l’horta',
-      '06. Frontera'
-    ],
-    synopsis: "Un disc lluminós i cosmopolita que traça eixos invisibles entre València, Mallorca, Catalunya i la riba sud de la Mediterrània.",
-    reviews: [
-      { pub: 'Folker Magazine', score: 'TOP EUROPE', quote: 'Miquel Gil es consolida com una de les grans veus de la Mediterrània occidental.' }
-    ]
-  },
-  {
-    id: 'MG—006',
-    title: 'En Concert',
-    shortTitle: 'En Concert',
-    year: '2006',
-    category: 'directe',
-    categoryLabel: 'ÀLBUM EN DIRECTE',
-    label: 'Galileo MC',
-    producer: 'Enregistrament en Viu',
-    single: 'Cançó Dels Traginers',
-    duration: '5:34',
-    style: 'Directe Acústic / Elèctric',
-    coverUrl: '/images/disco_4.png',
-    audioUrl: '/audio/full/en_concert_traginers.mp3',
-    spotifyUrl: 'https://open.spotify.com/search/Miquel%20Gil%20En%20Concert',
-    accolade: 'ENERGIA VIVA SOBRE L’ESCENARI',
-    palette: { primary: '#2B2D42', secondary: '#101119', accent: '#F4A261', text: '#F8F9FA' },
-    tracklist: [
-      '01. Cançó Dels Traginers (5:34)',
-      '02. Katà',
-      '03. L’amor és Déu en barca',
-      '04. Sant Joan',
-      '05. Comiat'
-    ],
-    synopsis: "Testimoni directe de la força escènica de Miquel Gil. Recull els moments més intensos de les gires d’Orgànic i Katà.",
-    reviews: [
-      { pub: 'Enderrock', score: 'DIRECTE DE L’ANY', quote: 'En directe és on la veu de Miquel Gil assoleix una dimensió tel·lúrica irrepetible.' }
-    ]
-  },
-  {
-    id: 'MG—007',
-    title: 'Katà',
-    shortTitle: 'Katà',
-    year: '2004',
-    category: 'estudi',
-    categoryLabel: "DISC D'ESTUDI",
-    label: 'Galileo MC',
-    producer: 'Miquel Gil',
-    single: 'Katà',
-    duration: '3:10',
-    style: 'World Music / Arrel',
-    coverUrl: '/images/disco_3.png',
-    audioUrl: '/audio/full/kata_kata.mp3',
-    spotifyUrl: 'https://open.spotify.com/search/Miquel%20Gil%20Kata',
-    accolade: 'WORLD MUSIC CHARTS EUROPE SELECTION',
-    palette: { primary: '#780000', secondary: '#190303', accent: '#FDF0D5', text: '#FFFDF7' },
-    tracklist: [
-      '01. Katà (3:10)',
-      '02. Rosa de paper (Estellés)',
-      '03. El vol de l’esparver',
-      '04. Nits de Xàtiva',
-      '05. Dansa de les vetlles'
-    ],
-    synopsis: "Katà aprofundeix en la percussió ibèrica, el llaüt i els melismes vocals d’arrel valenciana i magribina.",
-    reviews: [
-      { pub: 'fRoots Magazine', score: 'CRITIC’S PICK', quote: 'Un pont sonor fascinant entre València i l’Orient mediterrani.' }
-    ]
-  },
-  {
-    id: 'MG—008',
-    title: 'Orgànic',
-    shortTitle: 'Orgànic',
-    year: '2001',
-    category: 'estudi',
-    categoryLabel: "DISC D'ESTUDI",
-    label: 'Sonifolk',
-    producer: 'Miquel Gil',
-    single: "L'amor és Déu en barca",
-    duration: '5:21',
-    style: 'Neo-Tradició Acústica',
-    coverUrl: '/images/disco_2.png',
-    audioUrl: '/audio/full/organic_amor_es_deu.mp3',
-    spotifyUrl: 'https://open.spotify.com/search/Miquel%20Gil%20Organic',
-    accolade: 'OBRA CLAU DE LA MÚSICA VALENCIANA DEL S. XXI',
-    palette: { primary: '#344E41', secondary: '#111A16', accent: '#DAD7CD', text: '#F4F4F0' },
-    tracklist: [
-      '01. L’amor és Déu en barca (5:21)',
-      '02. Orgànic',
-      '03. Cant d’estil de Catarroja',
-      '04. La dama d’Aragó',
-      '05. Horta Sud'
-    ],
-    synopsis: "L’obra mestra que va redefinir la música d’arrel valenciana al segle XXI. Fusta, pell, corda i veu nua.",
-    reviews: [
-      { pub: 'El País', score: 'OBRA MESTRA', quote: 'Orgànic despulla el cant tradicional de tòpics i el projecta cap a la modernitat.' }
-    ]
-  },
-  {
-    id: 'MG—009',
-    title: 'Buscando tu olor',
-    shortTitle: 'Buscando tu olor',
-    year: '1997',
-    category: 'estudi',
-    categoryLabel: "DEBUT EN SOLITARI",
-    label: 'PDI',
-    producer: 'Miquel Gil',
-    single: 'Buscando tu olor',
-    duration: '3:39',
-    style: 'Fusió / Lirisme Sud',
-    coverUrl: '/images/disco_1.jpg',
-    audioUrl: '/audio/full/buscando_tu_olor.mp3',
-    spotifyUrl: 'https://open.spotify.com/search/Miquel%20Gil%20Buscando%20tu%20olor',
-    accolade: 'EL DEBUT EN SOLITARI POST-AL TALL',
-    palette: { primary: '#582F0E', secondary: '#1A0E04', accent: '#EDE0D4', text: '#FFF8F0' },
-    tracklist: [
-      '01. Buscando tu olor (3:39)',
-      '02. Al vent del sud',
-      '03. Carrer del mar',
-      '04. Tarara nova',
-      '05. Nit de foc'
-    ],
-    synopsis: "Primer treball signat amb nom propi després de l’etapa fundacional amb Al Tall i Terminal Sur.",
-    reviews: [
-      { pub: 'Arxiu Musical Valencià', score: 'HISTÒRIC', quote: 'El primer pas en solitari d’un artista inquiet que mai ha deixat d’explorar.' }
-    ]
-  },
-  {
-    id: 'MG—010',
-    title: 'Viajero — Terminal Sur',
-    shortTitle: 'Viajero (1988)',
-    year: '1988',
-    category: 'estudi',
-    categoryLabel: 'ETAPA TERMINAL SUR',
-    label: 'RNE / Discos Medicinales',
-    producer: 'Terminal Sur & Miquel Gil',
-    single: 'Sant Joan',
-    duration: '5:06',
-    style: 'Electro-Mediterrània 80s',
-    coverUrl: '/images/disco_1.jpg',
-    audioUrl: '/audio/full/terminal_sur_sant_joan.mp3',
-    spotifyUrl: 'https://open.spotify.com/search/Terminal%20Sur%20Miquel%20Gil',
-    accolade: 'PIONERS DE LA FUSIÓ ELECTRO-MEDITERRÀNIA',
-    palette: { primary: '#1B263B', secondary: '#0B101B', accent: '#E0E1DD', text: '#FFFFFF' },
-    tracklist: [
-      '01. Sant Joan (5:06)',
-      '02. Viajero',
-      '03. Terminal Sur',
-      '04. Mediterráneo Express',
-      '05. Alba en la playa'
-    ],
-    synopsis: "L’experiment llegendari de Terminal Sur liderat per Miquel Gil a finals dels 80.",
-    reviews: [
-      { pub: 'RNE Radio 3', score: 'CULTE', quote: 'Un disc avançat al seu temps que va obrir les portes de la fusió mediterrània moderna.' }
-    ]
-  }
-];
-
-/********************************************************************
- * 2. AUDIO SYSTEM (WEB AUDIO API + FALLBACK PLUCK SYNTH)
- ********************************************************************/
-class MiquelGilAudioSystem {
-  ctx: AudioContext | null = null;
-  fxEnabled: boolean = true;
-  audioEl: HTMLAudioElement;
-  isPlayingMusic: boolean = false;
-  synthInterval: any = null;
-  synthProgressTimer: any = null;
-  synthElapsed: number = 0;
-  onTimeUpdate?: (current: string, total: string, pct: number) => void;
-  onPlayStateChange?: (playing: boolean) => void;
-
-  constructor() {
-    this.audioEl = typeof window !== 'undefined' ? new Audio() : (null as any);
-    if (this.audioEl) {
-      this.audioEl.crossOrigin = 'anonymous';
-
-      this.audioEl.addEventListener('timeupdate', () => {
-        if (!this.audioEl.duration) return;
-        const pct = (this.audioEl.currentTime / this.audioEl.duration) * 100;
-        const curStr = this.formatTime(this.audioEl.currentTime);
-        const totStr = this.formatTime(this.audioEl.duration);
-        if (this.onTimeUpdate) this.onTimeUpdate(curStr, totStr, pct);
-      });
-
-      this.audioEl.addEventListener('ended', () => {
-        this.stopMusic();
-      });
-    }
-  }
-
-  initContext() {
-    if (typeof window === 'undefined') return;
-    if (!this.ctx) {
-      const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
-      if (AudioCtx) this.ctx = new AudioCtx();
-    }
-    if (this.ctx && this.ctx.state === 'suspended') {
-      this.ctx.resume();
-    }
-  }
-
-  formatTime(sec: number) {
-    const m = Math.floor(sec / 60);
-    const s = Math.floor(sec % 60);
-    return `${m}:${String(s).padStart(2, '0')}`;
-  }
-
-  playRackClick(pitchOffset: number = 0) {
-    if (!this.fxEnabled) return;
-    this.initContext();
-    if (!this.ctx) return;
-
-    try {
-      const now = this.ctx.currentTime;
-      const osc = this.ctx.createOscillator();
-      const gain = this.ctx.createGain();
-      osc.type = 'triangle';
-      const baseFreq = 165 + Math.min(Math.max(pitchOffset * 12, -40), 80);
-      osc.frequency.setValueAtTime(baseFreq, now);
-      osc.frequency.exponentialRampToValueAtTime(42, now + 0.045);
-
-      gain.gain.setValueAtTime(0.11, now);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.045);
-
-      osc.connect(gain);
-      gain.connect(this.ctx.destination);
-      osc.start(now);
-      osc.stop(now + 0.05);
-    } catch (e) {}
-  }
-
-  playFlipWhoosh() {
-    if (!this.fxEnabled) return;
-    this.initContext();
-    if (!this.ctx) return;
-
-    try {
-      const now = this.ctx.currentTime;
-      const osc = this.ctx.createOscillator();
-      const gain = this.ctx.createGain();
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(110, now);
-      osc.frequency.exponentialRampToValueAtTime(280, now + 0.14);
-      osc.frequency.exponentialRampToValueAtTime(85, now + 0.32);
-
-      gain.gain.setValueAtTime(0.001, now);
-      gain.gain.linearRampToValueAtTime(0.08, now + 0.1);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.34);
-
-      osc.connect(gain);
-      gain.connect(this.ctx.destination);
-      osc.start(now);
-      osc.stop(now + 0.35);
-    } catch (e) {}
-  }
-
-  toggleTrackPlayback(item: DiscItem) {
-    if (this.isPlayingMusic) {
-      this.stopMusic();
-      return;
-    }
-
-    this.isPlayingMusic = true;
-    if (this.onPlayStateChange) this.onPlayStateChange(true);
-
-    if (this.audioEl) {
-      this.audioEl.src = item.audioUrl;
-      const playPromise = this.audioEl.play();
-      if (playPromise !== undefined) {
-        playPromise.catch(() => {
-          this.startMediterraneanAcousticPreview(item);
-        });
-      }
-    } else {
-      this.startMediterraneanAcousticPreview(item);
-    }
-  }
-
-  startMediterraneanAcousticPreview(item: DiscItem) {
-    this.initContext();
-    if (!this.ctx) return;
-
-    const scale = [146.83, 155.56, 185.00, 196.00, 220.00, 233.08, 261.63, 293.66, 311.13, 370.00];
-    let step = 0;
-    this.synthElapsed = 0;
-
-    const playPluck = (freq: number, duration: number = 0.65, vol: number = 0.09) => {
-      if (!this.isPlayingMusic || !this.ctx) return;
-      try {
-        const now = this.ctx.currentTime;
-        const osc = this.ctx.createOscillator();
-        const filter = this.ctx.createBiquadFilter();
-        const gain = this.ctx.createGain();
-
-        osc.type = 'sawtooth';
-        osc.frequency.setValueAtTime(freq, now);
-
-        filter.type = 'lowpass';
-        filter.frequency.setValueAtTime(1400, now);
-        filter.frequency.exponentialRampToValueAtTime(260, now + duration);
-
-        gain.gain.setValueAtTime(vol, now);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
-
-        osc.connect(filter);
-        filter.connect(gain);
-        gain.connect(this.ctx.destination);
-
-        osc.start(now);
-        osc.stop(now + duration);
-      } catch (e) {}
-    };
-
-    playPluck(scale[0], 1.1, 0.11);
-    this.synthInterval = setInterval(() => {
-      if (!this.isPlayingMusic) return;
-      const idx = (step * 2 + (step % 3)) % scale.length;
-      playPluck(scale[idx], 0.7, 0.08);
-      if (step % 4 === 0) playPluck(scale[0] * 0.5, 1.4, 0.07);
-      step++;
-    }, 360);
-
-    this.synthProgressTimer = setInterval(() => {
-      this.synthElapsed += 0.25;
-      const pct = Math.min(100, (this.synthElapsed / 30) * 100);
-      const curStr = this.formatTime(this.synthElapsed);
-      if (this.onTimeUpdate) this.onTimeUpdate(curStr, item.duration, pct);
-      if (this.synthElapsed >= 30) this.stopMusic();
-    }, 250);
-  }
-
-  stopMusic() {
-    this.isPlayingMusic = false;
-    try {
-      if (this.audioEl) this.audioEl.pause();
-    } catch (e) {}
-    if (this.synthInterval) clearInterval(this.synthInterval);
-    if (this.synthProgressTimer) clearInterval(this.synthProgressTimer);
-    if (this.onPlayStateChange) this.onPlayStateChange(false);
-  }
-
-  destroy() {
-    this.stopMusic();
-    if (this.ctx) {
-      try {
-        this.ctx.close();
-      } catch (e) {}
-    }
-  }
-}
-
-/********************************************************************
- * 3. 2D PROCEDURAL DISC TEXTURE DRAWING
- ********************************************************************/
-function drawDiscTopCanvas(ctx: CanvasRenderingContext2D, item: DiscItem, coverImage: HTMLImageElement | null = null) {
-  const cx = 512, cy = 512;
-  ctx.clearRect(0, 0, 1024, 1024);
-
-  const outerGrad = ctx.createRadialGradient(cx, cy, 80, cx, cy, 500);
-  outerGrad.addColorStop(0, '#d8d8d8');
-  outerGrad.addColorStop(0.28, '#efefef');
-  outerGrad.addColorStop(0.31, item.palette.secondary);
-  outerGrad.addColorStop(0.96, item.palette.primary);
-  outerGrad.addColorStop(0.985, '#e2e2e2');
-  outerGrad.addColorStop(1, '#999999');
-
-  ctx.beginPath();
-  ctx.arc(cx, cy, 500, 0, Math.PI * 2);
-  ctx.fillStyle = outerGrad;
-  ctx.fill();
-
-  ctx.save();
-  ctx.beginPath();
-  ctx.arc(cx, cy, 486, 0, Math.PI * 2);
-  ctx.arc(cx, cy, 156, 0, Math.PI * 2, true);
-  ctx.clip();
-
-  const bgGrad = ctx.createLinearGradient(0, 0, 1024, 1024);
-  bgGrad.addColorStop(0, item.palette.primary);
-  bgGrad.addColorStop(1, item.palette.secondary);
-  ctx.fillStyle = bgGrad;
-  ctx.fillRect(0, 0, 1024, 1024);
-
-  if (coverImage && coverImage.complete && coverImage.naturalWidth > 0) {
-    ctx.save();
-    ctx.globalAlpha = 0.82;
-    ctx.drawImage(coverImage, 24, 24, 976, 976);
-    const vig = ctx.createRadialGradient(cx, cy, 150, cx, cy, 490);
-    vig.addColorStop(0, 'rgba(10, 9, 8, 0.55)');
-    vig.addColorStop(0.55, 'rgba(10, 9, 8, 0.25)');
-    vig.addColorStop(1, 'rgba(10, 9, 8, 0.78)');
-    ctx.fillStyle = vig;
-    ctx.fillRect(0, 0, 1024, 1024);
-    ctx.restore();
-  } else {
-    ctx.save();
-    ctx.strokeStyle = item.palette.accent;
-    ctx.lineWidth = 2.5;
-    ctx.globalAlpha = 0.35;
-    for (let r = 190; r < 470; r += 32) {
-      ctx.beginPath();
-      ctx.arc(cx, cy, r, 0, Math.PI * 2);
-      ctx.stroke();
-    }
-    ctx.restore();
-  }
-
-  ctx.fillStyle = item.palette.text;
-  ctx.font = '800 36px "Syne", sans-serif';
-  ctx.textAlign = 'center';
-  ctx.fillText('MIQUEL GIL', cx, 232);
-
-  ctx.font = '500 15px "JetBrains Mono", monospace';
-  ctx.fillStyle = item.palette.accent;
-  ctx.fillText(`${item.id} // ${item.label.toUpperCase()}`, cx, 262);
-
-  ctx.fillStyle = item.palette.text;
-  ctx.font = '700 20px "JetBrains Mono", monospace';
-  ctx.textAlign = 'left';
-  ctx.fillText(item.year, 108, cy - 6);
-  ctx.font = '400 14px "JetBrains Mono", monospace';
-  ctx.fillText(item.duration, 108, cy + 16);
-
-  ctx.textAlign = 'right';
-  ctx.font = '700 16px "JetBrains Mono", monospace';
-  ctx.fillText('CD-DA', 914, cy - 6);
-  ctx.font = '400 13px "JetBrains Mono", monospace';
-  ctx.fillText('STEREO', 914, cy + 16);
-
-  ctx.textAlign = 'center';
-  ctx.fillStyle = '#FFFFFF';
-  ctx.font = 'italic 72px "Instrument Serif", Georgia, serif';
-  ctx.fillText(item.shortTitle.toUpperCase(), cx, 765);
-
-  ctx.font = '600 17px "JetBrains Mono", monospace';
-  ctx.fillStyle = item.palette.accent;
-  ctx.fillText(`«${item.single.toUpperCase()}»`, cx, 804);
-
-  ctx.restore();
-
-  ctx.strokeStyle = 'rgba(255,255,255,0.6)';
-  ctx.lineWidth = 3;
-  ctx.beginPath();
-  ctx.arc(cx, cy, 155, 0, Math.PI * 2);
-  ctx.stroke();
-}
-
-function createOpticalDiscTextures(item: DiscItem, textureCache: Map<string, { topTex: THREE.CanvasTexture; bTex: THREE.CanvasTexture }>) {
-  if (textureCache.has(item.id)) return textureCache.get(item.id)!;
-
-  const cx = 512, cy = 512;
-  const topCanvas = document.createElement('canvas');
-  topCanvas.width = 1024;
-  topCanvas.height = 1024;
-  const ctx = topCanvas.getContext('2d')!;
-
-  drawDiscTopCanvas(ctx, item, null);
-  const topTex = new THREE.CanvasTexture(topCanvas);
-  topTex.anisotropy = 8;
-
-  const img = new Image();
-  img.crossOrigin = 'anonymous';
-  img.onload = () => {
-    drawDiscTopCanvas(ctx, item, img);
-    topTex.needsUpdate = true;
-  };
-  img.src = item.coverUrl;
-
-  const bCanvas = document.createElement('canvas');
-  bCanvas.width = 1024;
-  bCanvas.height = 1024;
-  const bCtx = bCanvas.getContext('2d')!;
-
-  const bBase = bCtx.createRadialGradient(cx, cy, 80, cx, cy, 500);
-  bBase.addColorStop(0, '#d2d4d6');
-  bBase.addColorStop(0.3, '#b8bcc2');
-  bBase.addColorStop(0.65, '#dcdfe3');
-  bBase.addColorStop(0.96, '#aeb4bc');
-  bBase.addColorStop(1, '#7a7e85');
-  bCtx.fillStyle = bBase;
-  bCtx.beginPath();
-  bCtx.arc(cx, cy, 500, 0, Math.PI * 2);
-  bCtx.fill();
-
-  // Iridescent diffraction fans
-  const rainbowColors = ['rgba(255,0,128,0.22)', 'rgba(0,255,255,0.22)', 'rgba(255,255,0,0.22)', 'rgba(128,0,255,0.22)'];
-  for (let a = 0; a < Math.PI * 2; a += Math.PI / 4) {
-    const g = bCtx.createRadialGradient(cx, cy, 140, cx, cy, 490);
-    g.addColorStop(0, 'transparent');
-    g.addColorStop(0.5, rainbowColors[Math.floor(a * 4) % rainbowColors.length]);
-    g.addColorStop(1, 'transparent');
-    bCtx.fillStyle = g;
-    bCtx.beginPath();
-    bCtx.moveTo(cx, cy);
-    bCtx.arc(cx, cy, 490, a - 0.22, a + 0.22);
-    bCtx.closePath();
-    bCtx.fill();
-  }
-
-  // Laser micro-grooves
-  bCtx.strokeStyle = 'rgba(255,255,255,0.12)';
-  bCtx.lineWidth = 1;
-  for (let r = 160; r < 480; r += 14) {
-    bCtx.beginPath();
-    bCtx.arc(cx, cy, r, 0, Math.PI * 2);
-    bCtx.stroke();
-  }
-
-  const bTex = new THREE.CanvasTexture(bCanvas);
-  bTex.anisotropy = 8;
-
-  const bundle = { topTex, bTex };
-  textureCache.set(item.id, bundle);
-  return bundle;
-}
-
-/********************************************************************
- * 4. NEXT.JS COMPONENT EXPORT CODE TEMPLATE
- ********************************************************************/
-function generateNextJsComponentCode() {
-  return `'use client';
 import React, { useEffect, useRef } from 'react';
 import * as THREE from 'three';
+import gsap from 'gsap';
+import './discografia.css';
 
-export default function DiscografiaRack3D() {
-  const containerRef = useRef(null);
-
-  useEffect(() => {
-    if (!containerRef.current) return;
-    // Escena Three.js i Rack de discs de Miquel Gil (1988-2024)
-  }, []);
-
-  return <div ref={containerRef} className="w-full h-screen bg-[#F2ECE1] dark:bg-[#090807]" />;
-}`;
+interface ReviewData {
+  pub: string;
+  quote: string;
+  stars: string;
 }
 
-/********************************************************************
- * 5. MAIN CLIENT COMPONENT
- ********************************************************************/
+interface FilmData {
+  index: number;
+  node: HTMLElement;
+  title: string;
+  description: string;
+  director: string;
+  year: string;
+  starring: string;
+  detailUrl: string;
+  discUrl: string;
+  reviews: ReviewData[];
+}
+
+interface DiscHolderUserData {
+  index: number;
+  frontMat: THREE.MeshPhysicalMaterial;
+  dragSpinX: number;
+  dragSpinY: number;
+  flipAngleY: number;
+  zeroGOffset: THREE.Vector3;
+  zeroGRot: THREE.Vector3;
+  zeroGTween: gsap.core.Timeline | null;
+  hoverWeight: number;
+  hoverTiltTargetX: number;
+  hoverTiltTargetY: number;
+  hoverTiltCurrentX: number;
+  hoverTiltCurrentY: number;
+  floatPhase: number;
+}
+
+interface ScribbleRingData {
+  baseRadius: number;
+  geometry: THREE.BufferGeometry;
+  positions: Float32Array;
+  mesh: THREE.Mesh;
+  noiseValues: Float32Array;
+  startAngle: number;
+  sweepFraction: number;
+}
+
 export default function DiscografiaClient() {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const cursorRingRef = useRef<HTMLDivElement>(null);
-  const ambientGlowRef = useRef<HTMLDivElement>(null);
-  const sideHudRef = useRef<HTMLDivElement>(null);
-  const soundEngineRef = useRef<MiquelGilAudioSystem | null>(null);
+  const galleryRef = useRef<HTMLElement>(null);
 
-  // React state for HUD & UI synchronization
-  const [filter, setFilter] = useState<'all' | 'estudi' | 'directe'>('all');
-  const [activeIndex, setActiveIndex] = useState<number>(0);
-  const [isLightMode, setIsLightMode] = useState<boolean>(true);
-  const [isFxEnabled, setIsFxEnabled] = useState<boolean>(true);
-  const [isPlaying, setIsPlaying] = useState<boolean>(false);
-  const [audioTime, setAudioTime] = useState<string>('0:00 / 4:07');
-  const [audioProgress, setAudioProgress] = useState<number>(0);
-  const [isDetailOpen, setIsDetailOpen] = useState<boolean>(false);
-  const [isIndexOpen, setIsIndexOpen] = useState<boolean>(false);
-  const [isAntigravityOpen, setIsAntigravityOpen] = useState<boolean>(false);
-  const [copiedCode, setCopiedCode] = useState<boolean>(false);
+  useEffect(() => {
+    const container = galleryRef.current;
+    if (!container) return;
 
-  // Preloader state
-  const [isPreloaderFading, setIsPreloaderFading] = useState<boolean>(false);
-  const [isPreloaderDone, setIsPreloaderDone] = useState<boolean>(false);
+    const canvas = container.querySelector('[data-disc-canvas]') as HTMLCanvasElement | null;
+    if (!canvas) return;
 
-  // References for Three.js animation loop and controls
-  const sceneRef = useRef<THREE.Scene | null>(null);
-  const cameraRef = useRef<THREE.PerspectiveCamera | null>(null);
-  const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
-  const rackGroupRef = useRef<THREE.Group | null>(null);
-  const dynamicPointLightRef = useRef<THREE.PointLight | null>(null);
-  const ambientLightRef = useRef<THREE.AmbientLight | null>(null);
-  const textureCacheRef = useRef<Map<string, { topTex: THREE.CanvasTexture; bTex: THREE.CanvasTexture }>>(new Map());
+    const itemNodes = Array.from(
+      container.querySelectorAll('[data-film-list] [data-film-item]')
+    ) as HTMLElement[];
+    const N = itemNodes.length;
+    if (N === 0) return;
 
-  const stateRef = useRef({
-    filter: 'all',
-    filteredItems: [...DISCOGRAFIA_MIQUEL_GIL],
-    targetIndex: 0,
-    currentIndex: 0,
-    activeDiscreteIndex: 0,
-    isDetailOpen: false,
-    isIndexOpen: false,
-    mouseX: 0,
-    mouseY: 0,
-    smoothMouseX: 0,
-    smoothMouseY: 0,
-    isDragging: false,
-    dragStartY: 0,
-    dragStartX: 0,
-    dragMoved: false,
-    discMeshes: [] as THREE.Group[]
-  });
+    container.setAttribute('data-disc-gallery-init', 'true');
 
-  const filteredItems = filter === 'all'
-    ? DISCOGRAFIA_MIQUEL_GIL
-    : DISCOGRAFIA_MIQUEL_GIL.filter(d => d.category === filter);
+    // 1. Parseo de datos desde el DOM ([data-film-list])
+    const films: FilmData[] = itemNodes.map((node, idx) => {
+      node.setAttribute('data-film-index', String(idx));
+      node.setAttribute('data-film-status', idx === 0 ? 'active' : 'inactive');
+      const getField = (name: string) => {
+        const el = node.querySelector(`[data-film-field="${name}"]`);
+        return el ? (el.textContent || '').trim() : '';
+      };
+      const rawReviews = getField('reviews');
+      const reviews: ReviewData[] = rawReviews
+        ? rawReviews.split(';').map((chunk) => {
+            const [pub, quote, stars] = chunk.split('|');
+            return { pub: pub || '', quote: quote || '', stars: stars || '★★★★★' };
+          })
+        : [];
+      return {
+        index: idx,
+        node,
+        title: getField('title'),
+        description: getField('description'),
+        director: getField('director'),
+        year: getField('year'),
+        starring: getField('starring'),
+        detailUrl: getField('detailUrl'),
+        discUrl: getField('discUrl'),
+        reviews
+      };
+    });
 
-  const activeItem = filteredItems[activeIndex] || DISCOGRAFIA_MIQUEL_GIL[0];
+    // 2. Constantes exactas de la especificación
+    const SPEC = {
+      hGap: 2.3,
+      depthGap: 1.0,
+      activeDiscY: 0.06,
+      galleryRotX: THREE.MathUtils.degToRad(-30),
+      galleryRotY: THREE.MathUtils.degToRad(-30),
+      galleryScale: 1.08,
+      fov: 40,
+      camDistance: 4.4,
+      exposure: 0.86,
+      discRadius: 1.0,
+      discThickness: 0.01,
+      holeRadius: 0.14,
+      hubRadius: 0.24,
+      renderRadius: 5,
+      initialPreloadRadius: 5,
+      flowLean: 0.055,
+      flowBank: 0.32,
+      flowDip: 0.014,
+      hoverTiltStrength: 0.21,
+      touchActiveScale: 1.5,
+      touchInactiveScale: 0.6,
+      touchGap: 2.2,
+      touchDepth: 0.5,
+      snapDuration: 0.46,
+      dragStartDistance: 5,
+      dragSensitivity: 0.95,
+      dragVelocitySmoothing: 0.32,
+      touchFlickVelocity: 0.035,
+      wheelStepThreshold: 6,
+      wheelEnvelopeTau: 550,
+      wheelTickGap: 34,
+      wheelPauseGap: 130,
+      wheelIdleReset: 150,
+      wheelSustainDelay: 480
+    };
 
-  // Helper to change active disc
-  const goToDisc = useCallback((index: number) => {
-    const list = stateRef.current.filteredItems;
-    const clamped = Math.max(0, Math.min(list.length - 1, index));
-    if (clamped !== stateRef.current.activeDiscreteIndex) {
-      if (soundEngineRef.current) {
-        soundEngineRef.current.playRackClick(clamped - stateRef.current.activeDiscreteIndex);
-      }
-    }
-    stateRef.current.targetIndex = clamped;
-  }, []);
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  // Filter change handler
-  const handleFilterChange = useCallback((newFilter: 'all' | 'estudi' | 'directe') => {
-    if (isIndexOpen) setIsIndexOpen(false);
-    if (filter === newFilter) return;
+    // Estado principal del carrusel
+    let L = 0; // Posición continua (decimal)
+    let W = 0; // Índice activo entero
+    let prevL = 0;
+    let velocityVisual = 0;
+    let kickBoost = 0;
+    let isFlippedBSide = false;
+    let activeTween: gsap.core.Tween | null = null;
+    let isDisposed = false;
 
-    setFilter(newFilter);
-    stateRef.current.filter = newFilter;
-    const newItems = newFilter === 'all'
-      ? [...DISCOGRAFIA_MIQUEL_GIL]
-      : DISCOGRAFIA_MIQUEL_GIL.filter(d => d.category === newFilter);
-    stateRef.current.filteredItems = newItems;
+    // 3. Configuración Three.js (WebGLRenderer + PerspectiveCamera)
+    // Match Three.js r128 color and lighting pipeline in modern Three.js
+    THREE.ColorManagement.enabled = false;
 
-    if (soundEngineRef.current) soundEngineRef.current.playFlipWhoosh();
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(
+      SPEC.fov,
+      container.clientWidth / container.clientHeight,
+      0.1,
+      50
+    );
+    camera.position.set(0, 0, SPEC.camDistance);
 
-    const rack = rackGroupRef.current;
-    if (rack) {
-      gsap.to(rack.position, {
-        z: -4.5,
-        y: -1.5,
-        duration: 0.35,
-        ease: 'power2.in',
-        onComplete: () => {
-          rebuildRackMeshes(newItems);
-          rack.position.set(0, 1.5, -4.5);
-          gsap.to(rack.position, {
-            x: stateRef.current.isDetailOpen ? -2.2 : 0,
-            y: 0,
-            z: 0,
-            duration: 0.65,
-            ease: 'expo.out'
-          });
+    const renderer = new THREE.WebGLRenderer({
+      canvas,
+      antialias: true,
+      alpha: true,
+      powerPreference: 'high-performance'
+    });
+    renderer.outputColorSpace = THREE.LinearSRGBColorSpace;
+    renderer.setSize(container.clientWidth, container.clientHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = SPEC.exposure;
+
+    // Iluminación según especificación: key, fill, rim azul (#499FF5) y tira superior
+    // Multiply by Math.PI to match r128 non-physical punctual light scaleFactor
+    const LIGHT_SCALE = Math.PI;
+    const keyLight = new THREE.DirectionalLight(0xffffff, 2.2 * LIGHT_SCALE);
+    keyLight.position.set(2.8, 3.8, 4.2);
+    scene.add(keyLight);
+
+    const fillLight = new THREE.DirectionalLight(0xf5f7fa, 1.15 * LIGHT_SCALE);
+    fillLight.position.set(-3.2, 1.0, 3.0);
+    scene.add(fillLight);
+
+    const rimLight = new THREE.DirectionalLight(0x499FF5, 1.65 * LIGHT_SCALE);
+    rimLight.position.set(0.0, -3.2, -2.5);
+    scene.add(rimLight);
+
+    const topStripLight = new THREE.DirectionalLight(0xffffff, 1.45 * LIGHT_SCALE);
+    topStripLight.position.set(0.0, 5.5, 1.5);
+    scene.add(topStripLight);
+
+    scene.add(new THREE.AmbientLight(0xffffff, 0.75 * LIGHT_SCALE));
+
+    // Grupo principal inclinado galleryRotX = -30°, galleryRotY = -30°, galleryScale = 1.08
+    const galleryGroup = new THREE.Group();
+    galleryGroup.rotation.set(SPEC.galleryRotX, SPEC.galleryRotY, 0);
+    galleryGroup.scale.setScalar(SPEC.galleryScale);
+    scene.add(galleryGroup);
+
+    // 4. Mapa procedural de serigrafía (bumpMap + roughnessMap de 1024 px)
+    function createSilkscreenPrintMaps() {
+      const size = 512;
+      const bumpCanvas = document.createElement('canvas');
+      bumpCanvas.width = size;
+      bumpCanvas.height = size;
+      const bCtx = bumpCanvas.getContext('2d')!;
+
+      const imgData = bCtx.createImageData(size, size);
+      const data = imgData.data;
+      const cx = size / 2;
+      const cy = size / 2;
+
+      for (let y = 0; y < size; y++) {
+        for (let x = 0; x < size; x++) {
+          const dx = x - cx;
+          const dy = y - cy;
+          const r = Math.sqrt(dx * dx + dy * dy) / (size / 2);
+          const idx = (y * size + x) * 4;
+
+          // Trama de serigrafía + surcos ópticos concéntricos
+          const halftone = (Math.sin(x * 1.35 + y * 1.35) * 0.5 + 0.5) * 28;
+          const groove = (Math.sin(r * 220) * 0.5 + 0.5) * 18;
+          const grain = (Math.random() - 0.5) * 22;
+          const val = Math.max(0, Math.min(255, 128 + halftone + groove + grain));
+
+          data[idx] = val;
+          data[idx + 1] = val;
+          data[idx + 2] = val;
+          data[idx + 3] = 255;
         }
-      });
+      }
+      bCtx.putImageData(imgData, 0, 0);
+
+      const bumpMap = new THREE.CanvasTexture(bumpCanvas);
+      bumpMap.needsUpdate = true;
+      return { bumpMap, roughnessMap: bumpMap };
     }
-  }, [filter, isIndexOpen]);
 
-  // Rebuild rack meshes when dataset changes
-  const rebuildRackMeshes = (items: DiscItem[]) => {
-    const rack = rackGroupRef.current;
-    if (!rack) return;
+    const printMaps = createSilkscreenPrintMaps();
 
-    while (rack.children.length > 0) {
-      rack.remove(rack.children[0]);
+    // Generador de textura de 1024px por disco con estampación serigráfica
+    const textureRecords = new Map<number, { promise: Promise<THREE.CanvasTexture | null> }>();
+
+    function buildDiscCanvasTexture(film: FilmData, loadedImg: HTMLImageElement | null) {
+      const size = 1024;
+      const c = document.createElement('canvas');
+      c.width = size;
+      c.height = size;
+      const ctx = c.getContext('2d')!;
+      const cx = size / 2;
+      const cy = size / 2;
+
+      // Base policarbonato / plata reflectante
+      ctx.fillStyle = '#e7e7e4';
+      ctx.beginPath();
+      ctx.arc(cx, cy, size * 0.495, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Portada impresa en serigrafía dentro del área de impresión (radio 0.24 a 0.985)
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(cx, cy, size * 0.485, 0, Math.PI * 2);
+      ctx.arc(cx, cy, size * 0.125, 0, Math.PI * 2, true);
+      ctx.clip('evenodd');
+
+      if (loadedImg) {
+        ctx.drawImage(loadedImg, 0, 0, size, size);
+      } else {
+        const grad = ctx.createRadialGradient(cx, cy, size * 0.1, cx, cy, size * 0.5);
+        grad.addColorStop(0, '#2a2a28');
+        grad.addColorStop(1, '#111111');
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, 0, size, size);
+      }
+
+      // Trama sutil de tinta serigráfica sobre el arte
+      ctx.fillStyle = 'rgba(255,255,255,0.04)';
+      for (let r = size * 0.14; r < size * 0.48; r += 6) {
+        ctx.beginPath();
+        ctx.arc(cx, cy, r, 0, Math.PI * 2);
+        ctx.strokeStyle = 'rgba(0,0,0,0.035)';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+      }
+
+      // Anillo perimetral legal estilo A24 Optical Disc
+      ctx.fillStyle = 'rgba(255,255,255,0.88)';
+      ctx.font = '600 18px "Helvetica Neue", Arial, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(`${film.title.toUpperCase()} · ${film.year} · A24 OPTICAL ARCHIVE`, cx, size * 0.93);
+      ctx.restore();
+
+      // Anillo espejo de matriz (matrix ring alrededor del buje)
+      ctx.strokeStyle = 'rgba(30, 30, 30, 0.35)';
+      ctx.lineWidth = 10;
+      ctx.beginPath();
+      ctx.arc(cx, cy, size * 0.13, 0, Math.PI * 2);
+      ctx.stroke();
+
+      const tex = new THREE.CanvasTexture(c);
+      tex.anisotropy = renderer.capabilities.getMaxAnisotropy();
+      tex.needsUpdate = true;
+      return tex;
     }
-    stateRef.current.discMeshes = [];
 
-    const outerR = 1.95;
-    const holeR = 0.28;
-
-    items.forEach((item, idx) => {
-      const group = new THREE.Group();
-      const { topTex, bTex } = createOpticalDiscTextures(item, textureCacheRef.current);
-
-      const faceGeo = new THREE.RingGeometry(holeR, outerR, 96, 2);
-      const pos = faceGeo.attributes.position;
-      const uvs = faceGeo.attributes.uv;
+    // 5. Geometrías compartidas del CD (grosor 0.01, agujero 0.14, buje 0.24, radio 1.0)
+    function remapRingUVs(geo: THREE.RingGeometry, outerR: number) {
+      const pos = geo.attributes.position;
+      const uvs = geo.attributes.uv;
       for (let i = 0; i < pos.count; i++) {
         const x = pos.getX(i);
         const y = pos.getY(i);
-        uvs.setXY(i, (x / (outerR * 2)) + 0.5, (y / (outerR * 2)) + 0.5);
+        uvs.setXY(i, x / (outerR * 2) + 0.5, y / (outerR * 2) + 0.5);
       }
+    }
 
-      const topMat = new THREE.MeshStandardMaterial({
-        map: topTex,
-        roughness: 0.24,
-        metalness: 0.32,
-        side: THREE.FrontSide
-      });
-      const topMesh = new THREE.Mesh(faceGeo, topMat);
-      topMesh.position.z = 0.018;
-      group.add(topMesh);
+    const sharedDiscGeo = new THREE.RingGeometry(SPEC.hubRadius, SPEC.discRadius, 72, 1);
+    remapRingUVs(sharedDiscGeo, SPEC.discRadius);
 
-      const backGeo = faceGeo.clone();
-      const backMat = new THREE.MeshStandardMaterial({
-        map: bTex,
-        roughness: 0.12,
-        metalness: 0.78,
-        side: THREE.FrontSide
-      });
-      const backMesh = new THREE.Mesh(backGeo, backMat);
-      backMesh.rotation.y = Math.PI;
-      backMesh.position.z = -0.018;
-      group.add(backMesh);
+    const sharedHubGeo = new THREE.RingGeometry(SPEC.holeRadius, SPEC.hubRadius, 64, 1);
+    remapRingUVs(sharedHubGeo, SPEC.discRadius);
 
-      const rimGeo = new THREE.CylinderGeometry(outerR, outerR, 0.035, 96, 1, true);
-      rimGeo.rotateX(Math.PI / 2);
-      const rimMat = new THREE.MeshPhysicalMaterial({
-        color: 0xffffff,
-        transmission: 0.6,
-        opacity: 0.85,
-        transparent: true,
-        roughness: 0.15
-      });
-      group.add(new THREE.Mesh(rimGeo, rimMat));
+    const sharedEdgeGeo = new THREE.CylinderGeometry(
+      SPEC.discRadius,
+      SPEC.discRadius,
+      SPEC.discThickness,
+      72,
+      1,
+      true
+    );
+    sharedEdgeGeo.rotateX(Math.PI / 2);
 
-      group.userData = { item, index: idx };
-      rack.add(group);
-      stateRef.current.discMeshes.push(group);
+    // Material trasero iridiscente (Cara B láser)
+    function createIridescentBackTexture() {
+      const size = 512;
+      const c = document.createElement('canvas');
+      c.width = size;
+      c.height = size;
+      const ctx = c.getContext('2d')!;
+      const cx = size / 2;
+      const cy = size / 2;
+      const grad = ctx.createConicGradient(0, cx, cy);
+      grad.addColorStop(0.0, '#d8dee9');
+      grad.addColorStop(0.18, '#a3be8c');
+      grad.addColorStop(0.35, '#88c0d0');
+      grad.addColorStop(0.5, '#e5e9f0');
+      grad.addColorStop(0.68, '#b48ead');
+      grad.addColorStop(0.85, '#81a1c1');
+      grad.addColorStop(1.0, '#d8dee9');
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, size, size);
+      return new THREE.CanvasTexture(c);
+    }
+
+    const backMatShared = new THREE.MeshPhysicalMaterial({
+      map: createIridescentBackTexture(),
+      roughness: 0.08,
+      metalness: 0.82,
+      clearcoat: 1.0,
+      clearcoatRoughness: 0.04,
+      side: THREE.BackSide
     });
 
-    stateRef.current.targetIndex = 0;
-    stateRef.current.currentIndex = 0;
-    stateRef.current.activeDiscreteIndex = 0;
-    setActiveIndex(0);
-  };
+    const sharedHubMat = new THREE.MeshPhysicalMaterial({
+      color: 0xffffff,
+      transparent: true,
+      opacity: 0.42,
+      roughness: 0.12,
+      metalness: 0.05,
+      clearcoat: 1.0
+    });
 
-  // Toggle production detail drawer
-  const openProductionPage = useCallback((open: boolean) => {
-    setIsDetailOpen(open);
-    stateRef.current.isDetailOpen = open;
-    if (soundEngineRef.current) soundEngineRef.current.playFlipWhoosh();
+    const sharedEdgeMat = new THREE.MeshPhysicalMaterial({
+      color: 0xd0d4dc,
+      roughness: 0.15,
+      metalness: 0.35
+    });
 
-    const rack = rackGroupRef.current;
-    if (rack) {
-      if (open) {
-        gsap.to(rack.position, { y: -12, duration: 0.75, ease: 'expo.in' });
+    // Construcción de los 12 discos
+    const discHolders: THREE.Group[] = [];
+    const discHitMeshes: THREE.Mesh[] = [];
+
+    films.forEach((_film, i) => {
+      const holder = new THREE.Group();
+
+      const frontMat = new THREE.MeshPhysicalMaterial({
+        color: 0xffffff,
+        roughness: 0.24,
+        metalness: 0.18,
+        bumpMap: printMaps.bumpMap,
+        bumpScale: 0.004,
+        roughnessMap: printMaps.roughnessMap,
+        clearcoat: 0.85,
+        clearcoatRoughness: 0.14
+      });
+
+      const frontMesh = new THREE.Mesh(sharedDiscGeo, frontMat);
+      frontMesh.position.z = SPEC.discThickness * 0.5;
+
+      const backMesh = new THREE.Mesh(sharedDiscGeo, backMatShared);
+      backMesh.position.z = -SPEC.discThickness * 0.5;
+
+      const hubMesh = new THREE.Mesh(sharedHubGeo, sharedHubMat);
+      hubMesh.name = 'hub';
+
+      const edgeMesh = new THREE.Mesh(sharedEdgeGeo, sharedEdgeMat);
+
+      // Malla invisible para hit-testing preciso sobre todo el círculo de radio 1
+      const hitMesh = new THREE.Mesh(
+        new THREE.CircleGeometry(SPEC.discRadius, 36),
+        new THREE.MeshBasicMaterial({ visible: false, side: THREE.DoubleSide })
+      );
+      hitMesh.userData = { discIndex: i };
+      discHitMeshes.push(hitMesh);
+
+      // Estados de interacción por disco (Zero-G y flotabilidad en cualquier disco + drag spin)
+      const userData: DiscHolderUserData = {
+        index: i,
+        frontMat,
+        dragSpinX: 0,
+        dragSpinY: 0,
+        flipAngleY: 0,
+        zeroGOffset: new THREE.Vector3(),
+        zeroGRot: new THREE.Vector3(),
+        zeroGTween: null,
+        hoverWeight: 0,
+        hoverTiltTargetX: 0,
+        hoverTiltTargetY: 0,
+        hoverTiltCurrentX: 0,
+        hoverTiltCurrentY: 0,
+        floatPhase: i * 1.37
+      };
+      holder.userData = userData;
+
+      holder.add(frontMesh, backMesh, hubMesh, edgeMesh, hitMesh);
+      galleryGroup.add(holder);
+      discHolders.push(holder);
+    });
+
+    function ensureDiscTexture(index: number): Promise<THREE.CanvasTexture | null> {
+      if (index < 0 || index >= N) return Promise.resolve(null);
+      if (textureRecords.has(index)) {
+        return textureRecords.get(index)!.promise;
+      }
+
+      const film = films[index];
+      // Textura inicial inmediata mientras carga la imagen remota
+      const placeholderTex = buildDiscCanvasTexture(film, null);
+      if (discHolders[index] && (discHolders[index].userData as DiscHolderUserData).frontMat) {
+        const mat = (discHolders[index].userData as DiscHolderUserData).frontMat;
+        mat.map = placeholderTex;
+        mat.needsUpdate = true;
+      }
+
+      // Resolve local /images/... path if available to avoid CORS issues locally
+      const localUrl = film.discUrl.replace(/^https?:\/\/miquelgil\.vercel\.app/, '');
+
+      const promise = new Promise<THREE.CanvasTexture | null>((resolve) => {
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        img.onload = () => {
+          if (isDisposed) {
+            resolve(null);
+            return;
+          }
+          const finalTex = buildDiscCanvasTexture(film, img);
+          if (discHolders[index] && (discHolders[index].userData as DiscHolderUserData).frontMat) {
+            const mat = (discHolders[index].userData as DiscHolderUserData).frontMat;
+            mat.map = finalTex;
+            mat.needsUpdate = true;
+          }
+          resolve(finalTex);
+        };
+        img.onerror = () => {
+          if (img.src !== film.discUrl && film.discUrl) {
+            img.src = film.discUrl;
+            return;
+          }
+          resolve(placeholderTex);
+        };
+        img.src = localUrl || film.discUrl;
+      });
+
+      textureRecords.set(index, { promise });
+      return promise;
+    }
+
+    function preloadAround(centerIdx: number, radius = SPEC.renderRadius) {
+      const promises: Promise<THREE.CanvasTexture | null>[] = [];
+      const start = Math.max(0, Math.floor(centerIdx - radius));
+      const end = Math.min(N - 1, Math.ceil(centerIdx + radius));
+      for (let i = start; i <= end; i++) {
+        promises.push(ensureDiscTexture(i));
+      }
+      return Promise.all(promises);
+    }
+
+    // Precarga inicial en radio 5
+    preloadAround(0, SPEC.initialPreloadRadius);
+
+    // ============================================================================
+    // 6. SISTEMA SCRIBBLE (TRAZO NEGRO A MANO SEGÚN ESPECIFICACIÓN EXACTA)
+    // ============================================================================
+    const SCRIBBLE_SPEC = {
+      segments: 72,
+      baseRadii: [1.06, 1.105], // padding 0.06, loopGap 0.045
+      thickness: 0.012,
+      taperMin: 0.15,
+      noiseCount: 24,
+      noiseAmp: 0.028, // ±2.8% del radio
+      baseSweep: 0.68,
+      sweepVariance: 0.20, // ±20% -> [0.544, 0.816]
+      fpsIntervalMs: 100, // 10 fps
+      lag: 15,
+      enterFrames: [0.3, 0.5, 0.72, 1.0],
+      exitFrames: [0.72, 0.5, 0.3, 0.0]
+    };
+
+    const scribbleColorAttr = container.getAttribute('data-disc-scribble-color') || '#000000';
+    const scribbleMaterial = new THREE.MeshBasicMaterial({
+      color: new THREE.Color(scribbleColorAttr),
+      side: THREE.DoubleSide,
+      depthWrite: false,
+      depthTest: false,
+      transparent: true
+    });
+
+    const scribbleGroup = new THREE.Group();
+    scribbleGroup.visible = false;
+    scribbleGroup.renderOrder = 900;
+    galleryGroup.add(scribbleGroup);
+
+    function createScribbleRingData(baseRadius: number): ScribbleRingData {
+      const segs = SCRIBBLE_SPEC.segments; // 72
+      const vertexCount = (segs + 1) * 2; // 146 vértices
+      const indexCount = segs * 6; // 432 índices
+
+      const geometry = new THREE.BufferGeometry();
+      const positions = new Float32Array(vertexCount * 3);
+      const indices = new Uint16Array(indexCount);
+
+      let ptr = 0;
+      for (let i = 0; i < segs; i++) {
+        const v0 = i * 2;
+        const v1 = v0 + 1;
+        const v2 = v0 + 2;
+        const v3 = v0 + 3;
+        indices[ptr++] = v0;
+        indices[ptr++] = v2;
+        indices[ptr++] = v1;
+        indices[ptr++] = v1;
+        indices[ptr++] = v2;
+        indices[ptr++] = v3;
+      }
+
+      geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+      geometry.setIndex(new THREE.BufferAttribute(indices, 1));
+
+      const mesh = new THREE.Mesh(geometry, scribbleMaterial);
+      mesh.renderOrder = 900;
+      scribbleGroup.add(mesh);
+
+      return {
+        baseRadius,
+        geometry,
+        positions,
+        mesh,
+        noiseValues: new Float32Array(SCRIBBLE_SPEC.noiseCount),
+        startAngle: 0,
+        sweepFraction: SCRIBBLE_SPEC.baseSweep
+      };
+    }
+
+    const scribbleRings: ScribbleRingData[] = [
+      createScribbleRingData(SCRIBBLE_SPEC.baseRadii[0]),
+      createScribbleRingData(SCRIBBLE_SPEC.baseRadii[1])
+    ];
+
+    function randomizeRingParameters(ring: ScribbleRingData) {
+      for (let k = 0; k < SCRIBBLE_SPEC.noiseCount; k++) {
+        ring.noiseValues[k] = (Math.random() * 2 - 1) * SCRIBBLE_SPEC.noiseAmp;
+      }
+      ring.startAngle = Math.random() * Math.PI * 2;
+      const factor = 1 + (Math.random() * 2 - 1) * SCRIBBLE_SPEC.sweepVariance;
+      ring.sweepFraction = SCRIBBLE_SPEC.baseSweep * factor; // entre ~0.544 y ~0.816
+    }
+
+    function sampleSmoothNoise(noiseArr: Float32Array, u: number) {
+      const len = noiseArr.length;
+      const scaled = (((u % 1) + 1) % 1) * len;
+      const i0 = Math.floor(scaled) % len;
+      const i1 = (i0 + 1) % len;
+      const frac = scaled - Math.floor(scaled);
+      const smooth = frac * frac * (3 - 2 * frac); // smoothstep
+      return noiseArr[i0] * (1 - smooth) + noiseArr[i1] * smooth;
+    }
+
+    function rebuildRingRibbonGeometry(ring: ScribbleRingData, progress: number) {
+      const segs = SCRIBBLE_SPEC.segments;
+      const pos = ring.positions;
+      const activeSweep = ring.sweepFraction * Math.max(0.001, progress) * Math.PI * 2;
+
+      for (let i = 0; i <= segs; i++) {
+        const t = i / segs;
+        const theta = ring.startAngle + t * activeSweep;
+
+        // Muestreo de ruido suavizado alrededor de la vuelta
+        const normAngle = (t * ring.sweepFraction * Math.max(0.001, progress)) % 1;
+        const radialNoise = sampleSmoothNoise(ring.noiseValues, normAngle);
+        const rCenter = ring.baseRadius * (1 + radialNoise);
+
+        // Afilado de los extremos hasta el 15% (taperMin = 0.15)
+        const edgeDist = Math.min(t, 1 - t);
+        const taperZone = 0.18;
+        const taperRatio = Math.min(1, edgeDist / taperZone);
+        const smoothTaper = taperRatio * taperRatio * (3 - 2 * taperRatio);
+        const halfWidth =
+          SCRIBBLE_SPEC.thickness *
+          0.5 *
+          (SCRIBBLE_SPEC.taperMin + (1 - SCRIBBLE_SPEC.taperMin) * smoothTaper);
+
+        const rInner = rCenter - halfWidth;
+        const rOuter = rCenter + halfWidth;
+
+        const cosA = Math.cos(theta);
+        const sinA = Math.sin(theta);
+
+        const vIdx = i * 6;
+        pos[vIdx] = cosA * rInner;
+        pos[vIdx + 1] = sinA * rInner;
+        pos[vIdx + 2] = 0.008;
+
+        pos[vIdx + 3] = cosA * rOuter;
+        pos[vIdx + 4] = sinA * rOuter;
+        pos[vIdx + 5] = 0.008;
+      }
+
+      ring.geometry.attributes.position.needsUpdate = true;
+    }
+
+    const scribbleState = {
+      phase: 'hidden' as 'hidden' | 'entering' | 'active' | 'exiting',
+      frameIdx: 0,
+      progress: 0,
+      lastStepTime: 0,
+      wantActive: false
+    };
+
+    const scribbleStatusEl = container.querySelector('#scribble-status') as HTMLElement | null;
+
+    function setScribbleActiveIntent(flag: boolean) {
+      const activeFilm = films[W];
+      const canShow = Boolean(activeFilm && activeFilm.detailUrl);
+      const desired = flag && canShow;
+      if (desired === scribbleState.wantActive) return;
+      scribbleState.wantActive = desired;
+
+      if (desired) {
+        scribbleState.phase = 'entering';
+        scribbleState.frameIdx = 0;
+        scribbleGroup.visible = true;
+        // Primer frame inmediato al entrar
+        scribbleRings.forEach(randomizeRingParameters);
+        scribbleState.progress = SCRIBBLE_SPEC.enterFrames[0];
+        scribbleRings.forEach((r) => rebuildRingRibbonGeometry(r, scribbleState.progress));
+        scribbleState.lastStepTime = performance.now();
+        if (scribbleStatusEl) scribbleStatusEl.textContent = 'SCRIBBLE ACTIVE (10 FPS STOP-MOTION)';
       } else {
-        gsap.to(rack.position, { y: 0, duration: 0.75, ease: 'expo.out' });
-      }
-    }
-  }, []);
-
-  // Theme toggle
-  const toggleTheme = useCallback(() => {
-    const nextLight = !isLightMode;
-    setIsLightMode(nextLight);
-    if (soundEngineRef.current) soundEngineRef.current.playRackClick();
-
-    if (ambientLightRef.current) {
-      ambientLightRef.current.intensity = nextLight ? 1.35 : 0.78;
-    }
-  }, [isLightMode]);
-
-  // Audio FX toggle
-  const toggleAudioFx = useCallback(() => {
-    const nextFx = !isFxEnabled;
-    setIsFxEnabled(nextFx);
-    if (soundEngineRef.current) {
-      soundEngineRef.current.fxEnabled = nextFx;
-      if (nextFx) soundEngineRef.current.playRackClick();
-    }
-  }, [isFxEnabled]);
-
-  // Audio playback toggle
-  const handlePlayToggle = useCallback(() => {
-    const item = stateRef.current.filteredItems[stateRef.current.activeDiscreteIndex] || DISCOGRAFIA_MIQUEL_GIL[0];
-    if (soundEngineRef.current) {
-      soundEngineRef.current.toggleTrackPlayback(item);
-    }
-  }, []);
-
-  // Update dynamic ambient backdrop glow
-  useEffect(() => {
-    if (ambientGlowRef.current && activeItem) {
-      ambientGlowRef.current.style.background = `radial-gradient(circle at 50% 52%, ${activeItem.palette.primary}66 0%, ${activeItem.palette.accent}22 38%, rgba(9, 8, 7, 0) 70%)`;
-    }
-    if (dynamicPointLightRef.current && activeItem) {
-      dynamicPointLightRef.current.color.set(activeItem.palette.accent);
-    }
-  }, [activeItem]);
-
-  // Initialize Sound Engine & Three.js Scene
-  useEffect(() => {
-    const engine = new MiquelGilAudioSystem();
-    soundEngineRef.current = engine;
-
-    engine.onPlayStateChange = (playing) => {
-      setIsPlaying(playing);
-    };
-
-    engine.onTimeUpdate = (curStr, totStr, pct) => {
-      setAudioTime(`${curStr} / ${totStr}`);
-      setAudioProgress(pct);
-    };
-
-    const container = containerRef.current;
-    if (!container) return;
-
-    const scene = new THREE.Scene();
-    sceneRef.current = scene;
-
-    const camera = new THREE.PerspectiveCamera(36, window.innerWidth / window.innerHeight, 0.1, 100);
-    camera.position.set(0, 0, 11);
-    cameraRef.current = camera;
-
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: 'high-performance' });
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.35;
-    rendererRef.current = renderer;
-
-    container.appendChild(renderer.domElement);
-
-    const ambientLight = new THREE.AmbientLight(0xffffff, 1.35);
-    scene.add(ambientLight);
-    ambientLightRef.current = ambientLight;
-
-    const keyLight = new THREE.DirectionalLight(0xffffff, 2.4);
-    keyLight.position.set(4, 6, 7);
-    scene.add(keyLight);
-
-    const dynamicPointLight = new THREE.PointLight(0xffffff, 2.5, 20);
-    dynamicPointLight.position.set(0, 1, 4);
-    scene.add(dynamicPointLight);
-    dynamicPointLightRef.current = dynamicPointLight;
-
-    const rackGroup = new THREE.Group();
-    scene.add(rackGroup);
-    rackGroupRef.current = rackGroup;
-
-    // Build initial rack
-    rebuildRackMeshes(DISCOGRAFIA_MIQUEL_GIL);
-
-    // Preloader animation completion
-    const timer1 = setTimeout(() => {
-      setIsPreloaderFading(true);
-    }, 1200);
-    const timer2 = setTimeout(() => {
-      setIsPreloaderDone(true);
-    }, 1900);
-
-    // Raycaster & Pointer for 3D interactions
-    const raycaster = new THREE.Raycaster();
-    const pointer = new THREE.Vector2();
-    let scrollSnapTimeout: any = null;
-
-    const triggerScrollSnap = () => {
-      if (scrollSnapTimeout) clearTimeout(scrollSnapTimeout);
-      scrollSnapTimeout = setTimeout(() => {
-        if (!stateRef.current.isDragging && !stateRef.current.isDetailOpen && !stateRef.current.isIndexOpen) {
-          const nearest = Math.max(0, Math.min(stateRef.current.filteredItems.length - 1, Math.round(stateRef.current.targetIndex)));
-          gsap.to(stateRef.current, {
-            targetIndex: nearest,
-            duration: 0.45,
-            ease: 'power2.out'
-          });
+        if (scribbleState.phase !== 'hidden') {
+          scribbleState.phase = 'exiting';
+          scribbleState.frameIdx = 0;
+          scribbleState.lastStepTime = performance.now();
         }
-      }, 150);
-    };
+        if (scribbleStatusEl) scribbleStatusEl.textContent = 'HOVER ACTIVE DISC FOR SCRIBBLE';
+      }
+    }
 
-    const handlePointerDown = (e: PointerEvent) => {
-      stateRef.current.isDragging = true;
-      stateRef.current.dragStartX = e.clientX;
-      stateRef.current.dragStartY = e.clientY;
-      stateRef.current.dragMoved = false;
-    };
+    function updateScribbleStep(now: number, dt: number) {
+      const activeHolder = discHolders[W];
+      if (!activeHolder) return;
 
-    const handlePointerMove = (e: PointerEvent) => {
-      stateRef.current.mouseX = (e.clientX / window.innerWidth) * 2 - 1;
-      stateRef.current.mouseY = -(e.clientY / window.innerHeight) * 2 + 1;
-
-      // Update custom cursor
-      if (cursorRingRef.current) {
-        cursorRingRef.current.style.transform = `translate3d(${e.clientX}px, ${e.clientY}px, 0) translate(-50%, -50%)`;
+      // Seguimiento del disco activo: pegado mientras el carrusel se mueve, con lag 15 en reposo
+      const isMoving = Math.abs(L - W) > 0.002;
+      if (isMoving || scribbleState.phase === 'hidden') {
+        scribbleGroup.position.copy(activeHolder.position);
+        scribbleGroup.quaternion.copy(activeHolder.quaternion);
+        scribbleGroup.scale.copy(activeHolder.scale);
+      } else {
+        const alpha = 1 - Math.exp(-SCRIBBLE_SPEC.lag * dt);
+        scribbleGroup.position.lerp(activeHolder.position, alpha);
+        scribbleGroup.quaternion.slerp(activeHolder.quaternion, alpha);
+        scribbleGroup.scale.lerp(activeHolder.scale, alpha);
       }
 
-      if (stateRef.current.isDragging) {
-        const deltaY = e.clientY - stateRef.current.dragStartY;
-        if (Math.abs(deltaY) > 5) stateRef.current.dragMoved = true;
-        stateRef.current.targetIndex += deltaY * 0.005;
-        stateRef.current.dragStartY = e.clientY;
-      }
-    };
+      if (scribbleState.phase === 'hidden') return;
 
-    const handlePointerUp = (e: PointerEvent) => {
-      if (!stateRef.current.isDragging) return;
-      stateRef.current.isDragging = false;
-      triggerScrollSnap();
-
-      if (!stateRef.current.dragMoved && !stateRef.current.isIndexOpen && !stateRef.current.isDetailOpen) {
-        pointer.x = (e.clientX / window.innerWidth) * 2 - 1;
-        pointer.y = -(e.clientY / window.innerHeight) * 2 + 1;
-        raycaster.setFromCamera(pointer, camera);
-
-        const intersects = raycaster.intersectObjects(rackGroup.children, true);
-        if (intersects.length > 0) {
-          let obj: THREE.Object3D | null = intersects[0].object;
-          while (obj && obj.parent && obj.parent !== rackGroup) {
-            obj = obj.parent;
-          }
-          if (obj && typeof (obj as any).userData?.index === 'number') {
-            const clickedIdx = (obj as any).userData.index;
-            if (clickedIdx === stateRef.current.activeDiscreteIndex) {
-              openProductionPage(true);
-            } else {
-              goToDisc(clickedIdx);
-            }
-          }
+      // Respetar prefers-reduced-motion: no avanza más allá del primer frame
+      if (prefersReducedMotion) {
+        if (!scribbleState.wantActive) {
+          scribbleState.phase = 'hidden';
+          scribbleGroup.visible = false;
         }
-      }
-    };
-
-    const handleWheel = (e: WheelEvent) => {
-      if (stateRef.current.isDetailOpen || stateRef.current.isIndexOpen) return;
-      stateRef.current.targetIndex += e.deltaY * 0.0018;
-      triggerScrollSnap();
-    };
-
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (stateRef.current.isDetailOpen) {
-        if (e.key === 'Escape') openProductionPage(false);
         return;
       }
-      if (e.key === 'ArrowDown' || e.key === 'ArrowRight') {
-        if (!stateRef.current.isIndexOpen) goToDisc(stateRef.current.activeDiscreteIndex + 1);
-      } else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
-        if (!stateRef.current.isIndexOpen) goToDisc(stateRef.current.activeDiscreteIndex - 1);
-      } else if (e.key === 'Enter') {
-        if (!stateRef.current.isIndexOpen) openProductionPage(true);
-      } else if (e.key === 'Escape') {
-        if (stateRef.current.isIndexOpen) setIsIndexOpen(false);
-      }
-    };
 
-    const handleResize = () => {
-      camera.aspect = window.innerWidth / window.innerHeight;
-      camera.updateProjectionMatrix();
-      renderer.setSize(window.innerWidth, window.innerHeight);
-    };
+      if (now - scribbleState.lastStepTime < SCRIBBLE_SPEC.fpsIntervalMs) return;
+      scribbleState.lastStepTime = now;
 
-    window.addEventListener('pointerdown', handlePointerDown);
-    window.addEventListener('pointermove', handlePointerMove);
-    window.addEventListener('pointerup', handlePointerUp);
-    window.addEventListener('wheel', handleWheel, { passive: true });
-    window.addEventListener('keydown', handleKeyDown);
-    window.addEventListener('resize', handleResize);
-
-    // Animation loop
-    let animId: number;
-    const animate = () => {
-      animId = requestAnimationFrame(animate);
-
-      const st = stateRef.current;
-      st.smoothMouseX += (st.mouseX - st.smoothMouseX) * 0.08;
-      st.smoothMouseY += (st.mouseY - st.smoothMouseY) * 0.08;
-      st.currentIndex += (st.targetIndex - st.currentIndex) * 0.1;
-
-      const nearestIdx = Math.round(st.currentIndex);
-      if (nearestIdx !== st.activeDiscreteIndex && nearestIdx >= 0 && nearestIdx < st.discMeshes.length) {
-        const diff = nearestIdx - st.activeDiscreteIndex;
-        st.activeDiscreteIndex = nearestIdx;
-        if (soundEngineRef.current) {
-          soundEngineRef.current.playRackClick(diff);
-          if (soundEngineRef.current.isPlayingMusic) {
-            soundEngineRef.current.stopMusic();
-          }
+      if (scribbleState.phase === 'entering') {
+        scribbleState.frameIdx++;
+        if (scribbleState.frameIdx >= SCRIBBLE_SPEC.enterFrames.length - 1) {
+          scribbleState.progress = 1.0;
+          scribbleState.phase = 'active';
+        } else {
+          scribbleState.progress = SCRIBBLE_SPEC.enterFrames[scribbleState.frameIdx];
         }
-        setActiveIndex(nearestIdx);
+        scribbleRings.forEach((ring) => {
+          randomizeRingParameters(ring);
+          rebuildRingRibbonGeometry(ring, scribbleState.progress);
+        });
+      } else if (scribbleState.phase === 'active') {
+        scribbleState.progress = 1.0;
+        scribbleRings.forEach((ring) => {
+          randomizeRingParameters(ring);
+          rebuildRingRibbonGeometry(ring, 1.0);
+        });
+      } else if (scribbleState.phase === 'exiting') {
+        const exitStep = SCRIBBLE_SPEC.exitFrames[scribbleState.frameIdx];
+        if (exitStep === undefined || exitStep <= 0) {
+          scribbleState.phase = 'hidden';
+          scribbleState.progress = 0;
+          scribbleGroup.visible = false;
+          return;
+        }
+        scribbleState.progress = exitStep;
+        scribbleRings.forEach((ring) => {
+          randomizeRingParameters(ring);
+          rebuildRingRibbonGeometry(ring, scribbleState.progress);
+        });
+        scribbleState.frameIdx++;
+      }
+    }
 
-        // Animate HUD side panel change
-        if (sideHudRef.current) {
-          const hudBlocks = sideHudRef.current.querySelectorAll('.hud-block');
-          gsap.fromTo(hudBlocks,
-            { opacity: 0, y: 6 },
-            { opacity: 1, y: 0, duration: 0.35, stagger: 0.05, ease: 'power2.out' }
+    // ============================================================================
+    // 7. ANIMACIÓN DE PANELES DE TEXTO Y REVELADO CINÉTICO GSAP
+    // ============================================================================
+    const leftPanel = container.querySelector('#left-editorial-panel') as HTMLElement | null;
+    const uiCatalogNum = container.querySelector('#ui-catalog-num') as HTMLElement | null;
+    const uiTitle = container.querySelector('#ui-title') as HTMLElement | null;
+    const uiDescription = container.querySelector('#ui-description') as HTMLElement | null;
+    const uiDirector = container.querySelector('#ui-director') as HTMLElement | null;
+    const uiYear = container.querySelector('#ui-year') as HTMLElement | null;
+    const uiStarring = container.querySelector('#ui-starring') as HTMLElement | null;
+    const uiReviews = container.querySelector('#ui-reviews') as HTMLElement | null;
+    const uiQuickList = container.querySelector('#ui-quick-list') as HTMLElement | null;
+    const uiRuler = container.querySelector('#ui-ruler') as HTMLElement | null;
+    const liveRegion = container.querySelector('#gallery-live-region') as HTMLElement | null;
+    const prevBtn = container.querySelector('[data-disc-prev]') as HTMLButtonElement | null;
+    const nextBtn = container.querySelector('[data-disc-next]') as HTMLButtonElement | null;
+
+    // Construir lista lateral derecha y enlaces del cajón Index ([data-film-scroll])
+    const indexGrid = container.querySelector('#index-links-grid') as HTMLElement | null;
+    if (uiQuickList) uiQuickList.innerHTML = '';
+    if (indexGrid) indexGrid.innerHTML = '';
+
+    films.forEach((f, idx) => {
+      if (uiQuickList) {
+        const li = document.createElement('li');
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.setAttribute('data-film-scroll', f.title);
+        btn.className = 'a24-label hover:text-black transition-colors text-right';
+        btn.innerHTML = `<span class="QuickTitle">${f.title}</span> <span class="opacity-50 ml-1">${f.year}</span>`;
+        li.appendChild(btn);
+        uiQuickList.appendChild(li);
+      }
+
+      if (indexGrid) {
+        const card = document.createElement('a');
+        card.href = f.detailUrl;
+        card.setAttribute('data-film-scroll', f.title);
+        card.className =
+          'p-4 border border-black/10 rounded hover:border-black transition flex justify-between items-center';
+        card.innerHTML = `<span class="a24-value">${String(idx + 1).padStart(2, '0')} — ${f.title}</span><span class="a24-label">${f.year}</span>`;
+        indexGrid.appendChild(card);
+      }
+    });
+
+    function splitAndAnimateChars(element: HTMLElement | null, text: string, delay = 0) {
+      if (!element) return;
+      element.innerHTML = '';
+      const words = text.split(' ');
+      words.forEach((word, wIdx) => {
+        const wordWrap = document.createElement('span');
+        wordWrap.className = 'inline-block whitespace-nowrap';
+        for (let c = 0; c < word.length; c++) {
+          const mask = document.createElement('span');
+          mask.className = 'char-mask';
+          const inner = document.createElement('span');
+          inner.className = 'char-inner';
+          inner.textContent = word[c];
+          mask.appendChild(inner);
+          wordWrap.appendChild(mask);
+        }
+        element.appendChild(wordWrap);
+        if (wIdx < words.length - 1) {
+          const sp = document.createElement('span');
+          sp.innerHTML = '&nbsp;';
+          element.appendChild(sp);
+        }
+      });
+
+      if (prefersReducedMotion) return;
+      gsap.fromTo(
+        element.querySelectorAll('.char-inner'),
+        { yPercent: 115, opacity: 0, rotateZ: 3 },
+        {
+          yPercent: 0,
+          opacity: 1,
+          rotateZ: 0,
+          duration: 0.62,
+          stagger: 0.015,
+          delay,
+          ease: 'expo.out',
+          overwrite: true
+        }
+      );
+    }
+
+    // Animación por palabras/líneas con máscara para la descripción del CD y bloques
+    function animateMaskedLines(element: HTMLElement | null, text: string, delay = 0.06) {
+      if (!element) return;
+      element.innerHTML = '';
+      const words = (text || '').split(' ');
+      words.forEach((w, i) => {
+        const mask = document.createElement('span');
+        mask.className = 'char-mask';
+        const inner = document.createElement('span');
+        inner.className = 'char-inner';
+        inner.textContent = w;
+        mask.appendChild(inner);
+        element.appendChild(mask);
+        if (i < words.length - 1) {
+          const sp = document.createElement('span');
+          sp.innerHTML = ' ';
+          element.appendChild(sp);
+        }
+      });
+
+      if (prefersReducedMotion) return;
+      gsap.fromTo(
+        element.querySelectorAll('.char-inner'),
+        { yPercent: 110, opacity: 0 },
+        {
+          yPercent: 0,
+          opacity: 1,
+          duration: 0.55,
+          stagger: 0.008,
+          delay,
+          ease: 'expo.out',
+          overwrite: true
+        }
+      );
+    }
+
+    // Listener del evento `discgallerychange` para animar título serif, líneas divisorias, descripción y créditos con GSAP
+    const handleDiscGalleryChange = (ev: Event) => {
+      const e = ev as CustomEvent<{ index: number; film: FilmData }>;
+      const { index, film } = e.detail;
+
+      if (uiCatalogNum) {
+        uiCatalogNum.textContent = `A24—${String(index + 1).padStart(2, '0')}`;
+      }
+
+      // 1. Título en tipografía Serif con animación letra por letra
+      splitAndAnimateChars(uiTitle, film.title, 0);
+
+      // 2. Líneas divisorias horizontales animadas con GSAP (scaleX: 0 -> 1)
+      if (leftPanel && !prefersReducedMotion) {
+        const lines = leftPanel.querySelectorAll('.editorial-line');
+        gsap.fromTo(
+          lines,
+          { scaleX: 0, opacity: 0.2 },
+          {
+            scaleX: 1,
+            opacity: 1,
+            duration: 0.7,
+            stagger: 0.07,
+            ease: 'expo.out',
+            overwrite: true
+          }
+        );
+      }
+
+      // 3. Descripción del CD con revelado en cascada
+      animateMaskedLines(uiDescription, film.description, 0.05);
+
+      // 4. Productor / Director y Año
+      splitAndAnimateChars(uiDirector, film.director, 0.09);
+      splitAndAnimateChars(uiYear, film.year, 0.12);
+
+      // 5. Reparto / Featuring
+      if (uiStarring) {
+        const items = film.starring.split(/,\s*/);
+        uiStarring.innerHTML = '';
+        items.forEach((itemText) => {
+          const lineMask = document.createElement('span');
+          lineMask.className = 'line-mask';
+          const lineInner = document.createElement('span');
+          lineInner.className = 'line-inner';
+          lineInner.textContent = itemText;
+          lineMask.appendChild(lineInner);
+          uiStarring.appendChild(lineMask);
+        });
+        if (!prefersReducedMotion) {
+          gsap.fromTo(
+            uiStarring.querySelectorAll('.line-inner'),
+            { yPercent: 105, opacity: 0 },
+            {
+              yPercent: 0,
+              opacity: 1,
+              duration: 0.52,
+              stagger: 0.045,
+              delay: 0.14,
+              ease: 'expo.out',
+              overwrite: true
+            }
           );
         }
       }
 
-      const isMobile = window.innerWidth < 768;
-      const xOffsetStep = isMobile ? 1.8 : 2.3;
-      const xCenterShift = isMobile ? 0 : 0.8;
-      const yOffsetStep = isMobile ? 1.1 : 1.35;
-
-      st.discMeshes.forEach((mesh, i) => {
-        const offset = i - st.currentIndex;
-        const absOffset = Math.abs(offset);
-        const isCurrent = i === st.activeDiscreteIndex;
-
-        // Extended diagonal rack trajectory across the screen
-        const targetX = -offset * xOffsetStep + xCenterShift;
-        const targetY = offset * yOffsetStep;
-        const targetZ = isCurrent ? 1.2 : -absOffset * 0.9 - 0.4;
-
-        mesh.position.x += (targetX - mesh.position.x) * 0.14;
-        mesh.position.y += (targetY - mesh.position.y) * 0.14;
-        mesh.position.z += (targetZ - mesh.position.z) * 0.14;
-
-        const targetRotX = isCurrent ? (-st.smoothMouseY * 0.28) : (-offset * 0.18);
-        const targetRotY = isCurrent ? (st.smoothMouseX * 0.35) : (0.45 - offset * 0.08);
-
-        mesh.rotation.x += (targetRotX - mesh.rotation.x) * 0.12;
-        mesh.rotation.y += (targetRotY - mesh.rotation.y) * 0.12;
-
-        if (isCurrent) {
-          mesh.rotation.z -= engine.isPlayingMusic ? 0.016 : 0.0045;
-        } else {
-          mesh.rotation.z += (0 - mesh.rotation.z) * 0.08;
+      // 6. Reseñas con líneas divisorias propias a la derecha
+      if (uiReviews) {
+        uiReviews.innerHTML = '';
+        film.reviews.forEach((rev, rIdx) => {
+          const block = document.createElement('div');
+          block.className = 'space-y-1';
+          block.innerHTML = `
+            ${rIdx > 0 ? '<div class="editorial-line mb-3"></div>' : ''}
+            <div class="a24-label">${rev.pub}</div>
+            <div class="a24-value">“${rev.quote}”</div>
+            <div class="a24-label tracking-widest text-black">${rev.stars}</div>
+          `;
+          uiReviews.appendChild(block);
+        });
+        if (!prefersReducedMotion) {
+          gsap.fromTo(
+            Array.from(uiReviews.children),
+            { y: 12, opacity: 0 },
+            { y: 0, opacity: 1, duration: 0.5, stagger: 0.07, delay: 0.08, ease: 'expo.out' }
+          );
+          gsap.fromTo(
+            uiReviews.querySelectorAll('.editorial-line'),
+            { scaleX: 0 },
+            { scaleX: 1, duration: 0.65, delay: 0.12, ease: 'expo.out' }
+          );
         }
+      }
 
-        const targetScale = isCurrent ? (isMobile ? 1.0 : 1.12) : Math.max(0.68, 0.95 - absOffset * 0.06);
-        mesh.scale.setScalar(mesh.scale.x + (targetScale - mesh.scale.x) * 0.14);
-      });
+      // Resaltar activo en la lista derecha
+      if (uiQuickList) {
+        Array.from(uiQuickList.querySelectorAll('button')).forEach((btn, idx) => {
+          if (idx === index) {
+            btn.className = 'a24-value font-semibold text-black text-right';
+          } else {
+            btn.className = 'a24-label hover:text-black transition-colors text-right';
+          }
+        });
+      }
 
-      renderer.render(scene, camera);
-    };
-
-    animate();
-
-    return () => {
-      clearTimeout(timer1);
-      clearTimeout(timer2);
-      cancelAnimationFrame(animId);
-      window.removeEventListener('pointerdown', handlePointerDown);
-      window.removeEventListener('pointermove', handlePointerMove);
-      window.removeEventListener('pointerup', handlePointerUp);
-      window.removeEventListener('wheel', handleWheel);
-      window.removeEventListener('keydown', handleKeyDown);
-      window.removeEventListener('resize', handleResize);
-
-      engine.destroy();
-      renderer.dispose();
-      if (renderer.domElement && renderer.domElement.parentNode) {
-        renderer.domElement.parentNode.removeChild(renderer.domElement);
+      // Mover regla inferior
+      if (uiRuler) {
+        uiRuler.style.transform = `translateX(${(5 - index) * 14}px)`;
       }
     };
-  }, [openProductionPage, goToDisc]);
 
-  const nextDiscIndex = (activeIndex + 1) % filteredItems.length;
-  const nextDiscItem = filteredItems[nextDiscIndex] || filteredItems[0];
+    container.addEventListener('discgallerychange', handleDiscGalleryChange);
+
+    // ============================================================================
+    // 8. FUNCIÓN DE ACTIVACIÓN ur(index) Y NAVEGACIÓN CENTRAL mr(index, {source})
+    // ============================================================================
+    let ariaTimer: ReturnType<typeof setTimeout> | null = null;
+    let prefetchTimer: ReturnType<typeof setTimeout> | null = null;
+
+    function ur(index: number) {
+      W = index;
+      const activeFilm = films[W];
+
+      container!.setAttribute('data-active-film-index', String(W));
+
+      films.forEach((f, idx) => {
+        const isAct = idx === W;
+        f.node.setAttribute('data-film-status', isAct ? 'active' : 'inactive');
+        if (isAct) {
+          f.node.setAttribute('aria-current', 'true');
+        } else {
+          f.node.removeAttribute('aria-current');
+        }
+      });
+
+      container!.querySelectorAll('[data-film-counter="current"]').forEach((el) => {
+        el.textContent = String(W + 1);
+      });
+      container!.querySelectorAll('[data-film-counter="total"]').forEach((el) => {
+        el.textContent = String(N);
+      });
+
+      if (prevBtn) prevBtn.disabled = W <= 0;
+      if (nextBtn) nextBtn.disabled = W >= N - 1;
+
+      // Anuncio por aria-live a los 350 ms
+      if (ariaTimer) clearTimeout(ariaTimer);
+      ariaTimer = setTimeout(() => {
+        if (liveRegion && activeFilm) {
+          liveRegion.textContent = `${activeFilm.title}, ${W + 1} of ${N}`;
+        }
+      }, 350);
+
+      // Precarga de la ficha con barba.prefetch a los 450 ms
+      if (prefetchTimer) clearTimeout(prefetchTimer);
+      prefetchTimer = setTimeout(() => {
+        const w = window as unknown as { barba?: { prefetch?: (url: string) => void } };
+        if (activeFilm && activeFilm.detailUrl && w.barba && typeof w.barba.prefetch === 'function') {
+          try {
+            w.barba.prefetch(activeFilm.detailUrl);
+          } catch (_) {}
+        }
+      }, 450);
+
+      // Disparar evento discgallerychange (bubbles: true)
+      container!.dispatchEvent(
+        new CustomEvent('discgallerychange', {
+          bubbles: true,
+          detail: { index: W, film: activeFilm }
+        })
+      );
+    }
+
+    async function mr(targetIndex: number, { source = 'default' }: { source?: string } = {}) {
+      // 1. Limita el índice a 0…N-1 (sin bucle)
+      const clamped = Math.max(0, Math.min(N - 1, Math.round(targetIndex)));
+      const distance = Math.abs(clamped - L);
+
+      // Resetear cara B si cambiamos de disco
+      if (clamped !== W && isFlippedBSide) {
+        isFlippedBSide = false;
+        if (discHolders[W]) {
+          gsap.to(discHolders[W].userData, { flipAngleY: 0, duration: 0.45, ease: 'power2.out' });
+        }
+      }
+
+      // 2. Si el destino está a más de 5 discos, espera a cargar sus texturas antes de animar
+      if (Math.abs(clamped - W) > SPEC.renderRadius) {
+        await preloadAround(clamped, SPEC.renderRadius);
+      } else {
+        preloadAround(clamped, SPEC.renderRadius);
+      }
+
+      // Tabla de duración e impulso (kick) según origen
+      let duration = SPEC.snapDuration;
+      let kick = 0;
+
+      if (source === 'wheel') {
+        duration = 0.51;
+        kick = 2.5;
+      } else if (source === 'key') {
+        duration = Math.min(0.64, 0.42 + 0.05 * distance);
+        kick = 1.2;
+      } else if (source === 'click') {
+        duration = Math.max(0.46, Math.min(1.05, 0.45 + 0.11 * distance));
+        kick = Math.min(5, 1.4 * distance);
+      } else if (source === 'flick') {
+        duration = 0.56;
+        kick = 0;
+      } else {
+        duration = SPEC.snapDuration;
+        kick = 0;
+      }
+
+      const dir = Math.sign(clamped - L) || 1;
+      kickBoost = dir * kick * 0.16;
+
+      if (activeTween) activeTween.kill();
+
+      if (prefersReducedMotion || distance < 0.0001) {
+        L = clamped;
+        ur(clamped);
+        return;
+      }
+
+      const animState = { val: L };
+      activeTween = gsap.to(animState, {
+        val: clamped,
+        duration,
+        ease: 'power3.out',
+        onUpdate: () => {
+          L = animState.val;
+        },
+        onComplete: () => {
+          L = clamped;
+          ur(clamped);
+        }
+      });
+    }
+
+    const onPrevClick = () => mr(W - 1, { source: 'click' });
+    const onNextClick = () => mr(W + 1, { source: 'click' });
+    if (prevBtn) prevBtn.addEventListener('click', onPrevClick);
+    if (nextBtn) nextBtn.addEventListener('click', onNextClick);
+
+    // ============================================================================
+    // 9. ENTRADA DE RUEDA / TRACKPAD (Con envolvente y huecos de referencia)
+    // ============================================================================
+    const wheelState = {
+      accum: 0,
+      lastEventTime: 0,
+      lastStepTime: 0,
+      envelope: 0,
+      lockedInGesture: false
+    };
+
+    const onWheel = (e: WheelEvent) => {
+      if (e.ctrlKey) return;
+      e.preventDefault();
+
+      const now = performance.now();
+      const dt = now - wheelState.lastEventTime;
+      wheelState.lastEventTime = now;
+
+      // Normalización de deltaMode
+      const modeMultiplier = e.deltaMode === 1 ? 16 : e.deltaMode === 2 ? 100 : 1;
+      const dx = e.deltaX * modeMultiplier;
+      const dy = e.deltaY * modeMultiplier;
+
+      // Elegir eje dominante (horizontal si |dx| > 1.25 * |dy|)
+      const rawDelta = Math.abs(dx) > 1.25 * Math.abs(dy) ? dx : dy;
+      const absDelta = Math.abs(rawDelta);
+
+      // Suelo de ruido 0.3
+      if (absDelta < 0.3) return;
+
+      if (dt > SPEC.wheelIdleReset) {
+        wheelState.accum = 0;
+        wheelState.lockedInGesture = false;
+        wheelState.envelope = 0;
+      } else if (dt > SPEC.wheelPauseGap) {
+        wheelState.lockedInGesture = false;
+      }
+
+      // Envolvente exponencial (wheelEnvelopeTau = 550 ms) para filtrar cola inercial
+      const decay = Math.exp(-dt / SPEC.wheelEnvelopeTau);
+      wheelState.envelope = Math.max(absDelta, wheelState.envelope * decay);
+
+      const clampedDelta = Math.sign(rawDelta) * Math.min(24, absDelta);
+      wheelState.accum += clampedDelta;
+
+      const sinceLastStep = now - wheelState.lastStepTime;
+      if (wheelState.lockedInGesture && sinceLastStep >= SPEC.wheelSustainDelay && absDelta > 4) {
+        wheelState.lockedInGesture = false;
+      }
+
+      if (!wheelState.lockedInGesture && Math.abs(wheelState.accum) >= SPEC.wheelStepThreshold) {
+        const stepDir = Math.sign(wheelState.accum);
+        wheelState.accum = 0;
+        wheelState.lockedInGesture = true;
+        wheelState.lastStepTime = now;
+        mr(Math.round(L) + stepDir, { source: 'wheel' });
+      }
+    };
+
+    container.addEventListener('wheel', onWheel, { passive: false });
+
+    // ============================================================================
+    // 10. HIT-TESTING, HOVER CON FLOTABILIDAD EN TODOS LOS DISCOS Y ARRASTRE POINTER*
+    // ============================================================================
+    const raycaster = new THREE.Raycaster();
+    const pointerNDC = new THREE.Vector2(99, 99);
+    let hoveredDiscIndex = -1;
+    let isPointerInside = false;
+    let keyboardNavMode = false;
+    let suppressClickUntil = 0;
+
+    function updateRaycasterFromEvent(clientX: number, clientY: number) {
+      const rect = container!.getBoundingClientRect();
+      pointerNDC.x = ((clientX - rect.left) / rect.width) * 2 - 1;
+      pointerNDC.y = -((clientY - rect.top) / rect.height) * 2 + 1;
+      raycaster.setFromCamera(pointerNDC, camera);
+      const hits = raycaster.intersectObjects(discHitMeshes, false);
+      if (hits.length > 0) {
+        const hit = hits[0];
+        const idx = hit.object.userData.discIndex as number;
+        const localPt = discHolders[idx].worldToLocal(hit.point.clone());
+        return { index: idx, localPt };
+      }
+      return { index: -1, localPt: null };
+    }
+
+    // Impulso de flotabilidad Zero-G al entrar con el cursor sobre CUALQUIER disco (central o lateral)
+    function triggerSingleZeroGImpulse(holder: THREE.Group, isCenter: boolean) {
+      if (!holder || prefersReducedMotion) return;
+      const u = holder.userData as DiscHolderUserData;
+      if (u.zeroGTween) u.zeroGTween.kill();
+
+      const amp = isCenter ? 1.0 : 0.85;
+      const tl = gsap.timeline();
+      u.zeroGTween = tl;
+
+      tl.to(
+        u.zeroGOffset,
+        {
+          y: 0.065 * amp,
+          z: 0.085 * amp,
+          duration: 0.36,
+          ease: 'power2.out'
+        },
+        0
+      )
+        .to(
+          u.zeroGRot,
+          {
+            x: -0.095 * amp,
+            y: 0.115 * amp,
+            z: 0.04 * amp,
+            duration: 0.36,
+            ease: 'power2.out'
+          },
+          0
+        )
+        .to(
+          u.zeroGOffset,
+          {
+            x: 0,
+            y: 0,
+            z: 0,
+            duration: 0.82,
+            ease: 'sine.inOut'
+          },
+          0.36
+        )
+        .to(
+          u.zeroGRot,
+          {
+            x: 0,
+            y: 0,
+            z: 0,
+            duration: 0.82,
+            ease: 'sine.inOut'
+          },
+          0.36
+        );
+    }
+
+    // Estado del arrastre pointer*
+    const dragState = {
+      active: false,
+      pointerId: null as number | null,
+      pointerType: 'mouse',
+      startX: 0,
+      startY: 0,
+      lastX: 0,
+      lastY: 0,
+      lastTime: 0,
+      movedBeyondThreshold: false,
+      mode: 'carousel' as 'disc-spin' | 'carousel',
+      velocity: 0
+    };
+
+    function isInteractiveElement(el: EventTarget | null) {
+      if (!el || !(el as Element).closest) return false;
+      return Boolean(
+        (el as Element).closest('a, button, input, select, textarea, label, [data-disc-no-drag]')
+      );
+    }
+
+    const onPointerDown = (e: PointerEvent) => {
+      if (!e.isPrimary || e.button !== 0) return;
+      if (isInteractiveElement(e.target)) return;
+
+      const hit = updateRaycasterFromEvent(e.clientX, e.clientY);
+      dragState.active = true;
+      dragState.pointerId = e.pointerId;
+      dragState.pointerType = e.pointerType || 'mouse';
+      dragState.startX = e.clientX;
+      dragState.startY = e.clientY;
+      dragState.lastX = e.clientX;
+      dragState.lastY = e.clientY;
+      dragState.lastTime = performance.now();
+      dragState.movedBeyondThreshold = false;
+      dragState.velocity = 0;
+
+      // Modo 1: Pulsar sobre el disco activo -> gira sobre sí mismo en X/Y
+      // Modo 2: Pulsar en otro sitio -> mueve el carrusel (L)
+      dragState.mode = hit.index === W ? 'disc-spin' : 'carousel';
+
+      if (activeTween && dragState.mode === 'carousel') {
+        activeTween.kill();
+      }
+
+      try {
+        container.setPointerCapture(e.pointerId);
+      } catch (_) {}
+    };
+
+    const onPointerMove = (e: PointerEvent) => {
+      isPointerInside = true;
+
+      if (!dragState.active) {
+        const hit = updateRaycasterFromEvent(e.clientX, e.clientY);
+        const prevHovered = hoveredDiscIndex;
+        hoveredDiscIndex = hit.index;
+
+        // Al entrar a cualquier disco (central o lateral): activar impulso de flotabilidad
+        if (hoveredDiscIndex !== prevHovered) {
+          if (prevHovered >= 0 && discHolders[prevHovered]) {
+            const prevU = discHolders[prevHovered].userData as DiscHolderUserData;
+            prevU.hoverTiltTargetX = 0;
+            prevU.hoverTiltTargetY = 0;
+          }
+          if (hoveredDiscIndex >= 0 && discHolders[hoveredDiscIndex]) {
+            triggerSingleZeroGImpulse(discHolders[hoveredDiscIndex], hoveredDiscIndex === W);
+          }
+        }
+
+        // El Scribble solo aparece cuando el cursor está sobre el disco activo (W)
+        if (hoveredDiscIndex === W && prevHovered !== W) {
+          keyboardNavMode = false;
+          setScribbleActiveIntent(true);
+        } else if (hoveredDiscIndex !== W && prevHovered === W && !keyboardNavMode) {
+          setScribbleActiveIntent(false);
+        }
+
+        // Inclinación magnética de flotabilidad sobre el disco bajo el cursor (sea activo o inactivo)
+        if (hoveredDiscIndex >= 0 && hit.localPt && discHolders[hoveredDiscIndex]) {
+          const u = discHolders[hoveredDiscIndex].userData as DiscHolderUserData;
+          const tiltScale =
+            hoveredDiscIndex === W ? SPEC.hoverTiltStrength : SPEC.hoverTiltStrength * 1.15;
+          u.hoverTiltTargetX = -hit.localPt.y * tiltScale;
+          u.hoverTiltTargetY = hit.localPt.x * tiltScale;
+        }
+        return;
+      }
+
+      if (e.pointerId !== dragState.pointerId) return;
+
+      const dxTotal = e.clientX - dragState.startX;
+      const dyTotal = e.clientY - dragState.startY;
+      const dist = Math.hypot(dxTotal, dyTotal);
+
+      if (!dragState.movedBeyondThreshold) {
+        if (dist < SPEC.dragStartDistance) return;
+        dragState.movedBeyondThreshold = true;
+
+        // En táctil, si el gesto es más horizontal que vertical, se desactiva el giro del disco y manda el carrusel
+        if (dragState.pointerType !== 'mouse' && Math.abs(dxTotal) > Math.abs(dyTotal)) {
+          dragState.mode = 'carousel';
+        }
+      }
+
+      const now = performance.now();
+      const dt = Math.max(1, now - dragState.lastTime);
+      const dx = e.clientX - dragState.lastX;
+      const dy = e.clientY - dragState.lastY;
+      dragState.lastX = e.clientX;
+      dragState.lastY = e.clientY;
+      dragState.lastTime = now;
+
+      const activeHolder = discHolders[W];
+
+      if (dragState.mode === 'disc-spin' && activeHolder) {
+        const rect = container.getBoundingClientRect();
+        const u = activeHolder.userData as DiscHolderUserData;
+        u.dragSpinY += (dx / rect.width) * Math.PI * 2 * SPEC.dragSensitivity;
+        u.dragSpinX += (dy / rect.height) * Math.PI * 2 * SPEC.dragSensitivity;
+      } else {
+        const width = Math.max(1, container.clientWidth);
+        const spanFactor = dragState.pointerType === 'mouse' ? 6 * SPEC.dragSensitivity : 4.2;
+        const deltaL = -(dx / width) * spanFactor;
+        L = Math.max(0, Math.min(N - 1, L + deltaL));
+
+        const instVel = deltaL / dt;
+        dragState.velocity =
+          dragState.velocity * (1 - SPEC.dragVelocitySmoothing) +
+          instVel * SPEC.dragVelocitySmoothing;
+        dragState.velocity = Math.max(-0.5, Math.min(0.5, dragState.velocity));
+      }
+    };
+
+    const endPointerDrag = (e: PointerEvent) => {
+      if (!dragState.active || e.pointerId !== dragState.pointerId) return;
+      dragState.active = false;
+
+      try {
+        container.releasePointerCapture(e.pointerId);
+      } catch (_) {}
+
+      if (!dragState.movedBeyondThreshold) return;
+
+      // Bloquear clic posterior durante 140 ms para que arrastrar no cuente como clic
+      suppressClickUntil = performance.now() + 140;
+
+      const activeHolder = discHolders[W];
+      if (dragState.mode === 'disc-spin' && activeHolder) {
+        gsap.to(activeHolder.userData, {
+          dragSpinX: 0,
+          dragSpinY: 0,
+          duration: 1.2,
+          ease: 'power3.out'
+        });
+      } else {
+        if (
+          dragState.pointerType !== 'mouse' &&
+          Math.abs(dragState.velocity) >= SPEC.touchFlickVelocity
+        ) {
+          const step = dragState.velocity > 0 ? 1 : -1;
+          mr(W + step, { source: 'flick' });
+        } else {
+          mr(Math.round(L), { source: 'default' });
+        }
+      }
+    };
+
+    const onPointerLeave = () => {
+      isPointerInside = false;
+      if (hoveredDiscIndex >= 0 && discHolders[hoveredDiscIndex]) {
+        const u = discHolders[hoveredDiscIndex].userData as DiscHolderUserData;
+        u.hoverTiltTargetX = 0;
+        u.hoverTiltTargetY = 0;
+      }
+      hoveredDiscIndex = -1;
+      if (!keyboardNavMode) {
+        setScribbleActiveIntent(false);
+      }
+    };
+
+    container.addEventListener('pointerdown', onPointerDown);
+    container.addEventListener('pointermove', onPointerMove);
+    container.addEventListener('pointerup', endPointerDrag);
+    container.addEventListener('pointercancel', endPointerDrag);
+    container.addEventListener('pointerleave', onPointerLeave);
+
+    // ============================================================================
+    // 11. CLIC Y APERTURA DE FICHA (detailUrl)
+    // ============================================================================
+    const detailModal = container.querySelector('#detail-modal') as HTMLElement | null;
+    const modalTitle = container.querySelector('#modal-title') as HTMLElement | null;
+    const modalYear = container.querySelector('#modal-year') as HTMLElement | null;
+    const modalDesc = container.querySelector('#modal-desc') as HTMLElement | null;
+    const modalSlug = container.querySelector('#modal-slug') as HTMLElement | null;
+    const closeModalBtn = container.querySelector('#close-modal-btn') as HTMLButtonElement | null;
+
+    function openFilmDetail(film: FilmData, openInNewTab = false) {
+      if (!film || !film.detailUrl) return;
+      if (openInNewTab) {
+        window.open(film.detailUrl, '_blank', 'noopener');
+        return;
+      }
+      const w = window as unknown as { barba?: { go?: (url: string) => void } };
+      if (w.barba && typeof w.barba.go === 'function') {
+        try {
+          w.barba.go(film.detailUrl);
+          return;
+        } catch (_) {}
+      }
+      // Mostrar ficha de producción integrada
+      if (modalSlug) modalSlug.textContent = `A24 ARCHIVE — ${film.detailUrl}`;
+      if (modalYear) modalYear.textContent = `${film.year} · DIRECTED BY ${film.director}`;
+      if (modalTitle) modalTitle.textContent = film.title;
+      if (modalDesc) {
+        modalDesc.textContent = `Featuring ${film.starring}. Original optical disc release from the Miquel Gil discography archive.`;
+      }
+      if (detailModal) detailModal.classList.remove('opacity-0', 'pointer-events-none');
+    }
+
+    const onCloseModal = () => {
+      if (detailModal) detailModal.classList.add('opacity-0', 'pointer-events-none');
+    };
+
+    if (closeModalBtn) {
+      closeModalBtn.addEventListener('click', onCloseModal);
+    }
+
+    const onContainerClick = (e: MouseEvent) => {
+      if (performance.now() < suppressClickUntil) return;
+      const target = e.target as Element | null;
+      if (target && target.closest && target.closest('a, button, [data-disc-no-open]')) return;
+
+      const hit = updateRaycasterFromEvent(e.clientX, e.clientY);
+      if (hit.index < 0) return;
+
+      if (hit.index !== W) {
+        mr(hit.index, { source: 'click' });
+      } else {
+        openFilmDetail(films[W], e.metaKey || e.ctrlKey);
+      }
+    };
+
+    container.addEventListener('click', onContainerClick);
+
+    // ============================================================================
+    // 12. TECLADO (← →, Home, End, Enter, Espacio 180° en 0.75s power3.inOut)
+    // ============================================================================
+    function flipActiveDisc() {
+      const holder = discHolders[W];
+      if (!holder) return;
+      isFlippedBSide = !isFlippedBSide;
+      gsap.to(holder.userData, {
+        flipAngleY: isFlippedBSide ? Math.PI : 0,
+        duration: 0.75,
+        ease: 'power3.inOut'
+      });
+    }
+
+    const flipBtn = container.querySelector('#flip-disc-btn') as HTMLButtonElement | null;
+    if (flipBtn) flipBtn.addEventListener('click', flipActiveDisc);
+
+    // ============================================================================
+    // 13. MENÚ INDEX Y CUSTOM EVENT 'discgallerynavigate'
+    // ============================================================================
+    const indexDrawer = container.querySelector('#index-drawer') as HTMLElement | null;
+    const toggleIndexBtn = container.querySelector('#toggle-index-btn') as HTMLButtonElement | null;
+    const closeIndexBtn = container.querySelector('#close-index-btn') as HTMLButtonElement | null;
+
+    function openIndexDrawer() {
+      if (indexDrawer) indexDrawer.classList.remove('opacity-0', 'invisible');
+    }
+    function closeIndexDrawer() {
+      if (indexDrawer) indexDrawer.classList.add('opacity-0', 'invisible');
+    }
+
+    if (toggleIndexBtn) toggleIndexBtn.addEventListener('click', openIndexDrawer);
+    if (closeIndexBtn) closeIndexBtn.addEventListener('click', closeIndexDrawer);
+
+    function normalizeTitle(str: string | undefined) {
+      return (str || '').trim().toLowerCase();
+    }
+
+    const onDiscGalleryNavigate = (ev: Event) => {
+      const e = ev as CustomEvent<{ title?: string }>;
+      const targetTitle = normalizeTitle(e.detail && e.detail.title);
+      const foundIdx = films.findIndex((f) => normalizeTitle(f.title) === targetTitle);
+      if (foundIdx !== -1) {
+        mr(foundIdx, { source: 'click' });
+        closeIndexDrawer();
+        container.focus();
+      }
+    };
+
+    container.addEventListener('discgallerynavigate', onDiscGalleryNavigate);
+
+    const filmScrollLinks = Array.from(
+      container.querySelectorAll('[data-film-scroll]')
+    ) as HTMLElement[];
+    const onFilmScrollClick = (e: Event) => {
+      e.preventDefault();
+      const link = e.currentTarget as HTMLElement;
+      const title = link.getAttribute('data-film-scroll');
+      const galleryEl = document.querySelector('[data-disc-gallery]');
+      if (!galleryEl) return;
+      galleryEl.dispatchEvent(
+        new CustomEvent('discgallerynavigate', {
+          detail: { title }
+        })
+      );
+    };
+    filmScrollLinks.forEach((link) => {
+      link.addEventListener('click', onFilmScrollClick);
+    });
+
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        closeIndexDrawer();
+        if (detailModal) detailModal.classList.add('opacity-0', 'pointer-events-none');
+        return;
+      }
+
+      const activeEl = document.activeElement;
+      const galleryFocused = activeEl === container || container.contains(activeEl);
+      const nothingElseFocused = !activeEl || activeEl === document.body;
+
+      if (!galleryFocused && !(isPointerInside && nothingElseFocused)) return;
+
+      if (e.key === 'ArrowRight') {
+        e.preventDefault();
+        keyboardNavMode = true;
+        mr(W + 1, { source: 'key' });
+        setScribbleActiveIntent(true);
+      } else if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        keyboardNavMode = true;
+        mr(W - 1, { source: 'key' });
+        setScribbleActiveIntent(true);
+      } else if (e.key === 'Home') {
+        e.preventDefault();
+        keyboardNavMode = true;
+        mr(0, { source: 'key' });
+        setScribbleActiveIntent(true);
+      } else if (e.key === 'End') {
+        e.preventDefault();
+        keyboardNavMode = true;
+        mr(N - 1, { source: 'key' });
+        setScribbleActiveIntent(true);
+      } else if (e.key === 'Enter') {
+        e.preventDefault();
+        openFilmDetail(films[W], e.metaKey || e.ctrlKey);
+      } else if (e.key === ' ' || e.code === 'Space') {
+        e.preventDefault();
+        flipActiveDisc();
+      }
+    };
+
+    window.addEventListener('keydown', onKeyDown);
+
+    // ============================================================================
+    // 14. LOOP DE RENDERIZADO Y COLOCACIÓN MATEMÁTICA DE LOS DISCOS
+    // ============================================================================
+    let lastFrameTime = performance.now();
+    let rafId = 0;
+
+    function renderLoop(now: number) {
+      if (isDisposed) return;
+      rafId = requestAnimationFrame(renderLoop);
+
+      const dt = Math.min(0.05, Math.max(0.001, (now - lastFrameTime) / 1000));
+      lastFrameTime = now;
+      const timeSec = now * 0.001;
+
+      // Velocidad e inercia visual (flowLean 0.055, flowBank 0.32, flowDip 0.014)
+      const rawVel = (L - prevL) / Math.max(0.008, dt);
+      prevL = L;
+      velocityVisual += (rawVel * 0.08 - velocityVisual) * 0.18;
+      kickBoost *= 0.88;
+      const flowSignal = Math.max(-1.8, Math.min(1.8, velocityVisual + kickBoost));
+
+      const isMobile = window.innerWidth <= 991;
+      const v = Math.max(0.12, SPEC.depthGap);
+
+      for (let p = 0; p < N; p++) {
+        const holder = discHolders[p];
+        const m = p - L;
+        const absM = Math.abs(m);
+
+        // Solo renderizar dentro de renderRadius = 5
+        holder.visible = absM <= SPEC.renderRadius + 0.5;
+        if (!holder.visible) continue;
+
+        const u = holder.userData as DiscHolderUserData;
+
+        // Interpolación suave de flotabilidad (hoverWeight) e inclinación en cada disco (central o lateral)
+        const isHovered = p === hoveredDiscIndex;
+        const targetHoverWeight = isHovered && !prefersReducedMotion ? 1 : 0;
+        u.hoverWeight += (targetHoverWeight - u.hoverWeight) * Math.min(1, dt * 7.5);
+
+        if (!isHovered) {
+          u.hoverTiltTargetX = 0;
+          u.hoverTiltTargetY = 0;
+        }
+        u.hoverTiltCurrentX += (u.hoverTiltTargetX - u.hoverTiltCurrentX) * 0.14;
+        u.hoverTiltCurrentY += (u.hoverTiltTargetY - u.hoverTiltCurrentY) * 0.14;
+
+        // Oscilación suave de flotabilidad mientras el cursor está encima del disco
+        const buoyY = u.hoverWeight * (0.048 + Math.sin(timeSec * 2.6 + u.floatPhase) * 0.022);
+        const buoyZ = u.hoverWeight * (0.075 + Math.cos(timeSec * 2.1 + u.floatPhase) * 0.02);
+        const buoyRoll = u.hoverWeight * Math.sin(timeSec * 2.3 + u.floatPhase) * 0.032;
+        const buoyPitch = u.hoverWeight * Math.cos(timeSec * 2.0 + u.floatPhase) * 0.026;
+
+        if (!isMobile) {
+          // Fórmula exacta de colocación en escritorio:
+          // a = m * 0.35
+          // x = sin(a) * hGap * 2.4
+          // z = -cos(a) * v * 2.4 + v * 2.4
+          const a = m * 0.35;
+          const x = Math.sin(a) * SPEC.hGap * 2.4;
+          const z = -Math.cos(a) * v * 2.4 + v * 2.4;
+
+          const activeWeight = Math.max(0, 1 - absM);
+          const y = activeWeight * SPEC.activeDiscY - Math.abs(flowSignal) * SPEC.flowDip;
+
+          holder.position.set(
+            x + u.zeroGOffset.x,
+            y + u.zeroGOffset.y + buoyY,
+            z + u.zeroGOffset.z + buoyZ
+          );
+
+          // Escala: activo vale 1; los demás max(0.8, 1 - |m| * 0.2 * 0.6) + ligero realce de flotabilidad
+          const baseScale =
+            p === W && absM < 0.01 ? 1 : Math.max(0.8, 1 - absM * 0.2 * 0.6);
+          holder.scale.setScalar(baseScale + u.hoverWeight * 0.028);
+
+          // Rotación Y = -a + inclinaciones de flujo, flotabilidad hover en TODOS los discos, arrastre y volteo 180°
+          const isAct = p === W;
+          const rotX =
+            flowSignal * SPEC.flowLean +
+            u.hoverTiltCurrentX +
+            u.zeroGRot.x +
+            buoyPitch +
+            (isAct ? u.dragSpinX : 0);
+          const rotY =
+            -a +
+            u.hoverTiltCurrentY +
+            u.zeroGRot.y +
+            (isAct ? u.dragSpinY + u.flipAngleY : 0);
+          const rotZ =
+            -flowSignal * SPEC.flowBank * 0.18 + u.zeroGRot.z + buoyRoll;
+
+          holder.rotation.set(rotX, rotY, rotZ);
+        } else {
+          // Disposición móvil (<= 991 px): touchActiveScale 1.5, touchInactiveScale 0.6, touchGap 2.2, touchDepth 0.5
+          const a = m * 0.35;
+          const x = Math.sin(a) * SPEC.touchGap * 1.6;
+          const z = -Math.cos(a) * SPEC.touchDepth * 2.0 + SPEC.touchDepth * 2.0;
+          const scale = THREE.MathUtils.lerp(
+            SPEC.touchActiveScale,
+            SPEC.touchInactiveScale,
+            Math.min(1, absM)
+          );
+          holder.position.set(
+            x + u.zeroGOffset.x,
+            u.zeroGOffset.y + buoyY,
+            z + u.zeroGOffset.z + buoyZ
+          );
+          holder.scale.setScalar(scale);
+          holder.rotation.set(
+            u.hoverTiltCurrentX + u.zeroGRot.x + (p === W ? u.dragSpinX : 0),
+            -a + u.hoverTiltCurrentY + u.zeroGRot.y + (p === W ? u.dragSpinY + u.flipAngleY : 0),
+            u.zeroGRot.z + buoyRoll
+          );
+        }
+      }
+
+      // Actualizar el efecto Scribble (anillos concéntricos en stop-motion a 10 fps + lag 15)
+      updateScribbleStep(now, dt);
+
+      renderer.render(scene, camera);
+    }
+
+    // Redimensionado responsivo
+    const onResize = () => {
+      if (!container) return;
+      const w = container.clientWidth;
+      const h = container.clientHeight;
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+      renderer.setSize(w, h);
+    };
+
+    window.addEventListener('resize', onResize);
+
+    // Inicializar el primer disco como activo y arrancar el loop
+    ur(0);
+    rafId = requestAnimationFrame(renderLoop);
+
+    return () => {
+      isDisposed = true;
+      cancelAnimationFrame(rafId);
+      if (ariaTimer) clearTimeout(ariaTimer);
+      if (prefetchTimer) clearTimeout(prefetchTimer);
+      if (activeTween) activeTween.kill();
+
+      window.removeEventListener('keydown', onKeyDown);
+      window.removeEventListener('resize', onResize);
+
+      container.removeEventListener('discgallerychange', handleDiscGalleryChange);
+      container.removeEventListener('discgallerynavigate', onDiscGalleryNavigate);
+      container.removeEventListener('wheel', onWheel);
+      container.removeEventListener('pointerdown', onPointerDown);
+      container.removeEventListener('pointermove', onPointerMove);
+      container.removeEventListener('pointerup', endPointerDrag);
+      container.removeEventListener('pointercancel', endPointerDrag);
+      container.removeEventListener('pointerleave', onPointerLeave);
+      container.removeEventListener('click', onContainerClick);
+
+      if (prevBtn) prevBtn.removeEventListener('click', onPrevClick);
+      if (nextBtn) nextBtn.removeEventListener('click', onNextClick);
+      if (flipBtn) flipBtn.removeEventListener('click', flipActiveDisc);
+      if (toggleIndexBtn) toggleIndexBtn.removeEventListener('click', openIndexDrawer);
+      if (closeIndexBtn) closeIndexBtn.removeEventListener('click', closeIndexDrawer);
+      if (closeModalBtn) closeModalBtn.removeEventListener('click', onCloseModal);
+      filmScrollLinks.forEach((link) => {
+        link.removeEventListener('click', onFilmScrollClick);
+      });
+
+      sharedDiscGeo.dispose();
+      sharedHubGeo.dispose();
+      sharedEdgeGeo.dispose();
+      backMatShared.dispose();
+      sharedHubMat.dispose();
+      sharedEdgeMat.dispose();
+      scribbleMaterial.dispose();
+      printMaps.bumpMap.dispose();
+      renderer.dispose();
+      container.removeAttribute('data-disc-gallery-init');
+    };
+  }, []);
 
   return (
-    <div className={`disco-page-container ${isLightMode ? 'light' : 'dark-theme'}`}>
-      {/* Film Grain Overlay */}
-      <div className="film-grain" />
+    <main
+      ref={galleryRef}
+      data-disc-gallery=""
+      data-lenis-prevent-wheel=""
+      data-disc-scribble-color="#000000"
+      tabIndex={0}
+      role="group"
+      aria-roledescription="carousel"
+      aria-label="Film disc gallery"
+    >
+      {/* CANVAS 3D CON POINTER-EVENTS: NONE */}
+      <canvas data-disc-canvas=""></canvas>
 
-      {/* Custom Cursor Ring */}
-      <div id="cursor-ring" ref={cursorRingRef}>
-        <span id="cursor-label" className="font-mono text-[8px] tracking-widest uppercase opacity-0 transition-opacity duration-200 text-white">
-          escoltar
-        </span>
-      </div>
+      {/* REGIÓN ARIA-LIVE PARA ANUNCIOS A LOS 350 MS */}
+      <div id="gallery-live-region" className="sr-only" aria-live="polite" aria-atomic="true"></div>
 
-      {/* Dynamic Ambient Backdrop Glow */}
-      <div
-        id="ambient-glow"
-        ref={ambientGlowRef}
-        className="fixed inset-0 pointer-events-none z-0 transition-all duration-1000 opacity-25"
-        style={{
-          background: 'radial-gradient(circle at 50% 52%, rgba(200, 90, 50, 0.20) 0%, rgba(242, 236, 225, 0) 68%)'
-        }}
-      />
-
-      {/* Subtle Studio Grid Crosshairs */}
-      <div className="fixed inset-0 pointer-events-none z-0 opacity-20">
-        <div className="w-full h-full grid grid-cols-4 md:grid-cols-12 border-b border-hairline">
-          <div className="border-r border-hairline h-full" />
-          <div className="border-r border-hairline h-full hidden md:block" />
-          <div className="border-r border-hairline h-full hidden md:block" />
-          <div className="border-r border-hairline h-full" />
-          <div className="border-r border-hairline h-full hidden md:block" />
-          <div className="border-r border-hairline h-full hidden md:block" />
-          <div className="border-r border-hairline h-full" />
-          <div className="border-r border-hairline h-full hidden md:block" />
-          <div className="border-r border-hairline h-full hidden md:block" />
-          <div className="border-r border-hairline h-full" />
-          <div className="border-r border-hairline h-full hidden md:block" />
-          <div className="h-full hidden md:block" />
-        </div>
-      </div>
-
-      {/* PRELOADER OVERLAY */}
-      {!isPreloaderDone && (
-        <div
-          id="preloader"
-          className={`fixed inset-0 z-50 flex flex-col justify-between p-6 md:p-10 bg-[#090807] text-[#F4F0E6] transition-opacity duration-700 pointer-events-none ${
-            isPreloaderFading ? 'opacity-0' : 'opacity-100'
-          }`}
-        >
-          <div className="flex items-center justify-between border-b border-white/15 pb-4">
-            <div className="flex items-center gap-3">
-              <div className="px-2.5 py-1 border border-white/30 font-display font-extrabold text-sm tracking-tighter">
-                MG // 24
-              </div>
-              <span className="font-mono text-[10px] tracking-[0.25em] uppercase opacity-60">
-                Miquel Gil // Arxiu Discogràfic 1988–2024
-              </span>
-            </div>
-            <div className="font-mono text-[11px] tracking-widest uppercase opacity-60 hidden sm:block">
-              MASTERITZACIÓ ÒPTICA — CD 120MM POLICARBONAT
-            </div>
-          </div>
-
-          <div className="my-auto flex flex-col items-center justify-center relative">
-            <div className="relative w-52 h-52 md:w-64 md:h-64 flex items-center justify-center">
-              <svg className="w-full h-full animate-spin" style={{ animationDuration: '7s' }} viewBox="0 0 200 200">
-                <circle cx="100" cy="100" r="95" fill="none" stroke="rgba(244,240,230,0.22)" strokeWidth="1" />
-                <circle cx="100" cy="100" r="88" fill="none" stroke="rgba(244,240,230,0.1)" strokeWidth="0.75" strokeDasharray="4 6" />
-                <circle cx="100" cy="100" r="62" fill="none" stroke="rgba(244,240,230,0.08)" strokeWidth="0.75" />
-                <circle cx="100" cy="100" r="34" fill="none" stroke="rgba(244,240,230,0.35)" strokeWidth="1.2" strokeDasharray="18 8" />
-                <circle cx="100" cy="100" r="22" fill="none" stroke="rgba(244,240,230,0.2)" strokeWidth="1" />
-                <circle cx="100" cy="100" r="14" fill="none" stroke="rgba(200,90,50,0.85)" strokeWidth="1.5" />
-              </svg>
-              <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <span id="preloader-percent" className="font-mono text-2xl md:text-3xl font-light tracking-tighter">100%</span>
-                <span className="font-mono text-[9px] tracking-[0.3em] uppercase opacity-50 mt-1">CARREGANT DISCOS</span>
-              </div>
-            </div>
-            <div id="preloader-status" className="font-mono text-[10px] tracking-[0.25em] uppercase opacity-60 mt-6 text-center">
-              INICIALITZANT LECTOR ÒPTIC // 10 OBRES DE MIQUEL GIL
-            </div>
-          </div>
-
-          <div className="flex items-end justify-between border-t border-white/15 pt-4 font-mono text-[10px] tracking-widest uppercase opacity-60">
-            <div>ARREL MEDITERRÀNIA · VALÈNCIA</div>
-            <div>10 EDICIONS OFICIALS EN RACK 3D</div>
-          </div>
-        </div>
-      )}
-
-      {/* BACKGROUND EDITORIAL METADATA STRIP */}
-      <div id="editorial-bg" className="fixed inset-x-0 top-24 pointer-events-none z-10 flex flex-col justify-center items-center px-4 md:px-14 overflow-hidden">
-        <div className="mb-2 flex items-center gap-3 font-mono text-[11px] tracking-[0.28em] uppercase opacity-70">
-          <span id="bg-cat-id" className="px-2.5 py-0.5 border border-hairline rounded-full">{activeItem.id}</span>
-          <span>•</span>
-          <span id="bg-year">{activeItem.year}</span>
-          <span>•</span>
-          <span id="bg-director">{activeItem.label.toUpperCase()}</span>
+      {/* CABECERA SUPERIOR ESTILO A24 */}
+      <header className="absolute top-0 left-0 w-full z-20 flex items-center justify-between px-6 py-5 pointer-events-none">
+        <div className="flex items-center gap-6 pointer-events-auto">
+          <span className="a24-value font-semibold tracking-widest">A24 — MIQUEL GIL</span>
+          <span className="a24-label hidden sm:inline">OPTICAL ARCHIVE (1988–2024)</span>
         </div>
 
-        <div className="mt-2 flex flex-wrap items-center justify-center gap-3 md:gap-7 font-mono text-[10px] md:text-[11px] tracking-[0.22em] uppercase opacity-65">
-          <span id="bg-single">TEMA DESTACAT: «{activeItem.single.toUpperCase()}»</span>
-          <span>//</span>
-          <span id="bg-runtime">DURADA: {activeItem.duration}</span>
-          <span>//</span>
-          <span id="bg-accolade" className="text-amber-700 font-bold dark:text-amber-300">{activeItem.accolade}</span>
-        </div>
-      </div>
-
-      {/* THREE.JS WEBGL 3D CANVAS CONTAINER */}
-      <div id="webgl-container" ref={containerRef} className="fixed inset-0 z-20 cursor-grab active:cursor-grabbing" />
-
-      {/* SIDE VERTICAL RACK TELEMETRY */}
-      <div
-        id="side-hud-panel"
-        ref={sideHudRef}
-        className="fixed left-6 top-1/2 -translate-y-1/2 z-25 hidden xl:flex flex-col items-start gap-4 pointer-events-none font-mono text-[10px] tracking-[0.2em] uppercase opacity-100 max-w-[280px]"
-        style={{ color: 'var(--text-primary)' }}
-      >
-        {/* BLOQUE 1: TÍTULO Y GÈNERE */}
-        <div className="hud-block flex flex-col gap-1 w-full" style={{ color: 'var(--text-primary)' }}>
-          <span className="font-bold text-[9px] tracking-[0.25em] opacity-80" style={{ color: 'var(--text-primary)' }}>DISC &amp; GÈNERE</span>
-          <h2 id="hud-title" className="font-serif italic text-4xl sm:text-5xl tracking-tight leading-none font-black my-1" style={{ color: 'var(--text-primary)' }}>
-            {activeItem.title}
-          </h2>
-          <span id="hud-genre" className="font-bold opacity-100" style={{ color: 'var(--text-primary)' }}>{activeItem.style}</span>
-        </div>
-
-        <div className="w-full h-[1px] opacity-30" style={{ backgroundColor: 'var(--text-primary)' }} />
-
-        {/* BLOQUE 2: DISCOGRÀFICA & PRODUCCIÓ */}
-        <div className="hud-block flex flex-col gap-1 w-full" style={{ color: 'var(--text-primary)' }}>
-          <span className="font-bold text-[9px] tracking-[0.25em] opacity-80" style={{ color: 'var(--text-primary)' }}>DISCOGRÀFICA &amp; PRODUCCIÓ</span>
-          <p id="hud-producer" className="normal-case font-sans text-[11px] leading-snug font-bold opacity-100" style={{ color: 'var(--text-primary)' }}>
-            {activeItem.label} · {activeItem.producer}
-          </p>
-        </div>
-
-        <div className="w-full h-[1px] opacity-30" style={{ backgroundColor: 'var(--text-primary)' }} />
-
-        {/* BLOQUE 3: SINOPSI / ARXIU */}
-        <div className="hud-block flex flex-col gap-1 w-full" style={{ color: 'var(--text-primary)' }}>
-          <span className="font-bold text-[9px] tracking-[0.25em] opacity-80" style={{ color: 'var(--text-primary)' }}>SINOPSI / ARXIU</span>
-          <p id="hud-synopsis" className="normal-case font-sans text-[11px] leading-relaxed font-semibold opacity-100 line-clamp-4" style={{ color: 'var(--text-primary)' }}>
-            {activeItem.synopsis}
-          </p>
-        </div>
-      </div>
-
-      {/* TOP NAVIGATION HUD BAR */}
-      <header className="fixed top-0 left-0 right-0 z-30 flex items-center justify-between px-3 sm:px-8 py-3.5 md:py-4 border-b border-hairline glass-panel">
-        <div className="flex items-center gap-3">
-          <Link href="/" className="group flex items-center gap-3 text-left focus:outline-none" title="Tornar a l'inici del web">
-            <div className="px-2.5 py-1 rounded border border-hairline bg-white/5 font-display font-extrabold text-xs sm:text-sm tracking-tight group-hover:bg-[#F4F0E6] group-hover:text-[#090807] transition-colors">
-              MIQUEL GIL
-            </div>
-            <div className="hidden xl:flex flex-col border-l border-hairline pl-3">
-              <span className="font-mono text-[10px] tracking-[0.22em] uppercase leading-tight">DISCOGRAFIA OFICIAL</span>
-              <span className="font-mono text-[9px] tracking-[0.18em] uppercase opacity-50">1988 — 2024 // 10 VOLUMS</span>
-            </div>
-          </Link>
-        </div>
-
-        <nav className="flex items-center p-1 rounded-full border border-hairline bg-black/20 dark:bg-white/5 backdrop-blur-md overflow-x-auto max-w-[58vw] sm:max-w-none">
-          <button
-            id="nav-all"
-            onClick={() => handleFilterChange('all')}
-            className={`nav-pill px-2.5 sm:px-3.5 py-1.5 rounded-full font-mono text-[10px] sm:text-[11px] tracking-[0.16em] uppercase transition-all whitespace-nowrap ${
-              filter === 'all'
-                ? 'bg-[#F4F0E6] text-[#090807] font-medium'
-                : 'opacity-65 hover:opacity-100'
-            }`}
-          >
-            TOTS <span className="opacity-60 text-[9px] ml-0.5">(10)</span>
+        <nav className="flex items-center gap-6 pointer-events-auto">
+          <button type="button" data-disc-no-drag="" className="a24-value">
+            ALBUMS
           </button>
           <button
-            id="nav-estudi"
-            onClick={() => handleFilterChange('estudi')}
-            className={`nav-pill px-2.5 sm:px-3.5 py-1.5 rounded-full font-mono text-[10px] sm:text-[11px] tracking-[0.16em] uppercase transition-all whitespace-nowrap ${
-              filter === 'estudi'
-                ? 'bg-[#F4F0E6] text-[#090807] font-medium'
-                : 'opacity-65 hover:opacity-100'
-            }`}
+            type="button"
+            data-disc-no-drag=""
+            id="toggle-index-btn"
+            className="a24-label hover:text-black transition-colors"
           >
-            ESTUDI <span className="opacity-60 text-[9px] ml-0.5">(08)</span>
-          </button>
-          <button
-            id="nav-directe"
-            onClick={() => handleFilterChange('directe')}
-            className={`nav-pill px-2.5 sm:px-3.5 py-1.5 rounded-full font-mono text-[10px] sm:text-[11px] tracking-[0.16em] uppercase transition-all whitespace-nowrap ${
-              filter === 'directe'
-                ? 'bg-[#F4F0E6] text-[#090807] font-medium'
-                : 'opacity-65 hover:opacity-100'
-            }`}
-          >
-            DIRECTE &amp; TRIO <span className="opacity-60 text-[9px] ml-0.5">(02)</span>
-          </button>
-          <div className="h-3.5 w-[1px] bg-current opacity-20 mx-1" />
-          <button
-            id="nav-index"
-            onClick={() => setIsIndexOpen(!isIndexOpen)}
-            className="nav-pill px-2.5 sm:px-3.5 py-1.5 rounded-full font-mono text-[10px] sm:text-[11px] tracking-[0.16em] uppercase transition-all opacity-65 hover:opacity-100 whitespace-nowrap"
-          >
-            ÍNDEX
+            INDEX <span data-film-counter="total">12</span>
           </button>
         </nav>
 
-        <div className="flex items-center gap-2 font-mono text-[10px] tracking-[0.16em] uppercase">
+        <div className="flex items-center gap-4 pointer-events-auto">
+          <span className="a24-label">
+            <span data-film-counter="current">1</span> / <span data-film-counter="total">12</span>
+          </span>
           <button
-            id="btn-antigravity"
-            onClick={() => {
-              setIsAntigravityOpen(true);
-              if (soundEngineRef.current) soundEngineRef.current.playRackClick();
-            }}
-            className="px-3 py-1.5 rounded-full bg-amber-500/20 border border-amber-400/50 text-amber-900 hover:bg-amber-400 hover:text-black transition-all flex items-center gap-1.5 font-medium"
-            title="Exportar codi per a Antigravity / Next.js"
+            type="button"
+            data-disc-prev=""
+            className="a24-value px-2 py-1 border border-black/15 rounded hover:border-black disabled:opacity-30 transition"
           >
-            <span className="w-1.5 h-1.5 rounded-full bg-amber-600 animate-ping" />
-            <span>ANTIGRAVITY</span>
+            ←
           </button>
-
           <button
-            id="btn-theme"
-            onClick={toggleTheme}
-            className="px-2.5 py-1.5 rounded-full border border-hairline hover:border-current transition-all hidden md:flex items-center gap-1.5"
-            title="Canviar il·luminació Estudi / Nit"
+            type="button"
+            data-disc-next=""
+            className="a24-value px-2 py-1 border border-black/15 rounded hover:border-black disabled:opacity-30 transition"
           >
-            <span id="theme-dot" className={`w-2 h-2 rounded-full ${isLightMode ? 'bg-stone-900' : 'bg-amber-400'}`} />
-            <span id="theme-label">{isLightMode ? 'DIA' : 'NIT'}</span>
-          </button>
-
-          <button
-            id="btn-audio-fx"
-            onClick={toggleAudioFx}
-            className="px-2.5 py-1.5 rounded-full border border-hairline hover:border-current transition-all hidden sm:flex items-center gap-1.5"
-            title="Sons mecànics del prestatge"
-          >
-            <span>FX</span>
-            <span id="audio-label">[{isFxEnabled ? 'ON' : 'OFF'}]</span>
+            →
           </button>
         </div>
       </header>
 
-      {/* FLOATING AUDIO PLAYER */}
-      <div
-        id="floating-audio-player"
-        className="fixed left-4 sm:left-8 bottom-6 z-30 glass-panel border border-hairline rounded-2xl p-3 sm:px-4 sm:py-3 flex items-center gap-3.5 shadow-2xl max-w-[92vw] sm:max-w-md transition-all duration-500"
-      >
-        <div className="relative w-11 h-11 rounded-full overflow-hidden border border-hairline shrink-0 bg-stone-900">
-          <img
-            id="player-cover"
-            src={activeItem.coverUrl}
-            alt="Portada"
-            className="w-full h-full object-cover animate-spin"
-            style={{
-              animationDuration: '12s',
-              animationPlayState: isPlaying ? 'running' : 'paused'
-            }}
-          />
-          <div className="absolute inset-0 m-auto w-3 h-3 rounded-full bg-[#090807] border border-white/30" />
-        </div>
-
-        <div className="flex-1 min-w-[140px] sm:min-w-[180px]">
-          <div className="flex items-center justify-between gap-2">
-            <span id="player-track-title" className="font-mono text-[11px] font-semibold tracking-wider uppercase truncate" style={{ color: 'var(--text-primary)' }}>
-              {activeItem.single}
-            </span>
-            <span id="player-time" className="font-mono text-[10px] opacity-75 shrink-0" style={{ color: 'var(--text-primary)' }}>
-              {audioTime}
-            </span>
-          </div>
-          <div className="font-mono text-[9px] tracking-[0.18em] uppercase opacity-75 truncate" id="player-album-sub" style={{ color: 'var(--text-primary)' }}>
-            {activeItem.title} ({activeItem.year}) · Miquel Gil
-          </div>
-          <div
-            id="player-progress-bar"
-            onClick={(e) => {
-              const rect = e.currentTarget.getBoundingClientRect();
-              const clickPct = (e.clientX - rect.left) / rect.width;
-              if (soundEngineRef.current && soundEngineRef.current.audioEl && soundEngineRef.current.audioEl.duration) {
-                soundEngineRef.current.audioEl.currentTime = clickPct * soundEngineRef.current.audioEl.duration;
-              }
-            }}
-            className="w-full h-1.5 bg-black/10 dark:bg-white/10 rounded-full overflow-hidden mt-1.5 cursor-pointer"
-          >
-            <div
-              id="player-progress-fill"
-              style={{ width: `${audioProgress}%` }}
-              className="h-full bg-amber-600 transition-all duration-150"
-            />
-          </div>
-        </div>
-
-        <button
-          id="btn-play-track"
-          onClick={handlePlayToggle}
-          className="w-9 h-9 rounded-full bg-[#141210] text-[#F2ECE1] flex items-center justify-center hover:scale-105 transition-transform shrink-0"
-          title="Reproduir / Pausar mostra sonora"
-        >
-          {isPlaying ? (
-            <svg id="icon-pause" className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
-            </svg>
-          ) : (
-            <svg id="icon-play" className="w-4 h-4 ml-0.5" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M8 5v14l11-7z" />
-            </svg>
-          )}
-        </button>
-
-        <a
-          id="player-spotify-link"
-          href={activeItem.spotifyUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="px-2.5 py-1.5 rounded-full border border-hairline hover:bg-emerald-500/20 hover:border-emerald-600 font-mono text-[9px] tracking-widest uppercase transition-all hidden sm:flex items-center gap-1.5"
-          style={{ color: 'var(--text-primary)' }}
-          title="Escoltar a Spotify"
-        >
-          <span className="w-1.5 h-1.5 rounded-full bg-emerald-600" />
-          SPOTIFY ↗
-        </a>
-      </div>
-
-      {/* PRODUCTION DETAIL PAGE VIEW */}
-      <div
-        id="production-page"
-        className={`fixed inset-0 z-40 bg-[#090807] text-[#F4F0E6] overflow-y-auto custom-scroll ${
-          isDetailOpen ? 'flex opacity-100' : 'hidden opacity-0'
-        } flex-col transition-opacity duration-500`}
-      >
-        <div className="sticky top-0 z-50 flex items-center justify-between px-6 md:px-12 py-4 border-b border-white/10 bg-[#090807]/90 backdrop-blur-md text-[#F4F0E6]">
-          <div className="flex items-center gap-4">
-            <button
-              id="prod-back-btn"
-              onClick={() => openProductionPage(false)}
-              className="font-mono text-xs tracking-widest uppercase text-[#F4F0E6] opacity-75 hover:opacity-100 flex items-center gap-2"
-            >
-              ← TORNAR AL PRESTATGE
-            </button>
-            <span className="text-[#F4F0E6] opacity-30">/</span>
-            <span id="prod-top-title" className="font-mono text-xs tracking-widest uppercase font-bold text-[#F4F0E6] truncate max-w-xs">
-              {activeItem.title}
-            </span>
-          </div>
-          <div className="flex items-center gap-6 font-mono text-xs tracking-widest uppercase text-[#F4F0E6]">
-            <a
-              id="prod-top-spotify"
-              href={activeItem.spotifyUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-[#F4F0E6] hover:opacity-50 transition-opacity"
-            >
-              SPOTIFY ↗
-            </a>
-            <button
-              id="prod-close-btn"
-              onClick={() => openProductionPage(false)}
-              className="text-[#F4F0E6] hover:opacity-50 transition-opacity"
-            >
-              TANCAR ✕
-            </button>
-          </div>
-        </div>
-
-        <div className="max-w-7xl mx-auto w-full px-6 md:px-12 py-12 md:py-20 grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16">
-          <div className="lg:col-span-3 space-y-6 font-mono text-xs">
-            <div>
-              <div className="opacity-50 text-[10px] tracking-[0.2em] uppercase mb-1">DIRECCIÓ / PRODUCCIÓ</div>
-              <div id="prod-producer" className="tracking-wider">{activeItem.producer}</div>
-            </div>
-            <div>
-              <div className="opacity-50 text-[10px] tracking-[0.2em] uppercase mb-1">ANY DE LLANÇAMENT</div>
-              <div id="prod-year" className="tracking-wider">{activeItem.year}</div>
-            </div>
-            <div>
-              <div className="opacity-50 text-[10px] tracking-[0.2em] uppercase mb-1">GÈNERE / ESTIL</div>
-              <div id="prod-genre" className="tracking-wider">{activeItem.style}</div>
-            </div>
-            <div>
-              <div className="opacity-50 text-[10px] tracking-[0.2em] uppercase mb-1">LLENGÜES</div>
-              <div id="prod-langs" className="tracking-wider">Català (Valencià)</div>
-            </div>
-            <div>
-              <div className="opacity-50 text-[10px] tracking-[0.2em] uppercase mb-1">DURADA TOTAL</div>
-              <div id="prod-runtime" className="tracking-wider">{activeItem.duration}</div>
-            </div>
-            <div className="pt-6 border-t border-hairline space-y-3">
-              <button
-                id="prod-play-btn"
-                onClick={handlePlayToggle}
-                className="w-full py-3 rounded-full bg-[#F4F0E6] text-[#090807] font-mono text-[10px] tracking-[0.2em] uppercase font-bold hover:scale-[1.02] transition-transform"
-              >
-                {isPlaying ? '⏸ PAUSAR MOSTRA SONORA' : '▶ ESCOLTAR TEMA PRINCIPAL'}
-              </button>
-              <a
-                id="prod-buy-btn"
-                href={activeItem.spotifyUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="block text-center py-3 rounded-full border border-hairline font-mono text-[10px] tracking-[0.2em] uppercase hover:bg-white/10 transition-colors"
-              >
-                OBRIR ENLLAÇ OFICIAL ↗
-              </a>
-            </div>
-          </div>
-
-          <div className="lg:col-span-6 space-y-8">
-            <div>
-              <span id="prod-cat-badge" className="font-mono text-xs tracking-widest uppercase opacity-60">
-                {activeItem.id} // {activeItem.categoryLabel}
+      {/* PANELES LATERALES DE METADATOS Y RESEÑAS */}
+      <div className="absolute inset-0 z-20 pointer-events-none flex items-center justify-between px-6 md:px-12 pt-24 md:pt-28 pb-20">
+        {/* Columna Izquierda: Ficha Editorial A24 con Título Serif arriba a la izquierda */}
+        <div id="left-editorial-panel" className="w-64 md:w-72 flex flex-col self-start">
+          {/* Título en tipografía distinta (Instrument Serif) */}
+          <div className="pb-3.5">
+            <div className="a24-label mb-1.5 flex items-center justify-between">
+              <span>EDITION</span>
+              <span id="ui-catalog-num" className="text-black/60 font-mono text-[10px]">
+                A24—01
               </span>
-              <h1 id="prod-main-title" className="font-serif italic text-6xl sm:text-7xl md:text-8xl tracking-tight leading-none mt-2 mb-6">
-                {activeItem.title}
-              </h1>
             </div>
+            <h1 id="ui-title" className="a24-serif-title"></h1>
+          </div>
 
-            <div className="relative w-full aspect-[16/9] rounded-2xl overflow-hidden border border-hairline bg-stone-900 group">
-              <img
-                id="prod-cover-img"
-                src={activeItem.coverUrl}
-                alt={activeItem.title}
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent flex items-end p-6">
-                <span className="font-mono text-[11px] tracking-[0.2em] uppercase text-white/90">
-                  ARXIU OFICIAL — FOTOGRAMA / PORTADA
-                </span>
-              </div>
+          {/* Línea divisoria 1 */}
+          <div className="editorial-line"></div>
+
+          {/* Descripción del CD */}
+          <div className="py-3.5">
+            <div className="a24-label mb-1.5">SYNOPSIS / NOTES</div>
+            <p id="ui-description" className="a24-desc"></p>
+          </div>
+
+          {/* Línea divisoria 2 */}
+          <div className="editorial-line"></div>
+
+          {/* Dirección / Producción & Año */}
+          <div className="py-3.5 grid grid-cols-3 gap-2">
+            <div className="col-span-2">
+              <div className="a24-label mb-1">PRODUCED BY</div>
+              <div id="ui-director" className="a24-value"></div>
             </div>
-
-            <p id="prod-synopsis" className="text-base sm:text-lg leading-relaxed font-light opacity-90">
-              {activeItem.synopsis}
-            </p>
-
-            <div className="pt-6 border-t border-hairline space-y-4">
-              <h3 className="font-mono text-xs tracking-[0.25em] uppercase opacity-50">REPERTORI DE L'EDICIÓ</h3>
-              <div id="prod-tracklist" className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 font-mono text-xs">
-                {activeItem.tracklist.map((tr, tIdx) => (
-                  <div
-                    key={tIdx}
-                    className={`p-2.5 rounded-lg border border-hairline ${
-                      tIdx === 0
-                        ? 'bg-amber-400/15 border-amber-400/40 text-amber-300'
-                        : 'bg-white/5 opacity-80'
-                    } flex items-center justify-between`}
-                  >
-                    <span className="truncate">{tr}</span>
-                    {tIdx === 0 && <span className="text-[9px] uppercase tracking-widest ml-2">★ TEMA</span>}
-                  </div>
-                ))}
-              </div>
+            <div>
+              <div className="a24-label mb-1">YEAR</div>
+              <div id="ui-year" className="a24-value"></div>
             </div>
           </div>
 
-          <div className="lg:col-span-3 space-y-6">
-            <h3 className="font-mono text-xs tracking-[0.25em] uppercase opacity-50">CRÍTIQUES I PREMIS</h3>
-            <div id="prod-reviews" className="space-y-6">
-              {activeItem.reviews.map((rev, rIdx) => (
-                <div key={rIdx} className="p-4 rounded-xl border border-hairline bg-black/15 space-y-2">
-                  <div className="flex items-center justify-between font-mono text-[10px] tracking-[0.2em] uppercase">
-                    <span className="font-semibold text-amber-400">{rev.pub}</span>
-                    <span className="px-2 py-0.5 rounded bg-white/10">{rev.score}</span>
-                  </div>
-                  <p className="font-serif italic text-base leading-snug opacity-90">“{rev.quote}”</p>
-                </div>
-              ))}
-            </div>
+          {/* Línea divisoria 3 */}
+          <div className="editorial-line"></div>
 
-            <div className="pt-8 border-t border-hairline space-y-4">
-              <span className="font-mono text-[10px] tracking-[0.25em] uppercase opacity-50">SEGÜENT EDICIÓ</span>
-              <button
-                id="prod-next-btn"
-                onClick={() => {
-                  goToDisc(nextDiscIndex);
-                  openProductionPage(false);
-                  setTimeout(() => openProductionPage(true), 300);
-                }}
-                className="w-full text-left p-4 rounded-xl border border-hairline bg-white/5 hover:bg-white/10 transition-all flex items-center justify-between group"
-              >
-                <div>
-                  <div id="prod-next-title" className="font-serif italic text-xl">{nextDiscItem.title}</div>
-                  <div className="font-mono text-[10px] tracking-wider uppercase opacity-50 mt-0.5">
-                    {nextDiscItem.year} · {nextDiscItem.category.toUpperCase()}
-                  </div>
-                </div>
-                <span className="font-mono text-xs group-hover:translate-x-1 transition-transform">→</span>
-              </button>
-            </div>
+          {/* Featuring / Intérpretes */}
+          <div className="pt-3.5">
+            <div className="a24-label mb-1">FEATURING</div>
+            <div id="ui-starring" className="a24-value leading-relaxed whitespace-pre-line"></div>
           </div>
+        </div>
+
+        {/* Columna Derecha: Reseñas + Lista rápida de navegación */}
+        <div className="flex items-center gap-10">
+          <div id="ui-reviews" className="hidden lg:flex flex-col gap-4 w-52"></div>
+
+          {/* Lista vertical derecha interactiva (como en a24.raviklaassens.com) */}
+          <ul id="ui-quick-list" className="hidden md:flex flex-col gap-1.5 text-right pointer-events-auto"></ul>
         </div>
       </div>
 
-      {/* FULL ARCHIVE INDEX GRID MODAL */}
-      <div
-        id="index-modal"
-        className={`fixed inset-0 z-40 pt-[61px] glass-panel ${
-          isIndexOpen ? 'flex' : 'hidden'
-        } flex-col`}
-      >
-        <div className="px-6 sm:px-10 py-5 border-b border-hairline flex items-center justify-between">
-          <div>
-            <h2 className="font-display text-lg sm:text-xl font-bold tracking-tight uppercase">
-              ÍNDEX COMPLET DE LA DISCOGRAFIA (1988–2024)
-            </h2>
-            <p className="font-mono text-[10px] tracking-[0.2em] uppercase opacity-55">
-              10 DISCOS OFICIALS DE MIQUEL GIL • CLICA QUALSEVOL EDICIÓ PER MUNTAR-LA AL RACK 3D
-            </p>
-          </div>
+      {/* PIE DE PÁGINA CON REGLA NUMÉRICA Y AYUDA */}
+      <footer className="absolute bottom-0 left-0 w-full z-20 flex items-center justify-between px-6 py-5 pointer-events-none">
+        <div className="flex items-center gap-5 pointer-events-auto">
           <button
-            id="index-close-btn"
-            onClick={() => setIsIndexOpen(false)}
-            className="px-4 py-1.5 rounded-full border border-hairline font-mono text-[10px] tracking-[0.2em] uppercase hover:bg-white/10"
+            type="button"
+            id="flip-disc-btn"
+            data-disc-no-drag=""
+            className="a24-label hover:text-black transition-colors"
           >
-            TANCAR ÍNDEX [ESC]
+            [SPACE] FLIP SIDE B
+          </button>
+          <span id="scribble-status" className="a24-label">
+            HOVER ACTIVE DISC FOR SCRIBBLE
+          </span>
+        </div>
+
+        {/* Cinta / Regla numérica sincronizada */}
+        <div className="w-56 overflow-hidden text-center pointer-events-none">
+          <div
+            id="ui-ruler"
+            className="whitespace-nowrap a24-label transition-transform duration-300 ease-out"
+          >
+            A &nbsp; 0 &nbsp; 1 &nbsp; 2 &nbsp; 3 &nbsp; 4 &nbsp; 5 &nbsp; 6 &nbsp; 7 &nbsp; 8 &nbsp; 9
+            &nbsp; 10 &nbsp; 11 &nbsp; 12
+          </div>
+        </div>
+
+        <div className="a24-label text-right">SCROLL · DRAG · CLICK TO INSPECT</div>
+      </footer>
+
+      {/* MENÚ INDEX SUPERPUESTO (Usa [data-film-scroll="<título>"]) */}
+      <div
+        id="index-drawer"
+        className="index-drawer fixed inset-0 z-30 bg-white/95 backdrop-blur-md opacity-0 invisible flex flex-col justify-between p-8"
+      >
+        <div className="flex justify-between items-center border-b border-black/10 pb-4">
+          <span className="a24-value font-semibold">CATALOGUE INDEX — 12 EDITIONS</span>
+          <button
+            type="button"
+            id="close-index-btn"
+            className="a24-value px-3 py-1 border border-black/20 rounded hover:bg-black hover:text-white transition"
+          >
+            CLOSE [ESC]
           </button>
         </div>
-
         <div
-          id="index-grid"
-          className="flex-1 overflow-y-auto custom-scroll p-6 sm:p-10 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 sm:gap-6"
-        >
-          {DISCOGRAFIA_MIQUEL_GIL.map((item) => (
-            <div
-              key={item.id}
-              onClick={() => {
-                const targetIdx = filteredItems.findIndex(d => d.id === item.id);
-                if (targetIdx !== -1) {
-                  goToDisc(targetIdx);
-                } else {
-                  // Switch filter to include this item
-                  handleFilterChange('all');
-                  const allIdx = DISCOGRAFIA_MIQUEL_GIL.findIndex(d => d.id === item.id);
-                  if (allIdx !== -1) goToDisc(allIdx);
-                }
-                setIsIndexOpen(false);
-              }}
-              className="p-4 rounded-2xl border border-hairline bg-white/5 hover:bg-white/10 cursor-pointer transition-all flex flex-col justify-between"
-            >
-              <img src={item.coverUrl} alt={item.title} className="w-full aspect-square object-cover rounded-xl mb-3" />
-              <div>
-                <div className="font-mono text-[9px] opacity-50 uppercase">{item.id} · {item.year}</div>
-                <div className="font-serif italic text-lg leading-tight mt-0.5">{item.title}</div>
-              </div>
-            </div>
-          ))}
+          id="index-links-grid"
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 my-auto max-w-5xl mx-auto w-full"
+        ></div>
+        <div className="a24-label border-t border-black/10 pt-4 flex justify-between">
+          <span>SELECT AN EDITION TO SCROLL THE 3D CAROUSEL</span>
+          <span>A24 / MIQUEL GIL ARCHIVE</span>
         </div>
       </div>
 
-      {/* ANTIGRAVITY / NEXT.JS INTEGRATION MODAL */}
+      {/* MODAL DE FICHA DE PRODUCCIÓN (Simula la navegación Barba a detailUrl) */}
       <div
-        id="antigravity-modal"
-        className={`fixed inset-0 z-50 glass-panel ${
-          isAntigravityOpen ? 'flex' : 'hidden'
-        } flex-col p-4 sm:p-8 md:p-12`}
+        id="detail-modal"
+        className="fixed inset-0 z-40 bg-white opacity-0 pointer-events-none transition-opacity duration-300 flex flex-col justify-between p-8"
       >
-        <div className="max-w-5xl w-full mx-auto flex-1 flex flex-col border border-hairline rounded-2xl bg-[#0c0b09]/95 overflow-hidden shadow-2xl">
-          <div className="px-6 py-4 border-b border-hairline flex items-center justify-between bg-white/5">
-            <div className="flex items-center gap-3">
-              <span className="px-2.5 py-1 rounded bg-amber-400 text-black font-mono text-[10px] font-bold tracking-widest uppercase">
-                ANTIGRAVITY READY
-              </span>
-              <h3 className="font-display text-sm sm:text-base font-bold uppercase tracking-wide">
-                Guia i Component React / Next.js per a <span className="text-amber-400">miquelgil.vercel.app/discografia</span>
-              </h3>
-            </div>
-            <button
-              id="antigravity-close-btn"
-              onClick={() => setIsAntigravityOpen(false)}
-              className="px-3 py-1 rounded-full border border-hairline font-mono text-xs hover:bg-white/10"
+        <div className="flex justify-between items-center border-b border-black/10 pb-4">
+          <span id="modal-slug" className="a24-label">
+            PRODUCTION DETAIL
+          </span>
+          <button
+            type="button"
+            id="close-modal-btn"
+            className="a24-value px-3 py-1 border border-black/20 rounded hover:bg-black hover:text-white transition"
+          >
+            ← BACK TO ARCHIVE
+          </button>
+        </div>
+        <div className="max-w-3xl my-auto space-y-6">
+          <div id="modal-year" className="a24-label"></div>
+          <h2 id="modal-title" className="text-4xl md:text-6xl font-bold uppercase tracking-tight"></h2>
+          <p id="modal-desc" className="text-sm text-black/70 leading-relaxed max-w-xl"></p>
+          <div className="pt-4 flex gap-4">
+            <a
+              id="modal-ext-link"
+              href="https://miquelgil.vercel.app/discografia/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="a24-value px-4 py-2 bg-black text-white rounded"
             >
-              ✕ TANCAR
-            </button>
-          </div>
-
-          <div className="flex-1 overflow-y-auto custom-scroll p-6 space-y-6 font-mono text-xs">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="p-4 rounded-xl border border-hairline bg-white/5">
-                <div className="text-amber-400 font-bold mb-1">PAS 1 · DEPENDÈNCIES</div>
-                <p className="opacity-75 text-[11px] leading-relaxed">
-                  Al terminal d'Antigravity executa:<br />
-                  <code className="text-emerald-300 code-selectable">npm install three gsap @types/three</code>
-                </p>
-              </div>
-              <div className="p-4 rounded-xl border border-hairline bg-white/5">
-                <div className="text-amber-400 font-bold mb-1">PAS 2 · ASSETS EXISTENTS</div>
-                <p className="opacity-75 text-[11px] leading-relaxed">
-                  El component ja apunta a les teues rutes locals de Next.js:<br />
-                  <code className="text-emerald-300 code-selectable">/images/disco_1.jpg ... /disco_8.webp</code>
-                </p>
-              </div>
-              <div className="p-4 rounded-xl border border-hairline bg-white/5">
-                <div className="text-amber-400 font-bold mb-1">PAS 3 · RUTA NEXT.JS</div>
-                <p className="opacity-75 text-[11px] leading-relaxed">
-                  Enganxa el component a <code className="text-emerald-300 code-selectable">app/discografia/DiscografiaClient.tsx</code>.
-                </p>
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="text-[11px] uppercase tracking-widest opacity-60">
-                  FITXER: app/discografia/DiscografiaClient.tsx
-                </span>
-                <button
-                  id="btn-copy-nextjs"
-                  onClick={() => {
-                    navigator.clipboard.writeText(generateNextJsComponentCode());
-                    setCopiedCode(true);
-                    setTimeout(() => setCopiedCode(false), 2200);
-                  }}
-                  className="px-4 py-1.5 rounded-full bg-amber-400 text-black font-mono text-[10px] font-bold tracking-widest uppercase hover:bg-amber-300 transition-all"
-                >
-                  {copiedCode ? '✓ CODI COPIAT!' : 'COPIAR COMPONENTE NEXT.JS'}
-                </button>
-              </div>
-              <pre className="code-selectable p-4 rounded-xl border border-hairline bg-black/80 text-emerald-300/90 overflow-x-auto text-[11px] leading-relaxed max-h-[340px] custom-scroll">
-                {generateNextJsComponentCode()}
-              </pre>
-            </div>
+              OPEN OFFICIAL RELEASE ↗
+            </a>
           </div>
         </div>
+        <div className="a24-label border-t border-black/10 pt-4">STANDARDIZED PRODUCTION SHEET</div>
       </div>
-    </div>
+
+      {/* FUENTE DE DATOS OCULTA EN EL DOM ([data-film-list] con 12 discos) */}
+      <ul data-film-list="" aria-hidden="true" className="hidden">
+        <li data-film-item="">
+          <span data-film-field="title">Viatger</span>
+          <span data-film-field="description">
+            Un viatge sonor d&apos;arrel viva que celebra vint-i-cinc anys de trajectòria en solitari,
+            fusionant cants mediterranis amb textures contemporànies.
+          </span>
+          <span data-film-field="director">Toni Xuclà &amp; Miquel Gil</span>
+          <span data-film-field="year">2024</span>
+          <span data-film-field="starring">Arrel Viva, Fusió, Tradició Contemporània</span>
+          <span data-film-field="detailUrl">#/production/viatger</span>
+          <span data-film-field="discUrl">https://miquelgil.vercel.app/images/disco_8.webp</span>
+          <span data-film-field="reviews">
+            Enderrock|Foc en moviment continu|★★★★★;Diari La Veu|Vint-i-cinc anys de mestratge|★★★★☆
+          </span>
+        </li>
+        <li data-film-item="">
+          <span data-film-field="title">Geometries</span>
+          <span data-film-field="description">
+            Arquitectura polifònica construïda sobre versos de Vicent Andrés Estellés i Enric Casasses, on
+            la veu traça polígons emocionals d&apos;alta precisió.
+          </span>
+          <span data-film-field="director">Miquel Gil &amp; Col·lectiu</span>
+          <span data-film-field="year">2019</span>
+          <span data-film-field="starring">Vicent Andrés Estellés, Enric Casasses</span>
+          <span data-film-field="detailUrl">#/production/geometries</span>
+          <span data-film-field="discUrl">https://miquelgil.vercel.app/images/disco_7.jpg</span>
+          <span data-film-field="reviews">
+            Mondosonoro|Arquitectura polifònica fascinant|★★★★★;Tresdeu|Polígons emocionals perfectes|★★★★☆
+          </span>
+        </li>
+        <li data-film-item="">
+          <span data-film-field="title">Per marcianes</span>
+          <span data-film-field="description">
+            Laboratori d&apos;experimentació acústica i elèctrica on els cants de batre i les melodies
+            valencianes viatgen cap a coordenades inèdites.
+          </span>
+          <span data-film-field="director">Eduard Navarro</span>
+          <span data-film-field="year">2011</span>
+          <span data-film-field="starring">Tradició Mutant, Experimentació Sonora</span>
+          <span data-film-field="detailUrl">#/production/per-marcianes</span>
+          <span data-film-field="discUrl">https://miquelgil.vercel.app/images/disco_6.png</span>
+          <span data-film-field="reviews">
+            World Music Central|Electricitat i tradició|★★★★★;Sons Mediterrània|Rumb a nous planetes|★★★★☆
+          </span>
+        </li>
+        <li data-film-item="">
+          <span data-film-field="title">Gil &amp; Camp Trio</span>
+          <span data-film-field="description">
+            Diàleg íntim i lliure entre el piano jazzístic de Manel Camp i la gola tel·lúrica de Miquel
+            Gil, enregistrat amb respiració de música de cambra.
+          </span>
+          <span data-film-field="director">Manel Camp &amp; Miquel Gil</span>
+          <span data-film-field="year">2009</span>
+          <span data-film-field="starring">David Pastor, Jazz, Improvisació</span>
+          <span data-film-field="detailUrl">#/production/gil-camp-trio</span>
+          <span data-film-field="discUrl">https://miquelgil.vercel.app/images/disco_4.png</span>
+          <span data-film-field="reviews">
+            Cuadernos de Jazz|Diàleg hipnòtic i lliure|★★★★★;El País|Jazz de cambra mediterrani|★★★★★
+          </span>
+        </li>
+        <li data-film-item="">
+          <span data-film-field="title">Eixos</span>
+          <span data-film-field="description">
+            Cartografia sonora d&apos;una Mediterrània oberta i cosmopolita que connecta poetes contemporanis
+            amb ritmes ancestrals de ribera a ribera.
+          </span>
+          <span data-film-field="director">Miquel Gil</span>
+          <span data-film-field="year">2006</span>
+          <span data-film-field="starring">Mediterrània Cosmopolita, Poetes</span>
+          <span data-film-field="detailUrl">#/production/eixos</span>
+          <span data-film-field="discUrl">https://miquelgil.vercel.app/images/disco_5.png</span>
+          <span data-film-field="reviews">
+            Folker Magazine|Gran veu de la Mediterrània|★★★★★;RootsWorld|Cartografia sonora impecable|★★★★☆
+          </span>
+        </li>
+        <li data-film-item="">
+          <span data-film-field="title">En Concert</span>
+          <span data-film-field="description">
+            Registre en viu de la força escènica i la improvisació vocal en directe, capturant l&apos;energia
+            crua i orgànica del repertori mediterrani.
+          </span>
+          <span data-film-field="director">Galileo MC</span>
+          <span data-film-field="year">2006</span>
+          <span data-film-field="starring">Directe, Acústic, Energia Escènica</span>
+          <span data-film-field="detailUrl">#/production/en-concert</span>
+          <span data-film-field="discUrl">https://miquelgil.vercel.app/images/disco_4.png</span>
+          <span data-film-field="reviews">
+            Enderrock|Dimensió tel·lúrica irrepetible|★★★★★;B-Ritmos|Força escènica absoluta|★★★★★
+          </span>
+        </li>
+        <li data-film-item="">
+          <span data-film-field="title">Katà</span>
+          <span data-film-field="description">
+            Pont sonor entre Orient i Occident impulsat per llaüts, cordes pulsades i percussions que van
+            situar l&apos;àlbum a les llistes europees de World Music.
+          </span>
+          <span data-film-field="director">Miquel Gil</span>
+          <span data-film-field="year">2004</span>
+          <span data-film-field="starring">World Music, Llaüt, Percussió</span>
+          <span data-film-field="detailUrl">#/production/kata</span>
+          <span data-film-field="discUrl">https://miquelgil.vercel.app/images/disco_3.png</span>
+          <span data-film-field="reviews">
+            fRoots Magazine|Pont sonor fascinant|★★★★★;World Music Charts|Selecció Europea|★★★★★
+          </span>
+        </li>
+        <li data-film-item="">
+          <span data-film-field="title">Orgànic</span>
+          <span data-film-field="description">
+            Obra fundacional de la neo-tradició valenciana que posa música a Ausiàs March i redefineix el
+            cànon del cant d&apos;estil per al segle XXI.
+          </span>
+          <span data-film-field="director">Sonifolk</span>
+          <span data-film-field="year">2001</span>
+          <span data-film-field="starring">Ausiàs March, Neo-Tradició</span>
+          <span data-film-field="detailUrl">#/production/organic</span>
+          <span data-film-field="discUrl">https://miquelgil.vercel.app/images/disco_2.png</span>
+          <span data-film-field="reviews">
+            El País|Obra mestra fundacional|★★★★★;La Vanguardia|Redefineix l&apos;arrel|★★★★★
+          </span>
+        </li>
+        <li data-film-item="">
+          <span data-film-field="title">Buscando tu olor</span>
+          <span data-film-field="description">
+            Primer treball en solitari on l&apos;ex-vocalista d&apos;Al Tall explora lliurement la fusió amb el
+            flamenc, el rock i la poesia urbana.
+          </span>
+          <span data-film-field="director">Miquel Gil</span>
+          <span data-film-field="year">1997</span>
+          <span data-film-field="starring">Fusió, Flamenc, Experimentació</span>
+          <span data-film-field="detailUrl">#/production/buscando-tu-olor</span>
+          <span data-film-field="discUrl">https://miquelgil.vercel.app/images/disco_1.jpg</span>
+          <span data-film-field="reviews">
+            Arxiu Valencià|Debut en solitari valent|★★★★☆;Levante EMV|Laboratori sonor inèdit|★★★★☆
+          </span>
+        </li>
+        <li data-film-item="">
+          <span data-film-field="title">Viajero</span>
+          <span data-film-field="description">
+            Aventura pionera amb el grup Terminal Sur als anys vuitanta, combinant sintetitzadors
+            analògics, programacions i modalitat mediterrània.
+          </span>
+          <span data-film-field="director">Terminal Sur</span>
+          <span data-film-field="year">1988</span>
+          <span data-film-field="starring">Electro-Mediterrània, Sintetitzadors</span>
+          <span data-film-field="detailUrl">#/production/viajero</span>
+          <span data-film-field="discUrl">https://miquelgil.vercel.app/images/disco_1.jpg</span>
+          <span data-film-field="reviews">
+            RNE Radio 3|Avançat al seu temps|★★★★★;Discos Medicinales|Pioners de la fusió|★★★★★
+          </span>
+        </li>
+        <li data-film-item="">
+          <span data-film-field="title">Cants d&apos;Arrel</span>
+          <span data-film-field="description">
+            Antologia essencial de polifonia tradicional i cant d&apos;estil que preserva el llegat oral de
+            les comarques centrals i l&apos;Horta.
+          </span>
+          <span data-film-field="director">Al Tall &amp; Miquel Gil</span>
+          <span data-film-field="year">1985</span>
+          <span data-film-field="starring">Cant Valencià, Polifonia Tradicional</span>
+          <span data-film-field="detailUrl">#/production/cants-arrel</span>
+          <span data-film-field="discUrl">https://miquelgil.vercel.app/images/disco_8.webp</span>
+          <span data-film-field="reviews">
+            Serra d&apos;Or|Memòria viva d&apos;un poble|★★★★★;Enderrock|Clàssic essencial|★★★★★
+          </span>
+        </li>
+        <li data-film-item="">
+          <span data-film-field="title">Tocs i Vares</span>
+          <span data-film-field="description">
+            Registre fonogràfic de percussions de canya, corda fregada i melismes populars de l&apos;Horta
+            Sud en estat pur.
+          </span>
+          <span data-film-field="director">Arxiu Fonogràfic</span>
+          <span data-film-field="year">1982</span>
+          <span data-film-field="starring">Horta Sud, Percussions i Corda</span>
+          <span data-film-field="detailUrl">#/production/tocs-i-vares</span>
+          <span data-film-field="discUrl">https://miquelgil.vercel.app/images/disco_7.jpg</span>
+          <span data-film-field="reviews">
+            Fonoteca|Registre històric imprescindible|★★★★★;Cultura Popular|Raig d&apos;autenticitat|★★★★☆
+          </span>
+        </li>
+      </ul>
+    </main>
   );
 }
