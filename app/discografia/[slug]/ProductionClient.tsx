@@ -5,6 +5,7 @@ import Link from 'next/link';
 import * as THREE from 'three';
 import gsap from 'gsap';
 import { AlbumDetail } from './albumData';
+import { initDissolve } from './dissolveEngine';
 import './production.css';
 
 interface ProductionClientProps {
@@ -25,8 +26,6 @@ export default function ProductionClient({ album }: ProductionClientProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const heroRef = useRef<HTMLElement>(null);
   const trailerRef = useRef<HTMLElement>(null);
-  const svgStrokeRef = useRef<SVGPathElement>(null);
-  const svgGlowRef = useRef<SVGPathElement>(null);
   const dissolveCanvasRef = useRef<HTMLCanvasElement>(null);
   const upNextCanvasContainerRef = useRef<HTMLDivElement>(null);
   const iframeRef = useRef<HTMLIFrameElement>(null);
@@ -97,223 +96,13 @@ export default function ProductionClient({ album }: ProductionClientProps) {
   }, []);
 
   // ============================================================================
-  // 2. SEPARADOR LÍQUID DINÀMIC AMB SIMULACIÓ FÍSICA I RESPOSTA AL CURSOR
+  // 2. SEPARADOR LÍQUIDO A24 (DATA-DISSOLVE ENGINE: MARCHING SQUARES + CURSOR)
   // ============================================================================
   useEffect(() => {
-    const trailer = trailerRef.current;
-    if (!trailer) return;
-
-    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const supportsClipPath =
-      typeof CSS !== 'undefined' &&
-      typeof CSS.supports === 'function' &&
-      CSS.supports('clip-path', 'path("M 0 0 L 1 0 Z")');
-
-    if (prefersReducedMotion) return;
-
-    let animId: number;
-    let isDisposed = false;
-
-    // Número de nodes per a la simulació de malla líquida (Wave Equation)
-    const N = 85;
-    const yOffsets = new Float32Array(N);
-    const velocities = new Float32Array(N);
-
-    // Paràmetres físics del fluid
-    const springK = 0.038;  // Rigidesa de tensió superficial
-    const damping = 0.042;  // Viscositat del medi
-    const spread = 0.24;    // Propagació d'ona horitzontal
-
-    let H = 0;
-    let lastTime = performance.now();
-    let lastScrollY = window.scrollY;
-    let scrollVelocity = 0;
-
-    // Seguiment de posició i velocitat del cursor
-    let lastPointerX = -1000;
-    let lastPointerY = -1000;
-    let lastPointerTime = performance.now();
-
-    const handlePointerMove = (e: PointerEvent) => {
-      if (isDisposed || !trailer) return;
-      const rect = trailer.getBoundingClientRect();
-      const W = trailer.offsetWidth;
-      const baseY = 85;
-      const liquidLineY = rect.top + baseY;
-      const distY = e.clientY - liquidLineY;
-
-      // S'activa en una franja àmplia de ±180px al voltant de la línia líquida
-      if (Math.abs(distY) < 180) {
-        const now = performance.now();
-        const dt = Math.max(0.001, (now - lastPointerTime) / 1000);
-        lastPointerTime = now;
-
-        const vx = (e.clientX - lastPointerX) / dt;
-        const vy = (e.clientY - lastPointerY) / dt;
-        lastPointerX = e.clientX;
-        lastPointerY = e.clientY;
-
-        const speed = Math.sqrt(vx * vx + vy * vy);
-
-        // Índex del node sota el cursor
-        const u = Math.max(0, Math.min(1, (e.clientX - rect.left) / W));
-        const k = Math.round(u * (N - 1));
-
-        // Impuls hidrodinàmic en funció de la velocitat del cursor
-        const impulse = Math.max(
-          -55,
-          Math.min(55, vy * 0.045 + (distY < 0 ? -1 : 1) * Math.min(35, speed * 0.03))
-        );
-
-        // Dispersió de l'onada amb campana gaussiana a través dels veïns
-        const radius = 8;
-        for (let j = Math.max(0, k - radius); j <= Math.min(N - 1, k + radius); j++) {
-          const dist = Math.abs(j - k);
-          const weight = Math.exp(-(dist * dist) / 12);
-          velocities[j] += impulse * weight;
-        }
-
-        // Estirament viscós directe sota el cursor
-        const suction = Math.max(-30, Math.min(30, -distY * 0.35));
-        yOffsets[k] += (suction - yOffsets[k]) * 0.25;
-      }
-    };
-
-    const handlePointerDown = (e: PointerEvent) => {
-      if (isDisposed || !trailer) return;
-      const rect = trailer.getBoundingClientRect();
-      const W = trailer.offsetWidth;
-      const baseY = 85;
-      const liquidLineY = rect.top + baseY;
-      const distY = e.clientY - liquidLineY;
-
-      if (Math.abs(distY) < 200) {
-        const u = Math.max(0, Math.min(1, (e.clientX - rect.left) / W));
-        const k = Math.round(u * (N - 1));
-        const radius = 12;
-        for (let j = Math.max(0, k - radius); j <= Math.min(N - 1, k + radius); j++) {
-          const dist = Math.abs(j - k);
-          const weight = Math.exp(-(dist * dist) / 16);
-          velocities[j] += 48 * weight;
-        }
-      }
-    };
-
-    window.addEventListener('pointermove', handlePointerMove, { passive: true });
-    window.addEventListener('pointerdown', handlePointerDown, { passive: true });
-
-    const updateLiquidWave = (now: number) => {
-      if (isDisposed) return;
-      animId = requestAnimationFrame(updateLiquidWave);
-
-      const dt = Math.min(0.05, (now - lastTime) / 1000);
-      lastTime = now;
-
-      // Velocitat de scroll
-      const currentScrollY = window.scrollY;
-      const scrollDiff = currentScrollY - lastScrollY;
-      scrollVelocity = scrollDiff / (dt * 1000);
-      lastScrollY = currentScrollY;
-
-      const trailerRect = trailer.getBoundingClientRect();
-      const W = trailer.offsetWidth;
-      const H_total = trailer.offsetHeight;
-
-      // Si està fora de visió, pausar el renderitzat intensiu
-      if (trailerRect.bottom < -100 || trailerRect.top > window.innerHeight + 150) return;
-
-      // 1. Equació d'ones mecàniques (molles acoblades)
-      for (let i = 0; i < N; i++) {
-        const force = -springK * yOffsets[i] - damping * velocities[i];
-        velocities[i] += force;
-        yOffsets[i] += velocities[i];
-      }
-
-      // Propagació de la tensió superficial entre nodes adjacents
-      for (let pass = 0; pass < 5; pass++) {
-        for (let i = 0; i < N; i++) {
-          if (i > 0) {
-            const dL = spread * (yOffsets[i] - yOffsets[i - 1]);
-            yOffsets[i - 1] += dL;
-            velocities[i - 1] += dL * 0.25;
-          }
-          if (i < N - 1) {
-            const dR = spread * (yOffsets[i] - yOffsets[i + 1]);
-            yOffsets[i + 1] += dR;
-            velocities[i + 1] += dR * 0.25;
-          }
-        }
-      }
-
-      // 2. Respiració orgànica contínua de fluid
-      const agitate = 1 + Math.min(2.5, Math.abs(scrollVelocity) * 0.002);
-      H += dt * 0.25 * Math.PI * 2 * agitate;
-
-      const baseY = 85;
-      const surge = Math.min(25, Math.abs(scrollVelocity) * 0.035);
-
-      const points: Array<[number, number]> = [];
-
-      for (let i = 0; i < N; i++) {
-        const u = i / (N - 1);
-        const x = u * W;
-
-        // Modulació suau als extrems
-        const edgeEnvelope = Math.sin(u * Math.PI);
-        const centerBell = 0.85 + 0.15 * Math.sin(u * Math.PI);
-
-        // Harmònics de fluid orgànic
-        const w1 = Math.sin(u * 9 + H) * 0.55;
-        const w2 = Math.cos(u * 21 - H * 1.3) * 0.35;
-        const w3 = Math.sin(u * 5 + H * 0.65) * 0.25;
-        const organicNoise = (w1 + w2 + w3) * (14 + surge) * centerBell;
-
-        // Desplaçament total: baseline + resposta interactiva al cursor + harmònics orgànics
-        const totalY = Math.max(
-          10,
-          baseY + yOffsets[i] * (0.3 + 0.7 * edgeEnvelope) + organicNoise * (0.3 + 0.7 * edgeEnvelope)
-        );
-        points.push([x, totalY]);
-      }
-
-      // 3. Traçat suau en corba de Bézier (clip-path i menisc lluminós SVG)
-      let pathStr = `M 0 ${points[0][1].toFixed(1)}`;
-      let crestStr = `M 0 ${points[0][1].toFixed(1)}`;
-
-      for (let i = 0; i < points.length - 1; i++) {
-        const p0 = points[i];
-        const p1 = points[i + 1];
-        const midX = (p0[0] + p1[0]) / 2;
-        const midY = (p0[1] + p1[1]) / 2;
-        const segment = ` Q ${p0[0].toFixed(1)} ${p0[1].toFixed(1)} ${midX.toFixed(1)} ${midY.toFixed(1)}`;
-        pathStr += segment;
-        crestStr += segment;
-      }
-
-      const lastP = points[points.length - 1];
-      pathStr += ` L ${W} ${lastP[1].toFixed(1)} L ${W} ${H_total} L 0 ${H_total} Z`;
-      crestStr += ` L ${W} ${lastP[1].toFixed(1)}`;
-
-      if (supportsClipPath) {
-        trailer.style.clipPath = `path("${pathStr}")`;
-      }
-
-      if (svgStrokeRef.current) {
-        svgStrokeRef.current.setAttribute('d', crestStr);
-      }
-      if (svgGlowRef.current) {
-        svgGlowRef.current.setAttribute('d', crestStr);
-      }
-    };
-
-    animId = requestAnimationFrame(updateLiquidWave);
-
+    if (!containerRef.current) return;
+    const cleanup = initDissolve(containerRef.current);
     return () => {
-      isDisposed = true;
-      cancelAnimationFrame(animId);
-      window.removeEventListener('pointermove', handlePointerMove);
-      window.removeEventListener('pointerdown', handlePointerDown);
-      if (trailer) trailer.style.clipPath = '';
+      cleanup?.();
     };
   }, []);
 
@@ -556,10 +345,16 @@ export default function ProductionClient({ album }: ProductionClientProps) {
       </header>
 
       {/* ============================================================
-          1. HERO SECTION (ZONA BLANCA CON BOTONES 100% LIMPIOS)
+          1. HERO SECTION (LA "CORTINA" SUPERIOR CON data-dissolve)
+             Se recorta por abajo con marching squares en 16px grid.
          ============================================================ */}
       <div data-dissolve-track="" className="reveal-track">
-        <section id="production_hero" ref={heroRef} className="production-hero">
+        <section
+          id="production_hero"
+          ref={heroRef}
+          data-dissolve=""
+          className="production-hero"
+        >
           <div className="production-content">
             <div className="production__info">
               {/* TÍTULO EN MAYÚSCULAS CON PP EIKO */}
@@ -698,16 +493,11 @@ export default function ProductionClient({ album }: ProductionClientProps) {
         </section>
 
         {/* ============================================================
-            2. FITXA AUDIOVISUAL: LA OLA LÍQUIDA ACTÚA SOBRE LA FOTO DE ABAJO
-               JUGANDO EN LA TRANSICIÓN ENTRE LOS BOTONES Y LA IMAGEN
+            2. FITXA AUDIOVISUAL (CAPA INFERIOR, INMEDIATAMENTE DETRÁS)
+               Sube por detrás mediante calc(-1 * var(--dissolve-overlap)).
+               Al recortarse la cortina blanca superior, esta imagen inunda hacia arriba.
            ============================================================ */}
         <section ref={trailerRef} data-theme-change="nav:base" className="trailer theme-dark">
-          {/* LÍNIA DE MENISC LÍQUID (ONDA INTERACTIVA AMB CURSOR) */}
-          <svg className="trailer-liquid-svg" aria-hidden="true">
-            <path ref={svgGlowRef} className="liquid-glow" />
-            <path ref={svgStrokeRef} className="liquid-crest" />
-          </svg>
-
           <div data-dissolve-bleed="" className="trailer__vh">
             <img
               src={album.trailerStill}

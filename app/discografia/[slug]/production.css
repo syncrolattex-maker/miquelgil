@@ -136,7 +136,6 @@
 .reveal-track {
   position: relative;
   width: 100%;
-  background-color: #ffffff;
 }
 
 .production-hero {
@@ -146,7 +145,6 @@
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  z-index: 1;
 }
 
 .production-content {
@@ -471,40 +469,103 @@
 }
 
 /* ============================================================
-   SECCIÓN TRAILER (THEME DARK) AMB TRANSICIÓ LÍQUIDA INTERACTIVA
+   SEPARADOR LÍQUIDO A24 (DATA-DISSOLVE)
+   ============================================================ */
+[data-dissolve-track] {
+  --dissolve-apron: 0px;
+  --dissolve-overlap: 0px;
+  --dissolve-bleed: 0px;
+  position: relative;
+  background-color: #050505;
+}
+
+[data-dissolve-track] > * {
+  z-index: 0;
+  position: relative;
+}
+
+[data-dissolve] {
+  --dissolve-reach: 0.4;
+  --dissolve-peek: 0.19;
+  --dissolve-wander: 0.13;
+  --dissolve-center: 0.13;
+  --dissolve-center-x: 0.5;
+  --dissolve-edge: 0.5;
+  --dissolve-below: 0.4;
+  --dissolve-scale: 230;
+  --dissolve-warp: 1.25;
+  --dissolve-detail: 0.16;
+  --dissolve-min-blob: 45;
+  --dissolve-smooth: 1;
+  --dissolve-grid: 16;
+  --dissolve-seed: 1;
+  --dissolve-intro: 1.5;
+  --dissolve-theme-at: 0.45;
+  --dissolve-life: 0.85;
+  --dissolve-life-speed: 0.15;
+  --dissolve-finish: 0.85;
+  --dissolve-idle-fps: 60;
+  --dissolve-surge: 0.55;
+  --dissolve-agitate: 2.2;
+  --dissolve-cursor: 1;
+  --dissolve-cursor-bite: 0.5;
+  --dissolve-cursor-drop: 90;
+  --dissolve-cursor-spread: 2.6;
+  --dissolve-cursor-wobble: 0.22;
+  --dissolve-cursor-wake: 0.15;
+  --dissolve-cursor-glide: 0.3;
+  --dissolve-cursor-turn: 0.3;
+  --dissolve-cursor-speed: 900;
+  --dissolve-cursor-rise: 0.05;
+  --dissolve-cursor-relax: 1.1;
+  --dissolve-cursor-guard: 110;
+  --dissolve-cursor-band: 120;
+  --dissolve-cursor-reserve: 0.35;
+}
+
+[data-dissolve][data-dissolve-ready] {
+  z-index: 1;
+  padding-bottom: var(--dissolve-apron);
+  contain: paint;
+}
+
+[data-dissolve][data-dissolve-ready] + * {
+  margin-top: calc(-1 * var(--dissolve-overlap));
+}
+
+[data-dissolve-bleed][data-dissolve-bleed] {
+  clip-path: inset(calc(-1 * var(--dissolve-bleed, 0px)) 0 0 0);
+  overflow: visible;
+}
+
+[data-dissolve-bleed] {
+  --bleed-cover: 130%;
+  --bleed-lead: 14%;
+}
+
+[data-dissolve-bleed] > img,
+[data-dissolve-bleed] > video,
+[data-dissolve-bleed] > picture,
+[data-dissolve-bleed] > canvas {
+  height: calc(var(--bleed-cover) + var(--bleed-lead) * 2) !important;
+  top: calc((100% - var(--bleed-cover)) / 2 - var(--bleed-lead)) !important;
+}
+
+[data-dissolve-theme] {
+  pointer-events: none;
+  position: absolute;
+  left: 0;
+  right: 0;
+}
+
+/* ============================================================
+   SECCIÓN TRAILER (THEME DARK)
    ============================================================ */
 .trailer {
   background-color: #050505;
   color: #f2f2f2;
   position: relative;
-  overflow: visible;
-  margin-top: -85px;
-  z-index: 15;
-}
-
-.trailer-liquid-svg {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 250px;
-  pointer-events: none;
-  z-index: 25;
-  overflow: visible;
-}
-
-.liquid-crest {
-  fill: none;
-  stroke: rgba(255, 255, 255, 0.45);
-  stroke-width: 1.5px;
-  stroke-linecap: round;
-}
-
-.liquid-glow {
-  fill: none;
-  stroke: rgba(255, 255, 255, 0.15);
-  stroke-width: 5px;
-  filter: blur(3px);
+  overflow: hidden;
 }
 
 .trailer__vh {
@@ -513,7 +574,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 9rem 2rem 8rem 2rem;
+  padding: 8rem 2rem;
 }
 
 .trailer__bg {
