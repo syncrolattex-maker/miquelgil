@@ -61,7 +61,6 @@ export default function ProductionClient({ album }: ProductionClientProps) {
     const btnStagger = 0.09;
     const duration = 0.7;
     const textDelay = 0.04;
-    // Curva energy (discGlide): M0,0 C0.32,0.72 0,1 1,1
     const easeCurve = 'power3.out';
 
     buttons.forEach((btn, idx) => {
@@ -96,12 +95,11 @@ export default function ProductionClient({ album }: ProductionClientProps) {
   }, []);
 
   // ============================================================================
-  // 2. SEPARADOR LÍQUIDO ORGANIC (DATA-DISSOLVE CON CLIP-PATH: PATH)
+  // 2. SEPARADOR LÍQUIDO ACTUANDO EN LA FOTO DE LA FITXA AUDIOVISUAL (TRANSICIÓN)
   // ============================================================================
   useEffect(() => {
-    const hero = heroRef.current;
     const trailer = trailerRef.current;
-    if (!hero || !trailer) return;
+    if (!trailer) return;
 
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const supportsClipPath =
@@ -114,65 +112,14 @@ export default function ProductionClient({ album }: ProductionClientProps) {
     let animId: number;
     let isDisposed = false;
 
-    // Parámetros de la especificación
-    const spec = {
-      reach: 0.38,
-      peek: 0.16,
-      below: 0.4,
-      lifeSpeed: 0.15,
-      agitate: 2.2,
-      surge: 0.55,
-      cursorBand: 120,
-      cursorGuard: 110,
-      cursorBite: 0.5,
-      cursorRelax: 1.1,
-      edge: 0.5,
-      center: 0.13,
-      centerX: 0.5
-    };
-
     let H = 0;
     let lastTime = performance.now();
     let lastScrollY = window.scrollY;
     let scrollVelocity = 0;
-    let mousePos = { x: -1000, y: -1000, vy: 0, lastY: -1000, lastT: performance.now() };
-    const droplets: Array<{ x: number; y: number; age: number; maxAge: number }> = [];
 
-    const onPointerMove = (e: PointerEvent) => {
-      const now = performance.now();
-      const dt = Math.max(0.001, (now - mousePos.lastT) / 1000);
-      const dy = e.clientY - mousePos.lastY;
-      mousePos.vy = dy / dt;
-      mousePos.x = e.clientX;
-      mousePos.y = e.clientY;
-      mousePos.lastY = e.clientY;
-      mousePos.lastT = now;
-
-      // Comprobar zona de seguridad (cursorGuard 110px) alrededor de enlaces/botones
-      const target = e.target as HTMLElement | null;
-      if (target && target.closest('a, button, input, [role="button"]')) return;
-
-      const heroRect = hero.getBoundingClientRect();
-      const liquidY = heroRect.bottom;
-      const dist = Math.abs(e.clientY - liquidY);
-
-      if (dist < spec.cursorBand && Math.abs(mousePos.vy) > 80) {
-        if (droplets.length < 24) {
-          droplets.push({
-            x: e.clientX - heroRect.left,
-            y: e.clientY - heroRect.top,
-            age: 0,
-            maxAge: spec.cursorRelax
-          });
-        }
-      }
-    };
-
-    window.addEventListener('pointermove', onPointerMove, { passive: true });
-
-    const updateDissolve = (now: number) => {
+    const updateLiquidWave = (now: number) => {
       if (isDisposed) return;
-      animId = requestAnimationFrame(updateDissolve);
+      animId = requestAnimationFrame(updateLiquidWave);
 
       const dt = Math.min(0.05, (now - lastTime) / 1000);
       lastTime = now;
@@ -183,96 +130,72 @@ export default function ProductionClient({ album }: ProductionClientProps) {
       scrollVelocity = scrollDiff / (dt * 1000);
       lastScrollY = currentScrollY;
 
-      // Progresión de fase de vida
-      const agitateFactor = 1 + Math.min(3, Math.abs(scrollVelocity) * 0.002) * spec.agitate;
-      H += dt * spec.lifeSpeed * Math.PI * 2 * agitateFactor;
+      // Progresión de la fase de vida de la onda líquida
+      const agitate = 1 + Math.min(2.5, Math.abs(scrollVelocity) * 0.0015);
+      H += dt * 0.22 * Math.PI * 2 * agitate;
 
-      // Progreso de scroll sobre el trigger
-      const heroRect = hero.getBoundingClientRect();
-      const heroHeight = hero.offsetHeight;
-      const heroWidth = hero.offsetWidth;
+      const trailerRect = trailer.getBoundingClientRect();
+      const W = trailer.offsetWidth;
+      const H_total = trailer.offsetHeight;
 
-      // Si el hero está fuera de pantalla, omitir cálculo pesado
-      if (heroRect.bottom < -100 || heroRect.top > window.innerHeight + 100) return;
+      // Si está fuera de vista, omitir renderizado intensivo
+      if (trailerRect.bottom < -50 || trailerRect.top > window.innerHeight + 100) return;
 
-      const triggerStart = window.innerHeight;
-      const triggerEnd = 0;
-      const rawProgress = (triggerStart - heroRect.bottom) / (triggerStart - triggerEnd);
-      const V = Math.max(0, Math.min(1, rawProgress));
+      // Progreso de entrada de la foto respecto a la parte de los botones
+      const entryProgress = Math.max(
+        0,
+        Math.min(1, (window.innerHeight - trailerRect.top) / (window.innerHeight * 0.9))
+      );
 
-      // Suavizado quíntico (smootherstep)
-      const smoothProgress = V * V * V * (V * (V * 6 - 15) + 10);
+      // Amplitud de la onda en la parte superior de la imagen
+      const baseWaveHeight = 70;
+      const surge = Math.min(25, Math.abs(scrollVelocity) * 0.04);
+      const currentWaveHeight = (baseWaveHeight * (0.45 + 0.55 * entryProgress) + surge);
 
-      // Actualizar gotas del cursor
-      for (let i = droplets.length - 1; i >= 0; i--) {
-        droplets[i].age += dt;
-        if (droplets[i].age > droplets[i].maxAge) {
-          droplets.splice(i, 1);
-        }
-      }
-
-      // Generar línea de corte ondulada inferior
-      const segments = Math.max(24, Math.floor(heroWidth / 24));
+      const segments = Math.max(30, Math.floor(W / 22));
       const points: Array<[number, number]> = [];
-
-      const baseRise = (spec.peek + smoothProgress * (spec.reach - spec.peek)) * heroHeight;
-      const surgeOffset = Math.min(40, Math.abs(scrollVelocity) * spec.surge * 0.05);
 
       for (let i = 0; i <= segments; i++) {
         const u = i / segments;
-        const x = u * heroWidth;
+        const x = u * W;
 
-        // Perfil horizontal (campana cos y joroba central)
-        const bell = Math.cos((u - 0.5) * Math.PI * spec.edge);
-        const centerHump = spec.center * Math.sin(u * Math.PI);
-        const profile = Math.max(0.2, bell + centerHump);
+        // Modulación suave en los laterales
+        const edgeEnvelope = Math.sin(u * Math.PI);
+        const centerBell = 0.85 + 0.15 * Math.sin(u * Math.PI);
 
-        // Ruido domain-warping multicapa
-        const wave1 = Math.sin(u * 14 + H) * 18;
-        const wave2 = Math.cos(u * 28 - H * 1.4) * 9;
-        const wave3 = Math.sin(u * 7 + H * 0.6) * 12;
-        const noise = (wave1 + wave2 + wave3) * profile;
+        // Armónicos de ruido orgánico domain-warping
+        const w1 = Math.sin(u * 10 + H) * 0.5;
+        const w2 = Math.cos(u * 22 - H * 1.25) * 0.3;
+        const w3 = Math.sin(u * 5 + H * 0.6) * 0.25;
+        const waveNoise = (w1 + w2 + w3) * centerBell;
 
-        // Perturbación de gotas del cursor
-        let dropPerturb = 0;
-        for (const drop of droplets) {
-          const dx = x - drop.x;
-          const dropDist = Math.abs(dx);
-          if (dropDist < 120) {
-            const decay = 1 - drop.age / drop.maxAge;
-            const dropShape = Math.cos((dropDist / 120) * (Math.PI / 2)) * decay;
-            dropPerturb += dropShape * 26 * spec.cursorBite;
-          }
-        }
-
-        const yOffset = (baseRise + surgeOffset) * profile + noise - dropPerturb;
-        const y = Math.max(10, heroHeight - Math.max(0, yOffset));
+        // Coordenada Y superior de la foto (ondulación líquida)
+        const y = Math.max(0, (waveNoise * 0.45 + 0.5) * currentWaveHeight * (0.2 + 0.8 * edgeEnvelope));
         points.push([x, y]);
       }
 
-      // Construir trazado SVG para clip-path
-      let pathStr = `M 0 0 L ${heroWidth} 0 L ${heroWidth} ${points[points.length - 1][1]}`;
+      // Trazar el contorno líquido: desde (0, y0) a través de la onda hasta (W, yN), luego baja a la base de la foto
+      let pathStr = `M 0 ${points[0][1].toFixed(1)}`;
 
-      for (let i = points.length - 1; i > 0; i--) {
-        const p1 = points[i];
-        const p0 = points[i - 1];
-        const midX = (p1[0] + p0[0]) / 2;
-        const midY = (p1[1] + p0[1]) / 2;
-        pathStr += ` Q ${p1[0].toFixed(1)} ${p1[1].toFixed(1)} ${midX.toFixed(1)} ${midY.toFixed(1)}`;
+      for (let i = 0; i < points.length - 1; i++) {
+        const p0 = points[i];
+        const p1 = points[i + 1];
+        const midX = (p0[0] + p1[0]) / 2;
+        const midY = (p0[1] + p1[1]) / 2;
+        pathStr += ` Q ${p0[0].toFixed(1)} ${p0[1].toFixed(1)} ${midX.toFixed(1)} ${midY.toFixed(1)}`;
       }
 
-      pathStr += ` L 0 ${points[0][1]} Z`;
+      pathStr += ` L ${W} ${points[points.length - 1][1].toFixed(1)} L ${W} ${H_total} L 0 ${H_total} Z`;
 
-      hero.style.clipPath = `path("${pathStr}")`;
+      trailer.style.clipPath = `path("${pathStr}")`;
     };
 
-    animId = requestAnimationFrame(updateDissolve);
+    animId = requestAnimationFrame(updateLiquidWave);
 
     return () => {
       isDisposed = true;
       cancelAnimationFrame(animId);
-      window.removeEventListener('pointermove', onPointerMove);
-      if (hero) hero.style.clipPath = '';
+      if (trailer) trailer.style.clipPath = '';
     };
   }, []);
 
@@ -507,7 +430,7 @@ export default function ProductionClient({ album }: ProductionClientProps) {
           <span className="a24-label hidden sm:inline">{album.year}</span>
           <button
             onClick={openTrailer}
-            className="a24-label px-3 py-1 border border-black/20 rounded hover:bg-black hover:text-white transition-colors"
+            className="a24-label px-3 py-1 border border-black/20 hover:bg-black hover:text-white transition-colors"
           >
             VÍDEO
           </button>
@@ -515,10 +438,10 @@ export default function ProductionClient({ album }: ProductionClientProps) {
       </header>
 
       {/* ============================================================
-          1. HERO SECTION ([data-production-hero] CON DATA-DISSOLVE)
+          1. HERO SECTION (ZONA BLANCA CON BOTONES 100% LIMPIOS)
          ============================================================ */}
       <div data-dissolve-track="" className="reveal-track">
-        <section id="production_hero" ref={heroRef} data-dissolve="" className="production-hero">
+        <section id="production_hero" ref={heroRef} className="production-hero">
           <div className="production-content">
             <div className="production__info">
               {/* TÍTULO EN MAYÚSCULAS CON PP EIKO */}
@@ -657,7 +580,8 @@ export default function ProductionClient({ album }: ProductionClientProps) {
         </section>
 
         {/* ============================================================
-            2. SECCIÓN TRAILER / TEASER (HERMANO CON DATA-DISSOLVE-BLEED)
+            2. FITXA AUDIOVISUAL: LA OLA LÍQUIDA ACTÚA SOBRE LA FOTO DE ABAJO
+               JUGANDO EN LA TRANSICIÓN ENTRE LOS BOTONES Y LA IMAGEN
            ============================================================ */}
         <section ref={trailerRef} data-theme-change="nav:base" className="trailer theme-dark">
           <div data-dissolve-bleed="" className="trailer__vh">

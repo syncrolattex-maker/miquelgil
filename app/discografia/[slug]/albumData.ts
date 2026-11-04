@@ -67,7 +67,7 @@ export const ALBUMS_DATA: Record<string, AlbumDetail> = {
     quote: "L'amor és Déu en barca, un viatge tel·lúric per les arrels sonores del Mediterrani",
     quoteAuthor: "Miquel Gil · Orgànic (2001)",
     trailerSrc: 'https://www.youtube.com/watch?v=yVT-HCsypyk', // YouTube video oficial
-    trailerStill: '/images/disco_2.png',
+    trailerStill: '/images/miquel-gil-juan-miguel-morales-13-scaled.jpg',
     streamUrl: 'https://open.spotify.com/search/Miquel%20Gil%20Organic',
     buyUrl: 'https://www.totfolk.cat/discografia-miquel-gil',
     awards: [

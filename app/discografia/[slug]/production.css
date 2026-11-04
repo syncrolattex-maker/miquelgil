@@ -281,7 +281,20 @@
 
 /* ============================================================
    BOTONES A24 CON TIPOGRAFÍA PP EIKO, REVELACIÓN Y HOVER ROLL
+   (SIN BORDES REDONDOS NI ARTEFACTOS CIRCULARES)
    ============================================================ */
+.btn,
+.btn *,
+.btn::before,
+.btn::after,
+.btn__p-mask,
+.btn__p,
+.btn__divider,
+[data-reveal="btn"],
+[data-hover] {
+  border-radius: 0 !important;
+}
+
 .btn {
   display: inline-flex;
   flex-direction: column;
@@ -293,6 +306,7 @@
   border: none;
   padding: 0.5rem 0;
   outline: none;
+  box-shadow: none !important;
 }
 
 .btn__divider {
