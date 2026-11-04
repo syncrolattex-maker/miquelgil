@@ -1474,37 +1474,24 @@ export default function DiscografiaClient() {
     function openFilmDetail(film: FilmData, openInNewTab = false) {
       if (!film || !film.detailUrl) return;
 
-      if (film.detailUrl.startsWith('/discografia/') || film.title.toLowerCase().includes('orgànic')) {
-        if (openInNewTab) {
-          window.open('/discografia/organic/', '_blank', 'noopener');
-        } else {
-          window.location.href = '/discografia/organic/';
-        }
+      const targetUrl = film.detailUrl.startsWith('/')
+        ? film.detailUrl
+        : `/discografia/${film.detailUrl.replace(/^#\/production\//, '')}/`;
+
+      if (openInNewTab) {
+        window.open(targetUrl, '_blank', 'noopener');
         return;
       }
 
-      if (openInNewTab) {
-        window.open(film.detailUrl, '_blank', 'noopener');
-        return;
-      }
       const w = window as unknown as { barba?: { go?: (url: string) => void } };
       if (w.barba && typeof w.barba.go === 'function') {
         try {
-          w.barba.go(film.detailUrl);
+          w.barba.go(targetUrl);
           return;
         } catch (_) {}
       }
-      // Mostrar fitxa de producció integrada en valencià
-      if (modalSlug) modalSlug.textContent = `ARXIU MIQUEL GIL — ${film.detailUrl}`;
-      if (modalYear) modalYear.textContent = `${film.year} · PRODUCCIÓ: ${film.director}`;
-      if (modalTitle) modalTitle.textContent = film.title;
-      if (modalDesc) {
-        modalDesc.textContent = `Amb la col·laboració de: ${film.starring}. Edició original en format disc òptic de l'arxiu discogràfic de Miquel Gil.`;
-      }
-      if (modalExtLink) {
-        modalExtLink.href = film.detailUrl;
-      }
-      if (detailModal) detailModal.classList.remove('opacity-0', 'pointer-events-none');
+
+      window.location.href = targetUrl;
     }
 
     const onCloseModal = () => {
@@ -2021,7 +2008,7 @@ export default function DiscografiaClient() {
           <span data-film-field="director">Toni Xuclà &amp; Miquel Gil</span>
           <span data-film-field="year">2024</span>
           <span data-film-field="starring">Arrel Viva, Fusió, Tradició Contemporània</span>
-          <span data-film-field="detailUrl">#/production/viatger</span>
+          <span data-film-field="detailUrl">/discografia/viatger/</span>
           <span data-film-field="discUrl">https://miquelgil.vercel.app/images/disco_8.webp</span>
           <span data-film-field="reviews">
             Enderrock|Foc en moviment continu|★★★★★;Diari La Veu|Vint-i-cinc anys de mestratge|★★★★☆
@@ -2036,7 +2023,7 @@ export default function DiscografiaClient() {
           <span data-film-field="director">Miquel Gil &amp; Col·lectiu</span>
           <span data-film-field="year">2019</span>
           <span data-film-field="starring">Vicent Andrés Estellés, Enric Casasses</span>
-          <span data-film-field="detailUrl">#/production/geometries</span>
+          <span data-film-field="detailUrl">/discografia/geometries/</span>
           <span data-film-field="discUrl">https://miquelgil.vercel.app/images/disco_7.jpg</span>
           <span data-film-field="reviews">
             Mondosonoro|Arquitectura polifònica fascinant|★★★★★;Tresdeu|Polígons emocionals perfectes|★★★★☆
@@ -2051,7 +2038,7 @@ export default function DiscografiaClient() {
           <span data-film-field="director">Eduard Navarro</span>
           <span data-film-field="year">2011</span>
           <span data-film-field="starring">Tradició Mutant, Experimentació Sonora</span>
-          <span data-film-field="detailUrl">#/production/per-marcianes</span>
+          <span data-film-field="detailUrl">/discografia/per-marcianes/</span>
           <span data-film-field="discUrl">https://miquelgil.vercel.app/images/disco_6.png</span>
           <span data-film-field="reviews">
             World Music Central|Electricitat i tradició|★★★★★;Sons Mediterrània|Rumb a nous planetes|★★★★☆
@@ -2066,7 +2053,7 @@ export default function DiscografiaClient() {
           <span data-film-field="director">Manel Camp &amp; Miquel Gil</span>
           <span data-film-field="year">2009</span>
           <span data-film-field="starring">David Pastor, Jazz, Improvisació</span>
-          <span data-film-field="detailUrl">#/production/gil-camp-trio</span>
+          <span data-film-field="detailUrl">/discografia/gil-camp-trio/</span>
           <span data-film-field="discUrl">https://miquelgil.vercel.app/images/disco_4.png</span>
           <span data-film-field="reviews">
             Cuadernos de Jazz|Diàleg hipnòtic i lliure|★★★★★;El País|Jazz de cambra mediterrani|★★★★★
@@ -2081,7 +2068,7 @@ export default function DiscografiaClient() {
           <span data-film-field="director">Miquel Gil</span>
           <span data-film-field="year">2006</span>
           <span data-film-field="starring">Mediterrània Cosmopolita, Poetes</span>
-          <span data-film-field="detailUrl">#/production/eixos</span>
+          <span data-film-field="detailUrl">/discografia/eixos/</span>
           <span data-film-field="discUrl">https://miquelgil.vercel.app/images/disco_5.png</span>
           <span data-film-field="reviews">
             Folker Magazine|Gran veu de la Mediterrània|★★★★★;RootsWorld|Cartografia sonora impecable|★★★★☆
@@ -2096,7 +2083,7 @@ export default function DiscografiaClient() {
           <span data-film-field="director">Galileo MC</span>
           <span data-film-field="year">2006</span>
           <span data-film-field="starring">Directe, Acústic, Energia Escènica</span>
-          <span data-film-field="detailUrl">#/production/en-concert</span>
+          <span data-film-field="detailUrl">/discografia/en-concert/</span>
           <span data-film-field="discUrl">https://miquelgil.vercel.app/images/disco_4.png</span>
           <span data-film-field="reviews">
             Enderrock|Dimensió tel·lúrica irrepetible|★★★★★;B-Ritmos|Força escènica absoluta|★★★★★
@@ -2111,7 +2098,7 @@ export default function DiscografiaClient() {
           <span data-film-field="director">Miquel Gil</span>
           <span data-film-field="year">2004</span>
           <span data-film-field="starring">World Music, Llaüt, Percussió</span>
-          <span data-film-field="detailUrl">#/production/kata</span>
+          <span data-film-field="detailUrl">/discografia/kata/</span>
           <span data-film-field="discUrl">https://miquelgil.vercel.app/images/disco_3.png</span>
           <span data-film-field="reviews">
             fRoots Magazine|Pont sonor fascinant|★★★★★;World Music Charts|Selecció Europea|★★★★★
@@ -2141,7 +2128,7 @@ export default function DiscografiaClient() {
           <span data-film-field="director">Miquel Gil</span>
           <span data-film-field="year">1997</span>
           <span data-film-field="starring">Fusió, Flamenc, Experimentació</span>
-          <span data-film-field="detailUrl">#/production/buscando-tu-olor</span>
+          <span data-film-field="detailUrl">/discografia/buscando-tu-olor/</span>
           <span data-film-field="discUrl">https://miquelgil.vercel.app/images/disco_1.jpg</span>
           <span data-film-field="reviews">
             Arxiu Valencià|Debut en solitari valent|★★★★☆;Levante EMV|Laboratori sonor inèdit|★★★★☆
@@ -2156,7 +2143,7 @@ export default function DiscografiaClient() {
           <span data-film-field="director">Terminal Sur</span>
           <span data-film-field="year">1988</span>
           <span data-film-field="starring">Electro-Mediterrània, Sintetitzadors</span>
-          <span data-film-field="detailUrl">#/production/viajero</span>
+          <span data-film-field="detailUrl">/discografia/viajero/</span>
           <span data-film-field="discUrl">https://miquelgil.vercel.app/images/disco_1.jpg</span>
           <span data-film-field="reviews">
             RNE Radio 3|Avançat al seu temps|★★★★★;Discos Medicinales|Pioners de la fusió|★★★★★
@@ -2171,7 +2158,7 @@ export default function DiscografiaClient() {
           <span data-film-field="director">Al Tall &amp; Miquel Gil</span>
           <span data-film-field="year">1985</span>
           <span data-film-field="starring">Cant Valencià, Polifonia Tradicional</span>
-          <span data-film-field="detailUrl">#/production/cants-arrel</span>
+          <span data-film-field="detailUrl">/discografia/cants-arrel/</span>
           <span data-film-field="discUrl">https://miquelgil.vercel.app/images/disco_8.webp</span>
           <span data-film-field="reviews">
             Serra d&apos;Or|Memòria viva d&apos;un poble|★★★★★;Enderrock|Clàssic essencial|★★★★★
@@ -2186,7 +2173,7 @@ export default function DiscografiaClient() {
           <span data-film-field="director">Arxiu Fonogràfic</span>
           <span data-film-field="year">1982</span>
           <span data-film-field="starring">Horta Sud, Percussions i Corda</span>
-          <span data-film-field="detailUrl">#/production/tocs-i-vares</span>
+          <span data-film-field="detailUrl">/discografia/tocs-i-vares/</span>
           <span data-film-field="discUrl">https://miquelgil.vercel.app/images/disco_7.jpg</span>
           <span data-film-field="reviews">
             Fonoteca|Registre històric imprescindible|★★★★★;Cultura Popular|Raig d&apos;autenticitat|★★★★☆
