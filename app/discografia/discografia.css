@@ -128,13 +128,11 @@
 }
 
 [data-disc-gallery],
-[data-disc-gallery] *,
 [data-disc-gallery] *::before,
 [data-disc-gallery] *::after {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
-  font-family: var(--font-texts);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -147,6 +145,7 @@
   overflow: hidden;
   background-color: #ffffff;
   color: #111111;
+  font-family: var(--font-texts);
   user-select: none;
   -webkit-user-select: none;
 }
@@ -185,34 +184,50 @@
 }
 
 /* ============================================================
-   TÍTULOS: PP Eiko Medium
+   TÍTULOS: PP Eiko Medium en formato grande
    ============================================================ */
 .a24-serif-title,
-.a24-title,
+.a24-serif-title *,
 #ui-title,
+#ui-title *,
 #modal-title,
+#modal-title *,
+.a24-title,
+.a24-title *,
 [data-disc-gallery] h1,
+[data-disc-gallery] h1 *,
 [data-disc-gallery] h2,
-[data-disc-gallery] h3 {
+[data-disc-gallery] h2 *,
+[data-disc-gallery] h3,
+[data-disc-gallery] h3 * {
   font-family: var(--font-titles) !important;
   font-weight: 500 !important;
 }
 
-.a24-serif-title {
-  font-size: clamp(2.1rem, 3.2vw, 3.1rem);
-  line-height: 0.96;
-  letter-spacing: -0.02em;
+.a24-serif-title,
+#ui-title {
+  font-size: clamp(3rem, 4.6vw, 5rem) !important;
+  line-height: 0.90;
+  letter-spacing: -0.03em;
   color: #111111;
+  font-weight: 500 !important;
+  display: block;
+  margin-top: 0.25rem;
 }
 
 /* ============================================================
    SUBTÍTULOS: PP Museum Font Family
    ============================================================ */
 .a24-label,
+.a24-label *,
 .a24-subtitle,
+.a24-subtitle *,
 #modal-year,
+#modal-year *,
 #modal-slug,
-[data-subtitle] {
+#modal-slug *,
+[data-subtitle],
+[data-subtitle] * {
   font-family: var(--font-subtitles) !important;
   font-size: 10px;
   line-height: 13px;
@@ -356,6 +371,11 @@
 [data-disc-gallery] .w-52 { width: 13rem; }
 [data-disc-gallery] .w-56 { width: 14rem; }
 [data-disc-gallery] .w-64 { width: 16rem; }
+[data-disc-gallery] .w-72 { width: 18rem; }
+[data-disc-gallery] .w-80 { width: 20rem; }
+[data-disc-gallery] .w-88 { width: 22rem; }
+[data-disc-gallery] .w-96 { width: 24rem; }
+[data-disc-gallery] .w-\[28rem\] { width: 28rem; }
 [data-disc-gallery] .max-w-xl { max-width: 36rem; }
 [data-disc-gallery] .max-w-3xl { max-width: 48rem; }
 [data-disc-gallery] .max-w-5xl { max-width: 64rem; }
@@ -473,10 +493,13 @@
   [data-disc-gallery] .md\:px-12 { padding-left: 3rem; padding-right: 3rem; }
   [data-disc-gallery] .md\:pt-28 { padding-top: 7rem; }
   [data-disc-gallery] .md\:w-72 { width: 18rem; }
+  [data-disc-gallery] .md\:w-88 { width: 22rem; }
+  [data-disc-gallery] .md\:w-96 { width: 24rem; }
   [data-disc-gallery] .md\:text-6xl { font-size: 3.75rem; line-height: 1; }
 }
 
 @media (min-width: 1024px) {
   [data-disc-gallery] .lg\:flex { display: flex; }
   [data-disc-gallery] .lg\:grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  [data-disc-gallery] .lg\:w-\[28rem\] { width: 28rem; }
 }

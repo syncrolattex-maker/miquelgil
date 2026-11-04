@@ -284,11 +284,11 @@ export default function DiscografiaClient() {
         ctx.stroke();
       }
 
-      // Anillo perimetral legal estilo A24 Optical Disc
+      // Anell perimetral d'arxiu oficial en serigrafia
       ctx.fillStyle = 'rgba(255,255,255,0.88)';
       ctx.font = '600 18px "PP Neue Montreal", Arial, sans-serif';
       ctx.textAlign = 'center';
-      ctx.fillText(`${film.title.toUpperCase()} · ${film.year} · A24 OPTICAL ARCHIVE`, cx, size * 0.93);
+      ctx.fillText(`${film.title.toUpperCase()} · ${film.year} · ARXIU ÒPTIC MIQUEL GIL`, cx, size * 0.93);
       ctx.restore();
 
       // Anillo espejo de matriz (matrix ring alrededor del buje)
@@ -664,14 +664,14 @@ export default function DiscografiaClient() {
         scribbleState.progress = SCRIBBLE_SPEC.enterFrames[0];
         scribbleRings.forEach((r) => rebuildRingRibbonGeometry(r, scribbleState.progress));
         scribbleState.lastStepTime = performance.now();
-        if (scribbleStatusEl) scribbleStatusEl.textContent = 'SCRIBBLE ACTIVE (10 FPS STOP-MOTION)';
+        if (scribbleStatusEl) scribbleStatusEl.textContent = 'TRAÇ ACTIU (ANIMACIÓ 10 FPS)';
       } else {
         if (scribbleState.phase !== 'hidden') {
           scribbleState.phase = 'exiting';
           scribbleState.frameIdx = 0;
           scribbleState.lastStepTime = performance.now();
         }
-        if (scribbleStatusEl) scribbleStatusEl.textContent = 'HOVER ACTIVE DISC FOR SCRIBBLE';
+        if (scribbleStatusEl) scribbleStatusEl.textContent = 'PASSA EL CURSOR PEL DISC PER AL TRAÇ';
       }
     }
 
@@ -1018,7 +1018,7 @@ export default function DiscografiaClient() {
       if (ariaTimer) clearTimeout(ariaTimer);
       ariaTimer = setTimeout(() => {
         if (liveRegion && activeFilm) {
-          liveRegion.textContent = `${activeFilm.title}, ${W + 1} of ${N}`;
+          liveRegion.textContent = `${activeFilm.title}, ${W + 1} de ${N}`;
         }
       }, 350);
 
@@ -1483,12 +1483,12 @@ export default function DiscografiaClient() {
           return;
         } catch (_) {}
       }
-      // Mostrar ficha de producción integrada
-      if (modalSlug) modalSlug.textContent = `A24 ARCHIVE — ${film.detailUrl}`;
-      if (modalYear) modalYear.textContent = `${film.year} · DIRECTED BY ${film.director}`;
+      // Mostrar fitxa de producció integrada en valencià
+      if (modalSlug) modalSlug.textContent = `ARXIU MIQUEL GIL — ${film.detailUrl}`;
+      if (modalYear) modalYear.textContent = `${film.year} · PRODUCCIÓ: ${film.director}`;
       if (modalTitle) modalTitle.textContent = film.title;
       if (modalDesc) {
-        modalDesc.textContent = `Featuring ${film.starring}. Original optical disc release from the Miquel Gil discography archive.`;
+        modalDesc.textContent = `Amb la col·laboració de: ${film.starring}. Edició original en format disc òptic de l'arxiu discogràfic de Miquel Gil.`;
       }
       if (detailModal) detailModal.classList.remove('opacity-0', 'pointer-events-none');
     }
@@ -1804,8 +1804,8 @@ export default function DiscografiaClient() {
       data-disc-scribble-color="#000000"
       tabIndex={0}
       role="group"
-      aria-roledescription="carousel"
-      aria-label="Film disc gallery"
+      aria-roledescription="carrusel"
+      aria-label="Galeria discogràfica de discos òptics"
     >
       {/* CANVAS 3D CON POINTER-EVENTS: NONE */}
       <canvas data-disc-canvas=""></canvas>
@@ -1817,12 +1817,12 @@ export default function DiscografiaClient() {
       <header className="absolute top-0 left-0 w-full z-20 flex items-center justify-between px-6 py-5 pointer-events-none">
         <div className="flex items-center gap-6 pointer-events-auto">
           <span className="a24-value font-semibold tracking-widest">A24 — MIQUEL GIL</span>
-          <span className="a24-label hidden sm:inline">OPTICAL ARCHIVE (1988–2024)</span>
+          <span className="a24-label hidden sm:inline">ARXIU ÒPTIC (1988–2024)</span>
         </div>
 
         <nav className="flex items-center gap-6 pointer-events-auto">
           <button type="button" data-disc-no-drag="" className="a24-value">
-            ALBUMS
+            ÀLBUMS
           </button>
           <button
             type="button"
@@ -1830,7 +1830,7 @@ export default function DiscografiaClient() {
             id="toggle-index-btn"
             className="a24-label hover:text-black transition-colors"
           >
-            INDEX <span data-film-counter="total">12</span>
+            ÍNDEX <span data-film-counter="total">12</span>
           </button>
         </nav>
 
@@ -1857,12 +1857,12 @@ export default function DiscografiaClient() {
 
       {/* PANELES LATERALES DE METADATOS Y RESEÑAS */}
       <div className="absolute inset-0 z-20 pointer-events-none flex items-center justify-between px-6 md:px-12 pt-24 md:pt-28 pb-20">
-        {/* Columna Izquierda: Ficha Editorial A24 con Título Serif arriba a la izquierda */}
-        <div id="left-editorial-panel" className="w-64 md:w-72 flex flex-col self-start">
-          {/* Título en tipografía distinta (Instrument Serif) */}
+        {/* Columna Izquierda: Ficha Editorial A24 con Título Serif grande en PP Eiko */}
+        <div id="left-editorial-panel" className="w-80 md:w-96 lg:w-[28rem] flex flex-col self-start">
+          {/* Título en tipografía PP Eiko en formato grande */}
           <div className="pb-3.5">
             <div className="a24-label mb-1.5 flex items-center justify-between">
-              <span>EDITION</span>
+              <span>EDICIÓ</span>
               <span id="ui-catalog-num" className="text-black/60 font-mono text-[10px]">
                 A24—01
               </span>
@@ -1875,7 +1875,7 @@ export default function DiscografiaClient() {
 
           {/* Descripción del CD */}
           <div className="py-3.5">
-            <div className="a24-label mb-1.5">SYNOPSIS / NOTES</div>
+            <div className="a24-label mb-1.5">SINOPSI / NOTES</div>
             <p id="ui-description" className="a24-desc"></p>
           </div>
 
@@ -1885,11 +1885,11 @@ export default function DiscografiaClient() {
           {/* Dirección / Producción & Año */}
           <div className="py-3.5 grid grid-cols-3 gap-2">
             <div className="col-span-2">
-              <div className="a24-label mb-1">PRODUCED BY</div>
+              <div className="a24-label mb-1">PRODUCCIÓ</div>
               <div id="ui-director" className="a24-value"></div>
             </div>
             <div>
-              <div className="a24-label mb-1">YEAR</div>
+              <div className="a24-label mb-1">ANY</div>
               <div id="ui-year" className="a24-value"></div>
             </div>
           </div>
@@ -1899,7 +1899,7 @@ export default function DiscografiaClient() {
 
           {/* Featuring / Intérpretes */}
           <div className="pt-3.5">
-            <div className="a24-label mb-1">FEATURING</div>
+            <div className="a24-label mb-1">COL·LABORACIONS</div>
             <div id="ui-starring" className="a24-value leading-relaxed whitespace-pre-line"></div>
           </div>
         </div>
@@ -1917,7 +1917,7 @@ export default function DiscografiaClient() {
       <footer className="absolute bottom-0 left-0 w-full z-20 flex items-center justify-between px-6 py-5 pointer-events-none">
         <div className="flex items-center gap-5 pointer-events-auto">
           <span id="scribble-status" className="a24-label">
-            HOVER ACTIVE DISC FOR SCRIBBLE
+            PASSA EL CURSOR PEL DISC PER AL TRAÇ
           </span>
         </div>
 
@@ -1932,7 +1932,7 @@ export default function DiscografiaClient() {
           </div>
         </div>
 
-        <div className="a24-label text-right">SCROLL · DRAG · CLICK TO INSPECT</div>
+        <div className="a24-label text-right">RODA · ARROSSEGA · CLIC PER A INSPECCIONAR</div>
       </footer>
 
       {/* MENÚ INDEX SUPERPUESTO (Usa [data-film-scroll="<título>"]) */}
@@ -1941,13 +1941,13 @@ export default function DiscografiaClient() {
         className="index-drawer fixed inset-0 z-30 bg-white/95 backdrop-blur-md opacity-0 invisible flex flex-col justify-between p-8"
       >
         <div className="flex justify-between items-center border-b border-black/10 pb-4">
-          <span className="a24-title font-medium tracking-wide">CATALOGUE INDEX — 12 EDITIONS</span>
+          <span className="a24-title font-medium tracking-wide">ÍNDEX DEL CATÀLEG — 12 EDICIONS</span>
           <button
             type="button"
             id="close-index-btn"
             className="a24-value px-3 py-1 border border-black/20 rounded hover:bg-black hover:text-white transition"
           >
-            CLOSE [ESC]
+            TANCAR [ESC]
           </button>
         </div>
         <div
@@ -1955,8 +1955,8 @@ export default function DiscografiaClient() {
           className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 my-auto max-w-5xl mx-auto w-full"
         ></div>
         <div className="a24-label border-t border-black/10 pt-4 flex justify-between">
-          <span>SELECT AN EDITION TO SCROLL THE 3D CAROUSEL</span>
-          <span>A24 / MIQUEL GIL ARCHIVE</span>
+          <span>TRIA UNA EDICIÓ PER A DESPLAÇAR EL CARRUSEL 3D</span>
+          <span>ARXIU MIQUEL GIL</span>
         </div>
       </div>
 
@@ -1967,14 +1967,14 @@ export default function DiscografiaClient() {
       >
         <div className="flex justify-between items-center border-b border-black/10 pb-4">
           <span id="modal-slug" className="a24-label">
-            PRODUCTION DETAIL
+            FITXA DE PRODUCCIÓ
           </span>
           <button
             type="button"
             id="close-modal-btn"
             className="a24-value px-3 py-1 border border-black/20 rounded hover:bg-black hover:text-white transition"
           >
-            ← BACK TO ARCHIVE
+            ← TORNAR A L&apos;ARXIU
           </button>
         </div>
         <div className="max-w-3xl my-auto space-y-6">
@@ -1989,11 +1989,11 @@ export default function DiscografiaClient() {
               rel="noopener noreferrer"
               className="a24-value px-4 py-2 bg-black text-white rounded"
             >
-              OPEN OFFICIAL RELEASE ↗
+              VEURE EDICIÓ OFICIAL ↗
             </a>
           </div>
         </div>
-        <div className="a24-label border-t border-black/10 pt-4">STANDARDIZED PRODUCTION SHEET</div>
+        <div className="a24-label border-t border-black/10 pt-4">FITXA TÈCNICA NORMALITZADA</div>
       </div>
 
       {/* FUENTE DE DATOS OCULTA EN EL DOM ([data-film-list] con 12 discos) */}
