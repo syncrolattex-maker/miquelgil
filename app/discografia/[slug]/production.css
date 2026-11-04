@@ -136,6 +136,7 @@
 .reveal-track {
   position: relative;
   width: 100%;
+  background-color: #ffffff;
 }
 
 .production-hero {
@@ -145,8 +146,7 @@
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  z-index: 2;
-  transition: clip-path 0.05s linear;
+  z-index: 10;
 }
 
 .production-content {
@@ -225,6 +225,8 @@
   justify-content: center;
   align-items: center;
   box-sizing: border-box;
+  background-color: #ffffff;
+  z-index: 20;
 }
 
 .production__cta {
@@ -281,45 +283,81 @@
 
 /* ============================================================
    BOTONES A24 CON TIPOGRAFÍA PP EIKO, REVELACIÓN Y HOVER ROLL
-   (SIN BORDES REDONDOS NI ARTEFACTOS CIRCULARES)
+   (TOTALMENTE TRANSPARENTES: SIN RECUADRO NEGRO NI BORDES REDONDOS)
    ============================================================ */
-.btn,
-.btn *,
-.btn::before,
-.btn::after,
-.btn__p-mask,
-.btn__p,
-.btn__divider,
-[data-reveal="btn"],
-[data-hover] {
+.production-page .a24-btn,
+.production-page .a24-btn:hover,
+.production-page .a24-btn:focus,
+.production-page .a24-btn:active,
+.production-page .a24-btn:focus-visible,
+.production-page .btn,
+.production-page .btn:hover,
+.production-page .btn:focus,
+.production-page .btn:active,
+.production-page .btn:focus-visible,
+.production-page a.btn,
+.production-page a.btn:hover,
+.production-page button.btn,
+.production-page button.btn:hover,
+.production-page [data-reveal="btn"],
+.production-page [data-reveal="btn"]:hover,
+.production-page [data-hover],
+.production-page [data-hover]:hover,
+.production-page .btn__p-mask,
+.production-page .btn__p,
+.production-page [data-hover-inner],
+.production-page [data-hover-text] {
   border-radius: 0 !important;
+  background: transparent !important;
+  background-color: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  outline: none !important;
 }
 
-.btn {
+.production-page .btn:hover span,
+.production-page .btn[data-hover]:hover span,
+.production-page .a24-btn:hover span {
+  color: inherit !important;
+}
+
+.btn,
+.a24-btn {
   display: inline-flex;
   flex-direction: column;
   position: relative;
   text-decoration: none;
   color: inherit;
   cursor: pointer;
-  background: transparent;
-  border: none;
+  background: transparent !important;
+  background-color: transparent !important;
+  border: none !important;
+  border-radius: 0 !important;
   padding: 0.5rem 0;
   outline: none;
   box-shadow: none !important;
 }
 
+.production-page .btn__divider,
+.production-page .a24-btn .btn__divider,
 .btn__divider {
   width: 100%;
-  height: 1px;
-  background-color: #111111;
+  height: 1.5px;
+  background-color: #111111 !important;
   transform-origin: left center;
+  display: block;
+}
+
+.production-page .trailer .btn__divider,
+.trailer .btn__divider {
+  background-color: #ffffff !important;
 }
 
 .btn__p-mask {
   overflow: hidden;
   padding: 0.75rem 2rem;
   display: inline-block;
+  background: transparent !important;
 }
 
 .btn__p,
@@ -332,6 +370,12 @@
   display: block;
   line-height: 1.1;
   color: #111111;
+  background: transparent !important;
+}
+
+.production-page .trailer .btn__p,
+.trailer .btn__p {
+  color: #ffffff !important;
 }
 
 /* ============================================================
@@ -434,7 +478,8 @@
   color: #f2f2f2;
   position: relative;
   overflow: hidden;
-  margin-top: -1px;
+  margin-top: -60px;
+  z-index: 5;
 }
 
 .trailer__vh {

@@ -430,7 +430,7 @@ export default function ProductionClient({ album }: ProductionClientProps) {
           <span className="a24-label hidden sm:inline">{album.year}</span>
           <button
             onClick={openTrailer}
-            className="a24-label px-3 py-1 border border-black/20 hover:bg-black hover:text-white transition-colors"
+            className="a24-label px-3 py-1 border border-black/30 hover:border-black text-black/80 hover:text-black bg-transparent transition-colors"
           >
             VÍDEO
           </button>
@@ -536,7 +536,7 @@ export default function ProductionClient({ album }: ProductionClientProps) {
                   href={album.streamUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="btn"
+                  className="btn a24-btn"
                 >
                   <div className="btn__divider" />
                   <span className="btn__p-mask">
@@ -557,7 +557,7 @@ export default function ProductionClient({ album }: ProductionClientProps) {
                   data-reveal="btn"
                   data-hover=""
                   onClick={openTrailer}
-                  className="btn"
+                  className="btn a24-btn"
                 >
                   <div className="btn__divider" />
                   <span className="btn__p-mask">
@@ -605,7 +605,7 @@ export default function ProductionClient({ album }: ProductionClientProps) {
                 <button
                   type="button"
                   onClick={openTrailer}
-                  className="btn"
+                  className="btn a24-btn"
                   data-hover=""
                   data-trailer-src={album.trailerSrc}
                 >
@@ -693,7 +693,7 @@ export default function ProductionClient({ album }: ProductionClientProps) {
 
           <Link
             href={`/discografia/${album.nextAlbum.slug}/`}
-            className="btn mt-6"
+            className="btn a24-btn mt-6"
             data-hover=""
           >
             <div className="btn__divider" />

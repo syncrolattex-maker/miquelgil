@@ -655,12 +655,23 @@ button {
   transition: transform 0.35s var(--ease);
 }
 
-.btn:hover {
+.btn:not(.a24-btn):hover {
   background: currentColor;
 }
 
-.btn:hover span {
+.btn:not(.a24-btn):hover span {
   color: #000;
+}
+
+.production-page .btn,
+.production-page .btn:hover,
+.production-page .a24-btn,
+.production-page .a24-btn:hover {
+  background: transparent !important;
+  background-color: transparent !important;
+  border-radius: 0 !important;
+  border: none !important;
+  box-shadow: none !important;
 }
 
 .btn:hover svg {
