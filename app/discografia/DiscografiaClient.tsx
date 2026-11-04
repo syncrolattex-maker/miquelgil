@@ -114,15 +114,15 @@ export default function DiscografiaClient() {
       hubRadius: 0.24,
       renderRadius: 5,
       initialPreloadRadius: 5,
-      flowLean: 0.055,
-      flowBank: 0.32,
-      flowDip: 0.014,
+      flowLean: 0.11,
+      flowBank: 0.20,
+      flowDip: 0.032,
       hoverTiltStrength: 0.21,
       touchActiveScale: 1.5,
       touchInactiveScale: 0.6,
       touchGap: 2.2,
       touchDepth: 0.5,
-      snapDuration: 0.46,
+      snapDuration: 0.76,
       dragStartDistance: 5,
       dragSensitivity: 0.95,
       dragVelocitySmoothing: 0.32,
@@ -872,6 +872,12 @@ export default function DiscografiaClient() {
         uiCatalogNum.textContent = `A24—${String(index + 1).padStart(2, '0')}`;
       }
 
+      // Restablecer contenedores editoriales para el revelado en cascada
+      gsap.set(['#ui-title', '#ui-description', '#ui-director', '#ui-year', '#ui-starring', '#ui-reviews'], {
+        opacity: 1,
+        y: 0
+      });
+
       // 1. Título en tipografía Serif con animación letra por letra
       splitAndAnimateChars(uiTitle, film.title, 0);
 
@@ -1048,29 +1054,29 @@ export default function DiscografiaClient() {
         preloadAround(clamped, SPEC.renderRadius);
       }
 
-      // Tabla de duración e impulso (kick) según origen
+      // Tabla de duración e impulso (kick) según origen con dinámica fluida ("pequeño flow")
       let duration = SPEC.snapDuration;
-      let kick = 0;
+      let kick = 1.6;
 
       if (source === 'wheel') {
-        duration = 0.51;
-        kick = 2.5;
+        duration = 0.68;
+        kick = 2.4;
       } else if (source === 'key') {
-        duration = Math.min(0.64, 0.42 + 0.05 * distance);
-        kick = 1.2;
+        duration = Math.min(0.82, 0.64 + 0.06 * Math.sqrt(distance));
+        kick = 1.8;
       } else if (source === 'click') {
-        duration = Math.max(0.46, Math.min(1.05, 0.45 + 0.11 * distance));
-        kick = Math.min(5, 1.4 * distance);
+        duration = Math.max(0.72, Math.min(1.15, 0.68 + 0.12 * Math.sqrt(distance)));
+        kick = Math.min(4.0, 2.0 * Math.sqrt(distance));
       } else if (source === 'flick') {
-        duration = 0.56;
-        kick = 0;
+        duration = 0.74;
+        kick = 2.2;
       } else {
         duration = SPEC.snapDuration;
-        kick = 0;
+        kick = 1.6;
       }
 
       const dir = Math.sign(clamped - L) || 1;
-      kickBoost = dir * kick * 0.16;
+      kickBoost = dir * kick * 0.22;
 
       if (activeTween) activeTween.kill();
 
@@ -1080,17 +1086,43 @@ export default function DiscografiaClient() {
         return;
       }
 
+      const oldIndex = W;
+      let hasSwappedMeta = false;
+
+      // Suave desvanecimiento del texto anterior al iniciar el viaje si cambiamos de disco
+      if (clamped !== oldIndex && leftPanel && !prefersReducedMotion) {
+        gsap.to(['#ui-title', '#ui-description', '#ui-director', '#ui-year', '#ui-starring', '#ui-reviews'], {
+          opacity: 0.25,
+          y: dir > 0 ? -4 : 4,
+          duration: 0.2,
+          ease: 'power2.in',
+          overwrite: 'auto'
+        });
+      }
+
       const animState = { val: L };
       activeTween = gsap.to(animState, {
         val: clamped,
         duration,
-        ease: 'power3.out',
+        ease: 'power2.out',
         onUpdate: () => {
           L = animState.val;
+          // Actualización armónica de la ficha a mitad del trayecto (38%) para sincronía perfecta
+          const prog = distance > 0 ? 1 - Math.abs(clamped - L) / distance : 1;
+          if (!hasSwappedMeta && (prog >= 0.38 || distance < 0.05)) {
+            hasSwappedMeta = true;
+            ur(clamped);
+          }
         },
         onComplete: () => {
           L = clamped;
-          ur(clamped);
+          if (!hasSwappedMeta) {
+            ur(clamped);
+          }
+          // Sutil impulso Zero-G al asentarse en el centro para dar peso físico
+          if (discHolders[clamped]) {
+            triggerSingleZeroGImpulse(discHolders[clamped], true);
+          }
         }
       });
     }
@@ -1399,12 +1431,10 @@ export default function DiscografiaClient() {
           ease: 'power3.out'
         });
       } else {
-        if (
-          dragState.pointerType !== 'mouse' &&
-          Math.abs(dragState.velocity) >= SPEC.touchFlickVelocity
-        ) {
-          const step = dragState.velocity > 0 ? 1 : -1;
-          mr(W + step, { source: 'flick' });
+        const flickThreshold = dragState.pointerType === 'mouse' ? 0.06 : SPEC.touchFlickVelocity;
+        if (Math.abs(dragState.velocity) >= flickThreshold) {
+          const step = Math.sign(dragState.velocity) * Math.min(2, Math.max(1, Math.round(Math.abs(dragState.velocity) * 8)));
+          mr(Math.round(L) + step, { source: 'flick' });
         } else {
           mr(Math.round(L), { source: 'default' });
         }
@@ -1596,12 +1626,12 @@ export default function DiscografiaClient() {
       lastFrameTime = now;
       const timeSec = now * 0.001;
 
-      // Velocidad e inercia visual (flowLean 0.055, flowBank 0.32, flowDip 0.014)
+      // Velocidad e inercia visual con dinamismo elástico y amortiguación sedosa ("pequeño flow")
       const rawVel = (L - prevL) / Math.max(0.008, dt);
       prevL = L;
-      velocityVisual += (rawVel * 0.08 - velocityVisual) * 0.18;
-      kickBoost *= 0.88;
-      const flowSignal = Math.max(-1.8, Math.min(1.8, velocityVisual + kickBoost));
+      velocityVisual += (rawVel * 0.28 - velocityVisual) * Math.min(1, dt * 7.5);
+      kickBoost *= Math.exp(-dt * 3.6);
+      const flowSignal = Math.max(-1.4, Math.min(1.4, velocityVisual + kickBoost));
 
       const isMobile = window.innerWidth <= 991;
       const v = Math.max(0.12, SPEC.depthGap);
@@ -1636,7 +1666,7 @@ export default function DiscografiaClient() {
         const buoyPitch = u.hoverWeight * Math.cos(timeSec * 2.0 + u.floatPhase) * 0.026;
 
         if (!isMobile) {
-          // Fórmula exacta de colocación en escritorio:
+          // Fórmula de colocación en escritorio:
           // a = m * 0.35
           // x = sin(a) * hGap * 2.4
           // z = -cos(a) * v * 2.4 + v * 2.4
@@ -1644,8 +1674,10 @@ export default function DiscografiaClient() {
           const x = Math.sin(a) * SPEC.hGap * 2.4;
           const z = -Math.cos(a) * v * 2.4 + v * 2.4;
 
-          const activeWeight = Math.max(0, 1 - absM);
-          const y = activeWeight * SPEC.activeDiscY - Math.abs(flowSignal) * SPEC.flowDip;
+          const centerT = Math.max(0, 1 - absM);
+          // Interpolación hermite (smoothstep) para evitar saltos y dar sensación continua
+          const smoothCenter = centerT * centerT * (3 - 2 * centerT);
+          const y = smoothCenter * SPEC.activeDiscY - Math.abs(flowSignal) * SPEC.flowDip;
 
           holder.position.set(
             x + u.zeroGOffset.x,
@@ -1653,12 +1685,11 @@ export default function DiscografiaClient() {
             z + u.zeroGOffset.z + buoyZ
           );
 
-          // Escala: activo vale 1; los demás max(0.8, 1 - |m| * 0.2 * 0.6) + ligero realce de flotabilidad
-          const baseScale =
-            p === W && absM < 0.01 ? 1 : Math.max(0.8, 1 - absM * 0.2 * 0.6);
+          // Escala continua y sedosa: 1.0 en el centro exacto, desciende suavemente a 0.81
+          const baseScale = 0.81 + smoothCenter * 0.19;
           holder.scale.setScalar(baseScale + u.hoverWeight * 0.028);
 
-          // Rotación Y = -a + inclinaciones de flujo, flotabilidad hover en TODOS los discos y arrastre
+          // Rotación con cabeceo aerodinámico (flowLean), alabeo natural (flowBank) y balanceo
           const isAct = p === W;
           const rotX =
             flowSignal * SPEC.flowLean +
@@ -1667,12 +1698,12 @@ export default function DiscografiaClient() {
             buoyPitch +
             (isAct ? u.dragSpinX : 0);
           const rotY =
-            -a +
+            -a - flowSignal * 0.035 +
             u.hoverTiltCurrentY +
             u.zeroGRot.y +
             (isAct ? u.dragSpinY : 0);
           const rotZ =
-            -flowSignal * SPEC.flowBank * 0.18 + u.zeroGRot.z + buoyRoll;
+            -flowSignal * SPEC.flowBank + u.zeroGRot.z + buoyRoll;
 
           holder.rotation.set(rotX, rotY, rotZ);
         } else {
@@ -1680,21 +1711,23 @@ export default function DiscografiaClient() {
           const a = m * 0.35;
           const x = Math.sin(a) * SPEC.touchGap * 1.6;
           const z = -Math.cos(a) * SPEC.touchDepth * 2.0 + SPEC.touchDepth * 2.0;
+          const centerT = Math.max(0, 1 - absM);
+          const smoothCenter = centerT * centerT * (3 - 2 * centerT);
           const scale = THREE.MathUtils.lerp(
-            SPEC.touchActiveScale,
             SPEC.touchInactiveScale,
-            Math.min(1, absM)
+            SPEC.touchActiveScale,
+            smoothCenter
           );
           holder.position.set(
             x + u.zeroGOffset.x,
-            u.zeroGOffset.y + buoyY,
+            u.zeroGOffset.y + buoyY - Math.abs(flowSignal) * (SPEC.flowDip * 0.7),
             z + u.zeroGOffset.z + buoyZ
           );
           holder.scale.setScalar(scale);
           holder.rotation.set(
-            u.hoverTiltCurrentX + u.zeroGRot.x + (p === W ? u.dragSpinX : 0),
-            -a + u.hoverTiltCurrentY + u.zeroGRot.y + (p === W ? u.dragSpinY : 0),
-            u.zeroGRot.z + buoyRoll
+            flowSignal * (SPEC.flowLean * 0.8) + u.hoverTiltCurrentX + u.zeroGRot.x + (p === W ? u.dragSpinX : 0),
+            -a - flowSignal * 0.035 + u.hoverTiltCurrentY + u.zeroGRot.y + (p === W ? u.dragSpinY : 0),
+            -flowSignal * (SPEC.flowBank * 0.8) + u.zeroGRot.z + buoyRoll
           );
         }
       }

@@ -258,6 +258,13 @@
 [data-disc-prev],
 [data-disc-next] {
   font-family: var(--font-texts) !important;
+  transition: transform 0.15s cubic-bezier(0.2, 0.8, 0.2, 1), background-color 0.15s ease, border-color 0.15s ease, opacity 0.2s ease;
+  user-select: none;
+}
+
+[data-disc-prev]:active:not(:disabled),
+[data-disc-next]:active:not(:disabled) {
+  transform: scale(0.9);
 }
 
 .editorial-line {
