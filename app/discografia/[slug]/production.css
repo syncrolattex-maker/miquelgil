@@ -676,56 +676,172 @@
 }
 
 /* ============================================================
-   SECCIÓN UP NEXT (SCROLL NEXT 3D)
+   SECCIÓN UP NEXT (SCROLL-TO & DATA-SCROLL-NEXT) A24 EXACT SPEC
    ============================================================ */
+[data-scroll-next] {
+  --scroll-next-lift: .35em;
+  --scroll-next-inset: 2em;
+  position: relative;
+  background-color: #ffffff;
+  color: #111111;
+  width: 100%;
+}
+
 .scroll-to {
   background-color: #ffffff;
   color: #111111;
   position: relative;
-  min-height: 90vh;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  overflow: hidden;
+  width: 100%;
 }
 
 .scroll-to__vh {
-  width: 100%;
-  max-width: 1320px;
-  margin: 0 auto;
-  padding: 6rem 2rem;
+  height: 100vh;
+  min-height: 100vh;
   display: flex;
-  flex-direction: column;
-  align-items: center;
   position: relative;
+  overflow: hidden;
+  width: 100%;
+  justify-content: space-between;
+  align-items: stretch;
+}
+
+.scroll-to__content {
+  z-index: 1;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: stretch;
+  height: 100%;
+  padding-top: 1em;
+  padding-bottom: 1em;
+  display: flex;
+  position: relative;
+  width: 100%;
+  pointer-events: none;
+}
+
+.scroll-to__row {
+  flex-direction: column;
+  flex: 1;
+  justify-content: center;
+  align-items: center;
+  display: flex;
+  width: 100%;
+}
+
+.scroll-to__row > .divider-horizontal {
+  width: 100%;
+  height: 1px;
+  background-color: rgba(0, 0, 0, 0.12);
+  transform-origin: 50% 50%;
+  transition: transform 0.5s ease;
 }
 
 .scroll-to__canvas {
-  width: 320px;
-  height: 320px;
-  margin: 1.5rem auto;
-  position: relative;
+  z-index: 2;
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
 }
 
 .scroll-to__label {
+  z-index: 3;
+  pointer-events: none;
   text-align: center;
-  margin-top: 1rem;
+  flex-direction: column;
+  align-items: center;
+  padding: 5rem 5vw 0 5vw;
+  display: flex;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
 }
 
-.scroll-to__push-hint {
-  margin-top: 1.5rem;
-  font-family: var(--font-subtitles);
-  font-size: 10px;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: rgba(0, 0, 0, 0.5);
-  animation: pulse-opacity 2s infinite ease-in-out;
+.scroll-to__label h2 {
+  font-family: var(--font-titles) !important;
+  font-weight: 500 !important;
+  font-size: clamp(3.2rem, 7.5vw, 8rem);
+  line-height: 0.90;
+  letter-spacing: -0.04em;
+  text-transform: uppercase !important;
+  margin-top: 0.5rem;
+  color: #111111;
 }
 
-@keyframes pulse-opacity {
-  0%, 100% { opacity: 0.4; }
-  50% { opacity: 0.9; }
+.scroll-to__credit {
+  z-index: 5;
+  color: #111111;
+  align-items: flex-end;
+  flex-direction: column;
+  text-decoration: none;
+  display: flex;
+  position: absolute;
+  bottom: 3.5rem;
+  right: 3.5rem;
+  pointer-events: none;
+}
+
+.scroll-to__link {
+  z-index: 4;
+  display: block;
+  position: absolute;
+  inset: 0;
+  cursor: default;
+}
+
+[data-scroll-next][data-scroll-next-over] .scroll-to__link,
+[data-scroll-next][data-scroll-next-over] {
+  cursor: pointer;
+}
+
+.scroll-to__hint {
+  left: 3.5rem;
+  bottom: 3.5rem;
+  z-index: 5;
+  pointer-events: none;
+  color: rgba(0, 0, 0, 0.65);
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.scroll-to__hint-inner {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.scroll-to__push-bar {
+  width: 90px;
+  height: 3px;
+  background-color: rgba(0, 0, 0, 0.12);
+  border-radius: 999px;
+  overflow: hidden;
+  position: relative;
+}
+
+.scroll-to__push-fill {
+  height: 100%;
+  background-color: #111111;
+  border-radius: 999px;
+  transition: width 0.08s linear;
+}
+
+.scroll-to__hint [data-scroll-next-hint-arrow] {
+  animation: 1.8s cubic-bezier(.4, 0, .2, 1) infinite scroll-next-hint;
+}
+
+@keyframes scroll-next-hint {
+  0% { opacity: 0; transform: translateY(-8px); }
+  50% { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(8px); }
+}
+
+[data-scroll-next][data-scroll-next-leaving] {
+  pointer-events: none;
 }
 
 /* ============================================================

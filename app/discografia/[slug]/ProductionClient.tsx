@@ -27,9 +27,12 @@ export default function ProductionClient({ album }: ProductionClientProps) {
   const heroRef = useRef<HTMLElement>(null);
   const trailerRef = useRef<HTMLElement>(null);
   const dissolveCanvasRef = useRef<HTMLCanvasElement>(null);
+  const scrollNextRef = useRef<HTMLElement>(null);
   const upNextCanvasContainerRef = useRef<HTMLDivElement>(null);
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const playerRef = useRef<any>(null);
+
+  const [pushProgress, setPushProgress] = useState(0);
 
   // Extraer ID de YouTube
   const getYouTubeId = (url: string) => {
@@ -189,22 +192,27 @@ export default function ProductionClient({ album }: ProductionClientProps) {
   }, [trailerOpen, closeTrailer]);
 
   // ============================================================================
-  // 4. ESCENA 3D "UP NEXT" (DISCO 3D CON EMPUJE / PUSH GESTURE)
+  // 4. ESCENA 3D "UP NEXT" (DISCO 3D SEGÚN ESPECIFICACIÓN A24 CON PUSH INTERACTION)
   // ============================================================================
   useEffect(() => {
     const container = upNextCanvasContainerRef.current;
-    if (!container) return;
+    const section = scrollNextRef.current;
+    if (!container || !section) return;
 
     let animId: number;
-    let pushProgress = 0;
     let isDisposed = false;
+    let isLeaving = false;
 
-    const width = container.clientWidth || 320;
-    const height = container.clientHeight || 320;
+    // Métricas del viewport y canvas
+    let width = container.clientWidth || window.innerWidth;
+    let height = container.clientHeight || window.innerHeight;
 
+    // Configuración Three.js
     const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(40, width / height, 0.1, 50);
-    camera.position.set(0, 0, 3.8);
+    const cameraFOV = 40;
+    const cameraDistance = 4.4;
+    const camera = new THREE.PerspectiveCamera(cameraFOV, width / height, 0.1, 100);
+    camera.position.set(0, 0, cameraDistance);
 
     const renderer = new THREE.WebGLRenderer({
       alpha: true,
@@ -212,109 +220,493 @@ export default function ProductionClient({ album }: ProductionClientProps) {
       powerPreference: 'high-performance'
     });
     renderer.setSize(width, height);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.0;
+    renderer.toneMappingExposure = 0.86;
+    renderer.outputColorSpace = THREE.SRGBColorSpace;
+    renderer.setClearColor(0x000000, 0);
+
     container.innerHTML = '';
     container.appendChild(renderer.domElement);
 
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
+    // Jerarquía de grupos A24:
+    // rootGroup -> maneja posición, inclinaciones generales (arrive, rest, push) y escala
+    // wobbleGroup -> maneja balanceo orgánico / idle float
+    // spinGroup -> maneja giro del disco en el eje Z
+    const rootGroup = new THREE.Group();
+    const wobbleGroup = new THREE.Group();
+    const spinGroup = new THREE.Group();
+
+    rootGroup.add(wobbleGroup);
+    wobbleGroup.add(spinGroup);
+    scene.add(rootGroup);
+
+    // Iluminación cinemática A24
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.35);
     scene.add(ambientLight);
 
-    const dirLight = new THREE.DirectionalLight(0xffffff, 2.5);
-    dirLight.position.set(3, 4, 4);
-    scene.add(dirLight);
+    const keyLight = new THREE.DirectionalLight(0xfff9e8, 0.9);
+    keyLight.position.set(3.5, 5, 6);
+    scene.add(keyLight);
 
-    const blueRim = new THREE.DirectionalLight(0x499ff5, 1.8);
-    blueRim.position.set(-3, -2, -2);
-    scene.add(blueRim);
+    const fillLight = new THREE.DirectionalLight(0xffffff, 0.35);
+    fillLight.position.set(-5, -2, 4);
+    scene.add(fillLight);
 
-    const discRadius = 1.0;
+    const rimLight = new THREE.DirectionalLight(0x499ff5, 0.85);
+    rimLight.position.set(0, 3, -6);
+    scene.add(rimLight);
+
+    const topLight = new THREE.DirectionalLight(0xffffff, 1.4);
+    topLight.position.set(0, 3.2, 3);
+    scene.add(topLight);
+
+    // Geometría y materiales del disco óptico CD
     const holeRadius = 0.14;
-    const discGeometry = new THREE.RingGeometry(holeRadius, discRadius, 64, 8);
+    const hubRadius = 0.24;
+    const discRadius = 0.985;
 
-    const cv = document.createElement('canvas');
-    cv.width = 1024;
-    cv.height = 1024;
-    const ctx = cv.getContext('2d')!;
-    ctx.fillStyle = '#18181c';
-    ctx.fillRect(0, 0, 1024, 1024);
+    // 1. Cara frontal con artwork del siguiente álbum
+    const frontGeom = new THREE.RingGeometry(hubRadius, discRadius, 128, 8);
+    const pos = frontGeom.attributes.position;
+    const uvs = frontGeom.attributes.uv;
+    for (let i = 0; i < pos.count; i++) {
+      uvs.setXY(i, (pos.getX(i) + 1) * 0.5, (pos.getY(i) + 1) * 0.5);
+    }
+    uvs.needsUpdate = true;
 
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
-    ctx.lineWidth = 3;
-    ctx.beginPath();
-    ctx.arc(512, 512, 480, 0, Math.PI * 2);
-    ctx.stroke();
+    const textureLoader = new THREE.TextureLoader();
+    const discTexture = textureLoader.load(album.nextAlbum.discArtUrl);
+    discTexture.colorSpace = THREE.SRGBColorSpace;
+    discTexture.anisotropy = renderer.capabilities.getMaxAnisotropy();
 
-    ctx.fillStyle = '#ffffff';
-    ctx.font = '600 32px "PP Neue Montreal", sans-serif';
-    ctx.textAlign = 'center';
-    ctx.fillText(`${album.nextAlbum.title.toUpperCase()} · ${album.nextAlbum.year}`, 512, 940);
-    ctx.font = '500 24px "PP Museum", serif';
-    ctx.fillText('SEGÜENT EDICIÓ — ARXIU MIQUEL GIL', 512, 980);
+    const frontMaterial = new THREE.MeshPhysicalMaterial({
+      map: discTexture,
+      roughness: 0.38,
+      metalness: 0.42,
+      clearcoat: 0.8,
+      clearcoatRoughness: 0.08,
+      side: THREE.FrontSide
+    });
+    const frontMesh = new THREE.Mesh(frontGeom, frontMaterial);
+    spinGroup.add(frontMesh);
 
-    const texture = new THREE.CanvasTexture(cv);
-    const discMaterial = new THREE.MeshStandardMaterial({
-      map: texture,
-      roughness: 0.35,
-      metalness: 0.25,
+    // 2. Cara trasera oscura con iridiscencia metálica
+    const backGeom = new THREE.RingGeometry(hubRadius, discRadius, 128, 8);
+    const backMaterial = new THREE.MeshPhysicalMaterial({
+      color: 0x1a1e2a,
+      roughness: 0.25,
+      metalness: 0.85,
+      clearcoat: 0.4,
+      side: THREE.BackSide
+    });
+    const backMesh = new THREE.Mesh(backGeom, backMaterial);
+    spinGroup.add(backMesh);
+
+    // 3. Borde perimetral exterior
+    const edgeGeom = new THREE.CylinderGeometry(discRadius + 0.005, discRadius + 0.005, 0.012, 128, 1, true);
+    edgeGeom.rotateX(Math.PI / 2);
+    const edgeMaterial = new THREE.MeshPhysicalMaterial({
+      color: 0xffffff,
+      roughness: 0.05,
+      metalness: 0.55,
+      clearcoat: 0.7,
       side: THREE.DoubleSide
     });
+    const edgeMesh = new THREE.Mesh(edgeGeom, edgeMaterial);
+    spinGroup.add(edgeMesh);
 
-    const discMesh = new THREE.Mesh(discGeometry, discMaterial);
-    discMesh.rotation.x = THREE.MathUtils.degToRad(-15);
-    discMesh.rotation.y = THREE.MathUtils.degToRad(-25);
-    scene.add(discMesh);
-
-    const hubGeom = new THREE.RingGeometry(holeRadius, 0.25, 48);
-    const hubMat = new THREE.MeshStandardMaterial({
-      color: 0xcccccc,
-      metalness: 0.9,
-      roughness: 0.1,
+    // 4. Hub central acrílico transparente
+    const hubGeom = new THREE.RingGeometry(holeRadius, hubRadius, 64, 2);
+    const hubMaterial = new THREE.MeshPhysicalMaterial({
+      color: 0xffffff,
+      roughness: 0.25,
+      metalness: 0.05,
+      transmission: 0.75,
+      thickness: 0.5,
+      ior: 1.5,
+      transparent: true,
       side: THREE.DoubleSide
     });
-    const hubMesh = new THREE.Mesh(hubGeom, hubMat);
-    hubMesh.position.z = 0.002;
-    discMesh.add(hubMesh);
+    const hubMesh = new THREE.Mesh(hubGeom, hubMaterial);
+    spinGroup.add(hubMesh);
 
-    const onWheel = (e: WheelEvent) => {
+    // Variables de estado físico y animación
+    let ht = 0.01;
+    let pt = 1.0;
+    let mt = 0;
+    let Ce = 0; // Scroll progress (0 a 1)
+    let pushProgressTarget = 0;
+    let smoothedPush = 0;
+    let lastPushActionTime = 0;
+    let wheelArmedTime = 0;
+    let lastWheelTime = 0;
+    let isWheelArmed = false;
+    let idleTimer = 0;
+    let currentSpinZ = 0;
+    let hasPoppedIn = false;
+    const revealedRules: boolean[] = [false, false, false, false, false];
+
+    const popScaleState = { value: 0.35 };
+    const exitPhysics = { spin: 0, lift: 0 };
+
+    // Cálculo de dimensiones y escala en unidades de mundo
+    const updateDimensions = () => {
+      width = container.clientWidth || window.innerWidth;
+      height = container.clientHeight || window.innerHeight;
+      renderer.setSize(width, height);
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+      camera.aspect = width / height;
+      camera.updateProjectionMatrix();
+
+      // Conversión de píxeles a unidades Three.js
+      ht = (2 * cameraDistance * Math.tan(THREE.MathUtils.degToRad(cameraFOV) / 2)) / height;
+      pt = (Math.min(1.2 * height, 1.3 * width) * ht) / 2;
+
+      // Alineación con la 4ª línea separadora horizontal (.divider-horizontal)
+      const rows = section.querySelectorAll<HTMLElement>('.scroll-to__row > .divider-horizontal');
+      if (rows.length >= 4) {
+        const sRect = section.getBoundingClientRect();
+        const rTop = rows[3].getBoundingClientRect().top - sRect.top;
+        const restTiltRad = THREE.MathUtils.degToRad(-30);
+        const topOffset = pt * Math.cos(restTiltRad);
+        mt = -(rTop - height / 2) * ht - topOffset;
+      } else {
+        mt = -pt * 0.15;
+      }
+    };
+
+    updateDimensions();
+
+    // Helper para compensación horizontal de perspectiva en rotación (vt)
+    const centerMatrix = new THREE.Matrix4();
+    const getCenterComp = (euler: THREE.Euler) => {
+      centerMatrix.makeRotationFromEuler(euler);
+      const el = centerMatrix.elements;
+      const ang = Math.atan2(el[5], el[1]);
+      return Math.cos(ang) * el[0] + Math.sin(ang) * el[4];
+    };
+
+    // Comprobación de cursor dentro del disco con polígono 3D proyectado de 48 puntos
+    const checkDiscHover = (clientX: number, clientY: number) => {
+      if (!container || !camera || !wobbleGroup) return false;
       const rect = container.getBoundingClientRect();
-      const inView = rect.top < window.innerHeight && rect.bottom > 0;
-      if (!inView) return;
+      const ndcX = ((clientX - rect.left) / rect.width) * 2 - 1;
+      const ndcY = 1 - ((clientY - rect.top) / rect.height) * 2;
 
-      if (e.deltaY > 0) {
-        pushProgress += 0.04;
-        if (pushProgress >= 1) {
-          pushProgress = 1;
+      const vec = new THREE.Vector3();
+      const poly: [number, number][] = [];
+      for (let i = 0; i < 48; i++) {
+        const theta = (i / 48) * Math.PI * 2;
+        vec.set(Math.cos(theta), Math.sin(theta), 0);
+        vec.applyMatrix4(wobbleGroup.matrixWorld);
+        vec.project(camera);
+        poly.push([vec.x, vec.y]);
+      }
+
+      let inside = false;
+      for (let i = 0, j = 47; i < 48; j = i++) {
+        const [xi, yi] = poly[i];
+        const [xj, yj] = poly[j];
+        if (yi > ndcY !== yj > ndcY && ndcX < ((xj - xi) * (ndcY - yi)) / (yj - yi) + xi) {
+          inside = !inside;
+        }
+      }
+      return inside;
+    };
+
+    // Secuencia de salida (Exit timeline: al llegar a push 1.0 o hacer clic en el disco)
+    const triggerExit = () => {
+      if (isLeaving) return;
+      isLeaving = true;
+      pushProgressTarget = 1;
+      smoothedPush = 1;
+      section.setAttribute('data-scroll-next-leaving', 'true');
+
+      const exitTl = gsap.timeline();
+
+      // 1. Giro rápido y elevación del disco
+      exitTl.to(
+        exitPhysics,
+        {
+          spin: -16,
+          lift: 0.35,
+          duration: 0.7,
+          ease: 'power2.in'
+        },
+        0
+      );
+
+      // 2. Encogimiento del disco (popOut a 0.35)
+      exitTl.to(
+        popScaleState,
+        {
+          value: 0.35,
+          duration: 0.45,
+          ease: 'power2.in'
+        },
+        0
+      );
+
+      // 3. Subida del texto fuera de la pantalla (yPercent -120)
+      const texts = section.querySelectorAll(
+        '[data-scroll-next-kicker], [data-scroll-next-title], [data-reveal]'
+      );
+      if (texts.length) {
+        exitTl.to(texts, { yPercent: -120, duration: 0.45, ease: 'power3.out', stagger: 0.03 }, 0);
+      }
+
+      // 4. Colapso de las líneas horizontales
+      const rowEls = section.querySelectorAll('.scroll-to__row > .divider-horizontal');
+      if (rowEls.length) {
+        exitTl.to(
+          rowEls,
+          {
+            scaleX: 0,
+            duration: 0.5,
+            ease: 'power3.out',
+            stagger: { each: 0.04, from: 'end' }
+          },
+          0.05
+        );
+      }
+
+      // 5. Navegación a la siguiente ficha en 0.48s
+      exitTl.call(
+        () => {
           window.location.href = `/discografia/${album.nextAlbum.slug}/`;
+        },
+        [],
+        0.48
+      );
+    };
+
+    // Control de scroll y revelación de elementos
+    const updateScroll = () => {
+      if (!section) return;
+      const rect = section.getBoundingClientRect();
+      const vh = window.innerHeight;
+      const total = rect.height;
+      const current = vh - rect.top;
+      Ce = Math.max(0, Math.min(1, current / total));
+
+      // Pop-in al cruzar el 30% (arriveStart: 0.3)
+      if (!hasPoppedIn && Ce >= 0.3) {
+        hasPoppedIn = true;
+        gsap.to(popScaleState, {
+          value: 1.0,
+          duration: 1.05,
+          ease: 'power3.out'
+        });
+      }
+
+      // Revelación progresiva de las líneas horizontales
+      const rowEls = section.querySelectorAll<HTMLElement>('.scroll-to__row > .divider-horizontal');
+      rowEls.forEach((row, idx) => {
+        const thresh = (idx + 1) / (rowEls.length + 1);
+        if (Ce >= thresh && !revealedRules[idx]) {
+          revealedRules[idx] = true;
+          gsap.to(row, { scaleX: 1, duration: 0.9, ease: 'power3.out' });
+        }
+      });
+    };
+
+    const isAtBottom = () => {
+      const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+      return window.scrollY >= maxScroll - 3;
+    };
+
+    // Gestión del gesto de empuje (Wheel / Touch / Keys)
+    const onWheel = (e: WheelEvent) => {
+      if (isLeaving) return;
+      let delta = e.deltaY;
+      if (e.deltaMode === 1) delta *= 16;
+      else if (e.deltaMode === 2) delta *= window.innerHeight;
+      if (!delta) return;
+
+      const now = performance.now();
+      if (!isAtBottom()) return;
+
+      if (!wheelArmedTime) wheelArmedTime = now;
+      if (!isWheelArmed) {
+        const settled = now - wheelArmedTime >= 350; // pushSettle
+        const gap = now - lastWheelTime >= 140; // pushGap
+        if (!settled || !gap) return;
+        isWheelArmed = true;
+      }
+      lastWheelTime = now;
+
+      const clampedDelta = Math.max(-140, Math.min(140, delta));
+      pushProgressTarget = Math.max(0, Math.min(1, pushProgressTarget + clampedDelta / 620));
+      lastPushActionTime = now;
+
+      if (pushProgressTarget >= 1) {
+        triggerExit();
+      }
+    };
+
+    let touchStartY: number | null = null;
+    const onTouchStart = (e: TouchEvent) => {
+      touchStartY = e.touches[0]?.clientY ?? null;
+    };
+    const onTouchMove = (e: TouchEvent) => {
+      if (isLeaving || touchStartY === null) return;
+      const currentY = e.touches[0]?.clientY;
+      if (currentY === undefined) return;
+      const delta = touchStartY - currentY;
+      touchStartY = currentY;
+
+      if (!isAtBottom() || delta <= 0) return;
+
+      pushProgressTarget = Math.max(0, Math.min(1, pushProgressTarget + delta / 380));
+      lastPushActionTime = performance.now();
+
+      if (pushProgressTarget >= 1) {
+        triggerExit();
+      }
+    };
+    const onTouchEnd = () => {
+      touchStartY = null;
+    };
+
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (isLeaving) return;
+      if (e.target && (e.target as HTMLElement).tagName.match(/INPUT|TEXTAREA|SELECT/)) return;
+      if (e.key === 'ArrowDown' || e.key === 'PageDown' || e.key === ' ') {
+        if (!isAtBottom()) return;
+        pushProgressTarget = Math.max(0, Math.min(1, pushProgressTarget + 0.34));
+        lastPushActionTime = performance.now();
+        if (pushProgressTarget >= 1) {
+          triggerExit();
         }
       }
     };
 
-    window.addEventListener('wheel', onWheel, { passive: true });
+    // Eventos sobre el enlace del disco
+    const linkEl = section.querySelector<HTMLElement>('[data-scroll-next-link]');
+    const onPointerMove = (e: PointerEvent) => {
+      if (isLeaving) return;
+      if (checkDiscHover(e.clientX, e.clientY)) {
+        section.setAttribute('data-scroll-next-over', '');
+      } else {
+        section.removeAttribute('data-scroll-next-over');
+      }
+    };
+    const onPointerLeave = () => {
+      section.removeAttribute('data-scroll-next-over');
+    };
+    const onLinkClick = (e: MouseEvent) => {
+      e.preventDefault();
+      if (!isLeaving && checkDiscHover(e.clientX, e.clientY)) {
+        triggerExit();
+      }
+    };
 
-    const animate = () => {
+    if (linkEl) {
+      linkEl.addEventListener('pointermove', onPointerMove);
+      linkEl.addEventListener('pointerleave', onPointerLeave);
+      linkEl.addEventListener('click', onLinkClick);
+    }
+
+    window.addEventListener('scroll', updateScroll, { passive: true });
+    window.addEventListener('resize', updateDimensions);
+    window.addEventListener('wheel', onWheel, { passive: true });
+    window.addEventListener('touchstart', onTouchStart, { passive: true });
+    window.addEventListener('touchmove', onTouchMove, { passive: true });
+    window.addEventListener('touchend', onTouchEnd, { passive: true });
+    window.addEventListener('keydown', onKeyDown);
+
+    updateScroll();
+
+    // Bucle de renderizado animado a 60 fps
+    let lastTime = performance.now();
+    const animate = (now: number) => {
       if (isDisposed) return;
       animId = requestAnimationFrame(animate);
 
-      pushProgress = Math.max(0, pushProgress - 0.005);
-      const spinSpeed = 0.004 + pushProgress * 0.05;
-      discMesh.rotation.z -= spinSpeed;
-      discMesh.scale.setScalar(1.0 + pushProgress * 0.1);
+      const dt = Math.max(0.001, Math.min(0.05, (now - lastTime) / 1000));
+      lastTime = now;
+
+      // Drenaje de empuje (pushDrain: 0.9/s tras pushHold de 180ms)
+      if (!isLeaving && now - lastPushActionTime > 180) {
+        pushProgressTarget = Math.max(0, pushProgressTarget - dt * 0.9);
+      }
+
+      // Suavizado de la interacción de empuje (pushEase: 10)
+      smoothedPush += (pushProgressTarget - smoothedPush) * Math.min(1, dt * 10);
+      if (Math.abs(pushProgressTarget - smoothedPush) < 0.001) smoothedPush = pushProgressTarget;
+
+      const o = smoothedPush;
+      setPushProgress(o);
+
+      // Interpolación de llegada de scroll (arriveStart: 0.3 -> arriveEnd: 0.97)
+      const arriveProgress = Math.max(0, Math.min(1, (Ce - 0.3) / (0.97 - 0.3)));
+      const a = arriveProgress;
+
+      // Rotación en el eje Z (giro constante de reposo -0.14 + giro acelerado con el empuje)
+      const idleSpinDelta = -0.14 * a;
+      const pushSpinDelta = -6.0 * o;
+      currentSpinZ += (idleSpinDelta + pushSpinDelta + exitPhysics.spin) * dt;
+      spinGroup.rotation.z = currentSpinZ;
+
+      // Balanceo orgánico (idle floating)
+      idleTimer += dt;
+      const idleAmp = 0.022 * a;
+      wobbleGroup.rotation.x = Math.sin(idleTimer * 0.5 * Math.PI) * idleAmp;
+      wobbleGroup.rotation.y = Math.cos(idleTimer * 0.5 * Math.PI * 0.7) * idleAmp;
+
+      // Inclinación cinematográfica (arriveTilt -> restTilt -> pushTilt)
+      const rad = THREE.MathUtils.degToRad;
+      const tiltX = rad(-52) * (1 - a) + rad(-30) * a * (1 - o) + rad(-16) * a * o;
+      const tiltY = rad(10) * (1 - a) + rad(-30) * a * (1 - o) + rad(-10) * a * o;
+      rootGroup.rotation.x = tiltX;
+      rootGroup.rotation.y = tiltY;
+
+      // Escala del disco con factor de crecimiento por empuje (pushGrow: 1.04)
+      const popScale = popScaleState.value;
+      const discScale = pt * Math.max(0.0001, popScale) * (1 + 0.04 * o);
+      const compX = getCenterComp(rootGroup.rotation);
+
+      // Posición con caída de llegada (arriveDrop: 0.9) y elevación por empuje (pushLift: 0.1)
+      rootGroup.position.set(
+        -compX * discScale,
+        mt - 0.9 * pt * (1 - a) + 0.1 * pt * o + exitPhysics.lift * pt,
+        0
+      );
+      rootGroup.scale.setScalar(discScale);
+      rootGroup.visible = popScale >= 0.34;
 
       renderer.render(scene, camera);
     };
 
-    animate();
+    animate(performance.now());
 
     return () => {
       isDisposed = true;
       cancelAnimationFrame(animId);
+      window.removeEventListener('scroll', updateScroll);
+      window.removeEventListener('resize', updateDimensions);
       window.removeEventListener('wheel', onWheel);
-      discGeometry.dispose();
-      discMaterial.dispose();
+      window.removeEventListener('touchstart', onTouchStart);
+      window.removeEventListener('touchmove', onTouchMove);
+      window.removeEventListener('touchend', onTouchEnd);
+      window.removeEventListener('keydown', onKeyDown);
+
+      if (linkEl) {
+        linkEl.removeEventListener('pointermove', onPointerMove);
+        linkEl.removeEventListener('pointerleave', onPointerLeave);
+        linkEl.removeEventListener('click', onLinkClick);
+      }
+
+      frontGeom.dispose();
+      frontMaterial.dispose();
+      backGeom.dispose();
+      backMaterial.dispose();
+      edgeGeom.dispose();
+      edgeMaterial.dispose();
       hubGeom.dispose();
-      hubMat.dispose();
+      hubMaterial.dispose();
+      discTexture.dispose();
       renderer.dispose();
     };
   }, [album.nextAlbum]);
@@ -583,49 +975,99 @@ export default function ProductionClient({ album }: ProductionClientProps) {
       </section>
 
       {/* ============================================================
-          4. SECCIÓN UP NEXT (3D DISC & PUSH INTERACTION)
+          4. SECCIÓN UP NEXT (3D DISC & PUSH INTERACTION SEGÚN A24)
          ============================================================ */}
-      <section className="scroll-to">
+      <section
+        ref={scrollNextRef}
+        data-scroll-next=""
+        data-theme-change="nav:dark"
+        data-scroll-next-disc-vh="120"
+        data-scroll-next-disc-vw="130"
+        className="scroll-to theme-base"
+      >
         <div className="scroll-to__vh">
-          <span className="subheading-xs tracking-widest text-black/50">
-            SEGÜENT PRODUCCIÓ AL CATÀLEG
-          </span>
-
-          <div
-            ref={upNextCanvasContainerRef}
-            className="scroll-to__canvas cursor-grab"
-            title="Arrossega o fes roda per a passar a la següent producció"
-          />
-
-          <div className="scroll-to__label">
-            <span className="subheading-xs block mb-1">UP NEXT</span>
-            <h2 className="heading-l">{album.nextAlbum.title.toUpperCase()}</h2>
-            <span className="subheading-xs block mt-2 text-black/60">
-              {album.nextAlbum.year} · {album.nextAlbum.genre}
-            </span>
+          <div className="container">
+            <div className="scroll-to__content">
+              <div className="scroll-to__row">
+                <div className="divider-horizontal" />
+              </div>
+              <div className="scroll-to__row">
+                <div className="divider-horizontal" />
+              </div>
+              <div className="scroll-to__row">
+                <div className="divider-horizontal" />
+              </div>
+              <div className="scroll-to__row">
+                <div className="divider-horizontal" />
+              </div>
+              <div className="scroll-to__row">
+                <div className="divider-horizontal" />
+              </div>
+            </div>
           </div>
 
-          <Link
-            href={`/discografia/${album.nextAlbum.slug}/`}
-            className="btn a24-btn mt-6"
-            data-hover=""
-          >
-            <div className="btn__divider" />
-            <span className="btn__p-mask">
-              <span
-                className="btn__p"
-                data-hover-inner
-                data-text={`VEURE FITXA DE ${album.nextAlbum.title.toUpperCase()} →`}
-              >
-                <span data-hover-text>{`VEURE FITXA DE ${album.nextAlbum.title.toUpperCase()} →`}</span>
-              </span>
-            </span>
-            <div className="btn__divider" />
-          </Link>
+          {/* Lienzo WebGL Three.js con el disco 3D */}
+          <div
+            ref={upNextCanvasContainerRef}
+            data-scroll-next-canvas=""
+            className="scroll-to__canvas"
+          />
 
-          <p className="scroll-to__push-hint">
-            RODA O ARROSSEGA CAP AMUNT PER A AVANÇAR
-          </p>
+          {/* Etiqueta y Título en mayúsculas PP Eiko */}
+          <div data-scroll-next-label="" className="scroll-to__label">
+            <p data-scroll-next-kicker="" className="subheading-xs">
+              DISC SEGÜENT
+            </p>
+            <h2 data-scroll-next-title="" className="heading-l">
+              {album.nextAlbum.title.toUpperCase()}
+            </h2>
+          </div>
+
+          {/* Bloque de créditos del disco siguiente */}
+          <div data-scroll-next-credit="" className="scroll-to__credit">
+            <div data-reveal="" className="text-right">
+              <span className="subheading-xs block">ANY</span>
+              <span className="paragraph-m font-medium">{album.nextAlbum.year}</span>
+            </div>
+            <div data-reveal="" className="text-right mt-3">
+              <span className="subheading-xs block">GÈNERE</span>
+              <span className="paragraph-m font-medium">{album.nextAlbum.genre}</span>
+            </div>
+          </div>
+
+          {/* Enlace interactivo por polígono de 48 puntos sobre el disco */}
+          <a
+            aria-label={`Passar al disc següent: ${album.nextAlbum.title.toUpperCase()}`}
+            data-scroll-next-link=""
+            href={`/discografia/${album.nextAlbum.slug}/`}
+            className="scroll-to__link"
+          />
+
+          {/* Indicador de ayuda y barra de progreso de empuje */}
+          <div data-scroll-next-hint="" className="scroll-to__hint">
+            <div className="scroll-to__hint-inner">
+              <span className="subheading-xs">EMPENY PER PASSAR DE DISC</span>
+              <div className="scroll-to__push-bar">
+                <div
+                  className="scroll-to__push-fill"
+                  style={{ width: `${Math.round(pushProgress * 100)}%` }}
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Lista oculta de datos para resolución de producciones */}
+          <div data-scroll-next-list="" style={{ display: 'none' }} aria-hidden="true">
+            <div data-scroll-next-item="">
+              <span data-scroll-next-field="title">{album.nextAlbum.title}</span>
+              <span data-scroll-next-field="type">{album.nextAlbum.type}</span>
+              <span data-scroll-next-field="disc-art-url">{album.nextAlbum.discArtUrl}</span>
+              <span data-scroll-next-field="slug">{album.nextAlbum.slug}</span>
+              <span data-scroll-next-field="year">{album.nextAlbum.year}</span>
+              <span data-scroll-next-field="genre">{album.nextAlbum.genre}</span>
+              <span data-scroll-next-field="runtime">{album.nextAlbum.runtime}</span>
+            </div>
+          </div>
         </div>
       </section>
 
