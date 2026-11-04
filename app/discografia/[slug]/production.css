@@ -1,0 +1,625 @@
+/* ============================================================
+   A24 PRODUCTION SPECIFICATION — FICHA DE CD NORMALIZADA
+   Tipografías oficiales:
+   - Títulos: PP Eiko Medium
+   - Subtítulos: PP Museum Font Family
+   - Textos / Menús / Botones: PP Neue Montreal
+   ============================================================ */
+
+@font-face {
+  font-family: 'PP Eiko';
+  src: url('/fonts/PPEiko-Medium.woff2') format('woff2');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'PP Museum';
+  src: url('/fonts/PPMuseum-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'PP Neue Montreal';
+  src: url('/fonts/PPNeueMontreal-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'PP Neue Montreal';
+  src: url('/fonts/PPNeueMontreal-Medium.woff2') format('woff2');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  --font-titles: 'PP Eiko', serif;
+  --font-subtitles: 'PP Museum', serif;
+  --font-texts: 'PP Neue Montreal', -apple-system, BlinkMacSystemFont, sans-serif;
+  
+  --_theme---background: #ffffff;
+  --_theme---body-text: #111111;
+  --_theme---border: rgba(0, 0, 0, 0.15);
+  --_colors---swatch--black: #050505;
+  --_colors---swatch--grey: #d6d3d1;
+  --_colors---swatch--white: #ffffff;
+  --_colors---swatch--brand: #891a20;
+}
+
+.production-page {
+  font-family: var(--font-texts);
+  background-color: var(--_theme---background);
+  color: var(--_theme---body-text);
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ============================================================
+   TIPOGRAFÍA SEGÚN ESPECIFICACIÓN
+   ============================================================ */
+.heading-l,
+.production-hero h1,
+.scroll-to h2,
+[data-scroll-next-title] {
+  font-family: var(--font-titles) !important;
+  font-weight: 500 !important;
+  font-size: clamp(2.8rem, 6vw, 6.2rem);
+  line-height: 0.92;
+  letter-spacing: -0.035em;
+  text-transform: none;
+}
+
+.subheading-xs,
+.a24-label,
+[data-scroll-next-kicker] {
+  font-family: var(--font-subtitles) !important;
+  font-size: 11px;
+  line-height: 14px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(0, 0, 0, 0.55);
+}
+
+.theme-dark .subheading-xs,
+.theme-dark .a24-label {
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.paragraph-m {
+  font-family: var(--font-texts);
+  font-size: 13px;
+  line-height: 1.35;
+  letter-spacing: -0.01em;
+}
+
+.paragraph-xl {
+  font-family: var(--font-titles);
+  font-size: clamp(1.4rem, 2.2vw, 2.4rem);
+  line-height: 1.25;
+  letter-spacing: -0.02em;
+  font-weight: 400;
+}
+
+/* ============================================================
+   DIVISORES HORIZONTALES
+   ============================================================ */
+.divider-horizontal {
+  background-color: var(--_theme---body-text);
+  opacity: 0.25;
+  width: 100%;
+  height: 0.5px;
+  transform-origin: left center;
+}
+
+.theme-dark .divider-horizontal {
+  background-color: #ffffff;
+  opacity: 0.2;
+}
+
+/* ============================================================
+   SECCIÓN HERO (PRODUCTION HERO)
+   ============================================================ */
+.production-hero {
+  background-color: #ffffff;
+  color: #111111;
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.production-content {
+  min-height: 100vh;
+  padding: 6.5rem 2rem 3rem 2rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: stretch;
+  max-width: 1320px;
+  margin: 0 auto;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.production__info {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.production__title {
+  margin: 0 auto 1.5rem auto;
+  text-align: center;
+}
+
+.production__credits {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: baseline;
+  gap: 0.35rem 0.75rem;
+  max-width: 82ch;
+  margin: 1.2rem auto;
+  text-align: center;
+}
+
+.credits-item__list {
+  display: inline-flex;
+  gap: 0.35rem;
+}
+
+.production__metadata {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.5rem;
+  margin-top: 2rem;
+  width: 100%;
+}
+
+.production-metadata__item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.metadata-item__content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 0.35rem;
+}
+
+/* ============================================================
+   BOTONES CTA CON PLUSES (ESQUINAS A24)
+   ============================================================ */
+.production__cta {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 2rem;
+  position: relative;
+  margin: 4rem auto 2rem auto;
+  padding: 3rem 4rem;
+}
+
+.plus {
+  aspect-ratio: 1;
+  justify-content: center;
+  align-items: center;
+  height: 1.125rem;
+  width: 1.125rem;
+  display: flex;
+  position: absolute;
+  pointer-events: none;
+}
+
+.plus.is--tl { top: 0; left: 0; }
+.plus.is--tr { top: 0; right: 0; }
+.plus.is--bl { bottom: 0; left: 0; }
+.plus.is--br { bottom: 0; right: 0; }
+
+.plus-stroke {
+  background-color: #111111;
+  position: absolute;
+}
+
+.plus-stroke.is--hor {
+  width: 100%;
+  height: 1px;
+}
+
+.plus-stroke.is--ver {
+  height: 100%;
+  width: 1px;
+}
+
+.btn {
+  display: inline-flex;
+  flex-direction: column;
+  position: relative;
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+  background: transparent;
+  border: none;
+  padding: 0.5rem 0;
+}
+
+.btn__divider {
+  width: 100%;
+  height: 1px;
+  background-color: #111111;
+  transform-origin: left center;
+}
+
+.btn__p-mask {
+  overflow: hidden;
+  padding: 0.6rem 1.6rem;
+  display: inline-block;
+}
+
+.btn__p {
+  font-family: var(--font-texts);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  display: block;
+}
+
+.btn:hover .btn__divider {
+  background-color: var(--_colors---swatch--brand);
+}
+
+.btn:hover .btn__p {
+  color: var(--_colors---swatch--brand);
+}
+
+/* ============================================================
+   SECCIÓN TRAILER (THEME DARK)
+   ============================================================ */
+.trailer {
+  background-color: #050505;
+  color: #f2f2f2;
+  position: relative;
+  overflow: hidden;
+}
+
+.trailer__vh {
+  position: relative;
+  min-height: 80vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6rem 2rem;
+}
+
+.trailer__bg {
+  position: absolute;
+  inset: -10%;
+  width: 120%;
+  height: 120%;
+  object-fit: cover;
+  opacity: 0.32;
+  filter: grayscale(80%) brightness(0.65) contrast(1.2);
+  pointer-events: none;
+}
+
+.trailer__content {
+  position: relative;
+  z-index: 2;
+  max-width: 900px;
+  margin: 0 auto;
+  width: 100%;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.trailer-content__row {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  align-items: center;
+}
+
+.trailer-quote-text {
+  font-family: var(--font-titles);
+  font-size: clamp(2rem, 4vw, 3.8rem);
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+  color: #ffffff;
+}
+
+.trailer .btn__divider {
+  background-color: #ffffff;
+}
+
+.trailer .btn__p {
+  color: #ffffff;
+}
+
+.trailer .btn:hover .btn__divider {
+  background-color: #ff3344;
+}
+
+.trailer .btn:hover .btn__p {
+  color: #ff3344;
+}
+
+/* ============================================================
+   SECCIÓN DESCRIPCIÓN Y TRACKLIST
+   ============================================================ */
+.production-description {
+  background-color: #ffffff;
+  color: #111111;
+  padding: 8rem 2rem;
+  position: relative;
+}
+
+.description-content {
+  max-width: 1320px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: 5rem;
+}
+
+.description__synopsis {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.description__awards {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.tracklist-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 0.6rem 0;
+  border-bottom: 0.5px solid rgba(0, 0, 0, 0.12);
+}
+
+.tracklist-item:hover {
+  border-bottom-color: #111111;
+}
+
+/* ============================================================
+   SECCIÓN UP NEXT (SCROLL NEXT 3D)
+   ============================================================ */
+.scroll-to {
+  background-color: #ffffff;
+  color: #111111;
+  position: relative;
+  min-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+}
+
+.scroll-to__vh {
+  width: 100%;
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: 6rem 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+}
+
+.scroll-to__canvas {
+  width: 320px;
+  height: 320px;
+  margin: 1.5rem auto;
+  position: relative;
+}
+
+.scroll-to__label {
+  text-align: center;
+  margin-top: 1rem;
+}
+
+.scroll-to__push-hint {
+  margin-top: 1.5rem;
+  font-family: var(--font-subtitles);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(0, 0, 0, 0.5);
+  animation: pulse-opacity 2s infinite ease-in-out;
+}
+
+@keyframes pulse-opacity {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 0.9; }
+}
+
+/* ============================================================
+   LIGHTBOX DEL TRÁILER (A24 CINEMATIC LIGHTBOX)
+   ============================================================ */
+.trailer-lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: #000000;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.35s ease;
+}
+
+.trailer-lightbox[data-trailer-status="open"],
+.trailer-lightbox[data-trailer-status="opening"] {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.trailer-lightbox__stage {
+  flex: 1;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+}
+
+.trailer-lightbox__player {
+  position: relative;
+  width: 100%;
+  max-width: 1100px;
+  aspect-ratio: 16 / 9;
+  background: #0a0a0a;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.8);
+}
+
+.trailer-lightbox__player iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
+.trailer-lightbox__ui {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 1.5rem 2.5rem;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.trailer-lightbox__top,
+.trailer-lightbox__bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  pointer-events: auto;
+  gap: 1.5rem;
+}
+
+.trailer-lightbox__ctl {
+  background: none;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  color: #ffffff;
+  padding: 0.45rem 1.1rem;
+  font-family: var(--font-texts);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.trailer-lightbox__ctl:hover {
+  background: #ffffff;
+  color: #000000;
+  border-color: #ffffff;
+}
+
+.trailer-lightbox__time {
+  font-family: var(--font-texts);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  color: rgba(255, 255, 255, 0.7);
+  white-space: nowrap;
+}
+
+.trailer-lightbox__timeline {
+  flex: 1;
+  height: 20px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.trailer-lightbox__timeline-rule {
+  position: absolute;
+  width: 100%;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.trailer-lightbox__timeline-progress {
+  position: absolute;
+  left: 0;
+  height: 2px;
+  background: #ffffff;
+  width: 0%;
+}
+
+.trailer-lightbox__volume {
+  width: 70px;
+  height: 16px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.trailer-lightbox__volume-rule {
+  position: absolute;
+  width: 100%;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.trailer-lightbox__volume-level {
+  position: absolute;
+  left: 0;
+  height: 2px;
+  background: #ffffff;
+  width: 55%;
+}
+
+/* Canvas de disolución procedural */
+.trailer-lightbox__canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 20;
+}
+
+/* ============================================================
+   RESPONSIVE MÓVIL (<= 991px)
+   ============================================================ */
+@media (max-width: 991px) {
+  .production__metadata {
+    grid-template-columns: repeat(2, 1fr);
+    margin-top: 1.5rem;
+  }
+  
+  .description-content {
+    grid-template-columns: 1fr;
+    gap: 3.5rem;
+  }
+  
+  .production__cta-touch {
+    margin-top: 2.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+}

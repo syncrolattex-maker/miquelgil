@@ -1468,10 +1468,21 @@ export default function DiscografiaClient() {
     const modalYear = container.querySelector('#modal-year') as HTMLElement | null;
     const modalDesc = container.querySelector('#modal-desc') as HTMLElement | null;
     const modalSlug = container.querySelector('#modal-slug') as HTMLElement | null;
+    const modalExtLink = container.querySelector('#modal-ext-link') as HTMLAnchorElement | null;
     const closeModalBtn = container.querySelector('#close-modal-btn') as HTMLButtonElement | null;
 
     function openFilmDetail(film: FilmData, openInNewTab = false) {
       if (!film || !film.detailUrl) return;
+
+      if (film.detailUrl.startsWith('/discografia/') || film.title.toLowerCase().includes('orgànic')) {
+        if (openInNewTab) {
+          window.open('/discografia/organic/', '_blank', 'noopener');
+        } else {
+          window.location.href = '/discografia/organic/';
+        }
+        return;
+      }
+
       if (openInNewTab) {
         window.open(film.detailUrl, '_blank', 'noopener');
         return;
@@ -1489,6 +1500,9 @@ export default function DiscografiaClient() {
       if (modalTitle) modalTitle.textContent = film.title;
       if (modalDesc) {
         modalDesc.textContent = `Amb la col·laboració de: ${film.starring}. Edició original en format disc òptic de l'arxiu discogràfic de Miquel Gil.`;
+      }
+      if (modalExtLink) {
+        modalExtLink.href = film.detailUrl;
       }
       if (detailModal) detailModal.classList.remove('opacity-0', 'pointer-events-none');
     }
@@ -2112,7 +2126,7 @@ export default function DiscografiaClient() {
           <span data-film-field="director">Sonifolk</span>
           <span data-film-field="year">2001</span>
           <span data-film-field="starring">Ausiàs March, Neo-Tradició</span>
-          <span data-film-field="detailUrl">#/production/organic</span>
+          <span data-film-field="detailUrl">/discografia/organic/</span>
           <span data-film-field="discUrl">https://miquelgil.vercel.app/images/disco_2.png</span>
           <span data-film-field="reviews">
             El País|Obra mestra fundacional|★★★★★;La Vanguardia|Redefineix l&apos;arrel|★★★★★
