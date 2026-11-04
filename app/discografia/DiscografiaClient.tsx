@@ -778,10 +778,9 @@ export default function DiscografiaClient() {
       if (indexGrid) {
         const card = document.createElement('a');
         card.href = f.detailUrl;
-        card.setAttribute('data-film-scroll', f.title);
         card.className =
-          'p-4 border border-black/10 rounded hover:border-black transition flex justify-between items-center';
-        card.innerHTML = `<span class="a24-value">${String(idx + 1).padStart(2, '0')} — ${f.title}</span><span class="a24-label">${f.year}</span>`;
+          'p-4 border border-black/10 rounded hover:border-black transition flex justify-between items-center group';
+        card.innerHTML = `<span class="a24-value group-hover:underline">${String(idx + 1).padStart(2, '0')} — ${f.title}</span><span class="a24-label">${f.year} · FITXA →</span>`;
         indexGrid.appendChild(card);
       }
     });
@@ -977,6 +976,24 @@ export default function DiscografiaClient() {
       // Mover regla inferior
       if (uiRuler) {
         uiRuler.style.transform = `translateX(${(5 - index) * 14}px)`;
+      }
+
+      // Enllaços directes a la fitxa
+      const uiDetailBtn = container.querySelector('#ui-detail-btn') as HTMLAnchorElement | null;
+      const uiDetailBtnText = container.querySelector('#ui-detail-btn-text') as HTMLElement | null;
+      const uiTitleLink = container.querySelector('#ui-title-link') as HTMLAnchorElement | null;
+
+      if (uiDetailBtn) {
+        uiDetailBtn.href = film.detailUrl;
+      }
+      if (uiTitleLink) {
+        uiTitleLink.href = film.detailUrl;
+      }
+      if (uiDetailBtnText) {
+        const label = `VEURE FITXA DE ${film.title.toUpperCase()} →`;
+        uiDetailBtnText.setAttribute('data-text', label);
+        const span = uiDetailBtnText.querySelector('[data-hover-text]');
+        if (span) span.textContent = label;
       }
     };
 
@@ -1361,6 +1378,12 @@ export default function DiscografiaClient() {
           u.hoverTiltTargetX = -hit.localPt.y * tiltScale;
           u.hoverTiltTargetY = hit.localPt.x * tiltScale;
         }
+
+        if (hoveredDiscIndex >= 0) {
+          container.style.cursor = 'pointer';
+        } else {
+          container.style.cursor = 'default';
+        }
         return;
       }
 
@@ -1439,10 +1462,12 @@ export default function DiscografiaClient() {
           mr(Math.round(L), { source: 'default' });
         }
       }
+      container.style.cursor = hoveredDiscIndex >= 0 ? 'pointer' : 'default';
     };
 
     const onPointerLeave = () => {
       isPointerInside = false;
+      container.style.cursor = 'default';
       if (hoveredDiscIndex >= 0 && discHolders[hoveredDiscIndex]) {
         const u = discHolders[hoveredDiscIndex].userData as DiscHolderUserData;
         u.hoverTiltTargetX = 0;
@@ -1868,7 +1893,14 @@ export default function DiscografiaClient() {
                 A24—01
               </span>
             </div>
-            <h1 id="ui-title" className="a24-serif-title"></h1>
+            <a
+              id="ui-title-link"
+              href="/discografia/viatger/"
+              className="pointer-events-auto block hover:opacity-75 transition-opacity"
+              title="Veure la fitxa completa de l'edició"
+            >
+              <h1 id="ui-title" className="a24-serif-title"></h1>
+            </a>
           </div>
 
           {/* Línea divisoria 1 */}
@@ -1903,6 +1935,33 @@ export default function DiscografiaClient() {
             <div className="a24-label mb-1">COL·LABORACIONS</div>
             <div id="ui-starring" className="a24-value leading-relaxed whitespace-pre-line"></div>
           </div>
+
+          {/* Línea divisoria 4 */}
+          <div className="editorial-line mt-3.5"></div>
+
+          {/* Botó directe a la fitxa tècnica completa de l'àlbum */}
+          <div className="pt-3.5 pointer-events-auto">
+            <a
+              id="ui-detail-btn"
+              href="/discografia/viatger/"
+              className="btn a24-btn w-full block text-center"
+              data-hover=""
+              title="Obrir la fitxa tècnica completa de l'edició"
+            >
+              <div className="btn__divider" />
+              <span className="btn__p-mask w-full">
+                <span
+                  id="ui-detail-btn-text"
+                  className="btn__p w-full text-center"
+                  data-hover-inner
+                  data-text="VEURE FITXA DE L'EDICIÓ →"
+                >
+                  <span data-hover-text>VEURE FITXA DE L'EDICIÓ →</span>
+                </span>
+              </span>
+              <div className="btn__divider" />
+            </a>
+          </div>
         </div>
 
         {/* Columna Derecha: Reseñas + Lista rápida de navegación */}
@@ -1933,7 +1992,7 @@ export default function DiscografiaClient() {
           </div>
         </div>
 
-        <div className="a24-label text-right">RODA · ARROSSEGA · CLIC PER A INSPECCIONAR</div>
+        <div className="a24-label text-right">RODA · ARROSSEGA · FES CLIC AL DISC PER A VEURE LA FITXA</div>
       </footer>
 
       {/* MENÚ INDEX SUPERPUESTO (Usa [data-film-scroll="<título>"]) */}
