@@ -23,12 +23,12 @@ export default function ProductionClient({ album }: ProductionClientProps) {
 
   // Refs de elementos
   const containerRef = useRef<HTMLDivElement>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const heroRef = useRef<HTMLElement>(null);
+  const trailerRef = useRef<HTMLElement>(null);
   const dissolveCanvasRef = useRef<HTMLCanvasElement>(null);
   const upNextCanvasContainerRef = useRef<HTMLDivElement>(null);
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const playerRef = useRef<any>(null);
-  const timelineIntervalRef = useRef<any>(null);
 
   // Extraer ID de YouTube
   const getYouTubeId = (url: string) => {
@@ -40,13 +40,249 @@ export default function ProductionClient({ album }: ProductionClientProps) {
   const videoId = getYouTubeId(album.trailerSrc);
 
   // ============================================================================
-  // 1. REPRODUCTOR TRAILER LIGHTBOX & DISSOLVE CANVAS
+  // 1. ANIMACIÓN DE ENTRADA DE BOTONES (GSAP SEGÚN ESPECIFICACIÓN A24)
+  // ============================================================================
+  useEffect(() => {
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const buttons = containerRef.current?.querySelectorAll<HTMLElement>('[data-reveal="btn"]');
+    if (!buttons || !buttons.length) return;
+
+    if (prefersReducedMotion) {
+      buttons.forEach((btn) => {
+        const dividers = btn.querySelectorAll<HTMLElement>('.btn__divider');
+        const text = btn.querySelector<HTMLElement>('.btn__p');
+        gsap.set(dividers, { scaleX: 1 });
+        if (text) gsap.set(text, { yPercent: 0 });
+      });
+      return;
+    }
+
+    const ctaStart = 0.48; // ctaStart 0.38 + 0.1
+    const btnStagger = 0.09;
+    const duration = 0.7;
+    const textDelay = 0.04;
+    // Curva energy (discGlide): M0,0 C0.32,0.72 0,1 1,1
+    const easeCurve = 'power3.out';
+
+    buttons.forEach((btn, idx) => {
+      const startTime = ctaStart + idx * btnStagger;
+      const dividers = btn.querySelectorAll<HTMLElement>('.btn__divider');
+      const text = btn.querySelector<HTMLElement>('.btn__p');
+
+      // Estado inicial
+      gsap.set(dividers, { scaleX: 0, transformOrigin: 'left center' });
+      if (text) gsap.set(text, { yPercent: 120 });
+
+      // Crecimiento de las líneas
+      gsap.to(dividers, {
+        scaleX: 1,
+        duration: duration,
+        ease: easeCurve,
+        delay: startTime,
+        overwrite: 'auto'
+      });
+
+      // Subida del texto con 0.04s de retraso
+      if (text) {
+        gsap.to(text, {
+          yPercent: 0,
+          duration: duration,
+          ease: easeCurve,
+          delay: startTime + textDelay,
+          overwrite: 'auto'
+        });
+      }
+    });
+  }, []);
+
+  // ============================================================================
+  // 2. SEPARADOR LÍQUIDO ORGANIC (DATA-DISSOLVE CON CLIP-PATH: PATH)
+  // ============================================================================
+  useEffect(() => {
+    const hero = heroRef.current;
+    const trailer = trailerRef.current;
+    if (!hero || !trailer) return;
+
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const supportsClipPath =
+      typeof CSS !== 'undefined' &&
+      typeof CSS.supports === 'function' &&
+      CSS.supports('clip-path', 'path("M 0 0 L 1 0 Z")');
+
+    if (prefersReducedMotion || !supportsClipPath) return;
+
+    let animId: number;
+    let isDisposed = false;
+
+    // Parámetros de la especificación
+    const spec = {
+      reach: 0.38,
+      peek: 0.16,
+      below: 0.4,
+      lifeSpeed: 0.15,
+      agitate: 2.2,
+      surge: 0.55,
+      cursorBand: 120,
+      cursorGuard: 110,
+      cursorBite: 0.5,
+      cursorRelax: 1.1,
+      edge: 0.5,
+      center: 0.13,
+      centerX: 0.5
+    };
+
+    let H = 0;
+    let lastTime = performance.now();
+    let lastScrollY = window.scrollY;
+    let scrollVelocity = 0;
+    let mousePos = { x: -1000, y: -1000, vy: 0, lastY: -1000, lastT: performance.now() };
+    const droplets: Array<{ x: number; y: number; age: number; maxAge: number }> = [];
+
+    const onPointerMove = (e: PointerEvent) => {
+      const now = performance.now();
+      const dt = Math.max(0.001, (now - mousePos.lastT) / 1000);
+      const dy = e.clientY - mousePos.lastY;
+      mousePos.vy = dy / dt;
+      mousePos.x = e.clientX;
+      mousePos.y = e.clientY;
+      mousePos.lastY = e.clientY;
+      mousePos.lastT = now;
+
+      // Comprobar zona de seguridad (cursorGuard 110px) alrededor de enlaces/botones
+      const target = e.target as HTMLElement | null;
+      if (target && target.closest('a, button, input, [role="button"]')) return;
+
+      const heroRect = hero.getBoundingClientRect();
+      const liquidY = heroRect.bottom;
+      const dist = Math.abs(e.clientY - liquidY);
+
+      if (dist < spec.cursorBand && Math.abs(mousePos.vy) > 80) {
+        if (droplets.length < 24) {
+          droplets.push({
+            x: e.clientX - heroRect.left,
+            y: e.clientY - heroRect.top,
+            age: 0,
+            maxAge: spec.cursorRelax
+          });
+        }
+      }
+    };
+
+    window.addEventListener('pointermove', onPointerMove, { passive: true });
+
+    const updateDissolve = (now: number) => {
+      if (isDisposed) return;
+      animId = requestAnimationFrame(updateDissolve);
+
+      const dt = Math.min(0.05, (now - lastTime) / 1000);
+      lastTime = now;
+
+      // Calcular velocidad de scroll
+      const currentScrollY = window.scrollY;
+      const scrollDiff = currentScrollY - lastScrollY;
+      scrollVelocity = scrollDiff / (dt * 1000);
+      lastScrollY = currentScrollY;
+
+      // Progresión de fase de vida
+      const agitateFactor = 1 + Math.min(3, Math.abs(scrollVelocity) * 0.002) * spec.agitate;
+      H += dt * spec.lifeSpeed * Math.PI * 2 * agitateFactor;
+
+      // Progreso de scroll sobre el trigger
+      const heroRect = hero.getBoundingClientRect();
+      const heroHeight = hero.offsetHeight;
+      const heroWidth = hero.offsetWidth;
+
+      // Si el hero está fuera de pantalla, omitir cálculo pesado
+      if (heroRect.bottom < -100 || heroRect.top > window.innerHeight + 100) return;
+
+      const triggerStart = window.innerHeight;
+      const triggerEnd = 0;
+      const rawProgress = (triggerStart - heroRect.bottom) / (triggerStart - triggerEnd);
+      const V = Math.max(0, Math.min(1, rawProgress));
+
+      // Suavizado quíntico (smootherstep)
+      const smoothProgress = V * V * V * (V * (V * 6 - 15) + 10);
+
+      // Actualizar gotas del cursor
+      for (let i = droplets.length - 1; i >= 0; i--) {
+        droplets[i].age += dt;
+        if (droplets[i].age > droplets[i].maxAge) {
+          droplets.splice(i, 1);
+        }
+      }
+
+      // Generar línea de corte ondulada inferior
+      const segments = Math.max(24, Math.floor(heroWidth / 24));
+      const points: Array<[number, number]> = [];
+
+      const baseRise = (spec.peek + smoothProgress * (spec.reach - spec.peek)) * heroHeight;
+      const surgeOffset = Math.min(40, Math.abs(scrollVelocity) * spec.surge * 0.05);
+
+      for (let i = 0; i <= segments; i++) {
+        const u = i / segments;
+        const x = u * heroWidth;
+
+        // Perfil horizontal (campana cos y joroba central)
+        const bell = Math.cos((u - 0.5) * Math.PI * spec.edge);
+        const centerHump = spec.center * Math.sin(u * Math.PI);
+        const profile = Math.max(0.2, bell + centerHump);
+
+        // Ruido domain-warping multicapa
+        const wave1 = Math.sin(u * 14 + H) * 18;
+        const wave2 = Math.cos(u * 28 - H * 1.4) * 9;
+        const wave3 = Math.sin(u * 7 + H * 0.6) * 12;
+        const noise = (wave1 + wave2 + wave3) * profile;
+
+        // Perturbación de gotas del cursor
+        let dropPerturb = 0;
+        for (const drop of droplets) {
+          const dx = x - drop.x;
+          const dropDist = Math.abs(dx);
+          if (dropDist < 120) {
+            const decay = 1 - drop.age / drop.maxAge;
+            const dropShape = Math.cos((dropDist / 120) * (Math.PI / 2)) * decay;
+            dropPerturb += dropShape * 26 * spec.cursorBite;
+          }
+        }
+
+        const yOffset = (baseRise + surgeOffset) * profile + noise - dropPerturb;
+        const y = Math.max(10, heroHeight - Math.max(0, yOffset));
+        points.push([x, y]);
+      }
+
+      // Construir trazado SVG para clip-path
+      let pathStr = `M 0 0 L ${heroWidth} 0 L ${heroWidth} ${points[points.length - 1][1]}`;
+
+      for (let i = points.length - 1; i > 0; i--) {
+        const p1 = points[i];
+        const p0 = points[i - 1];
+        const midX = (p1[0] + p0[0]) / 2;
+        const midY = (p1[1] + p0[1]) / 2;
+        pathStr += ` Q ${p1[0].toFixed(1)} ${p1[1].toFixed(1)} ${midX.toFixed(1)} ${midY.toFixed(1)}`;
+      }
+
+      pathStr += ` L 0 ${points[0][1]} Z`;
+
+      hero.style.clipPath = `path("${pathStr}")`;
+    };
+
+    animId = requestAnimationFrame(updateDissolve);
+
+    return () => {
+      isDisposed = true;
+      cancelAnimationFrame(animId);
+      window.removeEventListener('pointermove', onPointerMove);
+      if (hero) hero.style.clipPath = '';
+    };
+  }, []);
+
+  // ============================================================================
+  // 3. REPRODUCTOR TRAILER LIGHTBOX & DISSOLVE CANVAS
   // ============================================================================
   const openTrailer = useCallback(() => {
     setTrailerOpen(true);
     setIsPlaying(true);
 
-    // Cargar YouTube Iframe API si no existe
     if (!(window as any).YT) {
       const tag = document.createElement('script');
       tag.src = 'https://www.youtube.com/iframe_api';
@@ -61,7 +297,6 @@ export default function ProductionClient({ album }: ProductionClientProps) {
       return;
     }
 
-    // Efecto procedural de disolución A24 con ruido sobre canvas 2D
     const ctx = canvas.getContext('2d');
     if (!ctx) {
       setTrailerOpen(false);
@@ -84,7 +319,6 @@ export default function ProductionClient({ album }: ProductionClientProps) {
       ctx.clearRect(0, 0, w, h);
       ctx.fillStyle = '#000000';
 
-      // Dibujar cuadrícula orgánica de disolución descendente
       const cellSize = 16;
       const cols = Math.ceil(w / cellSize);
       const rows = Math.ceil(h / cellSize);
@@ -114,7 +348,6 @@ export default function ProductionClient({ album }: ProductionClientProps) {
     requestAnimationFrame(renderDissolve);
   }, []);
 
-  // Control de teclado ESC para cerrar tráiler
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape' && trailerOpen) {
@@ -126,7 +359,7 @@ export default function ProductionClient({ album }: ProductionClientProps) {
   }, [trailerOpen, closeTrailer]);
 
   // ============================================================================
-  // 2. ESCENA 3D "UP NEXT" (DISCO 3D CON EMPUJE / PUSH GESTURE)
+  // 4. ESCENA 3D "UP NEXT" (DISCO 3D CON EMPUJE / PUSH GESTURE)
   // ============================================================================
   useEffect(() => {
     const container = upNextCanvasContainerRef.current;
@@ -136,7 +369,6 @@ export default function ProductionClient({ album }: ProductionClientProps) {
     let pushProgress = 0;
     let isDisposed = false;
 
-    // Configuración Three.js
     const width = container.clientWidth || 320;
     const height = container.clientHeight || 320;
 
@@ -156,7 +388,6 @@ export default function ProductionClient({ album }: ProductionClientProps) {
     container.innerHTML = '';
     container.appendChild(renderer.domElement);
 
-    // Luces
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
     scene.add(ambientLight);
 
@@ -168,12 +399,10 @@ export default function ProductionClient({ album }: ProductionClientProps) {
     blueRim.position.set(-3, -2, -2);
     scene.add(blueRim);
 
-    // Geometría y materiales del disco de la siguiente edición
     const discRadius = 1.0;
     const holeRadius = 0.14;
     const discGeometry = new THREE.RingGeometry(holeRadius, discRadius, 64, 8);
 
-    // Generar textura serigrafiada para el disco siguiente
     const cv = document.createElement('canvas');
     cv.width = 1024;
     cv.height = 1024;
@@ -207,7 +436,6 @@ export default function ProductionClient({ album }: ProductionClientProps) {
     discMesh.rotation.y = THREE.MathUtils.degToRad(-25);
     scene.add(discMesh);
 
-    // Anillo de brillo central (buje)
     const hubGeom = new THREE.RingGeometry(holeRadius, 0.25, 48);
     const hubMat = new THREE.MeshStandardMaterial({
       color: 0xcccccc,
@@ -219,7 +447,6 @@ export default function ProductionClient({ album }: ProductionClientProps) {
     hubMesh.position.z = 0.002;
     discMesh.add(hubMesh);
 
-    // Control de empuje (Wheel & Touch push hacia el siguiente disco)
     const onWheel = (e: WheelEvent) => {
       const rect = container.getBoundingClientRect();
       const inView = rect.top < window.innerHeight && rect.bottom > 0;
@@ -229,7 +456,6 @@ export default function ProductionClient({ album }: ProductionClientProps) {
         pushProgress += 0.04;
         if (pushProgress >= 1) {
           pushProgress = 1;
-          // Navegar a la siguiente edición
           window.location.href = `/discografia/${album.nextAlbum.slug}/`;
         }
       }
@@ -237,15 +463,11 @@ export default function ProductionClient({ album }: ProductionClientProps) {
 
     window.addEventListener('wheel', onWheel, { passive: true });
 
-    // Loop de renderizado
     const animate = () => {
       if (isDisposed) return;
       animId = requestAnimationFrame(animate);
 
-      // Desaceleración del push si no hay interacción continua
       pushProgress = Math.max(0, pushProgress - 0.005);
-
-      // Rotación continua con impulso según push
       const spinSpeed = 0.004 + pushProgress * 0.05;
       discMesh.rotation.z -= spinSpeed;
       discMesh.scale.setScalar(1.0 + pushProgress * 0.1);
@@ -293,151 +515,193 @@ export default function ProductionClient({ album }: ProductionClientProps) {
       </header>
 
       {/* ============================================================
-          1. HERO SECTION ([data-production-hero])
+          1. HERO SECTION ([data-production-hero] CON DATA-DISSOLVE)
          ============================================================ */}
-      <section id="production_hero" className="production-hero">
-        <div className="production-content">
-          <div className="production__info">
-            {/* Título en formato grande con PP Eiko */}
-            <div className="production__title">
-              <span className="subheading-xs block mb-2">{album.editionNumber}</span>
-              <h1 className="heading-l">{album.title}</h1>
+      <div data-dissolve-track="" className="reveal-track">
+        <section id="production_hero" ref={heroRef} data-dissolve="" className="production-hero">
+          <div className="production-content">
+            <div className="production__info">
+              {/* TÍTULO EN MAYÚSCULAS CON PP EIKO */}
+              <div className="production__title">
+                <span className="subheading-xs block mb-2">{album.editionNumber}</span>
+                <h1 className="heading-l">{album.title.toUpperCase()}</h1>
+              </div>
+
+              {/* LÍNEA SEPARADORA FULLWIDTH */}
+              <div className="divider-horizontal my-4" />
+
+              {/* Créditos de producción */}
+              <div className="production__credits">
+                <span className="subheading-xs">PRODUCCIÓ</span>
+                <span className="paragraph-m font-medium">{album.director}</span>
+
+                <span className="subheading-xs ml-4">SEGELL</span>
+                <span className="paragraph-m font-medium">{album.label}</span>
+
+                <span className="subheading-xs ml-4">LLETRES I POEMES</span>
+                <span className="paragraph-m font-medium">{album.lyrics}</span>
+
+                <span className="subheading-xs ml-4">MÚSICS</span>
+                <span className="paragraph-m font-medium">{album.musicians}</span>
+              </div>
+
+              {/* LÍNEA SEPARADORA FULLWIDTH */}
+              <div className="divider-horizontal my-4" />
+
+              {/* Metadatos en cuadrícula tabular */}
+              <div className="production__metadata">
+                <div className="production-metadata__item">
+                  <div className="metadata-item__content">
+                    <span className="subheading-xs">ANY</span>
+                    <span className="paragraph-m font-medium">{album.year}</span>
+                  </div>
+                </div>
+
+                <div className="production-metadata__item">
+                  <div className="metadata-item__content">
+                    <span className="subheading-xs">GÈNERE</span>
+                    <span className="paragraph-m font-medium">{album.genre}</span>
+                  </div>
+                </div>
+
+                <div className="production-metadata__item">
+                  <div className="metadata-item__content">
+                    <span className="subheading-xs">DURADA</span>
+                    <span className="paragraph-m font-medium">{album.runtime}</span>
+                  </div>
+                </div>
+
+                <div className="production-metadata__item">
+                  <div className="metadata-item__content">
+                    <span className="subheading-xs">FORMAT</span>
+                    <span className="paragraph-m font-medium">{album.format}</span>
+                  </div>
+                </div>
+              </div>
             </div>
 
-            <div className="divider-horizontal my-4" />
+            {/* ============================================================
+                CONTENEDOR FULLWIDTH PARA BOTONES Y CRUCES VECTORIALES
+               ============================================================ */}
+            <div className="production__cta-wrap">
+              {/* LÍNEA FULLWIDTH SUPERIOR DE BOTONES */}
+              <div className="divider-horizontal absolute top-0" />
 
-            {/* Créditos de producción */}
-            <div className="production__credits">
-              <span className="subheading-xs">PRODUCCIÓ</span>
-              <span className="paragraph-m font-medium">{album.director}</span>
+              {/* Cruces vectoriales a los extremos de la pantalla */}
+              <div className="plus is--tl">
+                <div className="plus-stroke is--hor" />
+                <div className="plus-stroke is--ver" />
+              </div>
+              <div className="plus is--tr">
+                <div className="plus-stroke is--hor" />
+                <div className="plus-stroke is--ver" />
+              </div>
+              <div className="plus is--bl">
+                <div className="plus-stroke is--hor" />
+                <div className="plus-stroke is--ver" />
+              </div>
+              <div className="plus is--br">
+                <div className="plus-stroke is--hor" />
+                <div className="plus-stroke is--ver" />
+              </div>
 
-              <span className="subheading-xs ml-4">SEGELL</span>
-              <span className="paragraph-m font-medium">{album.label}</span>
+              <div className="production__cta">
+                {/* BOTÓN 1: ESCOLTAR EN STREAMING */}
+                <a
+                  data-reveal="btn"
+                  data-hover=""
+                  href={album.streamUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn"
+                >
+                  <div className="btn__divider" />
+                  <span className="btn__p-mask">
+                    <span
+                      className="btn__p"
+                      data-hover-inner
+                      data-text="ESCOLTAR EN STREAMING ↗"
+                    >
+                      <span data-hover-text>ESCOLTAR EN STREAMING ↗</span>
+                    </span>
+                  </span>
+                  <div className="btn__divider" />
+                </a>
 
-              <span className="subheading-xs ml-4">LLETRES I POEMES</span>
-              <span className="paragraph-m font-medium">{album.lyrics}</span>
+                {/* BOTÓN 2: VEURE VÍDEO OFICIAL */}
+                <button
+                  type="button"
+                  data-reveal="btn"
+                  data-hover=""
+                  onClick={openTrailer}
+                  className="btn"
+                >
+                  <div className="btn__divider" />
+                  <span className="btn__p-mask">
+                    <span
+                      className="btn__p"
+                      data-hover-inner
+                      data-text="VEURE VÍDEO OFICIAL ▶"
+                    >
+                      <span data-hover-text>VEURE VÍDEO OFICIAL ▶</span>
+                    </span>
+                  </span>
+                  <div className="btn__divider" />
+                </button>
+              </div>
 
-              <span className="subheading-xs ml-4">MÚSICS</span>
-              <span className="paragraph-m font-medium">{album.musicians}</span>
+              {/* LÍNEA FULLWIDTH INFERIOR DE BOTONES */}
+              <div className="divider-horizontal absolute bottom-0" />
             </div>
+          </div>
+        </section>
 
-            {/* Metadatos en cuadrícula tabular */}
-            <div className="production__metadata">
-              <div className="production-metadata__item">
-                <div className="divider-horizontal" />
-                <div className="metadata-item__content">
-                  <span className="subheading-xs">ANY</span>
-                  <span className="paragraph-m font-medium">{album.year}</span>
-                </div>
+        {/* ============================================================
+            2. SECCIÓN TRAILER / TEASER (HERMANO CON DATA-DISSOLVE-BLEED)
+           ============================================================ */}
+        <section ref={trailerRef} data-theme-change="nav:base" className="trailer theme-dark">
+          <div data-dissolve-bleed="" className="trailer__vh">
+            <img
+              src={album.trailerStill}
+              alt={album.title}
+              className="trailer__bg"
+            />
+            <div className="trailer__content">
+              <div className="trailer-content__row">
+                <span className="subheading-xs text-white/60">FITXA AUDIOVISUAL</span>
+                <p className="trailer-quote-text">“{album.quote}”</p>
+                {album.quoteAuthor && (
+                  <span className="subheading-xs text-white/50">{album.quoteAuthor}</span>
+                )}
               </div>
 
-              <div className="production-metadata__item">
-                <div className="divider-horizontal" />
-                <div className="metadata-item__content">
-                  <span className="subheading-xs">GÈNERE</span>
-                  <span className="paragraph-m font-medium">{album.genre}</span>
-                </div>
-              </div>
+              <div className="divider-horizontal my-4" />
 
-              <div className="production-metadata__item">
-                <div className="divider-horizontal" />
-                <div className="metadata-item__content">
-                  <span className="subheading-xs">DURADA</span>
-                  <span className="paragraph-m font-medium">{album.runtime}</span>
-                </div>
-              </div>
-
-              <div className="production-metadata__item">
-                <div className="divider-horizontal" />
-                <div className="metadata-item__content">
-                  <span className="subheading-xs">FORMAT</span>
-                  <span className="paragraph-m font-medium">{album.format}</span>
-                </div>
+              <div className="trailer-content__row">
+                <button
+                  type="button"
+                  onClick={openTrailer}
+                  className="btn"
+                  data-hover=""
+                  data-trailer-src={album.trailerSrc}
+                >
+                  <div className="btn__divider" />
+                  <span className="btn__p-mask">
+                    <span
+                      className="btn__p text-white"
+                      data-hover-inner
+                      data-text="REPRODUIR EN EL LIGHTBOX ▶"
+                    >
+                      <span data-hover-text>REPRODUIR EN EL LIGHTBOX ▶</span>
+                    </span>
+                  </span>
+                  <div className="btn__divider" />
+                </button>
               </div>
             </div>
           </div>
-
-          {/* Botones CTA con cruces vectoriales A24 */}
-          <div className="production__cta">
-            <div className="plus is--tl">
-              <div className="plus-stroke is--hor" />
-              <div className="plus-stroke is--ver" />
-            </div>
-            <div className="plus is--tr">
-              <div className="plus-stroke is--hor" />
-              <div className="plus-stroke is--ver" />
-            </div>
-            <div className="plus is--bl">
-              <div className="plus-stroke is--hor" />
-              <div className="plus-stroke is--ver" />
-            </div>
-            <div className="plus is--br">
-              <div className="plus-stroke is--hor" />
-              <div className="plus-stroke is--ver" />
-            </div>
-
-            <a
-              href={album.streamUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="btn"
-            >
-              <div className="btn__divider" />
-              <span className="btn__p-mask">
-                <span className="btn__p">ESCOLTAR EN STREAMING ↗</span>
-              </span>
-              <div className="btn__divider" />
-            </a>
-
-            <button type="button" onClick={openTrailer} className="btn">
-              <div className="btn__divider" />
-              <span className="btn__p-mask">
-                <span className="btn__p">VEURE VÍDEO OFICIAL ▶</span>
-              </span>
-              <div className="btn__divider" />
-            </button>
-          </div>
-        </div>
-      </section>
-
-      {/* ============================================================
-          2. SECCIÓN TRAILER / TEASER (THEME DARK)
-         ============================================================ */}
-      <section className="trailer">
-        <div className="trailer__vh">
-          <img
-            src={album.trailerStill}
-            alt={album.title}
-            className="trailer__bg"
-          />
-          <div className="trailer__content">
-            <div className="trailer-content__row">
-              <span className="subheading-xs text-white/60">FITXA AUDIOVISUAL</span>
-              <p className="trailer-quote-text">“{album.quote}”</p>
-              {album.quoteAuthor && (
-                <span className="subheading-xs text-white/50">{album.quoteAuthor}</span>
-              )}
-            </div>
-
-            <div className="divider-horizontal my-4" />
-
-            <div className="trailer-content__row">
-              <button
-                type="button"
-                onClick={openTrailer}
-                className="btn"
-                data-trailer-src={album.trailerSrc}
-              >
-                <div className="btn__divider" />
-                <span className="btn__p-mask">
-                  <span className="btn__p">REPRODUIR EN EL LIGHTBOX ▶</span>
-                </span>
-                <div className="btn__divider" />
-              </button>
-            </div>
-          </div>
-        </div>
-      </section>
+        </section>
+      </div>
 
       {/* ============================================================
           3. SECCIÓN DESCRIPCIÓN Y TRACKLIST
@@ -497,7 +761,7 @@ export default function ProductionClient({ album }: ProductionClientProps) {
 
           <div className="scroll-to__label">
             <span className="subheading-xs block mb-1">UP NEXT</span>
-            <h2 className="heading-l">{album.nextAlbum.title}</h2>
+            <h2 className="heading-l">{album.nextAlbum.title.toUpperCase()}</h2>
             <span className="subheading-xs block mt-2 text-black/60">
               {album.nextAlbum.year} · {album.nextAlbum.genre}
             </span>
@@ -506,10 +770,17 @@ export default function ProductionClient({ album }: ProductionClientProps) {
           <Link
             href={`/discografia/${album.nextAlbum.slug}/`}
             className="btn mt-6"
+            data-hover=""
           >
             <div className="btn__divider" />
             <span className="btn__p-mask">
-              <span className="btn__p">VEURE FITXA DE {album.nextAlbum.title.toUpperCase()} →</span>
+              <span
+                className="btn__p"
+                data-hover-inner
+                data-text={`VEURE FITXA DE ${album.nextAlbum.title.toUpperCase()} →`}
+              >
+                <span data-hover-text>{`VEURE FITXA DE ${album.nextAlbum.title.toUpperCase()} →`}</span>
+              </span>
             </span>
             <div className="btn__divider" />
           </Link>
@@ -535,7 +806,7 @@ export default function ProductionClient({ album }: ProductionClientProps) {
         <div className="trailer-lightbox__ui">
           <div className="trailer-lightbox__top">
             <div className="flex items-center gap-3">
-              <span className="subheading-xs text-white/80">{album.title}</span>
+              <span className="subheading-xs text-white/80">{album.title.toUpperCase()}</span>
               <span className="subheading-xs text-white/40">·</span>
               <span className="subheading-xs text-white/60">VÍDEO OFICIAL</span>
             </div>
