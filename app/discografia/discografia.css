@@ -184,7 +184,7 @@
 }
 
 /* ============================================================
-   TÍTULOS: PP Eiko Medium en formato grande
+   TÍTULOS: PP Eiko Medium en formato A24 editorial
    ============================================================ */
 .a24-serif-title,
 .a24-serif-title *,
@@ -194,6 +194,8 @@
 #modal-title *,
 .a24-title,
 .a24-title *,
+.a24-serif-review,
+.a24-serif-review *,
 [data-disc-gallery] h1,
 [data-disc-gallery] h1 *,
 [data-disc-gallery] h2,
@@ -201,19 +203,28 @@
 [data-disc-gallery] h3,
 [data-disc-gallery] h3 * {
   font-family: var(--font-titles) !important;
-  font-weight: 500 !important;
 }
 
 .a24-serif-title,
 #ui-title {
-  font-size: clamp(1.4rem, 3.6vw, 3.8rem) !important;
-  line-height: 0.95;
-  letter-spacing: -0.02em;
+  font-size: clamp(1.4rem, 2.5vw, 2.5rem) !important;
+  line-height: 0.92 !important;
+  letter-spacing: -0.02em !important;
   color: #000000 !important;
-  font-weight: 600 !important;
+  font-weight: 500 !important;
   text-transform: uppercase !important;
   display: block;
-  margin-top: 0.2rem;
+  margin: 0;
+  padding: 0;
+}
+
+.a24-serif-review {
+  font-family: var(--font-titles) !important;
+  font-weight: 500 !important;
+  line-height: 1.15 !important;
+  letter-spacing: -0.015em !important;
+  text-transform: uppercase !important;
+  color: #000000 !important;
 }
 
 #left-editorial-panel {
@@ -226,13 +237,17 @@
   font-weight: 600 !important;
 }
 
-#left-editorial-panel .a24-desc,
 #left-editorial-panel .a24-value,
-#left-editorial-panel #ui-description,
 #left-editorial-panel #ui-director,
 #left-editorial-panel #ui-year,
 #left-editorial-panel #ui-starring {
   color: #000000 !important;
+}
+
+.editorial-row {
+  border-top: 1px solid rgba(0, 0, 0, 0.2);
+  transform-origin: left center;
+  will-change: transform, opacity;
 }
 
 #ui-reviews-container {
