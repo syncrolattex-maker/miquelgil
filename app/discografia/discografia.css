@@ -184,7 +184,7 @@
 }
 
 /* ============================================================
-   TÍTULOS: PP Eiko Medium en formato A24 editorial
+   TÍTULOS: PP Eiko Medium en formato grande
    ============================================================ */
 .a24-serif-title,
 .a24-serif-title *,
@@ -194,8 +194,6 @@
 #modal-title *,
 .a24-title,
 .a24-title *,
-.a24-serif-review,
-.a24-serif-review *,
 [data-disc-gallery] h1,
 [data-disc-gallery] h1 *,
 [data-disc-gallery] h2,
@@ -203,28 +201,222 @@
 [data-disc-gallery] h3,
 [data-disc-gallery] h3 * {
   font-family: var(--font-titles) !important;
+  font-weight: 500 !important;
 }
 
 .a24-serif-title,
 #ui-title {
-  font-size: clamp(1.4rem, 2.5vw, 2.5rem) !important;
+  font-size: clamp(1.75rem, 3.3vw, 3.2rem) !important;
   line-height: 0.92 !important;
-  letter-spacing: -0.02em !important;
+  letter-spacing: -0.02em;
   color: #000000 !important;
-  font-weight: 500 !important;
+  font-weight: 400 !important;
   text-transform: uppercase !important;
   display: block;
-  margin: 0;
-  padding: 0;
+  margin-top: 0;
 }
 
-.a24-serif-review {
+/* ============================================================
+   DISTRIBUCIÓN EXACTA SEGÚN CAPTURA DE REFERENCIA A24
+   ============================================================ */
+
+/* 1. Barra superior centrada (A24 · Films · Index ∨) */
+.a24-header-logo {
   font-family: var(--font-titles) !important;
-  font-weight: 500 !important;
-  line-height: 1.15 !important;
-  letter-spacing: -0.015em !important;
-  text-transform: uppercase !important;
+  font-size: 15px;
+  font-weight: 600 !important;
+  letter-spacing: -0.02em;
   color: #000000 !important;
+  line-height: 1;
+}
+
+.a24-header-tab {
+  font-family: var(--font-texts) !important;
+  font-size: 13px;
+  line-height: 1;
+  letter-spacing: -0.005em;
+  color: #000000;
+  font-weight: 400;
+  position: relative;
+  padding-bottom: 2px;
+}
+
+.a24-header-tab--active {
+  font-weight: 500;
+  color: #000000 !important;
+}
+
+.a24-header-dot {
+  position: absolute;
+  bottom: -4px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 3px;
+  height: 3px;
+  border-radius: 9999px;
+  background-color: #000000;
+}
+
+/* 2. Bloque editorial superior izquierda (THE ZONE OF INTEREST + tabla 3 filas) */
+.a24-top-left-block {
+  position: absolute;
+  top: 1.4rem;
+  left: 1.75rem;
+  z-index: 20;
+  width: clamp(16.5rem, 23vw, 22.5rem);
+  color: #000000 !important;
+}
+
+.a24-meta-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  padding: 0.42rem 0;
+  gap: 1rem;
+}
+
+.a24-meta-row--starring {
+  align-items: flex-start;
+  padding-top: 0.45rem;
+}
+
+.a24-meta-label {
+  font-family: var(--font-subtitles) !important;
+  font-size: 8.5px;
+  line-height: 1.2;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #000000 !important;
+  font-weight: 500;
+  flex-shrink: 0;
+}
+
+.a24-meta-value,
+.a24-meta-value * {
+  font-family: var(--font-texts) !important;
+  font-size: 13px;
+  line-height: 1.32;
+  letter-spacing: -0.01em;
+  color: #000000 !important;
+  font-weight: 400;
+  text-align: right;
+  text-transform: none;
+}
+
+/* 3. Críticas centradas debajo de los CDs (★★★★★ -> MEDIO -> “CITA SERIF EN MAYÚSCULAS”) */
+.a24-bottom-reviews-container {
+  position: absolute;
+  bottom: 1.65rem;
+  left: 0;
+  width: 100%;
+  z-index: 20;
+  display: flex;
+  justify-content: center;
+  padding: 0 1.5rem;
+  will-change: transform, opacity;
+}
+
+.a24-bottom-reviews-grid {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: center;
+  gap: clamp(2.25rem, 6vw, 5.5rem);
+  max-width: 52rem;
+  width: 100%;
+}
+
+.a24-review-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  max-width: 18.5rem;
+  flex: 1 1 0%;
+}
+
+.a24-review-stars {
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  color: #000000 !important;
+  margin-bottom: 0.45rem;
+  line-height: 1;
+}
+
+.a24-review-pub {
+  font-family: var(--font-subtitles) !important;
+  font-size: 8px;
+  line-height: 1.2;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: #000000 !important;
+  margin-bottom: 0.35rem;
+  font-weight: 500;
+}
+
+.a24-review-quote {
+  font-family: var(--font-titles) !important;
+  font-size: clamp(1.05rem, 1.65vw, 1.5rem);
+  line-height: 1.06;
+  letter-spacing: -0.01em;
+  color: #000000 !important;
+  text-transform: uppercase;
+  font-weight: 400 !important;
+}
+
+/* Responsive móvil para que título arriba, CDs en medio y críticas abajo encajen sin pisarse */
+@media (max-width: 650px) {
+  .a24-top-left-block {
+    top: 3.1rem;
+    left: 1rem;
+    right: 1rem;
+    width: auto;
+    max-width: 21rem;
+  }
+
+  .a24-serif-title,
+  #ui-title {
+    font-size: clamp(1.45rem, 6.2vw, 2rem) !important;
+    line-height: 0.94 !important;
+  }
+
+  .a24-meta-row {
+    padding: 0.28rem 0;
+  }
+
+  .a24-meta-label {
+    font-size: 8px;
+  }
+
+  .a24-meta-value,
+  .a24-meta-value * {
+    font-size: 11.5px;
+    line-height: 1.25;
+  }
+
+  .a24-bottom-reviews-container {
+    bottom: 1.1rem;
+    padding: 0 0.75rem;
+  }
+
+  .a24-bottom-reviews-grid {
+    gap: 1rem;
+  }
+
+  .a24-review-stars {
+    font-size: 9.5px;
+    margin-bottom: 0.3rem;
+  }
+
+  .a24-review-pub {
+    font-size: 7.5px;
+    margin-bottom: 0.25rem;
+  }
+
+  .a24-review-quote {
+    font-size: clamp(0.85rem, 3.8vw, 1.1rem);
+    line-height: 1.08;
+  }
 }
 
 #left-editorial-panel {
@@ -237,21 +429,13 @@
   font-weight: 600 !important;
 }
 
+#left-editorial-panel .a24-desc,
 #left-editorial-panel .a24-value,
+#left-editorial-panel #ui-description,
 #left-editorial-panel #ui-director,
 #left-editorial-panel #ui-year,
 #left-editorial-panel #ui-starring {
   color: #000000 !important;
-}
-
-.editorial-row {
-  border-top: 1px solid rgba(0, 0, 0, 0.2);
-  transform-origin: left center;
-  will-change: transform, opacity;
-}
-
-#ui-reviews-container {
-  will-change: transform, opacity;
 }
 
 #ui-reviews .a24-value,

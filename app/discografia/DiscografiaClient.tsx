@@ -828,11 +828,11 @@ export default function DiscografiaClient() {
       }
     });
 
-    function splitAndAnimateChars(element: HTMLElement | null, text: string, delay = 0) {
+    function splitAndAnimateChars(element: HTMLElement | null, text: string, delay = 0, forceUppercase = false) {
       if (!element) return;
       element.innerHTML = '';
-      const upperText = (text || '').toUpperCase();
-      const words = upperText.split(' ');
+      const displayText = forceUppercase ? (text || '').toUpperCase() : text || '';
+      const words = displayText.split(' ');
       words.forEach((word, wIdx) => {
         const wordWrap = document.createElement('span');
         wordWrap.className = 'inline-block whitespace-nowrap';
@@ -840,7 +840,7 @@ export default function DiscografiaClient() {
           const mask = document.createElement('span');
           mask.className = 'char-mask';
           const inner = document.createElement('span');
-          inner.className = 'char-inner text-black font-bold';
+          inner.className = 'char-inner text-black';
           inner.style.color = '#000000';
           inner.textContent = word[c];
           mask.appendChild(inner);
@@ -908,7 +908,7 @@ export default function DiscografiaClient() {
       );
     }
 
-    // Listener del evento `discgallerychange` para animar título serif, filas de metadades y reseñas GSAP
+    // Listener del evento `discgallerychange` para animar título serif, líneas divisorias, créditos y críticas con GSAP
     const handleDiscGalleryChange = (ev: Event) => {
       const e = ev as CustomEvent<{ index: number; film: FilmData }>;
       const { index, film } = e.detail;
@@ -918,44 +918,49 @@ export default function DiscografiaClient() {
       }
 
       // Restablecer contenedores editoriales en color negro nítido y opacidad 1
-      gsap.set(['#ui-title', '#ui-director', '#ui-year', '#ui-starring', '#ui-reviews'], {
+      gsap.set(['#ui-title', '#ui-description', '#ui-director', '#ui-year', '#ui-starring', '#ui-reviews'], {
         opacity: 1,
         y: 0
       });
 
-      // 1. Título en tipografía Serif en MAYÚSCULAS y negro
-      splitAndAnimateChars(uiTitle, film.title.toUpperCase(), 0);
+      // 1. Título en tipografía Serif PP Eiko en MAYÚSCULAS y negro
+      splitAndAnimateChars(uiTitle, film.title, 0, true);
 
-      // 2. Líneas divisorias de la tabla editorial con revelado GSAP
+      // 2. Líneas divisorias horizontales animadas con GSAP (scaleX: 0 -> 1)
       if (leftPanel && !prefersReducedMotion) {
-        const rows = leftPanel.querySelectorAll('.editorial-row');
+        const lines = leftPanel.querySelectorAll('.editorial-line');
         gsap.fromTo(
-          rows,
-          { opacity: 0, x: -8 },
+          lines,
+          { scaleX: 0, opacity: 0.3 },
           {
+            scaleX: 1,
             opacity: 1,
-            x: 0,
-            duration: 0.5,
-            stagger: 0.05,
+            duration: 0.7,
+            stagger: 0.07,
             ease: 'expo.out',
             overwrite: true
           }
         );
       }
 
-      // 3. Productor / Director y Año
-      splitAndAnimateChars(uiDirector, film.director, 0.06);
-      splitAndAnimateChars(uiYear, film.year, 0.09);
+      // 3. Descripción si está presente
+      if (uiDescription) {
+        animateMaskedLines(uiDescription, film.description, 0.05);
+      }
 
-      // 4. Reparto / Col·laboracions (stack de líneas a la derecha, cada nombre en su renglón)
+      // 4. Productor / Director y Año (alineados a la derecha en la tabla superior izquierda)
+      splitAndAnimateChars(uiDirector, film.director, 0.07, false);
+      splitAndAnimateChars(uiYear, film.year, 0.1, false);
+
+      // 5. Reparto / Col·laboracions (cada línea apilada alineada a la derecha)
       if (uiStarring) {
         const items = film.starring.split(/,\s*/);
         uiStarring.innerHTML = '';
         items.forEach((itemText) => {
           const lineMask = document.createElement('span');
-          lineMask.className = 'line-mask';
+          lineMask.className = 'line-mask text-right';
           const lineInner = document.createElement('span');
-          lineInner.className = 'line-inner text-black font-normal';
+          lineInner.className = 'line-inner a24-meta-value';
           lineInner.style.color = '#000000';
           lineInner.textContent = itemText;
           lineMask.appendChild(lineInner);
@@ -970,7 +975,7 @@ export default function DiscografiaClient() {
               opacity: 1,
               duration: 0.52,
               stagger: 0.045,
-              delay: 0.12,
+              delay: 0.13,
               ease: 'expo.out',
               overwrite: true
             }
@@ -978,25 +983,26 @@ export default function DiscografiaClient() {
         }
       }
 
-      // 5. Reseñas centradas debajo de los discos: orden estrellas -> medio -> cita en mayúsculas serif (A24)
+      // 6. Críticas abajo de los CDs al estilo exacto A24:
+      // 1º Estrellas (★★★★★) arriba
+      // 2º Nombre del medio en pequeño uppercase espaciado
+      // 3º Cita en tipografía Serif grande PP Eiko en MAYÚSCULAS entre comillas
       if (uiReviews) {
         uiReviews.innerHTML = '';
-        const displayReviews = (film.reviews || []).slice(0, 2);
-        displayReviews.forEach((rev) => {
+        film.reviews.forEach((rev) => {
           const block = document.createElement('div');
-          block.className =
-            'flex flex-col items-center justify-start text-center max-w-[190px] sm:max-w-[230px] md:max-w-[260px]';
+          block.className = 'a24-review-card';
           block.innerHTML = `
-            <div class="text-[10px] sm:text-xs tracking-[0.25em] text-black font-mono mb-1 leading-none">★★★★★</div>
-            <div class="a24-label text-[9px] sm:text-[10px] font-bold tracking-[0.16em] text-black uppercase mb-1.5 leading-none">${rev.pub}</div>
-            <div class="a24-serif-review text-xs sm:text-sm md:text-[15px] font-normal text-black leading-tight uppercase tracking-tight">“${rev.quote}”</div>
+            <div class="a24-review-stars">${rev.stars}</div>
+            <div class="a24-review-pub">${rev.pub}</div>
+            <div class="a24-review-quote">“${rev.quote.toUpperCase()}”</div>
           `;
           uiReviews.appendChild(block);
         });
         if (!prefersReducedMotion) {
           gsap.fromTo(
             Array.from(uiReviews.children),
-            { y: 12, opacity: 0 },
+            { y: 14, opacity: 0 },
             { y: 0, opacity: 1, duration: 0.5, stagger: 0.08, delay: 0.08, ease: 'expo.out' }
           );
         }
@@ -2064,42 +2070,45 @@ export default function DiscografiaClient() {
       {/* REGIÓN ARIA-LIVE PARA ANUNCIOS A LOS 350 MS */}
       <div id="gallery-live-region" className="sr-only" aria-live="polite" aria-atomic="true"></div>
 
-      {/* CABECERA SUPERIOR ESTILO A24 */}
-      <header className="absolute top-0 left-0 w-full z-20 flex items-center justify-between px-6 py-5 pointer-events-none">
-        <div className="flex items-center gap-6 pointer-events-auto">
-          <span className="a24-value font-semibold tracking-widest">A24 — MIQUEL GIL</span>
-          <span className="a24-label hidden sm:inline">ARXIU ÒPTIC (1988–2024)</span>
-        </div>
-
+      {/* CABECERA SUPERIOR ESTILO A24 (Centrada como en la captura) */}
+      <header className="absolute top-0 left-0 w-full z-30 flex items-center justify-center px-6 py-4 pointer-events-none">
         <nav className="flex items-center gap-6 pointer-events-auto">
-          <button type="button" data-disc-no-drag="" className="a24-value">
-            ÀLBUMS
+          <span className="a24-header-logo font-bold tracking-tight text-black">M.GIL</span>
+          <button
+            type="button"
+            data-disc-no-drag=""
+            className="a24-header-tab a24-header-tab--active text-black font-medium relative"
+          >
+            Àlbums
+            <span className="a24-header-dot" />
           </button>
           <button
             type="button"
             data-disc-no-drag=""
             id="toggle-index-btn"
-            className="a24-label hover:text-black transition-colors"
+            className="a24-header-tab text-black/80 hover:text-black transition-colors flex items-center gap-1"
           >
-            ÍNDEX <span data-film-counter="total">12</span>
+            <span>Índex</span>
+            <span className="text-[9px] leading-none">∨</span>
           </button>
         </nav>
 
-        <div className="flex items-center gap-4 pointer-events-auto">
-          <span className="a24-label">
+        {/* Controles discretos derecha */}
+        <div className="absolute right-6 top-4 hidden sm:flex items-center gap-3 pointer-events-auto">
+          <span className="a24-label text-black">
             <span data-film-counter="current">1</span> / <span data-film-counter="total">12</span>
           </span>
           <button
             type="button"
             data-disc-prev=""
-            className="a24-value px-2 py-1 border border-black/15 rounded hover:border-black disabled:opacity-30 transition"
+            className="a24-value px-2 py-0.5 border border-black/15 rounded hover:border-black disabled:opacity-30 transition"
           >
             ←
           </button>
           <button
             type="button"
             data-disc-next=""
-            className="a24-value px-2 py-1 border border-black/15 rounded hover:border-black disabled:opacity-30 transition"
+            className="a24-value px-2 py-0.5 border border-black/15 rounded hover:border-black disabled:opacity-30 transition"
           >
             →
           </button>
@@ -2113,88 +2122,66 @@ export default function DiscografiaClient() {
         aria-hidden="true"
       />
 
-      {/* BLOC EDITORIAL SUPERIOR ESQUERRA ESTIL A24 */}
+      {/* BLOC EDITORIAL SUPERIOR ESQUERRA (ESTIL EXACTE CAPTURA A24) */}
       <div
         id="left-editorial-panel"
-        className="absolute top-14 sm:top-16 md:top-20 left-4 sm:left-6 md:left-12 z-20 pointer-events-none w-[calc(100vw-2rem)] sm:w-80 md:w-88 max-w-sm flex flex-col"
+        className="a24-top-left-block pointer-events-none"
       >
-        {/* Títol en majúscules enllaçat */}
-        <div className="mb-4 sm:mb-5">
+        {/* Títol gran en majúscules PP Eiko */}
+        <div className="pb-2.5">
           <a
             id="ui-title-link"
             href="/discografia/viatger/"
-            className="pointer-events-auto block hover:opacity-80 transition-opacity"
+            className="pointer-events-auto block hover:opacity-75 transition-opacity"
             title="Veure la fitxa completa de l'edició"
           >
-            <h1 id="ui-title" className="a24-serif-title uppercase font-normal text-black"></h1>
+            <h1 id="ui-title" className="a24-serif-title uppercase text-black"></h1>
           </a>
         </div>
 
-        {/* Taula de metadades estil A24 amb línies horitzontals fines */}
-        <div className="w-full flex flex-col pointer-events-auto">
-          {/* Fila 1: PRODUCCIÓ */}
-          <div className="editorial-row border-t border-black/20 py-2 sm:py-2.5 flex items-baseline justify-between gap-4">
-            <span className="a24-label font-semibold text-black text-[9px] sm:text-[10px] tracking-widest uppercase shrink-0">
-              PRODUCCIÓ
-            </span>
-            <span id="ui-director" className="a24-value text-black text-[11px] sm:text-xs text-right font-normal"></span>
-          </div>
+        {/* Línia divisòria 1 */}
+        <div className="editorial-line"></div>
 
-          {/* Fila 2: ANY */}
-          <div className="editorial-row border-t border-black/20 py-2 sm:py-2.5 flex items-baseline justify-between gap-4">
-            <span className="a24-label font-semibold text-black text-[9px] sm:text-[10px] tracking-widest uppercase shrink-0">
-              ANY
-            </span>
-            <span id="ui-year" className="a24-value text-black text-[11px] sm:text-xs text-right font-normal"></span>
-          </div>
+        {/* Fila 1: PRODUCCIÓ (esquerra) | Valor (dreta) */}
+        <div className="a24-meta-row">
+          <span className="a24-meta-label">PRODUCCIÓ</span>
+          <div id="ui-director" className="a24-meta-value text-right"></div>
+        </div>
 
-          {/* Fila 3: COL·LABORACIONS */}
-          <div className="editorial-row border-t border-black/20 py-2 sm:py-2.5 flex items-baseline justify-between gap-4">
-            <span className="a24-label font-semibold text-black text-[9px] sm:text-[10px] tracking-widest uppercase shrink-0 self-start pt-0.5">
-              COL·LABORACIONS
-            </span>
-            <div id="ui-starring" className="a24-value text-black text-[11px] sm:text-xs text-right font-normal flex flex-col items-end gap-0.5 leading-snug"></div>
-          </div>
+        {/* Línia divisòria 2 */}
+        <div className="editorial-line"></div>
+
+        {/* Fila 2: ANY (esquerra) | Valor (dreta) */}
+        <div className="a24-meta-row">
+          <span className="a24-meta-label">ANY</span>
+          <div id="ui-year" className="a24-meta-value text-right"></div>
+        </div>
+
+        {/* Línia divisòria 3 */}
+        <div className="editorial-line"></div>
+
+        {/* Fila 3: COL·LABORACIONS (esquerra) | Valors apilats (dreta) */}
+        <div className="a24-meta-row a24-meta-row--starring">
+          <span className="a24-meta-label">COL·LABORACIONS</span>
+          <div id="ui-starring" className="a24-meta-value text-right flex flex-col items-end"></div>
         </div>
       </div>
 
-      {/* LLISTA RÀPIDA VERTICAL DRETA (NOMÉS ESCRIPTORI) */}
-      <ul
-        id="ui-quick-list"
-        className="absolute top-16 md:top-20 right-6 md:right-12 z-20 hidden lg:flex flex-col gap-1.5 text-right pointer-events-auto"
-      ></ul>
-
-      {/* SECCIÓ DE RESSENYES CENTRADES A SOTA DELS DISCOS (ESTIL A24) */}
+      {/* SECCIÓ DE CRÍTIQUES A SOTA DELS DISCOS (ESTIL EXACTE CAPTURA A24: ★★★★★ -> MITJÀ -> “CITA SERIF GRAN”) */}
       <div
         id="ui-reviews-container"
-        className="absolute bottom-10 sm:bottom-12 md:bottom-14 left-0 w-full z-20 pointer-events-none flex items-center justify-center px-4 sm:px-6"
+        className="a24-bottom-reviews-container pointer-events-none"
       >
         <div
           id="ui-reviews"
-          className="w-full max-w-4xl flex items-start justify-center gap-8 sm:gap-16 md:gap-24 text-center pointer-events-auto"
+          className="a24-bottom-reviews-grid pointer-events-auto"
         ></div>
       </div>
 
-      {/* PIE DE PÁGINA CON REGLA NUMÉRICA Y AYUDA */}
-      <footer className="absolute bottom-0 left-0 w-full z-20 flex items-center justify-between px-6 py-5 pointer-events-none">
-        <div className="flex items-center gap-5 pointer-events-auto">
-          <span id="scribble-status" className="a24-label">
-            PASSA EL CURSOR PEL DISC PER AL TRAÇ
-          </span>
-        </div>
-
-        {/* Cinta / Regla numérica sincronizada */}
-        <div className="w-56 overflow-hidden text-center pointer-events-none">
-          <div
-            id="ui-ruler"
-            className="whitespace-nowrap a24-label transition-transform duration-300 ease-out"
-          >
-            A &nbsp; 0 &nbsp; 1 &nbsp; 2 &nbsp; 3 &nbsp; 4 &nbsp; 5 &nbsp; 6 &nbsp; 7 &nbsp; 8 &nbsp; 9
-            &nbsp; 10 &nbsp; 11 &nbsp; 12
-          </div>
-        </div>
-
-        <div className="a24-label text-right">RODA · ARROSSEGA · FES CLIC AL DISC PER A VEURE LA FITXA</div>
+      {/* PIE DE PÁGINA OCULTO PARA RESPETAR EL DISEÑO LIMPIO DE LA CAPTURA A24 */}
+      <footer className="sr-only pointer-events-none" aria-hidden="true">
+        <span id="scribble-status"></span>
+        <div id="ui-ruler"></div>
       </footer>
 
       {/* MENÚ INDEX SUPERPUESTO (Usa [data-film-scroll="<título>"]) */}
