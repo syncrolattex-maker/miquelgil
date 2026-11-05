@@ -224,16 +224,23 @@ export default function DiscografiaClient() {
       renderer.setSize(w, h);
 
       if (w <= 650) {
-        // En versión móvil, formato más pequeño de los CDs para que el título quepa arriba y las críticas abajo
-        camera.position.set(0, 0, 6.2);
-        galleryGroup.scale.setScalar(0.55);
-        galleryGroup.position.set(0, -0.06, 0);
+        // En versión móvil, replicar disposición A24 mobile (plano frontal con inclinación suave, CD activo protagonista y vecinos asomando abajo)
+        camera.position.set(0, 0, 5.2);
+        galleryGroup.rotation.set(
+          THREE.MathUtils.degToRad(-12),
+          THREE.MathUtils.degToRad(-8),
+          THREE.MathUtils.degToRad(14)
+        );
+        galleryGroup.scale.setScalar(0.68);
+        galleryGroup.position.set(0, -0.05, 0);
       } else if (w <= 1024) {
         camera.position.set(0, 0, 5.0);
+        galleryGroup.rotation.set(SPEC.galleryRotX, SPEC.galleryRotY, 0);
         galleryGroup.scale.setScalar(0.82);
         galleryGroup.position.set(0, 0, 0);
       } else {
         camera.position.set(0, 0, SPEC.camDistance);
+        galleryGroup.rotation.set(SPEC.galleryRotX, SPEC.galleryRotY, 0);
         galleryGroup.scale.setScalar(SPEC.galleryScale);
         galleryGroup.position.set(0, 0, 0);
       }
@@ -1920,7 +1927,8 @@ export default function DiscografiaClient() {
       // Espaciado horizontal: hGap: 2.8 (0.9x en pantallas <= narrowWidth 650 px, variable rowGap).
       // Profundidad: depthGap: 1. Elevación del disco activo: activeDiscY: 0.06.
       // Escala del inactivo: inactiveScale: 0.8.
-      const rowGap = window.innerWidth <= SPEC.narrowWidth ? SPEC.hGap * 0.9 : SPEC.hGap;
+      const isMobile = window.innerWidth <= SPEC.narrowWidth;
+      const rowGap = isMobile ? SPEC.hGap * 0.72 : SPEC.hGap;
       const v = Math.max(0.12, SPEC.depthGap);
 
       for (let p = 0; p < N; p++) {
@@ -1960,7 +1968,9 @@ export default function DiscografiaClient() {
         const centerT = Math.max(0, 1 - absM);
         // Interpolación hermite (smoothstep) para evitar saltos y dar sensación continua
         const smoothCenter = centerT * centerT * (3 - 2 * centerT);
-        const y = smoothCenter * SPEC.activeDiscY - Math.abs(flowSignal) * SPEC.flowDip;
+        // En móvil, los discos inactivos bajan ligeramente en Y para asomar por las esquinas inferiores como en la captura A24
+        const mobileSideDrop = isMobile ? (1 - smoothCenter) * 0.55 : 0;
+        const y = smoothCenter * SPEC.activeDiscY - mobileSideDrop - Math.abs(flowSignal) * SPEC.flowDip;
 
         holder.position.set(
           x + u.zeroGOffset.x,
@@ -1968,9 +1978,10 @@ export default function DiscografiaClient() {
           z + u.zeroGOffset.z + buoyZ
         );
 
-        // Escala continua y sedosa: 1.0 en el centro exacto, desciende a inactiveScale = 0.8
+        // Escala continua y sedosa: 1.0 en el centro exacto, desciende a inactiveScale (0.8 en desktop, 0.52 en móvil como en la captura)
         if (!isTransitioningOut) {
-          const baseScale = SPEC.inactiveScale + smoothCenter * (1.0 - SPEC.inactiveScale);
+          const minScale = isMobile ? 0.52 : SPEC.inactiveScale;
+          const baseScale = minScale + smoothCenter * (1.0 - minScale);
           holder.scale.setScalar(baseScale + u.hoverWeight * 0.028);
         }
 
@@ -2070,9 +2081,9 @@ export default function DiscografiaClient() {
       {/* REGIÓN ARIA-LIVE PARA ANUNCIOS A LOS 350 MS */}
       <div id="gallery-live-region" className="sr-only" aria-live="polite" aria-atomic="true"></div>
 
-      {/* CABECERA SUPERIOR ESTILO A24 (Centrada como en la captura) */}
-      <header className="absolute top-0 left-0 w-full z-30 flex items-center justify-center px-6 py-4 pointer-events-none">
-        <nav className="flex items-center gap-6 pointer-events-auto">
+      {/* CABECERA SUPERIOR ESTILO A24 (Centrada arriba en desktop, pastilla inferior en móvil como en la captura) */}
+      <header className="a24-header-bar pointer-events-none">
+        <nav className="a24-header-nav pointer-events-auto">
           <span className="a24-header-logo font-bold tracking-tight text-black">M.GIL</span>
           <button
             type="button"
@@ -2089,12 +2100,12 @@ export default function DiscografiaClient() {
             className="a24-header-tab text-black/80 hover:text-black transition-colors flex items-center gap-1"
           >
             <span>Índex</span>
-            <span className="text-[9px] leading-none">∨</span>
+            <span className="a24-header-chevron text-[9px] leading-none">∨</span>
           </button>
         </nav>
 
-        {/* Controles discretos derecha */}
-        <div className="absolute right-6 top-4 hidden sm:flex items-center gap-3 pointer-events-auto">
+        {/* Controles discretos derecha (solo desktop) */}
+        <div className="a24-header-controls hidden sm:flex items-center gap-3 pointer-events-auto">
           <span className="a24-label text-black">
             <span data-film-counter="current">1</span> / <span data-film-counter="total">12</span>
           </span>
