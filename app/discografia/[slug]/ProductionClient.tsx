@@ -4,6 +4,7 @@ import React, { useEffect, useRef, useState, useCallback } from 'react';
 import Link from 'next/link';
 import * as THREE from 'three';
 import gsap from 'gsap';
+import AnnnimateVideoPlayer from '@/components/AnnnimateVideoPlayer';
 import { AlbumDetail } from './albumData';
 import { initDissolve } from './dissolveEngine';
 import './production.css';
@@ -13,35 +14,17 @@ interface ProductionClientProps {
 }
 
 export default function ProductionClient({ album }: ProductionClientProps) {
-  // Estados para el Lightbox
+  // Estados para el Modal de Vídeo
   const [trailerOpen, setTrailerOpen] = useState(false);
-  const [isPlaying, setIsPlaying] = useState(true);
-  const [isMuted, setIsMuted] = useState(false);
-  const [currentTime, setCurrentTime] = useState('00:00');
-  const [totalTime, setTotalTime] = useState('04:42');
-  const [progress, setProgress] = useState(0);
-  const [volume, setVolume] = useState(55);
 
   // Refs de elementos
   const containerRef = useRef<HTMLDivElement>(null);
   const heroRef = useRef<HTMLElement>(null);
   const trailerRef = useRef<HTMLElement>(null);
-  const dissolveCanvasRef = useRef<HTMLCanvasElement>(null);
   const scrollNextRef = useRef<HTMLElement>(null);
   const upNextCanvasContainerRef = useRef<HTMLDivElement>(null);
-  const iframeRef = useRef<HTMLIFrameElement>(null);
-  const playerRef = useRef<any>(null);
 
   const [pushProgress, setPushProgress] = useState(0);
-
-  // Extraer ID de YouTube
-  const getYouTubeId = (url: string) => {
-    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
-    const match = url.match(regExp);
-    return match && match[2].length === 11 ? match[2] : 'yVT-HCsypyk';
-  };
-
-  const videoId = getYouTubeId(album.trailerSrc);
 
   // ============================================================================
   // 1. ANIMACIÓN DE ENTRADA DE BOTONES (GSAP SEGÚN ESPECIFICACIÓN A24)
@@ -110,75 +93,14 @@ export default function ProductionClient({ album }: ProductionClientProps) {
   }, []);
 
   // ============================================================================
-  // 3. REPRODUCTOR TRAILER LIGHTBOX & DISSOLVE CANVAS
+  // 3. REPRODUCTOR TRAILER LIGHTBOX & MODAL
   // ============================================================================
   const openTrailer = useCallback(() => {
     setTrailerOpen(true);
-    setIsPlaying(true);
-
-    if (!(window as any).YT) {
-      const tag = document.createElement('script');
-      tag.src = 'https://www.youtube.com/iframe_api';
-      document.body.appendChild(tag);
-    }
   }, []);
 
   const closeTrailer = useCallback(() => {
-    const canvas = dissolveCanvasRef.current;
-    if (!canvas) {
-      setTrailerOpen(false);
-      return;
-    }
-
-    const ctx = canvas.getContext('2d');
-    if (!ctx) {
-      setTrailerOpen(false);
-      return;
-    }
-
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-    const w = canvas.width;
-    const h = canvas.height;
-
-    let progressVal = 0;
-    const duration = 850; // 0.85s según especificación
-    const startTime = performance.now();
-
-    const renderDissolve = (now: number) => {
-      const elapsed = now - startTime;
-      progressVal = Math.min(1, elapsed / duration);
-
-      ctx.clearRect(0, 0, w, h);
-      ctx.fillStyle = '#000000';
-
-      const cellSize = 16;
-      const cols = Math.ceil(w / cellSize);
-      const rows = Math.ceil(h / cellSize);
-
-      for (let r = 0; r < rows; r++) {
-        const rowProgress = r / rows;
-        for (let c = 0; c < cols; c++) {
-          const noise = Math.sin(c * 0.4 + progressVal * 6) * 0.2 + Math.cos(r * 0.3) * 0.2;
-          const threshold = rowProgress + noise;
-          if (threshold < progressVal * 1.3) {
-            ctx.fillRect(c * cellSize, r * cellSize, cellSize, cellSize);
-          }
-        }
-      }
-
-      if (progressVal < 1) {
-        requestAnimationFrame(renderDissolve);
-      } else {
-        ctx.clearRect(0, 0, w, h);
-        setTrailerOpen(false);
-        if (playerRef.current && typeof playerRef.current.pauseVideo === 'function') {
-          playerRef.current.pauseVideo();
-        }
-      }
-    };
-
-    requestAnimationFrame(renderDissolve);
+    setTrailerOpen(false);
   }, []);
 
   useEffect(() => {
@@ -1072,105 +994,39 @@ export default function ProductionClient({ album }: ProductionClientProps) {
       </section>
 
       {/* ============================================================
-          5. REPRODUCTOR LIGHTBOX DEL TRÁILER (A24 CINEMATIC LIGHTBOX)
+          5. REPRODUCTOR LIGHTBOX DEL TRÁILER (ANNNIMATE VIDEO PLAYER / A24 MODAL)
          ============================================================ */}
-      <div
-        className="trailer-lightbox"
-        data-trailer-status={trailerOpen ? 'open' : 'closed'}
-        aria-hidden={!trailerOpen}
-      >
-        {/* Canvas de disolución procedural */}
-        <canvas ref={dissolveCanvasRef} className="trailer-lightbox__canvas" />
-
-        {/* Barra superior de controles */}
-        <div className="trailer-lightbox__ui">
-          <div className="trailer-lightbox__top">
-            <div className="flex items-center gap-3">
-              <span className="subheading-xs text-white/80">{album.title.toUpperCase()}</span>
-              <span className="subheading-xs text-white/40">·</span>
-              <span className="subheading-xs text-white/60">VÍDEO OFICIAL</span>
-            </div>
+      {trailerOpen && (
+        <div
+          className="a24-video-modal"
+          role="dialog"
+          aria-modal="true"
+          aria-label={`Videoclip de ${album.title}`}
+        >
+          <div
+            className="a24-modal-backdrop"
+            onClick={closeTrailer}
+          />
+          <div className="a24-modal-content">
             <button
               type="button"
+              className="a24-modal-close"
               onClick={closeTrailer}
-              className="trailer-lightbox__ctl"
+              aria-label="Tancar vídeo"
             >
-              TANCAR [ESC]
+              ✕
             </button>
-          </div>
-
-          {/* Barra inferior de controles */}
-          <div className="trailer-lightbox__bottom">
-            <button
-              type="button"
-              onClick={() => setIsPlaying(!isPlaying)}
-              className="trailer-lightbox__ctl"
-            >
-              {isPlaying ? 'PAUSA' : 'REPRODUIR'}
-            </button>
-
-            <span className="trailer-lightbox__time">
-              {currentTime} / {totalTime}
-            </span>
-
-            {/* Barra de progreso / Timeline */}
-            <div className="trailer-lightbox__timeline">
-              <div className="trailer-lightbox__timeline-rule" />
-              <div
-                className="trailer-lightbox__timeline-progress"
-                style={{ width: `${progress}%` }}
+            <div className="a24-modal-player">
+              <AnnnimateVideoPlayer
+                src={album.videoSrc || '/video/nineta.mp4'}
+                poster={album.videoPoster || album.trailerStill || '/video/nineta_frame.jpg'}
+                title={`${album.title} — Videoclip Oficial`}
+                credits={album.videoCredits || album.director}
               />
             </div>
-
-            {/* Control de sonido y volumen */}
-            <div className="flex items-center gap-3">
-              <button
-                type="button"
-                onClick={() => setIsMuted(!isMuted)}
-                className="trailer-lightbox__ctl"
-              >
-                {isMuted ? 'ACTIVAR SO' : 'SO'}
-              </button>
-              <div className="trailer-lightbox__volume hidden sm:flex">
-                <div className="trailer-lightbox__volume-rule" />
-                <div
-                  className="trailer-lightbox__volume-level"
-                  style={{ width: isMuted ? '0%' : `${volume}%` }}
-                />
-              </div>
-            </div>
-
-            <button
-              type="button"
-              onClick={() => {
-                if (!document.fullscreenElement) {
-                  document.documentElement.requestFullscreen?.();
-                } else {
-                  document.exitFullscreen?.();
-                }
-              }}
-              className="trailer-lightbox__ctl hidden md:inline-block"
-            >
-              PANTALLA COMPLETA
-            </button>
           </div>
         </div>
-
-        {/* Escenario del reproductor */}
-        <div className="trailer-lightbox__stage">
-          <div className="trailer-lightbox__player">
-            {trailerOpen && (
-              <iframe
-                ref={iframeRef}
-                src={`https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&controls=0&rel=0&modestbranding=1&playsinline=1&enablejsapi=1`}
-                title={`${album.title} — Trailer`}
-                allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
-                allowFullScreen
-              />
-            )}
-          </div>
-        </div>
-      </div>
+      )}
     </div>
   );
 }

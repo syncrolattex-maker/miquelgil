@@ -39,6 +39,9 @@ export interface AlbumDetail {
   quoteAuthor?: string;
   trailerSrc: string; // YouTube URL o ID
   trailerStill: string;
+  videoSrc?: string; // MP4 directa per a AnnnimateVideoPlayer
+  videoPoster?: string;
+  videoCredits?: string;
   streamUrl: string;
   buyUrl?: string;
   awards: AwardItem[];
@@ -68,7 +71,10 @@ export const ALBUMS_DATA: Record<string, AlbumDetail> = {
     quote: "Vint-i-cinc anys de viatge sonor per les venes obertes de la Mediterrània",
     quoteAuthor: 'Miquel Gil · Viatger (2024)',
     trailerSrc: 'https://www.youtube.com/watch?v=kNwJUff7NlU',
-    trailerStill: '/images/MiquelGilViatger_Principal.webp',
+    trailerStill: '/images/viatger01.jpg',
+    videoSrc: '/video/nineta.mp4',
+    videoPoster: '/video/nineta_frame.jpg',
+    videoCredits: 'Tubal Perales, Vicent Todolí i Enric Alepuz',
     streamUrl: 'https://open.spotify.com/search/Miquel%20Gil%20Viatger',
     buyUrl: 'https://www.youtube.com/watch?v=kNwJUff7NlU',
     awards: [
@@ -119,10 +125,10 @@ export const ALBUMS_DATA: Record<string, AlbumDetail> = {
       "Arquitectura polifònica construïda sobre versos de Vicent Andrés Estellés i Enric Casasses. A través d'una combinació d'harmonies polifòniques i ritmes complexos, 'Geometries' és una reflexió profunda sobre l'ordre i el caos, la simetria i l'asimetria, capturant la bellesa matemàtica i emocional del cant valencià.",
     quote: "La veu traça polígons d'emoció pura sobre la pell del temps",
     quoteAuthor: 'Miquel Gil · Geometries (2019)',
-    trailerSrc: 'https://www.youtube.com/watch?v=yVT-HCsypyk',
+    trailerSrc: 'https://www.youtube.com/watch?v=GzIg30r1138&list=RDGzIg30r1138&start_radio=1',
     trailerStill: '/images/miquel-gil-juan-miguel-morales-14-scaled.jpg',
     streamUrl: 'https://open.spotify.com/search/Miquel%20Gil%20Geometries',
-    buyUrl: 'https://www.totfolk.cat/discografia-miquel-gil',
+    buyUrl: 'https://www.youtube.com/watch?v=GzIg30r1138&list=RDGzIg30r1138&start_radio=1',
     awards: [
       { title: 'PREMIS CARLES SANTOS 2019', value: 'MILLOR DISC DE MÚSICA TRADICIONAL' },
       { title: 'PREMIS OVÍDI MONTLLOR 2019', value: 'MILLOR PRODUCCIÓ I ARRANJAMENTS' },
