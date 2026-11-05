@@ -97,13 +97,14 @@ export default function DiscografiaClient() {
       };
     });
 
-    // 2. Constantes exactas de la especificación
+    // 2. Constantes exactas de la especificación (dmtrbrl/discography - A24 base)
     const SPEC = {
-      hGap: 2.3,
+      hGap: 2.8,
+      narrowWidth: 650,
       depthGap: 1.0,
       activeDiscY: 0.06,
-      galleryRotX: THREE.MathUtils.degToRad(-30),
-      galleryRotY: THREE.MathUtils.degToRad(-30),
+      galleryRotX: THREE.MathUtils.degToRad(-22),
+      galleryRotY: THREE.MathUtils.degToRad(-22),
       galleryScale: 1.08,
       fov: 40,
       camDistance: 4.4,
@@ -114,37 +115,49 @@ export default function DiscografiaClient() {
       hubRadius: 0.24,
       renderRadius: 5,
       initialPreloadRadius: 5,
+      inactiveScale: 0.8,
       flowLean: 0.11,
       flowBank: 0.20,
       flowDip: 0.032,
       hoverTiltStrength: 0.21,
-      touchActiveScale: 1.5,
-      touchInactiveScale: 0.6,
-      touchGap: 2.2,
-      touchDepth: 0.5,
-      snapDuration: 0.76,
+      snapDuration: 0.46,
       dragStartDistance: 5,
       dragSensitivity: 0.95,
       dragVelocitySmoothing: 0.32,
+      touchDragSpan: 1.8,
       touchFlickVelocity: 0.035,
-      wheelStepThreshold: 6,
+      flipFlickVelocity: 0.08,
+      flipDuration: 0.9,
+      friction: 0.89,
+      snapFreq: 9.5,
+      snapDamping: 12,
+      wheelNoiseFloor: 0.3,
       wheelEnvelopeTau: 550,
       wheelTickGap: 34,
+      wheelMinStepTick: 90,
+      wheelMinStepFlick: 190,
       wheelPauseGap: 130,
       wheelIdleReset: 150,
-      wheelSustainDelay: 480
+      wheelSustainDelay: 480,
+      wheelStepThreshold: 6
     };
 
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-    // Estado principal del carrusel
+    // Estado principal del carrusel (dmtrbrl/discography)
     let L = 0; // Posición continua (decimal)
     let W = 0; // Índice activo entero
+    let targetL = 0; // Destino en curso
+    let dragInertia = 0; // Inercia física conservada al soltar
+    let settleVelocity = 0; // Velocidad del muelle crítico de asentamiento
     let prevL = 0;
     let velocityVisual = 0;
     let kickBoost = 0;
     let activeTween: gsap.core.Tween | null = null;
     let isDisposed = false;
+
+    const activeIndex = () => Math.round(Math.max(0, Math.min(N - 1, L)));
+    const targetIndex = () => (activeTween ? Math.round(targetL) : activeIndex());
 
     // 3. Configuración Three.js (WebGLRenderer + PerspectiveCamera)
     // Match Three.js r128 color and lighting pipeline in modern Three.js
@@ -1059,9 +1072,36 @@ export default function DiscografiaClient() {
       );
     }
 
-    async function mr(targetIndex: number, { source = 'default' }: { source?: string } = {}) {
+    // ============================================================================
+    // 8. FUNCIÓN DE ACTIVACIÓN ur(index) Y NAVEGACIÓN CENTRAL goTo(index, source)
+    // ============================================================================
+    function motionFor(source: string, distance: number) {
+      const base = SPEC.snapDuration; // 0.46
+      let duration = base;
+      let kick = 1.6;
+      const ease = 'power2.out';
+
+      if (source === 'wheel') {
+        duration = base + 0.05; // 0.51 s
+        kick = 2.5;
+      } else if (source === 'key') {
+        duration = base; // 0.46 s
+        kick = 1.8;
+      } else if (source === 'click') {
+        const clampedSqrt = Math.min(1.6, Math.max(1.0, Math.sqrt(distance)));
+        duration = base * clampedSqrt;
+        kick = 2.0;
+      } else if (source === 'flick') {
+        duration = base * 0.9; // 0.414 s
+        kick = 2.2;
+      }
+
+      return { duration, kick, ease };
+    }
+
+    async function goTo(targetIdx: number, source = 'default') {
       // 1. Limita el índice a 0…N-1 (sin bucle)
-      const clamped = Math.max(0, Math.min(N - 1, Math.round(targetIndex)));
+      const clamped = Math.max(0, Math.min(N - 1, Math.round(targetIdx)));
       const distance = Math.abs(clamped - L);
 
       // 2. Si el destino está a más de 5 discos, espera a cargar sus texturas antes de animar
@@ -1071,26 +1111,12 @@ export default function DiscografiaClient() {
         preloadAround(clamped, SPEC.renderRadius);
       }
 
-      // Tabla de duración e impulso (kick) según origen con dinámica fluida ("pequeño flow")
-      let duration = SPEC.snapDuration;
-      let kick = 1.6;
+      // 3. Duración e impulso (kick) según origen con motionFor(source, distance)
+      const { duration, kick, ease } = motionFor(source, distance);
 
-      if (source === 'wheel') {
-        duration = 0.68;
-        kick = 2.4;
-      } else if (source === 'key') {
-        duration = Math.min(0.82, 0.64 + 0.06 * Math.sqrt(distance));
-        kick = 1.8;
-      } else if (source === 'click') {
-        duration = Math.max(0.72, Math.min(1.15, 0.68 + 0.12 * Math.sqrt(distance)));
-        kick = Math.min(4.0, 2.0 * Math.sqrt(distance));
-      } else if (source === 'flick') {
-        duration = 0.74;
-        kick = 2.2;
-      } else {
-        duration = SPEC.snapDuration;
-        kick = 1.6;
-      }
+      // Detener inercia física y velocidad del muelle
+      dragInertia = 0;
+      settleVelocity = 0;
 
       const dir = Math.sign(clamped - L) || 1;
       kickBoost = dir * kick * 0.22;
@@ -1099,6 +1125,7 @@ export default function DiscografiaClient() {
 
       if (prefersReducedMotion || distance < 0.0001) {
         L = clamped;
+        targetL = clamped;
         ur(clamped);
         return;
       }
@@ -1117,11 +1144,12 @@ export default function DiscografiaClient() {
         });
       }
 
+      targetL = clamped;
       const animState = { val: L };
       activeTween = gsap.to(animState, {
         val: clamped,
         duration,
-        ease: 'power2.out',
+        ease,
         onUpdate: () => {
           L = animState.val;
           // Actualización armónica de la ficha a mitad del trayecto (38%) para sincronía perfecta
@@ -1133,6 +1161,7 @@ export default function DiscografiaClient() {
         },
         onComplete: () => {
           L = clamped;
+          activeTween = null;
           if (!hasSwappedMeta) {
             ur(clamped);
           }
@@ -1144,8 +1173,18 @@ export default function DiscografiaClient() {
       });
     }
 
-    const onPrevClick = () => mr(W - 1, { source: 'click' });
-    const onNextClick = () => mr(W + 1, { source: 'click' });
+    function step(delta: number) {
+      wheelState.accum = 0;
+      wheelState.lockedInGesture = false;
+      wheelState.lastStepTime = performance.now();
+      goTo(targetIndex() + delta, 'key');
+    }
+
+    // Alias mr para compatibilidad
+    const mr = (targetIndex: number, opts?: { source?: string }) => goTo(targetIndex, opts?.source || 'default');
+
+    const onPrevClick = () => goTo(W - 1, 'click');
+    const onNextClick = () => goTo(W + 1, 'click');
     if (prevBtn) prevBtn.addEventListener('click', onPrevClick);
     if (nextBtn) nextBtn.addEventListener('click', onNextClick);
 
@@ -1168,17 +1207,25 @@ export default function DiscografiaClient() {
       const dt = now - wheelState.lastEventTime;
       wheelState.lastEventTime = now;
 
+      // Si el modal de detalle está abierto, la rueda no mueve la fila (solo se sigue el gesto para no heredar cola)
+      const isModalOpen = Boolean(detailModal && !detailModal.classList.contains('opacity-0'));
+
       // Normalización de deltaMode
       const modeMultiplier = e.deltaMode === 1 ? 16 : e.deltaMode === 2 ? 100 : 1;
       const dx = e.deltaX * modeMultiplier;
       const dy = e.deltaY * modeMultiplier;
 
       // Elegir eje dominante (horizontal si |dx| > 1.25 * |dy|)
-      const rawDelta = Math.abs(dx) > 1.25 * Math.abs(dy) ? dx : dy;
+      const isHorizontal = Math.abs(dx) > 1.25 * Math.abs(dy);
+      const rawDelta = isHorizontal ? dx : dy;
       const absDelta = Math.abs(rawDelta);
 
-      // Suelo de ruido 0.3
-      if (absDelta < 0.3) return;
+      // Suelo de ruido wheelNoiseFloor 0.3
+      if (absDelta < SPEC.wheelNoiseFloor) return;
+
+      // Envolvente exponencial (wheelEnvelopeTau = 550 ms) para distinguir tic de rueda de cola inercial de trackpad
+      const decay = Math.exp(-dt / SPEC.wheelEnvelopeTau);
+      wheelState.envelope = Math.max(absDelta, wheelState.envelope * decay);
 
       if (dt > SPEC.wheelIdleReset) {
         wheelState.accum = 0;
@@ -1188,24 +1235,27 @@ export default function DiscografiaClient() {
         wheelState.lockedInGesture = false;
       }
 
-      // Envolvente exponencial (wheelEnvelopeTau = 550 ms) para filtrar cola inercial
-      const decay = Math.exp(-dt / SPEC.wheelEnvelopeTau);
-      wheelState.envelope = Math.max(absDelta, wheelState.envelope * decay);
+      const sinceLastStep = now - wheelState.lastStepTime;
+      const isCleanTick = dt <= SPEC.wheelTickGap && sinceLastStep >= SPEC.wheelMinStepTick;
+      const isFlick = sinceLastStep >= SPEC.wheelMinStepFlick && absDelta > 10;
+      const isSustained = sinceLastStep >= SPEC.wheelSustainDelay && absDelta > 4;
+
+      if (isCleanTick || isFlick || isSustained) {
+        wheelState.lockedInGesture = false;
+      }
 
       const clampedDelta = Math.sign(rawDelta) * Math.min(24, absDelta);
       wheelState.accum += clampedDelta;
-
-      const sinceLastStep = now - wheelState.lastStepTime;
-      if (wheelState.lockedInGesture && sinceLastStep >= SPEC.wheelSustainDelay && absDelta > 4) {
-        wheelState.lockedInGesture = false;
-      }
 
       if (!wheelState.lockedInGesture && Math.abs(wheelState.accum) >= SPEC.wheelStepThreshold) {
         const stepDir = Math.sign(wheelState.accum);
         wheelState.accum = 0;
         wheelState.lockedInGesture = true;
         wheelState.lastStepTime = now;
-        mr(Math.round(L) + stepDir, { source: 'wheel' });
+
+        if (!isModalOpen) {
+          goTo(targetIndex() + stepDir, 'wheel');
+        }
       }
     };
 
@@ -1291,7 +1341,7 @@ export default function DiscografiaClient() {
         );
     }
 
-    // Estado del arrastre pointer*
+    // Estado del arrastre pointer* (dmtrbrl/discography)
     const dragState = {
       active: false,
       pointerId: null as number | null,
@@ -1303,7 +1353,8 @@ export default function DiscografiaClient() {
       lastTime: 0,
       movedBeyondThreshold: false,
       mode: 'carousel' as 'disc-spin' | 'carousel',
-      velocity: 0
+      velocity: 0,
+      spinVelocityY: 0
     };
 
     function isInteractiveElement(el: EventTarget | null) {
@@ -1328,14 +1379,18 @@ export default function DiscografiaClient() {
       dragState.lastTime = performance.now();
       dragState.movedBeyondThreshold = false;
       dragState.velocity = 0;
+      dragState.spinVelocityY = 0;
 
       // Modo 1: Pulsar sobre el disco activo -> gira sobre sí mismo en X/Y
       // Modo 2: Pulsar en otro sitio -> mueve el carrusel (L)
       dragState.mode = hit.index === W ? 'disc-spin' : 'carousel';
 
-      if (activeTween && dragState.mode === 'carousel') {
+      if (activeTween) {
         activeTween.kill();
+        activeTween = null;
       }
+      dragInertia = 0;
+      settleVelocity = 0;
 
       try {
         container.setPointerCapture(e.pointerId);
@@ -1362,7 +1417,7 @@ export default function DiscografiaClient() {
           }
         }
 
-        // El Scribble solo aparece cuando el cursor está sobre el disco activo (W)
+        // El Scribble (halo negro) solo aparece cuando el cursor está sobre el disco activo (W)
         if (hoveredDiscIndex === W && prevHovered !== W) {
           keyboardNavMode = false;
           setScribbleActiveIntent(true);
@@ -1416,19 +1471,25 @@ export default function DiscografiaClient() {
       if (dragState.mode === 'disc-spin' && activeHolder) {
         const rect = container.getBoundingClientRect();
         const u = activeHolder.userData as DiscHolderUserData;
-        u.dragSpinY += (dx / rect.width) * Math.PI * 2 * SPEC.dragSensitivity;
-        u.dragSpinX += (dy / rect.height) * Math.PI * 2 * SPEC.dragSensitivity;
+        const spinDx = (dx / rect.width) * Math.PI * 2 * SPEC.dragSensitivity;
+        const spinDy = (dy / rect.height) * Math.PI * 2 * SPEC.dragSensitivity;
+        u.dragSpinY += spinDx;
+        u.dragSpinX += spinDy;
+        const instSpinVel = spinDx / (dt / 1000);
+        dragState.spinVelocityY =
+          dragState.spinVelocityY * (1 - SPEC.dragVelocitySmoothing) +
+          instSpinVel * SPEC.dragVelocitySmoothing;
       } else {
         const width = Math.max(1, container.clientWidth);
-        const spanFactor = dragState.pointerType === 'mouse' ? 6 * SPEC.dragSensitivity : 4.2;
-        const deltaL = -(dx / width) * spanFactor;
+        const span = dragState.pointerType === 'mouse' ? 6 * SPEC.dragSensitivity : SPEC.touchDragSpan;
+        const deltaL = -(dx / width) * span;
         L = Math.max(0, Math.min(N - 1, L + deltaL));
 
-        const instVel = deltaL / dt;
+        const framesDt = dt / 16.6667;
+        const instVel = deltaL / Math.max(0.1, framesDt);
         dragState.velocity =
           dragState.velocity * (1 - SPEC.dragVelocitySmoothing) +
           instVel * SPEC.dragVelocitySmoothing;
-        dragState.velocity = Math.max(-0.5, Math.min(0.5, dragState.velocity));
       }
     };
 
@@ -1447,19 +1508,31 @@ export default function DiscografiaClient() {
 
       const activeHolder = discHolders[W];
       if (dragState.mode === 'disc-spin' && activeHolder) {
-        gsap.to(activeHolder.userData, {
+        const u = activeHolder.userData as DiscHolderUserData;
+        const absSpin = Math.abs(u.dragSpinY);
+        const isFlipFlick = Math.abs(dragState.spinVelocityY) >= SPEC.flipFlickVelocity * 10;
+        const shouldFlip = absSpin >= Math.PI / 2 || isFlipFlick;
+        const targetSpinY = shouldFlip ? Math.sign(u.dragSpinY || 1) * Math.PI : 0;
+        gsap.to(u, {
+          dragSpinY: targetSpinY,
           dragSpinX: 0,
-          dragSpinY: 0,
-          duration: 1.2,
-          ease: 'power3.out'
+          duration: shouldFlip ? SPEC.flipDuration : 0.6,
+          ease: 'power2.out'
         });
       } else {
-        const flickThreshold = dragState.pointerType === 'mouse' ? 0.06 : SPEC.touchFlickVelocity;
-        if (Math.abs(dragState.velocity) >= flickThreshold) {
-          const step = Math.sign(dragState.velocity) * Math.min(2, Math.max(1, Math.round(Math.abs(dragState.velocity) * 8)));
-          mr(Math.round(L) + step, { source: 'flick' });
+        if (dragState.pointerType !== 'mouse') {
+          // Táctil: si |inercia| ≥ touchFlickVelocity: 0.035, goTo(target, 'flick')
+          if (Math.abs(dragState.velocity) >= SPEC.touchFlickVelocity) {
+            const stepDelta = Math.sign(dragState.velocity) * Math.min(2, Math.max(1, Math.round(Math.abs(dragState.velocity) * 8)));
+            goTo(activeIndex() + stepDelta, 'flick');
+          } else {
+            goTo(activeIndex(), 'default');
+          }
         } else {
-          mr(Math.round(L), { source: 'default' });
+          // Ratón: no hace snap inmediato. Conserva inercia, la amortigua con fricción (friction: 0.89)
+          // hasta que el muelle crítico (snapFreq: 9.5, snapDamping: 12) la atrae al índice más cercano.
+          dragInertia = dragState.velocity;
+          settleVelocity = 0;
         }
       }
       container.style.cursor = hoveredDiscIndex >= 0 ? 'pointer' : 'default';
@@ -1613,24 +1686,24 @@ export default function DiscografiaClient() {
       if (e.key === 'ArrowRight') {
         e.preventDefault();
         keyboardNavMode = true;
-        mr(W + 1, { source: 'key' });
+        step(1);
         setScribbleActiveIntent(true);
       } else if (e.key === 'ArrowLeft') {
         e.preventDefault();
         keyboardNavMode = true;
-        mr(W - 1, { source: 'key' });
+        step(-1);
         setScribbleActiveIntent(true);
       } else if (e.key === 'Home') {
         e.preventDefault();
         keyboardNavMode = true;
-        mr(0, { source: 'key' });
+        goTo(0, 'key');
         setScribbleActiveIntent(true);
       } else if (e.key === 'End') {
         e.preventDefault();
         keyboardNavMode = true;
-        mr(N - 1, { source: 'key' });
+        goTo(N - 1, 'key');
         setScribbleActiveIntent(true);
-      } else if (e.key === 'Enter') {
+      } else if (e.key === 'Enter' || e.key === ' ') {
         e.preventDefault();
         openFilmDetail(films[W], e.metaKey || e.ctrlKey);
       }
@@ -1651,6 +1724,55 @@ export default function DiscografiaClient() {
       const dt = Math.min(0.05, Math.max(0.001, (now - lastFrameTime) / 1000));
       lastFrameTime = now;
       const timeSec = now * 0.001;
+      const frames = dt / (1 / 60);
+
+      // Fricción + Muelle crítico según especificación dmtrbrl/discography
+      // Si no estás arrastrando y no hay un tween activo:
+      // this.position += this.inertia * frames;
+      // this.inertia *= Math.pow(this.friction, frames);
+      // Si la inercia baja a 0, el muelle crítico tira hacia el entero más cercano:
+      // offset = activeIndex() - this.position;
+      // settleVelocity += (offset * snapFreq² - settleVelocity * 2 * snapDamping) * dt;
+      // this.position += settleVelocity * dt;
+      if (!dragState.active && !activeTween) {
+        if (Math.abs(dragInertia) > 1e-4) {
+          L += dragInertia * frames;
+          dragInertia *= Math.pow(SPEC.friction, frames);
+
+          if (L < 0) {
+            L = 0;
+            dragInertia = 0;
+          } else if (L > N - 1) {
+            L = N - 1;
+            dragInertia = 0;
+          }
+
+          if (Math.abs(dragInertia) <= 1e-4) {
+            dragInertia = 0;
+          }
+
+          const currentNearIdx = activeIndex();
+          if (currentNearIdx !== W) {
+            ur(currentNearIdx);
+          }
+        } else {
+          const target = activeIndex();
+          const offset = target - L;
+          settleVelocity +=
+            (offset * (SPEC.snapFreq * SPEC.snapFreq) - settleVelocity * 2 * SPEC.snapDamping) *
+            dt;
+          L += settleVelocity * dt;
+
+          if (Math.abs(offset) < 0.0005 && Math.abs(settleVelocity) < 0.0005) {
+            L = target;
+            settleVelocity = 0;
+          }
+
+          if (target !== W) {
+            ur(target);
+          }
+        }
+      }
 
       // Velocidad e inercia visual con dinamismo elástico y amortiguación sedosa ("pequeño flow")
       const rawVel = (L - prevL) / Math.max(0.008, dt);
@@ -1659,7 +1781,11 @@ export default function DiscografiaClient() {
       kickBoost *= Math.exp(-dt * 3.6);
       const flowSignal = Math.max(-1.4, Math.min(1.4, velocityVisual + kickBoost));
 
-      const isMobile = window.innerWidth <= 991;
+      // Disposición en fila según especificación:
+      // Espaciado horizontal: hGap: 2.8 (0.9x en pantallas <= narrowWidth 650 px, variable rowGap).
+      // Profundidad: depthGap: 1. Elevación del disco activo: activeDiscY: 0.06.
+      // Escala del inactivo: inactiveScale: 0.8.
+      const rowGap = window.innerWidth <= SPEC.narrowWidth ? SPEC.hGap * 0.9 : SPEC.hGap;
       const v = Math.max(0.12, SPEC.depthGap);
 
       for (let p = 0; p < N; p++) {
@@ -1667,7 +1793,7 @@ export default function DiscografiaClient() {
         const m = p - L;
         const absM = Math.abs(m);
 
-        // Solo renderizar dentro de renderRadius = 5
+        // Solo se renderizan/cargan los discos en un radio de renderRadius: 5 del activo.
         holder.visible = absM <= SPEC.renderRadius + 0.5;
         if (!holder.visible) continue;
 
@@ -1691,74 +1817,46 @@ export default function DiscografiaClient() {
         const buoyRoll = u.hoverWeight * Math.sin(timeSec * 2.3 + u.floatPhase) * 0.032;
         const buoyPitch = u.hoverWeight * Math.cos(timeSec * 2.0 + u.floatPhase) * 0.026;
 
-        if (!isMobile) {
-          // Fórmula de colocación en escritorio:
-          // a = m * 0.35
-          // x = sin(a) * hGap * 2.4
-          // z = -cos(a) * v * 2.4 + v * 2.4
-          const a = m * 0.35;
-          const x = Math.sin(a) * SPEC.hGap * 2.4;
-          const z = -Math.cos(a) * v * 2.4 + v * 2.4;
+        // Colocación matemática
+        const a = m * 0.35;
+        const x = Math.sin(a) * rowGap * 2.4;
+        const z = -Math.cos(a) * v * 2.4 + v * 2.4;
 
-          const centerT = Math.max(0, 1 - absM);
-          // Interpolación hermite (smoothstep) para evitar saltos y dar sensación continua
-          const smoothCenter = centerT * centerT * (3 - 2 * centerT);
-          const y = smoothCenter * SPEC.activeDiscY - Math.abs(flowSignal) * SPEC.flowDip;
+        const centerT = Math.max(0, 1 - absM);
+        // Interpolación hermite (smoothstep) para evitar saltos y dar sensación continua
+        const smoothCenter = centerT * centerT * (3 - 2 * centerT);
+        const y = smoothCenter * SPEC.activeDiscY - Math.abs(flowSignal) * SPEC.flowDip;
 
-          holder.position.set(
-            x + u.zeroGOffset.x,
-            y + u.zeroGOffset.y + buoyY,
-            z + u.zeroGOffset.z + buoyZ
-          );
+        holder.position.set(
+          x + u.zeroGOffset.x,
+          y + u.zeroGOffset.y + buoyY,
+          z + u.zeroGOffset.z + buoyZ
+        );
 
-          // Escala continua y sedosa: 1.0 en el centro exacto, desciende suavemente a 0.81
-          const baseScale = 0.81 + smoothCenter * 0.19;
-          holder.scale.setScalar(baseScale + u.hoverWeight * 0.028);
+        // Escala continua y sedosa: 1.0 en el centro exacto, desciende a inactiveScale = 0.8
+        const baseScale = SPEC.inactiveScale + smoothCenter * (1.0 - SPEC.inactiveScale);
+        holder.scale.setScalar(baseScale + u.hoverWeight * 0.028);
 
-          // Rotación con cabeceo aerodinámico (flowLean), alabeo natural (flowBank) y balanceo
-          const isAct = p === W;
-          const rotX =
-            flowSignal * SPEC.flowLean +
-            u.hoverTiltCurrentX +
-            u.zeroGRot.x +
-            buoyPitch +
-            (isAct ? u.dragSpinX : 0);
-          const rotY =
-            -a - flowSignal * 0.035 +
-            u.hoverTiltCurrentY +
-            u.zeroGRot.y +
-            (isAct ? u.dragSpinY : 0);
-          const rotZ =
-            -flowSignal * SPEC.flowBank + u.zeroGRot.z + buoyRoll;
+        // Rotación con cabeceo aerodinámico (flowLean), alabeo natural (flowBank) y balanceo
+        const isAct = p === W;
+        const rotX =
+          flowSignal * SPEC.flowLean +
+          u.hoverTiltCurrentX +
+          u.zeroGRot.x +
+          buoyPitch +
+          (isAct ? u.dragSpinX : 0);
+        const rotY =
+          -a - flowSignal * 0.035 +
+          u.hoverTiltCurrentY +
+          u.zeroGRot.y +
+          (isAct ? u.dragSpinY : 0);
+        const rotZ =
+          -flowSignal * SPEC.flowBank + u.zeroGRot.z + buoyRoll;
 
-          holder.rotation.set(rotX, rotY, rotZ);
-        } else {
-          // Disposición móvil (<= 991 px): touchActiveScale 1.5, touchInactiveScale 0.6, touchGap 2.2, touchDepth 0.5
-          const a = m * 0.35;
-          const x = Math.sin(a) * SPEC.touchGap * 1.6;
-          const z = -Math.cos(a) * SPEC.touchDepth * 2.0 + SPEC.touchDepth * 2.0;
-          const centerT = Math.max(0, 1 - absM);
-          const smoothCenter = centerT * centerT * (3 - 2 * centerT);
-          const scale = THREE.MathUtils.lerp(
-            SPEC.touchInactiveScale,
-            SPEC.touchActiveScale,
-            smoothCenter
-          );
-          holder.position.set(
-            x + u.zeroGOffset.x,
-            u.zeroGOffset.y + buoyY - Math.abs(flowSignal) * (SPEC.flowDip * 0.7),
-            z + u.zeroGOffset.z + buoyZ
-          );
-          holder.scale.setScalar(scale);
-          holder.rotation.set(
-            flowSignal * (SPEC.flowLean * 0.8) + u.hoverTiltCurrentX + u.zeroGRot.x + (p === W ? u.dragSpinX : 0),
-            -a - flowSignal * 0.035 + u.hoverTiltCurrentY + u.zeroGRot.y + (p === W ? u.dragSpinY : 0),
-            -flowSignal * (SPEC.flowBank * 0.8) + u.zeroGRot.z + buoyRoll
-          );
-        }
+        holder.rotation.set(rotX, rotY, rotZ);
       }
 
-      // Actualizar el efecto Scribble (anillos concéntricos en stop-motion a 10 fps + lag 15)
+      // Actualizar el efecto Scribble (halo negro de trazo a mano a 10 fps stop motion)
       updateScribbleStep(now, dt);
 
       renderer.render(scene, camera);
