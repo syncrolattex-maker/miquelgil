@@ -802,38 +802,10 @@ export default function DiscografiaClient() {
     const uiYear = container.querySelector('#ui-year') as HTMLElement | null;
     const uiStarring = container.querySelector('#ui-starring') as HTMLElement | null;
     const uiReviews = container.querySelector('#ui-reviews') as HTMLElement | null;
-    const uiQuickList = container.querySelector('#ui-quick-list') as HTMLElement | null;
     const uiRuler = container.querySelector('#ui-ruler') as HTMLElement | null;
     const liveRegion = container.querySelector('#gallery-live-region') as HTMLElement | null;
     const prevBtn = container.querySelector('[data-disc-prev]') as HTMLButtonElement | null;
     const nextBtn = container.querySelector('[data-disc-next]') as HTMLButtonElement | null;
-
-    // Construir lista lateral derecha y enlaces del cajón Index ([data-film-scroll])
-    const indexGrid = container.querySelector('#index-links-grid') as HTMLElement | null;
-    if (uiQuickList) uiQuickList.innerHTML = '';
-    if (indexGrid) indexGrid.innerHTML = '';
-
-    films.forEach((f, idx) => {
-      if (uiQuickList) {
-        const li = document.createElement('li');
-        const btn = document.createElement('button');
-        btn.type = 'button';
-        btn.setAttribute('data-film-scroll', f.title);
-        btn.className = 'a24-label hover:text-black transition-colors text-right';
-        btn.innerHTML = `<span class="QuickTitle">${f.title}</span> <span class="opacity-50 ml-1">${f.year}</span>`;
-        li.appendChild(btn);
-        uiQuickList.appendChild(li);
-      }
-
-      if (indexGrid) {
-        const card = document.createElement('a');
-        card.href = f.detailUrl;
-        card.className =
-          'p-4 border border-black/10 rounded hover:border-black transition flex justify-between items-center group';
-        card.innerHTML = `<span class="a24-value group-hover:underline">${String(idx + 1).padStart(2, '0')} — ${f.title}</span><span class="a24-label">${f.year} · FITXA →</span>`;
-        indexGrid.appendChild(card);
-      }
-    });
 
     function splitAndAnimateChars(element: HTMLElement | null, text: string, delay = 0, forceUppercase = false) {
       if (!element) return;
@@ -1013,17 +985,6 @@ export default function DiscografiaClient() {
             { y: 0, opacity: 1, duration: 0.5, stagger: 0.08, delay: 0.08, ease: 'expo.out' }
           );
         }
-      }
-
-      // Resaltar activo en la lista derecha
-      if (uiQuickList) {
-        Array.from(uiQuickList.querySelectorAll('button')).forEach((btn, idx) => {
-          if (idx === index) {
-            btn.className = 'a24-value font-bold text-black text-right';
-          } else {
-            btn.className = 'a24-label text-black/75 hover:text-black font-medium transition-colors text-right';
-          }
-        });
       }
 
       // Mover regla inferior
@@ -1759,25 +1720,618 @@ export default function DiscografiaClient() {
     }
 
     // ============================================================================
-    // 13. MENÚ INDEX Y CUSTOM EVENT 'discgallerynavigate'
+    // 13. MENÚ DE NAVEGACIÓN A24 EXACTO (https://a24.raviklaassens.com/)
+    // - Recuadro blanco (.nav-bg) arriba centrado en desktop y abajo en móvil
+    // - Morphing de etiqueta "Index" <-> "12" (data-nav-label)
+    // - Filas del dropdown con placa negra bidireccional (.nav-dropdown__link-bg),
+    //   máscara de año (data-nav-year-mask) y jitter stop-motion en hover
+    // - Scrollbar interactiva arrastrable (.nav-dropdown__scrollbar) y máscara de fade
+    // - Punto negro activo (.nav-page-dot) bajo la pestaña actual
     // ============================================================================
-    const indexDrawer = container.querySelector('#index-drawer') as HTMLElement | null;
-    const toggleIndexBtn = container.querySelector('#toggle-index-btn') as HTMLButtonElement | null;
-    const closeIndexBtn = container.querySelector('#close-index-btn') as HTMLButtonElement | null;
+    const navEl = container.querySelector('nav.nav') as HTMLElement | null;
+    const navCenterList = navEl?.querySelector('.nav-center__list') as HTMLElement | null;
+    const dropdownToggle = navEl?.querySelector('[data-dropdown-toggle]') as HTMLButtonElement | null;
+    const navDropdown = navEl?.querySelector('.nav-dropdown') as HTMLElement | null;
+    const navRegion = dropdownToggle?.parentElement as HTMLElement | null;
+    const navScroller = navDropdown?.querySelector('.nav-dropdown__content') as HTMLElement | null;
+    const navListContainer = navDropdown?.querySelector('.nav-dropdown__content-li') as HTMLElement | null;
+    const navScrollbar = navDropdown?.querySelector('.nav-dropdown__scrollbar') as HTMLElement | null;
+    const navThumb = navDropdown?.querySelector('.nav-dropdown__scrollbar-progress') as HTMLElement | null;
+    const navPageLinks = Array.from(
+      navEl?.querySelectorAll('.nav-link:not([data-dropdown-toggle])') || []
+    ) as HTMLElement[];
 
-    function openIndexDrawer() {
-      if (indexDrawer) indexDrawer.classList.remove('opacity-0', 'invisible');
-    }
-    function closeIndexDrawer() {
-      if (indexDrawer) indexDrawer.classList.add('opacity-0', 'invisible');
-    }
+    const NAV_G = {
+      minThumbRatio: 0.2,
+      labelDuration: 0.55,
+      labelShift: 130,
+      rowDuration: 0.34,
+      rowYearDuration: 0.26,
+      rowYearShift: 125,
+      ease: 'cubic-bezier(0.32, 0.72, 0, 1)'
+    };
 
-    if (toggleIndexBtn) toggleIndexBtn.addEventListener('click', openIndexDrawer);
-    if (closeIndexBtn) closeIndexBtn.addEventListener('click', closeIndexDrawer);
+    const mqlMobile = window.matchMedia('(max-width: 991px)');
+    const mqlHover = window.matchMedia('(hover: hover) and (pointer: fine)');
+    const isMobileNav = () => mqlMobile.matches;
+    const canHoverNav = () => !isMobileNav() && mqlHover.matches;
 
     function normalizeTitle(str: string | undefined) {
-      return (str || '').trim().toLowerCase();
+      return (str || '').trim().toLowerCase().replace(/\s+/g, ' ');
     }
+
+    // Poblar los 12 discos dentro de .nav-dropdown__content-li
+    if (navListContainer) {
+      navListContainer.innerHTML = '';
+      films.forEach((f, idx) => {
+        const itemDiv = document.createElement('div');
+        itemDiv.setAttribute('role', 'listitem');
+        itemDiv.className = 'w-dyn-item';
+
+        const link = document.createElement('a');
+        link.setAttribute('data-film-scroll', f.title);
+        link.setAttribute('data-film-status', idx === W ? 'active' : 'inactive');
+        if (idx === W) link.setAttribute('aria-current', 'true');
+        link.href = f.detailUrl;
+        link.className = 'nav-dropdown__link';
+
+        const bg = document.createElement('div');
+        bg.className = 'nav-dropdown__link-bg';
+        bg.setAttribute('aria-hidden', 'true');
+
+        const inner = document.createElement('div');
+        inner.className = 'nav-dropdown__link-inner';
+
+        const titleH2 = document.createElement('h2');
+        titleH2.className = 'nav-dropdown__link-label';
+        titleH2.textContent = f.title;
+
+        const yearMask = document.createElement('span');
+        yearMask.setAttribute('data-nav-year-mask', '');
+        const yearSpan = document.createElement('span');
+        yearSpan.className = 'nav-dropdown__link-label';
+        yearSpan.textContent = f.year;
+        yearMask.appendChild(yearSpan);
+
+        inner.appendChild(titleH2);
+        inner.appendChild(yearMask);
+        link.appendChild(bg);
+        link.appendChild(inner);
+        itemDiv.appendChild(link);
+        navListContainer.appendChild(itemDiv);
+      });
+    }
+
+    // Estado y animación de cada fila del dropdown (placa negra + año en máscara)
+    interface RowAnimParts {
+      background: HTMLElement;
+      year: HTMLElement | null;
+    }
+    const rowMap = new WeakMap<HTMLElement, RowAnimParts>();
+
+    function getRowParts(linkEl: HTMLElement): RowAnimParts {
+      let parts = rowMap.get(linkEl);
+      if (!parts) {
+        const background = linkEl.querySelector('.nav-dropdown__link-bg') as HTMLElement;
+        const year = linkEl.querySelector('[data-nav-year-mask] > .nav-dropdown__link-label') as HTMLElement | null;
+        parts = { background, year };
+        rowMap.set(linkEl, parts);
+      }
+      return parts;
+    }
+
+    function isPointerInTopHalf(el: HTMLElement, ev?: PointerEvent | MouseEvent) {
+      const rect = el.getBoundingClientRect();
+      if (!rect.height || !ev) return false;
+      return ev.clientY - rect.top < rect.height / 2;
+    }
+
+    function animateDropdownRow(
+      linkEl: HTMLElement,
+      parts: RowAnimParts,
+      fromTop: boolean,
+      active: boolean
+    ) {
+      const { background, year } = parts;
+      if (!background) return;
+      if (prefersReducedMotion) {
+        background.style.transform = `scaleY(${active ? 1 : 0})`;
+        if (year) year.style.transform = `translate(0%, ${active ? 0 : NAV_G.rowYearShift}%)`;
+        return;
+      }
+      const curScale = Number(gsap.getProperty(background, 'scaleY')) || 0;
+      if ((active && curScale <= 0.001) || (!active && curScale >= 0.999)) {
+        gsap.set(background, { transformOrigin: fromTop ? 'center top' : 'center bottom' });
+      }
+      const targetYearY = active ? 0 : NAV_G.rowYearShift;
+      gsap.to(background, {
+        scaleY: active ? 1 : 0,
+        duration: NAV_G.rowDuration,
+        ease: 'power3.out',
+        overwrite: true
+      });
+      if (year) {
+        gsap.to(year, {
+          yPercent: targetYearY,
+          duration: NAV_G.rowYearDuration,
+          ease: 'power3.out',
+          overwrite: true
+        });
+      }
+    }
+
+    const dropdownLinks = Array.from(
+      navDropdown?.querySelectorAll('.nav-dropdown__link') || []
+    ) as HTMLElement[];
+
+    dropdownLinks.forEach((linkEl) => {
+      const parts = getRowParts(linkEl);
+      const isAct = linkEl.getAttribute('data-film-status') === 'active';
+      gsap.set(parts.background, {
+        scaleY: isAct ? 1 : 0,
+        transformOrigin: 'center bottom'
+      });
+      if (parts.year) {
+        gsap.set(parts.year, { yPercent: isAct ? 0 : NAV_G.rowYearShift });
+      }
+
+      linkEl.addEventListener('pointerenter', (ev) => {
+        if (canHoverNav() && linkEl.getAttribute('data-film-status') !== 'active') {
+          animateDropdownRow(linkEl, parts, isPointerInTopHalf(linkEl, ev), true);
+        }
+      });
+      linkEl.addEventListener('pointerleave', (ev) => {
+        if (canHoverNav() && linkEl.getAttribute('data-film-status') !== 'active') {
+          animateDropdownRow(linkEl, parts, isPointerInTopHalf(linkEl, ev), false);
+        }
+      });
+      linkEl.addEventListener('focus', () => {
+        if (linkEl.getAttribute('data-film-status') !== 'active') {
+          animateDropdownRow(linkEl, parts, false, true);
+        }
+      });
+      linkEl.addEventListener('blur', () => {
+        if (linkEl.getAttribute('data-film-status') !== 'active' && !linkEl.matches(':hover')) {
+          animateDropdownRow(linkEl, parts, false, false);
+        }
+      });
+    });
+
+    function syncActiveDropdownRow(activeIdx: number, activeTitle?: string) {
+      const normTitle = normalizeTitle(activeTitle);
+      let matchedLink: HTMLElement | null = null;
+      if (normTitle) {
+        matchedLink =
+          dropdownLinks.find((el) => normalizeTitle(el.getAttribute('data-film-scroll') || '') === normTitle) ||
+          null;
+      }
+      if (!matchedLink && activeIdx >= 0) {
+        matchedLink = dropdownLinks[activeIdx] || null;
+      }
+      dropdownLinks.forEach((el) => {
+        const isTarget = el === matchedLink;
+        const wasActive = el.getAttribute('data-film-status') === 'active';
+        el.setAttribute('data-film-status', isTarget ? 'active' : 'inactive');
+        if (isTarget) {
+          el.setAttribute('aria-current', 'true');
+        } else {
+          el.removeAttribute('aria-current');
+        }
+        if (isTarget !== wasActive && (isTarget || !el.matches(':hover'))) {
+          animateDropdownRow(el, getRowParts(el), false, isTarget);
+        }
+      });
+    }
+
+    // Morphing de etiqueta "Index" <-> "12"
+    interface NavLabelTrack {
+      label: HTMLElement;
+      wordEl: HTMLElement;
+      countEl: HTMLElement;
+      widths: { word: number; count: number };
+      showing: 'word' | 'count';
+    }
+    let navLabelState: NavLabelTrack | null = null;
+
+    function measureTextWidth(el: HTMLElement) {
+      try {
+        const range = document.createRange();
+        range.selectNodeContents(el);
+        const w = range.getBoundingClientRect().width;
+        if (w > 0) return w;
+      } catch (_) {}
+      return el.getBoundingClientRect().width;
+    }
+
+    if (dropdownToggle) {
+      const labelSpan = dropdownToggle.querySelector('.nav-link__label') as HTMLElement | null;
+      if (labelSpan) {
+        const wordText = (labelSpan.textContent || 'Index').trim() || 'Index';
+        labelSpan.setAttribute('data-nav-label', '');
+        labelSpan.innerHTML = '';
+        const track = document.createElement('span');
+        track.setAttribute('data-nav-label-track', '');
+        const wordEl = document.createElement('span');
+        wordEl.setAttribute('data-nav-label-item', 'word');
+        wordEl.textContent = wordText;
+        const countEl = document.createElement('span');
+        countEl.setAttribute('data-nav-label-item', 'count');
+        countEl.setAttribute('aria-hidden', 'true');
+        countEl.textContent = String(films.length);
+        track.appendChild(wordEl);
+        track.appendChild(countEl);
+        labelSpan.appendChild(track);
+        gsap.set(wordEl, { yPercent: 0 });
+        gsap.set(countEl, { yPercent: NAV_G.labelShift });
+        navLabelState = {
+          label: labelSpan,
+          wordEl,
+          countEl,
+          widths: { word: 0, count: 0 },
+          showing: 'word'
+        };
+      }
+    }
+
+    function refreshLabelWidths() {
+      if (!navLabelState) return;
+      if (navLabelState.wordEl.getClientRects().length) {
+        navLabelState.widths.word = measureTextWidth(navLabelState.wordEl);
+        navLabelState.widths.count = measureTextWidth(navLabelState.countEl);
+      }
+    }
+
+    function morphNavLabel(mode: 'word' | 'count', immediate = false) {
+      if (!navLabelState) return;
+      refreshLabelWidths();
+      const showCount = mode === 'count' && films.length > 0;
+      const targetMode = showCount ? 'count' : 'word';
+      const targetW = showCount ? navLabelState.widths.count : navLabelState.widths.word;
+      if (!targetW) return;
+      const changed = navLabelState.showing !== targetMode;
+      navLabelState.showing = targetMode;
+
+      if (prefersReducedMotion || immediate) {
+        gsap.killTweensOf([navLabelState.label, navLabelState.wordEl, navLabelState.countEl]);
+        gsap.set(navLabelState.label, { width: targetW });
+        gsap.set(navLabelState.wordEl, { yPercent: showCount ? -NAV_G.labelShift : 0 });
+        gsap.set(navLabelState.countEl, { yPercent: showCount ? 0 : NAV_G.labelShift });
+        return;
+      }
+
+      gsap.to(navLabelState.label, {
+        width: targetW,
+        duration: NAV_G.labelDuration,
+        ease: 'power3.out',
+        overwrite: 'auto'
+      });
+      if (changed) {
+        gsap.to(navLabelState.wordEl, {
+          yPercent: showCount ? -NAV_G.labelShift : 0,
+          duration: NAV_G.labelDuration,
+          ease: 'power3.out',
+          overwrite: 'auto'
+        });
+        gsap.to(navLabelState.countEl, {
+          yPercent: showCount ? 0 : NAV_G.labelShift,
+          duration: NAV_G.labelDuration,
+          ease: 'power3.out',
+          overwrite: 'auto'
+        });
+      }
+    }
+
+    // Scrollbar interactiva y fade masks superior/inferior
+    const navDropdownState = {
+      isOpen: false,
+      suppressHover: false,
+      dragging: false,
+      pointerId: null as number | null,
+      grabOffset: 0,
+      scrollTicking: false,
+      resetTimer: 0
+    };
+
+    function getScrollerMetrics() {
+      const viewport = navScroller ? navScroller.clientHeight : 0;
+      const content = navScroller ? navScroller.scrollHeight : 0;
+      const maxScroll = Math.max(0, content - viewport);
+      const scrollTop = navScroller ? Math.min(maxScroll, Math.max(0, navScroller.scrollTop)) : 0;
+      const track = navScrollbar ? navScrollbar.clientHeight : 0;
+      const ratio =
+        maxScroll <= 0 || content <= 0
+          ? 1
+          : Math.min(1, Math.max(NAV_G.minThumbRatio, viewport / content));
+      const thumbHeight = track * ratio;
+      return {
+        viewport,
+        content,
+        maxScroll,
+        scrollTop,
+        track,
+        ratio,
+        thumbHeight,
+        travel: Math.max(0, track - thumbHeight)
+      };
+    }
+
+    function updateDropdownScrollbar() {
+      if (!navScroller) return;
+      const m = getScrollerMetrics();
+      const fadePx = 48;
+      let fadeTop = 0;
+      let fadeBottom = 0;
+      if (m.maxScroll > 0) {
+        fadeTop = Math.min(1, Math.max(0, m.scrollTop / fadePx));
+        fadeBottom = Math.min(1, Math.max(0, (m.maxScroll - m.scrollTop) / fadePx));
+      }
+      navScroller.style.setProperty('--nav-fade-top', fadeTop.toFixed(4));
+      navScroller.style.setProperty('--nav-fade-bottom', fadeBottom.toFixed(4));
+
+      if (!navScrollbar || !navThumb) return;
+      navScrollbar.classList.toggle('is-disabled', m.maxScroll <= 0);
+      if (m.track <= 0) return;
+      const progress = m.maxScroll <= 0 ? 0 : m.scrollTop / m.maxScroll;
+      navThumb.style.height = `${(m.ratio * 100).toFixed(3)}%`;
+      navThumb.style.transform = `translate3d(0, ${(m.travel * progress).toFixed(2)}px, 0)`;
+    }
+
+    // Punto indicador bajo la pestaña activa (.nav-page-dot) y ancho dinámico en móvil (--nav-dock-width)
+    let pageDotEl: HTMLElement | null = null;
+    let dotFollowRaf = 0;
+
+    function ensurePageDot() {
+      if (pageDotEl && pageDotEl.isConnected) return pageDotEl;
+      if (!navCenterList) return null;
+      const dot = document.createElement('span');
+      dot.className = 'nav-page-dot';
+      dot.setAttribute('aria-hidden', 'true');
+      navCenterList.appendChild(dot);
+      pageDotEl = dot;
+      return dot;
+    }
+
+    function positionPageDot(animate = false) {
+      const dot = ensurePageDot();
+      if (!dot || !navCenterList) return;
+      const activeTab = navEl?.querySelector('.nav-link[data-nav-page="current"]') as HTMLElement | null;
+      if (!activeTab) {
+        dot.style.opacity = '0';
+        return;
+      }
+      const labelEl = (activeTab.querySelector('.nav-link__label') as HTMLElement) || activeTab;
+      const listRect = navCenterList.getBoundingClientRect();
+      const labelRect = labelEl.getBoundingClientRect();
+      if (!labelRect.width) {
+        dot.style.opacity = '0';
+        return;
+      }
+      const x = labelRect.left + labelRect.width / 2 - listRect.left;
+      const y = labelRect.bottom - listRect.top + 5;
+      dot.style.opacity = '1';
+      if (animate && !prefersReducedMotion) {
+        gsap.to(dot, { x, y, duration: 0.45, ease: 'power3.out', overwrite: 'auto' });
+      } else {
+        gsap.set(dot, { x, y });
+      }
+    }
+
+    function trackDotDuringTransition(ms = 750) {
+      cancelAnimationFrame(dotFollowRaf);
+      const end = performance.now() + ms;
+      const tick = () => {
+        positionPageDot(false);
+        if (performance.now() < end) {
+          dotFollowRaf = requestAnimationFrame(tick);
+        }
+      };
+      dotFollowRaf = requestAnimationFrame(tick);
+    }
+
+    function updateMobileDockWidth() {
+      if (!navEl || !navCenterList) return;
+      if (!isMobileNav()) {
+        navEl.style.removeProperty('--nav-dock-width');
+        positionPageDot(false);
+        return;
+      }
+      if (navEl.getAttribute('data-nav-dropdown') === 'open') return;
+      const items = Array.from(navCenterList.children).filter((c) => c.tagName === 'LI') as HTMLElement[];
+      if (!items.length) return;
+      const gap = Number.parseFloat(getComputedStyle(navCenterList).columnGap) || 0;
+      const widths = items.map((li) => ((li.firstElementChild as HTMLElement) || li).getBoundingClientRect().width);
+      const validCount = widths.filter((w) => w > 0).length;
+      const sum = widths.reduce((a, b) => a + b, 0) + gap * Math.max(0, validCount - 1);
+      if (!sum) return;
+      const pad = Number.parseFloat(getComputedStyle(navEl).fontSize) || 16;
+      navEl.style.setProperty('--nav-dock-width', `${Math.ceil(sum + pad * 1.25)}px`);
+      positionPageDot(false);
+    }
+
+    function openNavDropdown(force = false) {
+      if (!navEl || !dropdownToggle || !navDropdown) return;
+      if ((navDropdownState.suppressHover && !force) || navDropdownState.isOpen) return;
+      navDropdownState.isOpen = true;
+      dropdownToggle.setAttribute('data-dropdown-toggle', 'open');
+      dropdownToggle.setAttribute('aria-expanded', 'true');
+      navDropdown.setAttribute('aria-hidden', 'false');
+      navEl.setAttribute('data-nav-dropdown', 'open');
+      window.clearTimeout(navDropdownState.resetTimer);
+      if (navScroller && !navDropdownState.dragging) {
+        navScroller.scrollTop = 0;
+      }
+      morphNavLabel('count');
+      syncActiveDropdownRow(W, films[W]?.title);
+      trackDotDuringTransition(750);
+      requestAnimationFrame(() => updateDropdownScrollbar());
+    }
+
+    function closeNavDropdown(force = false) {
+      if (!navEl || !dropdownToggle || !navDropdown) return;
+      if ((navDropdownState.dragging && !force) || !navDropdownState.isOpen) return;
+      navDropdownState.isOpen = false;
+      dropdownToggle.setAttribute('data-dropdown-toggle', 'closed');
+      dropdownToggle.setAttribute('aria-expanded', 'false');
+      navDropdown.setAttribute('aria-hidden', 'true');
+      navEl.setAttribute('data-nav-dropdown', 'closed');
+      morphNavLabel('word');
+      trackDotDuringTransition(650);
+      window.clearTimeout(navDropdownState.resetTimer);
+      navDropdownState.resetTimer = window.setTimeout(() => {
+        if (navScroller && !navDropdownState.dragging) {
+          navScroller.scrollTop = 0;
+          updateDropdownScrollbar();
+        }
+        updateMobileDockWidth();
+      }, 520);
+    }
+
+    // Eventos de scroll y arrastre de la barra de progreso del dropdown
+    const onScrollerScroll = () => {
+      if (!navDropdownState.scrollTicking) {
+        navDropdownState.scrollTicking = true;
+        requestAnimationFrame(() => {
+          navDropdownState.scrollTicking = false;
+          updateDropdownScrollbar();
+        });
+      }
+    };
+    if (navScroller) {
+      navScroller.addEventListener('scroll', onScrollerScroll, { passive: true });
+    }
+
+    function dragScrollbarTo(ev: PointerEvent) {
+      if (!navScroller || !navScrollbar) return;
+      const m = getScrollerMetrics();
+      if (m.travel <= 0 || m.maxScroll <= 0) return;
+      const rect = navScrollbar.getBoundingClientRect();
+      const offset = Math.min(m.travel, Math.max(0, ev.clientY - rect.top - navDropdownState.grabOffset));
+      navScroller.scrollTop = (offset / m.travel) * m.maxScroll;
+      updateDropdownScrollbar();
+    }
+
+    const onScrollbarPointerDown = (ev: PointerEvent) => {
+      if (!navScrollbar || !navThumb) return;
+      if (ev.pointerType === 'mouse' && ev.button !== 0) return;
+      const m = getScrollerMetrics();
+      if (m.maxScroll <= 0 || m.travel <= 0) return;
+      ev.preventDefault();
+      ev.stopPropagation();
+      const isThumb = ev.target === navThumb || navThumb.contains(ev.target as Node);
+      const thumbRect = navThumb.getBoundingClientRect();
+      navDropdownState.grabOffset = isThumb
+        ? Math.min(thumbRect.height, Math.max(0, ev.clientY - thumbRect.top))
+        : m.thumbHeight / 2;
+      navDropdownState.dragging = true;
+      navDropdownState.pointerId = ev.pointerId;
+      navThumb.classList.add('is-dragging');
+      try {
+        navScrollbar.setPointerCapture(ev.pointerId);
+      } catch (_) {}
+      openNavDropdown(true);
+      dragScrollbarTo(ev);
+    };
+
+    const onScrollbarPointerMove = (ev: PointerEvent) => {
+      if (navDropdownState.dragging && navDropdownState.pointerId === ev.pointerId) {
+        ev.preventDefault();
+        dragScrollbarTo(ev);
+      }
+    };
+
+    const onScrollbarPointerUp = (ev: PointerEvent) => {
+      if (!navScrollbar || !navThumb) return;
+      if (
+        navDropdownState.dragging &&
+        (navDropdownState.pointerId === null || navDropdownState.pointerId === ev.pointerId)
+      ) {
+        navDropdownState.dragging = false;
+        navDropdownState.pointerId = null;
+        navThumb.classList.remove('is-dragging');
+        try {
+          if (navScrollbar.hasPointerCapture(ev.pointerId)) {
+            navScrollbar.releasePointerCapture(ev.pointerId);
+          }
+        } catch (_) {}
+        updateDropdownScrollbar();
+        if (canHoverNav() && !navRegion?.matches(':hover')) {
+          closeNavDropdown();
+        }
+      }
+    };
+
+    const onScrollbarWheel = (ev: WheelEvent) => {
+      if (!navScroller) return;
+      const m = getScrollerMetrics();
+      if (m.maxScroll > 0) {
+        ev.preventDefault();
+        navScroller.scrollTop += ev.deltaY;
+      }
+    };
+
+    if (navScrollbar) {
+      navScrollbar.addEventListener('pointerdown', onScrollbarPointerDown);
+      navScrollbar.addEventListener('pointermove', onScrollbarPointerMove);
+      navScrollbar.addEventListener('pointerup', onScrollbarPointerUp);
+      navScrollbar.addEventListener('pointercancel', onScrollbarPointerUp);
+      navScrollbar.addEventListener('lostpointercapture', onScrollbarPointerUp);
+      navScrollbar.addEventListener('wheel', onScrollbarWheel, { passive: false });
+    }
+
+    // Hover y click sobre el botón Index y la región del dropdown
+    const onNavRegionMouseEnter = () => {
+      if (canHoverNav()) {
+        navDropdownState.suppressHover = false;
+        openNavDropdown(true);
+      }
+    };
+    const onNavRegionMouseLeave = () => {
+      navDropdownState.suppressHover = false;
+      if (canHoverNav() && !navDropdownState.dragging) {
+        closeNavDropdown();
+      }
+    };
+    const onDropdownToggleClick = (ev: MouseEvent) => {
+      ev.preventDefault();
+      ev.stopPropagation();
+      if (canHoverNav()) {
+        openNavDropdown(true);
+        return;
+      }
+      if (navDropdownState.isOpen) {
+        closeNavDropdown(true);
+      } else {
+        openNavDropdown(true);
+      }
+    };
+
+    if (navRegion) {
+      navRegion.addEventListener('mouseenter', onNavRegionMouseEnter);
+      navRegion.addEventListener('mouseleave', onNavRegionMouseLeave);
+    }
+    if (dropdownToggle) {
+      dropdownToggle.addEventListener('click', onDropdownToggleClick);
+    }
+    navPageLinks.forEach((link) => {
+      link.addEventListener('mouseenter', () => {
+        if (canHoverNav()) closeNavDropdown();
+      });
+    });
+
+    const onDocumentClickNav = (ev: MouseEvent) => {
+      const target = ev.target as Node | null;
+      if (!target) return;
+      if (dropdownToggle?.contains(target) || navDropdown?.contains(target)) return;
+      closeNavDropdown(true);
+    };
+    document.addEventListener('click', onDocumentClickNav);
+
+    // Sincronizar fila activa cuando cambia el disco del carrusel
+    const onGalleryChangeForNav = (ev: Event) => {
+      const e = ev as CustomEvent<{ index: number; film: FilmData }>;
+      syncActiveDropdownRow(e.detail.index, e.detail.film?.title);
+    };
+    container.addEventListener('discgallerychange', onGalleryChangeForNav);
 
     const onDiscGalleryNavigate = (ev: Event) => {
       const e = ev as CustomEvent<{ title?: string }>;
@@ -1785,7 +2339,8 @@ export default function DiscografiaClient() {
       const foundIdx = films.findIndex((f) => normalizeTitle(f.title) === targetTitle);
       if (foundIdx !== -1) {
         mr(foundIdx, { source: 'click' });
-        closeIndexDrawer();
+        navDropdownState.suppressHover = true;
+        closeNavDropdown(true);
         container.focus();
       }
     };
@@ -1796,12 +2351,12 @@ export default function DiscografiaClient() {
       container.querySelectorAll('[data-film-scroll]')
     ) as HTMLElement[];
     const onFilmScrollClick = (e: Event) => {
+      const mouseEv = e as MouseEvent;
+      if (mouseEv.metaKey || mouseEv.ctrlKey || mouseEv.shiftKey || mouseEv.altKey) return;
       e.preventDefault();
       const link = e.currentTarget as HTMLElement;
       const title = link.getAttribute('data-film-scroll');
-      const galleryEl = document.querySelector('[data-disc-gallery]');
-      if (!galleryEl) return;
-      galleryEl.dispatchEvent(
+      container.dispatchEvent(
         new CustomEvent('discgallerynavigate', {
           detail: { title }
         })
@@ -1811,10 +2366,26 @@ export default function DiscografiaClient() {
       link.addEventListener('click', onFilmScrollClick);
     });
 
+    // Inicializar medidas de etiqueta, ancho móvil y punto activo
+    requestAnimationFrame(() => {
+      morphNavLabel('word', true);
+      updateMobileDockWidth();
+      positionPageDot(false);
+      updateDropdownScrollbar();
+    });
+    if (document.fonts?.ready) {
+      document.fonts.ready.then(() => {
+        morphNavLabel(navDropdownState.isOpen ? 'count' : 'word', true);
+        updateMobileDockWidth();
+        positionPageDot(false);
+      });
+    }
+
     const onKeyDown = (e: KeyboardEvent) => {
       if (isTransitioningOut) return;
       if (e.key === 'Escape') {
-        closeIndexDrawer();
+        navDropdownState.suppressHover = true;
+        closeNavDropdown(true);
         if (detailModal) detailModal.classList.add('opacity-0', 'pointer-events-none');
         return;
       }
@@ -2013,6 +2584,10 @@ export default function DiscografiaClient() {
     // Redimensionado responsivo
     const onResize = () => {
       updateCameraAndScale();
+      morphNavLabel(navDropdownState.isOpen ? 'count' : 'word', true);
+      updateMobileDockWidth();
+      positionPageDot(false);
+      updateDropdownScrollbar();
     };
 
     window.addEventListener('resize', onResize);
@@ -2024,14 +2599,18 @@ export default function DiscografiaClient() {
     return () => {
       isDisposed = true;
       cancelAnimationFrame(rafId);
+      cancelAnimationFrame(dotFollowRaf);
+      window.clearTimeout(navDropdownState.resetTimer);
       if (ariaTimer) clearTimeout(ariaTimer);
       if (prefetchTimer) clearTimeout(prefetchTimer);
       if (activeTween) activeTween.kill();
 
       window.removeEventListener('keydown', onKeyDown);
       window.removeEventListener('resize', onResize);
+      document.removeEventListener('click', onDocumentClickNav);
 
       container.removeEventListener('discgallerychange', handleDiscGalleryChange);
+      container.removeEventListener('discgallerychange', onGalleryChangeForNav);
       container.removeEventListener('discgallerynavigate', onDiscGalleryNavigate);
       container.removeEventListener('wheel', onWheel);
       container.removeEventListener('pointerdown', onPointerDown);
@@ -2044,8 +2623,20 @@ export default function DiscografiaClient() {
 
       if (prevBtn) prevBtn.removeEventListener('click', onPrevClick);
       if (nextBtn) nextBtn.removeEventListener('click', onNextClick);
-      if (toggleIndexBtn) toggleIndexBtn.removeEventListener('click', openIndexDrawer);
-      if (closeIndexBtn) closeIndexBtn.removeEventListener('click', closeIndexDrawer);
+      if (navRegion) {
+        navRegion.removeEventListener('mouseenter', onNavRegionMouseEnter);
+        navRegion.removeEventListener('mouseleave', onNavRegionMouseLeave);
+      }
+      if (dropdownToggle) dropdownToggle.removeEventListener('click', onDropdownToggleClick);
+      if (navScroller) navScroller.removeEventListener('scroll', onScrollerScroll);
+      if (navScrollbar) {
+        navScrollbar.removeEventListener('pointerdown', onScrollbarPointerDown);
+        navScrollbar.removeEventListener('pointermove', onScrollbarPointerMove);
+        navScrollbar.removeEventListener('pointerup', onScrollbarPointerUp);
+        navScrollbar.removeEventListener('pointercancel', onScrollbarPointerUp);
+        navScrollbar.removeEventListener('lostpointercapture', onScrollbarPointerUp);
+        navScrollbar.removeEventListener('wheel', onScrollbarWheel);
+      }
       if (closeModalBtn) closeModalBtn.removeEventListener('click', onCloseModal);
       filmScrollLinks.forEach((link) => {
         link.removeEventListener('click', onFilmScrollClick);
@@ -2081,50 +2672,110 @@ export default function DiscografiaClient() {
       {/* REGIÓN ARIA-LIVE PARA ANUNCIOS A LOS 350 MS */}
       <div id="gallery-live-region" className="sr-only" aria-live="polite" aria-atomic="true"></div>
 
-      {/* CABECERA SUPERIOR ESTILO A24 (Centrada arriba en desktop, pastilla inferior en móvil como en la captura) */}
-      <header className="a24-header-bar pointer-events-none">
-        <nav className="a24-header-nav pointer-events-auto">
-          <span className="a24-header-logo font-bold tracking-tight text-black">M.GIL</span>
-          <button
-            type="button"
-            data-disc-no-drag=""
-            className="a24-header-tab a24-header-tab--active text-black font-medium relative"
-          >
-            Àlbums
-            <span className="a24-header-dot" />
-          </button>
-          <button
-            type="button"
-            data-disc-no-drag=""
-            id="toggle-index-btn"
-            className="a24-header-tab text-black/80 hover:text-black transition-colors flex items-center gap-1"
-          >
-            <span>Índex</span>
-            <span className="a24-header-chevron text-[9px] leading-none">∨</span>
-          </button>
-        </nav>
-
-        {/* Controles discretos derecha (solo desktop) */}
-        <div className="a24-header-controls hidden sm:flex items-center gap-3 pointer-events-auto">
-          <span className="a24-label text-black">
-            <span data-film-counter="current">1</span> / <span data-film-counter="total">12</span>
-          </span>
-          <button
-            type="button"
-            data-disc-prev=""
-            className="a24-value px-2 py-0.5 border border-black/15 rounded hover:border-black disabled:opacity-30 transition"
-          >
-            ←
-          </button>
-          <button
-            type="button"
-            data-disc-next=""
-            className="a24-value px-2 py-0.5 border border-black/15 rounded hover:border-black disabled:opacity-30 transition"
-          >
-            →
-          </button>
+      {/* MENÚ DE NAVEGACIÓN A24 EXACTO (https://a24.raviklaassens.com/) */}
+      <nav
+        data-theme-target="nav"
+        data-menu-status="closed"
+        data-nav-dropdown="closed"
+        data-disc-no-drag=""
+        className="nav theme-dark"
+        aria-label="Navegació principal"
+      >
+        <div className="nav-container">
+          <div className="nav-bg"></div>
+          <div className="nav-inner">
+            <div className="nav-center">
+              <ul className="nav-center__list">
+                <li>
+                  <a href="/start" className="nav-logo" aria-label="Miquel Gil Inici">
+                    <img
+                      src="/images/logo-W.png"
+                      alt="Miquel Gil"
+                      className="miquel-handwritten-logo"
+                    />
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="/discografia"
+                    aria-current="page"
+                    data-nav-page="current"
+                    className="nav-link w--current"
+                  >
+                    <span className="nav-link__label">Discografia</span>
+                  </a>
+                </li>
+                <li>
+                  <a href="/agenda" data-nav-page="other" className="nav-link">
+                    <span className="nav-link__label">Directes</span>
+                  </a>
+                </li>
+                <li>
+                  <a href="/biografia" data-nav-page="other" className="nav-link">
+                    <span className="nav-link__label">Biografia</span>
+                  </a>
+                </li>
+                <li className="nav-hide-mobile">
+                  <a href="/contractacio" data-nav-page="other" className="nav-link">
+                    <span className="nav-link__label">Contractació</span>
+                  </a>
+                </li>
+                <li className="nav-hide-mobile">
+                  <a href="/contacte" data-nav-page="other" className="nav-link">
+                    <span className="nav-link__label">Contacte</span>
+                  </a>
+                </li>
+                <li>
+                  <button
+                    type="button"
+                    data-dropdown-toggle="closed"
+                    className="nav-link"
+                    aria-expanded="false"
+                    aria-haspopup="true"
+                  >
+                    <span className="nav-link__label">Index</span>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="100%"
+                      viewBox="0 0 17 10"
+                      fill="none"
+                      className="nav-link__dropdown-icon"
+                      aria-hidden="true"
+                    >
+                      <path
+                        d="M1.5 1.5L8.5 8.5L15.5 1.5"
+                        stroke="currentColor"
+                        strokeWidth="1.5"
+                        strokeMiterlimit="10"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      ></path>
+                    </svg>
+                  </button>
+                  <div className="nav-dropdown" aria-hidden="true">
+                    <div className="nav-dropdown__overflow">
+                      <div className="nav-dropdown__overflow-inner">
+                        <div
+                          className="nav-dropdown__content"
+                          data-lenis-prevent=""
+                          data-lenis-prevent-wheel=""
+                          data-lenis-prevent-touch=""
+                        >
+                          <div role="list" className="nav-dropdown__content-li"></div>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="nav-dropdown__scrollbar">
+                      <div className="nav-dropdown__scrollbar-progress"></div>
+                    </div>
+                  </div>
+                </li>
+              </ul>
+            </div>
+          </div>
         </div>
-      </header>
+        <div className="page-bg"></div>
+      </nav>
 
       {/* OVERLAY DE TRANSICIÓ DE SORTIDA (FUNDIT A LA FITXA) */}
       <div
@@ -2194,31 +2845,6 @@ export default function DiscografiaClient() {
         <span id="scribble-status"></span>
         <div id="ui-ruler"></div>
       </footer>
-
-      {/* MENÚ INDEX SUPERPUESTO (Usa [data-film-scroll="<título>"]) */}
-      <div
-        id="index-drawer"
-        className="index-drawer fixed inset-0 z-30 bg-white/95 backdrop-blur-md opacity-0 invisible flex flex-col justify-between p-8"
-      >
-        <div className="flex justify-between items-center border-b border-black/10 pb-4">
-          <span className="a24-title font-medium tracking-wide">ÍNDEX DEL CATÀLEG — 12 EDICIONS</span>
-          <button
-            type="button"
-            id="close-index-btn"
-            className="a24-value px-3 py-1 border border-black/20 rounded hover:bg-black hover:text-white transition"
-          >
-            TANCAR [ESC]
-          </button>
-        </div>
-        <div
-          id="index-links-grid"
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 my-auto max-w-5xl mx-auto w-full"
-        ></div>
-        <div className="a24-label border-t border-black/10 pt-4 flex justify-between">
-          <span>TRIA UNA EDICIÓ PER A DESPLAÇAR EL CARRUSEL 3D</span>
-          <span>ARXIU MIQUEL GIL</span>
-        </div>
-      </div>
 
       {/* MODAL DE FICHA DE PRODUCCIÓN (Simula la navegación Barba a detailUrl) */}
       <div

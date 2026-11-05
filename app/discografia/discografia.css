@@ -217,68 +217,689 @@
 }
 
 /* ============================================================
-   DISTRIBUCIÓN EXACTA SEGÚN CAPTURA DE REFERENCIA A24
+   MENÚ DE NAVEGACIÓN A24 EXACTO (https://a24.raviklaassens.com/)
    ============================================================ */
 
-/* 1. Barra superior centrada en desktop / Pastilla inferior blanca en móvil (A24 · Films · Index ∧) */
-.a24-header-bar {
-  position: absolute;
+.nav {
+  z-index: 100;
+  color: #000000;
+  position: fixed;
   top: 0;
   left: 0;
+  right: 0;
+  font-size: 14px;
+  --nav-open-height: 24em;
+  --nav-scroll-fade: 3em;
+  --nav-ease: cubic-bezier(0.32, 0.72, 0, 1);
+  --nav-open-duration: 0.62s;
+  --nav-close-duration: 0.46s;
+  --nav-active-bg: #000000;
+  --nav-active-text: #f2f2f2;
+  --nav-dot-gap: 0.3em;
+}
+
+.nav-container {
+  z-index: 1;
   width: 100%;
-  z-index: 30;
-  display: flex;
-  align-items: center;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 3em;
+  padding-right: 3em;
+  position: relative;
+}
+
+.nav-inner {
+  width: 100%;
+  padding-top: 1.25em;
   justify-content: center;
-  padding: 1rem 1.5rem;
+  align-items: center;
+  display: flex;
+  position: relative;
 }
 
-.a24-header-nav {
+/* Recuadro blanco que en desktop mide 34em de ancho (height: 0 -> 24em al abrir) */
+.nav-bg {
+  background-color: #ffffff;
+  width: 34em;
+  max-width: calc(100vw - 2em);
+  height: 0;
+  margin-left: auto;
+  margin-right: auto;
+  position: absolute;
+  inset: 0% 0% auto;
+  pointer-events: none;
+  will-change: height;
+  transition: height var(--nav-close-duration) var(--nav-ease);
+}
+
+.nav[data-nav-dropdown='open'] .nav-bg {
+  height: var(--nav-open-height);
+  transition-duration: var(--nav-open-duration);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08);
+}
+
+/* Fondo oscurecido de la página cuando se abre el menú */
+.page-bg {
+  z-index: 0;
+  opacity: 0;
+  pointer-events: none;
+  background-image: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.2));
+  width: 100%;
+  height: 100vh;
+  position: absolute;
+  inset: 0% 0% auto;
+  will-change: opacity;
+  transition: opacity var(--nav-close-duration) var(--nav-ease) 40ms;
+}
+
+.nav[data-nav-dropdown='open'] .page-bg {
+  opacity: 1;
+  transition: opacity var(--nav-open-duration) var(--nav-ease) 0s;
+}
+
+.nav-center {
+  position: relative;
+  z-index: 2;
+}
+
+.nav-center__list {
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 0;
+  padding-left: 0;
+  list-style: none;
+  display: flex;
+  position: relative;
+}
+
+.nav-logo {
+  z-index: 2;
+  padding: 0.4em 0.9em;
   display: flex;
   align-items: center;
-  gap: 1.5rem;
+  position: relative;
 }
 
-.a24-header-controls {
-  position: absolute;
-  right: 1.5rem;
-  top: 1rem;
+/* Logo manuscrito de Miquel Gil invertido a negro nítido */
+.miquel-handwritten-logo {
+  height: 1.45em;
+  width: auto;
+  display: block;
+  filter: invert(1) brightness(0);
+  object-fit: contain;
 }
 
-.a24-header-logo {
-  font-family: var(--font-titles) !important;
-  font-size: 15px;
-  font-weight: 600 !important;
-  letter-spacing: -0.02em;
-  color: #000000 !important;
-  line-height: 1;
+.nav-link {
+  z-index: 2;
+  grid-column-gap: 0.375em;
+  grid-row-gap: 0.375em;
+  background-color: transparent;
+  border-radius: 0.25em;
+  justify-content: center;
+  align-items: center;
+  padding: 0.5em 0.85em;
+  display: flex;
+  position: relative;
+  color: #000000;
+  cursor: pointer;
 }
 
-.a24-header-tab {
+.nav-link[data-nav-page] {
+  transition: opacity 0.3s var(--nav-ease);
+}
+
+.nav-link[data-nav-page='other'] {
+  opacity: 0.55;
+}
+
+.nav-link[data-nav-page='other']:hover {
+  opacity: 1;
+}
+
+.nav-link__label {
   font-family: var(--font-texts) !important;
   font-size: 13px;
   line-height: 1;
-  letter-spacing: -0.005em;
-  color: #000000;
   font-weight: 400;
+  letter-spacing: -0.005em;
   position: relative;
-  padding-bottom: 2px;
+  color: inherit;
 }
 
-.a24-header-tab--active {
+.nav-link[data-nav-page='current'] .nav-link__label {
   font-weight: 500;
-  color: #000000 !important;
 }
 
-.a24-header-dot {
-  position: absolute;
-  bottom: -4px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 3px;
-  height: 3px;
-  border-radius: 9999px;
+/* Punto negro indicador de página activa */
+.nav-page-dot {
+  --nav-dot-size: 0.3em;
+  width: var(--nav-dot-size);
+  height: var(--nav-dot-size);
+  margin-left: calc(var(--nav-dot-size) / -2);
+  opacity: 0;
+  pointer-events: none;
+  will-change: transform;
+  transition: opacity 0.2s var(--nav-ease);
   background-color: #000000;
+  border-radius: 50%;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+/* Icono chevron del botón Index */
+.nav-link__dropdown-icon {
+  width: 0.75em;
+  height: auto;
+  transition: transform var(--nav-close-duration) var(--nav-ease);
+}
+
+[data-dropdown-toggle='open'] .nav-link__dropdown-icon {
+  transition-duration: var(--nav-open-duration);
+  transform: rotate(180deg);
+}
+
+/* Morphing de etiqueta "Index" <-> "12" */
+[data-nav-label] {
+  --nav-label-pad: 0.25em;
+  padding-top: var(--nav-label-pad);
+  padding-bottom: var(--nav-label-pad);
+  text-align: left;
+  white-space: nowrap;
+  will-change: width;
+  flex: none;
+  display: inline-block;
+  position: relative;
+  overflow: hidden;
+}
+
+[data-nav-label-track] {
+  white-space: nowrap;
+  display: block;
+  position: relative;
+}
+
+[data-nav-label-item] {
+  white-space: nowrap;
+  will-change: transform;
+  display: block;
+}
+
+[data-nav-label-item='count'] {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.nav-link:has([data-nav-label]) {
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+/* Contenedor desplegable de los 12 discos (.nav-dropdown) */
+.nav-dropdown {
+  z-index: 1;
+  box-sizing: border-box;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  width: 34em;
+  max-width: calc(100vw - 2em);
+  height: 0;
+  margin-left: auto;
+  margin-right: auto;
+  padding-top: 4.5em;
+  padding-bottom: 0;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  transition:
+    height var(--nav-close-duration) var(--nav-ease),
+    opacity calc(var(--nav-close-duration) * 0.6) var(--nav-ease),
+    visibility 0s linear calc(var(--nav-close-duration) * 0.6);
+  overflow: hidden;
+}
+
+[data-dropdown-toggle='open'] + .nav-dropdown {
+  height: var(--nav-open-height);
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transition:
+    height var(--nav-open-duration) var(--nav-ease),
+    opacity calc(var(--nav-open-duration) * 0.45) var(--nav-ease),
+    visibility 0s;
+}
+
+.nav-dropdown__overflow,
+.nav-dropdown__overflow-inner {
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.nav-dropdown__content {
+  --nav-fade-top: 0;
+  --nav-fade-bottom: 0;
+  overscroll-behavior-y: contain;
+  touch-action: pan-y;
+  -webkit-overflow-scrolling: touch;
+  pointer-events: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  -webkit-mask-size: 100% 100%;
+  mask-size: 100% 100%;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0) 0,
+    #000 calc(var(--nav-scroll-fade) * var(--nav-fade-top)),
+    #000 calc(100% - var(--nav-scroll-fade) * var(--nav-fade-bottom)),
+    rgba(0, 0, 0, 0) 100%
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0) 0,
+    #000 calc(var(--nav-scroll-fade) * var(--nav-fade-top)),
+    #000 calc(100% - var(--nav-scroll-fade) * var(--nav-fade-bottom)),
+    rgba(0, 0, 0, 0) 100%
+  );
+  display: block;
+  position: relative;
+  overflow: hidden auto;
+}
+
+.nav-dropdown__content::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  display: none;
+}
+
+.nav-dropdown__content-li {
+  pointer-events: auto;
+  width: 100%;
+  height: auto;
+  min-height: 0;
+  padding-bottom: 3.5em;
+  padding-left: 5.5em;
+  padding-right: 5.5em;
+  display: block;
+  overflow: visible;
+}
+
+.nav-dropdown__content-li > .w-dyn-item {
+  pointer-events: auto;
+  width: 100%;
+  display: block;
+}
+
+.nav-dropdown__link {
+  pointer-events: auto;
+  cursor: pointer;
+  flex-flow: column;
+  flex: 1;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  min-width: 0;
+  padding: 0.32em 0.55em;
+  display: flex;
+  position: relative;
+  overflow: hidden;
+  color: #000000;
+  transition: color 0.14s var(--nav-ease);
+}
+
+.nav-dropdown__link-bg {
+  z-index: 0;
+  background-color: var(--nav-active-bg);
+  pointer-events: none;
+  will-change: transform;
+  position: absolute;
+  inset: 0%;
+}
+
+.nav-dropdown__link-inner {
+  z-index: 1;
+  pointer-events: none;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  min-width: 0;
+  display: flex;
+  position: relative;
+}
+
+.nav-dropdown__link-label {
+  pointer-events: none;
+  font-family: var(--font-texts) !important;
+  font-size: 13px !important;
+  line-height: 1.35 !important;
+  font-weight: 400 !important;
+  letter-spacing: -0.005em;
+  color: inherit;
+}
+
+.nav-dropdown__link-inner > .nav-dropdown__link-label:first-child {
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  flex: 0 auto;
+  min-width: 0;
+  padding-right: 0.5em;
+  overflow: hidden;
+}
+
+[data-nav-year-mask] {
+  vertical-align: bottom;
+  margin-top: -0.08em;
+  margin-bottom: -0.08em;
+  padding-top: 0.08em;
+  padding-bottom: 0.08em;
+  display: inline-block;
+  position: relative;
+  overflow: hidden;
+  white-space: nowrap;
+  flex: none;
+}
+
+[data-nav-year-mask] > .nav-dropdown__link-label {
+  will-change: transform;
+  transition: none;
+  display: block;
+}
+
+.nav-dropdown__link:focus-visible,
+.nav-dropdown__link[data-film-status='active'] {
+  color: var(--nav-active-text) !important;
+}
+
+.nav-dropdown__link:focus-visible [data-nav-year-mask] > .nav-dropdown__link-label,
+.nav-dropdown__link[data-film-status='active'] [data-nav-year-mask] > .nav-dropdown__link-label {
+  color: var(--nav-active-text) !important;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .nav-dropdown__link:hover {
+    color: var(--nav-active-text) !important;
+  }
+  .nav-dropdown__link:hover [data-nav-year-mask] > .nav-dropdown__link-label {
+    color: var(--nav-active-text) !important;
+  }
+}
+
+/* Micro-jitter analógico a pasos (step-end) al pasar por encima de un disco en el menú */
+@keyframes nav-plate-jitter {
+  0% {
+    translate: 0;
+  }
+  30% {
+    translate: 0.05em -0.03em;
+  }
+  60% {
+    translate: -0.04em 0.045em;
+  }
+  80% {
+    translate: 0.025em 0.02em;
+  }
+  to {
+    translate: 0;
+  }
+}
+
+@keyframes nav-text-jitter {
+  0% {
+    translate: 0;
+  }
+  30% {
+    translate: 0.02em -0.012em;
+  }
+  60% {
+    translate: -0.015em 0.018em;
+  }
+  80% {
+    translate: 0.01em 0.008em;
+  }
+  to {
+    translate: 0;
+  }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .nav-dropdown__link:is(:hover, :focus-visible) .nav-dropdown__link-bg {
+    animation: 0.55s step-end 0.15s infinite nav-plate-jitter;
+  }
+  .nav-dropdown__link:is(:hover, :focus-visible) .nav-dropdown__link-inner {
+    animation: 0.45s step-end 0.15s infinite reverse nav-text-jitter;
+  }
+}
+
+/* Barra de scroll lateral derecha dentro del recuadro blanco */
+.nav-dropdown__scrollbar {
+  z-index: 4;
+  background-color: rgba(0, 0, 0, 0.12);
+  width: 0.375em;
+  position: absolute;
+  inset: 32% 1em 32% auto;
+  opacity: 0;
+  pointer-events: none;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  transition:
+    opacity calc(var(--nav-close-duration) * 0.6) var(--nav-ease),
+    transform var(--nav-close-duration) var(--nav-ease);
+  transform: translateY(0.5em);
+}
+
+.nav[data-nav-dropdown='open'] .nav-dropdown__scrollbar {
+  opacity: 1;
+  pointer-events: auto;
+  transition:
+    opacity calc(var(--nav-open-duration) * 0.5) var(--nav-ease) 0.12s,
+    transform var(--nav-open-duration) var(--nav-ease) 0.12s;
+  transform: translateY(0);
+}
+
+.nav-dropdown__scrollbar-progress {
+  background-color: #000000;
+  width: 100%;
+  height: 50%;
+  position: absolute;
+  inset: 0% 0% auto;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  will-change: transform, height;
+  top: 0;
+}
+
+.nav-dropdown__scrollbar-progress.is-dragging {
+  cursor: grabbing;
+}
+
+.nav-dropdown__scrollbar.is-disabled {
+  pointer-events: none;
+  opacity: 0 !important;
+}
+
+/* ============================================================
+   VERSIÓN MÓVIL / TABLET DEL MENÚ A24 (max-width: 991px):
+   - El menú se sitúa abajo en un recuadro blanco flotante (.nav-bg)
+   - Al pulsar Index, el recuadro blanco crece hacia arriba y se ensancha
+   ============================================================ */
+@media (max-width: 991px) {
+  .nav-hide-mobile {
+    display: none !important;
+  }
+
+  .nav {
+    --nav-dock-height: 3.5em;
+    --nav-dock-inset: 1em;
+    --nav-dock-radius: 0;
+    --nav-open-height: min(25em, 62vh);
+    --nav-dock-list-gap: 2.25em;
+    --nav-dock-open-width: min(100%, max(var(--nav-dock-width, 100%), 23.75em));
+    padding-left: var(--nav-dock-inset);
+    padding-right: var(--nav-dock-inset);
+    padding-bottom: calc(var(--nav-dock-inset) + env(safe-area-inset-bottom, 0px));
+    top: auto;
+    bottom: 0;
+  }
+
+  .nav-container {
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  .nav-inner {
+    z-index: 2;
+    height: var(--nav-dock-height);
+    align-items: center;
+    padding-top: 0;
+  }
+
+  .nav-bg {
+    width: var(--nav-dock-width, 100%);
+    max-width: 100%;
+    height: var(--nav-dock-height);
+    border-radius: var(--nav-dock-radius);
+    transition:
+      height var(--nav-close-duration) var(--nav-ease),
+      width var(--nav-close-duration) var(--nav-ease);
+    inset: auto auto 0% 50%;
+    transform: translateX(-50%);
+    box-shadow: 0 2px 18px rgba(0, 0, 0, 0.06);
+  }
+
+  .nav[data-nav-dropdown='open'] .nav-bg {
+    width: var(--nav-dock-open-width);
+    height: var(--nav-open-height);
+    transition-duration: var(--nav-open-duration);
+  }
+
+  .nav-center {
+    z-index: auto;
+    opacity: 1;
+    visibility: visible;
+    width: 100%;
+    height: auto;
+    position: static;
+    transform: none;
+  }
+
+  .nav-center__list {
+    width: calc(var(--nav-dock-width, 100%) - 1em);
+    max-width: 100%;
+    height: auto;
+    transition: width var(--nav-close-duration) var(--nav-ease);
+    flex-flow: row;
+    justify-content: center;
+    align-items: center;
+    gap: 0.25em;
+    margin-left: auto;
+    margin-right: auto;
+    padding-top: 0;
+    overflow: visible;
+  }
+
+  .nav[data-nav-dropdown='open'] .nav-center__list {
+    width: calc(var(--nav-dock-open-width) - 1em);
+    transition-duration: var(--nav-open-duration);
+  }
+
+  .nav-center__list > li:first-child,
+  .nav-center__list > li:last-of-type {
+    flex: 1 1 0;
+    align-items: center;
+    min-width: 0;
+    display: flex;
+  }
+
+  .nav-center__list > li:first-child > *,
+  .nav-center__list > li:last-of-type > * {
+    flex: none;
+    max-width: none;
+  }
+
+  .nav-center__list > li:first-child {
+    justify-content: flex-start;
+    margin-right: 0;
+  }
+
+  .nav-center__list > li:last-of-type {
+    justify-content: flex-end;
+    margin-left: 0;
+  }
+
+  .nav-logo {
+    padding: 0.25em 0.5em;
+  }
+
+  .miquel-handwritten-logo {
+    height: 1.3em;
+  }
+
+  .nav-link {
+    justify-content: center;
+    width: auto;
+    padding: 0.25em 0.65em;
+  }
+
+  .nav-dropdown {
+    width: calc(100% + 1em);
+    max-width: var(--nav-dock-open-width);
+    padding: 0 0 var(--nav-dock-list-gap);
+    margin: 0;
+    position: absolute;
+    inset: auto auto 100% 50%;
+    transform: translateX(-50%);
+  }
+
+  [data-dropdown-toggle='open'] + .nav-dropdown {
+    height: calc(var(--nav-open-height) - var(--nav-dock-height));
+  }
+
+  .nav-dropdown__content {
+    padding-top: 1.75em;
+    padding-bottom: 0.75em;
+  }
+
+  .nav-dropdown__content-li {
+    max-width: 17em;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 0 0 0.75em;
+  }
+
+  .nav-dropdown__link {
+    padding: 0.55em 0.5em;
+  }
+
+  .nav-dropdown__scrollbar {
+    --nav-dock-scrollbar-height: 7.25em;
+    inset: calc(var(--nav-open-height) / 2 - var(--nav-dock-scrollbar-height) / 2) 0.5em auto auto;
+    width: 0.45em;
+    height: var(--nav-dock-scrollbar-height);
+  }
+
+  .nav-link__dropdown-icon {
+    transform: rotate(180deg);
+  }
+
+  [data-dropdown-toggle='open'] .nav-link__dropdown-icon {
+    transform: rotate(0deg);
+  }
+
+  .page-bg {
+    background-image: linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.35));
+    inset: auto 0% 0%;
+  }
 }
 
 /* 2. Bloque editorial superior izquierda (THE ZONE OF INTEREST + tabla 3 filas) */
@@ -392,25 +1013,13 @@
    - Bloque editorial pegado arriba a la izquierda (sin barra superior en el top)
    - Barra de navegación flotante blanca abajo centrada (M.GIL · Àlbums · Índex ∧)
    - Críticas ocultas en móvil para dejar aire al CD central y los CDs laterales que asoman */
+@media (max-width: 991px) {
+  .a24-bottom-reviews-container {
+    display: none !important;
+  }
+}
+
 @media (max-width: 650px) {
-  .a24-header-bar {
-    top: auto;
-    bottom: 1.25rem;
-    padding: 0 1rem;
-  }
-
-  .a24-header-nav {
-    background-color: #ffffff;
-    padding: 0.7rem 1.35rem;
-    gap: 1.4rem;
-    box-shadow: 0 2px 14px rgba(0, 0, 0, 0.04);
-  }
-
-  .a24-header-chevron {
-    display: inline-block;
-    transform: rotate(180deg);
-  }
-
   .a24-top-left-block {
     top: 0.9rem;
     left: 0.85rem;
@@ -436,10 +1045,6 @@
   .a24-meta-value * {
     font-size: 12px;
     line-height: 1.3;
-  }
-
-  .a24-bottom-reviews-container {
-    display: none !important;
   }
 }
 
