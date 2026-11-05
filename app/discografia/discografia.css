@@ -206,13 +206,42 @@
 
 .a24-serif-title,
 #ui-title {
-  font-size: clamp(3rem, 4.6vw, 5rem) !important;
-  line-height: 0.90;
-  letter-spacing: -0.03em;
-  color: #111111;
-  font-weight: 500 !important;
+  font-size: clamp(1.4rem, 3.6vw, 3.8rem) !important;
+  line-height: 0.95;
+  letter-spacing: -0.02em;
+  color: #000000 !important;
+  font-weight: 600 !important;
+  text-transform: uppercase !important;
   display: block;
-  margin-top: 0.25rem;
+  margin-top: 0.2rem;
+}
+
+#left-editorial-panel {
+  color: #000000 !important;
+}
+
+#left-editorial-panel .a24-label,
+#left-editorial-panel .a24-label * {
+  color: #000000 !important;
+  font-weight: 600 !important;
+}
+
+#left-editorial-panel .a24-desc,
+#left-editorial-panel .a24-value,
+#left-editorial-panel #ui-description,
+#left-editorial-panel #ui-director,
+#left-editorial-panel #ui-year,
+#left-editorial-panel #ui-starring {
+  color: #000000 !important;
+}
+
+#ui-reviews-container {
+  will-change: transform, opacity;
+}
+
+#ui-reviews .a24-value,
+#ui-reviews .a24-label {
+  color: #000000 !important;
 }
 
 /* ============================================================
@@ -453,6 +482,28 @@
 
 [data-disc-gallery] .opacity-0 { opacity: 0; }
 [data-disc-gallery] .opacity-50 { opacity: 0.5; }
+
+[data-disc-gallery] .line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+[data-disc-gallery] .line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+@media (min-width: 640px) {
+  [data-disc-gallery] .sm\:line-clamp-none {
+    display: block;
+    -webkit-line-clamp: unset;
+    overflow: visible;
+  }
+}
 
 [data-disc-gallery] .transition {
   transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter;

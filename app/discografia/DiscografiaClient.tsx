@@ -155,6 +155,7 @@ export default function DiscografiaClient() {
     let kickBoost = 0;
     let activeTween: gsap.core.Tween | null = null;
     let isDisposed = false;
+    let isTransitioningOut = false; // Bloqueo durante la animación de salida a la ficha
 
     const activeIndex = () => Math.round(Math.max(0, Math.min(N - 1, L)));
     const targetIndex = () => (activeTween ? Math.round(targetL) : activeIndex());
@@ -205,11 +206,40 @@ export default function DiscografiaClient() {
 
     scene.add(new THREE.AmbientLight(0xffffff, 0.75 * LIGHT_SCALE));
 
-    // Grupo principal inclinado galleryRotX = -30°, galleryRotY = -30°, galleryScale = 1.08
+    // Grupo principal inclinado galleryRotX = -22°, galleryRotY = -22°
     const galleryGroup = new THREE.Group();
     galleryGroup.rotation.set(SPEC.galleryRotX, SPEC.galleryRotY, 0);
     galleryGroup.scale.setScalar(SPEC.galleryScale);
     scene.add(galleryGroup);
+
+    // Ajuste responsivo avanzado de cámara y escala (vigilar responsive móvil)
+    function updateCameraAndScale() {
+      if (!container || isDisposed) return;
+      const w = container.clientWidth;
+      const h = container.clientHeight;
+      if (w === 0 || h === 0) return;
+
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+      renderer.setSize(w, h);
+
+      if (w <= 650) {
+        // En versión móvil, formato más pequeño de los CDs para que el título quepa arriba y las críticas abajo
+        camera.position.set(0, 0, 6.2);
+        galleryGroup.scale.setScalar(0.55);
+        galleryGroup.position.set(0, -0.06, 0);
+      } else if (w <= 1024) {
+        camera.position.set(0, 0, 5.0);
+        galleryGroup.scale.setScalar(0.82);
+        galleryGroup.position.set(0, 0, 0);
+      } else {
+        camera.position.set(0, 0, SPEC.camDistance);
+        galleryGroup.scale.setScalar(SPEC.galleryScale);
+        galleryGroup.position.set(0, 0, 0);
+      }
+    }
+
+    updateCameraAndScale();
 
     // 4. Mapa procedural de serigrafía (bumpMap + roughnessMap de 1024 px)
     function createSilkscreenPrintMaps() {
@@ -801,7 +831,8 @@ export default function DiscografiaClient() {
     function splitAndAnimateChars(element: HTMLElement | null, text: string, delay = 0) {
       if (!element) return;
       element.innerHTML = '';
-      const words = text.split(' ');
+      const upperText = (text || '').toUpperCase();
+      const words = upperText.split(' ');
       words.forEach((word, wIdx) => {
         const wordWrap = document.createElement('span');
         wordWrap.className = 'inline-block whitespace-nowrap';
@@ -809,7 +840,8 @@ export default function DiscografiaClient() {
           const mask = document.createElement('span');
           mask.className = 'char-mask';
           const inner = document.createElement('span');
-          inner.className = 'char-inner';
+          inner.className = 'char-inner text-black font-bold';
+          inner.style.color = '#000000';
           inner.textContent = word[c];
           mask.appendChild(inner);
           wordWrap.appendChild(mask);
@@ -830,7 +862,7 @@ export default function DiscografiaClient() {
           yPercent: 0,
           opacity: 1,
           rotateZ: 0,
-          duration: 0.62,
+          duration: 0.58,
           stagger: 0.015,
           delay,
           ease: 'expo.out',
@@ -848,7 +880,8 @@ export default function DiscografiaClient() {
         const mask = document.createElement('span');
         mask.className = 'char-mask';
         const inner = document.createElement('span');
-        inner.className = 'char-inner';
+        inner.className = 'char-inner text-black font-normal';
+        inner.style.color = '#000000';
         inner.textContent = w;
         mask.appendChild(inner);
         element.appendChild(mask);
@@ -882,23 +915,24 @@ export default function DiscografiaClient() {
 
       if (uiCatalogNum) {
         uiCatalogNum.textContent = `A24—${String(index + 1).padStart(2, '0')}`;
+        uiCatalogNum.className = 'text-black font-mono font-bold text-[10px]';
       }
 
-      // Restablecer contenedores editoriales para el revelado en cascada
+      // Restablecer contenedores editoriales en color negro nítido y opacidad 1
       gsap.set(['#ui-title', '#ui-description', '#ui-director', '#ui-year', '#ui-starring', '#ui-reviews'], {
         opacity: 1,
         y: 0
       });
 
-      // 1. Título en tipografía Serif con animación letra por letra
-      splitAndAnimateChars(uiTitle, film.title, 0);
+      // 1. Título en tipografía Serif en MAYÚSCULAS y negro
+      splitAndAnimateChars(uiTitle, film.title.toUpperCase(), 0);
 
       // 2. Líneas divisorias horizontales animadas con GSAP (scaleX: 0 -> 1)
       if (leftPanel && !prefersReducedMotion) {
         const lines = leftPanel.querySelectorAll('.editorial-line');
         gsap.fromTo(
           lines,
-          { scaleX: 0, opacity: 0.2 },
+          { scaleX: 0, opacity: 0.3 },
           {
             scaleX: 1,
             opacity: 1,
@@ -910,7 +944,7 @@ export default function DiscografiaClient() {
         );
       }
 
-      // 3. Descripción del CD con revelado en cascada
+      // 3. Descripción del CD con revelado en cascada en color negro
       animateMaskedLines(uiDescription, film.description, 0.05);
 
       // 4. Productor / Director y Año
@@ -925,7 +959,8 @@ export default function DiscografiaClient() {
           const lineMask = document.createElement('span');
           lineMask.className = 'line-mask';
           const lineInner = document.createElement('span');
-          lineInner.className = 'line-inner';
+          lineInner.className = 'line-inner text-black font-medium';
+          lineInner.style.color = '#000000';
           lineInner.textContent = itemText;
           lineMask.appendChild(lineInner);
           uiStarring.appendChild(lineMask);
@@ -947,30 +982,24 @@ export default function DiscografiaClient() {
         }
       }
 
-      // 6. Reseñas con líneas divisorias propias a la derecha
+      // 6. Reseñas ampliadas y destacadas debajo de los CDs
       if (uiReviews) {
         uiReviews.innerHTML = '';
-        film.reviews.forEach((rev, rIdx) => {
+        film.reviews.forEach((rev) => {
           const block = document.createElement('div');
-          block.className = 'space-y-1';
+          block.className = 'flex flex-col items-center justify-center px-4 py-1.5 max-w-xs sm:max-w-sm';
           block.innerHTML = `
-            ${rIdx > 0 ? '<div class="editorial-line mb-3"></div>' : ''}
-            <div class="a24-label">${rev.pub}</div>
-            <div class="a24-value">“${rev.quote}”</div>
-            <div class="a24-label tracking-widest text-black">${rev.stars}</div>
+            <div class="text-[10px] sm:text-xs font-bold tracking-widest text-black uppercase mb-1">${rev.pub}</div>
+            <div class="text-xs sm:text-base md:text-lg font-medium tracking-tight text-black leading-snug">“${rev.quote}”</div>
+            <div class="text-xs sm:text-sm tracking-widest text-black mt-1">${rev.stars}</div>
           `;
           uiReviews.appendChild(block);
         });
         if (!prefersReducedMotion) {
           gsap.fromTo(
             Array.from(uiReviews.children),
-            { y: 12, opacity: 0 },
-            { y: 0, opacity: 1, duration: 0.5, stagger: 0.07, delay: 0.08, ease: 'expo.out' }
-          );
-          gsap.fromTo(
-            uiReviews.querySelectorAll('.editorial-line'),
-            { scaleX: 0 },
-            { scaleX: 1, duration: 0.65, delay: 0.12, ease: 'expo.out' }
+            { y: 14, opacity: 0 },
+            { y: 0, opacity: 1, duration: 0.5, stagger: 0.08, delay: 0.08, ease: 'expo.out' }
           );
         }
       }
@@ -979,9 +1008,9 @@ export default function DiscografiaClient() {
       if (uiQuickList) {
         Array.from(uiQuickList.querySelectorAll('button')).forEach((btn, idx) => {
           if (idx === index) {
-            btn.className = 'a24-value font-semibold text-black text-right';
+            btn.className = 'a24-value font-bold text-black text-right';
           } else {
-            btn.className = 'a24-label hover:text-black transition-colors text-right';
+            btn.className = 'a24-label text-black/75 hover:text-black font-medium transition-colors text-right';
           }
         });
       }
@@ -991,22 +1020,10 @@ export default function DiscografiaClient() {
         uiRuler.style.transform = `translateX(${(5 - index) * 14}px)`;
       }
 
-      // Enllaços directes a la fitxa
-      const uiDetailBtn = container.querySelector('#ui-detail-btn') as HTMLAnchorElement | null;
-      const uiDetailBtnText = container.querySelector('#ui-detail-btn-text') as HTMLElement | null;
+      // Enllaç del títol a la fitxa
       const uiTitleLink = container.querySelector('#ui-title-link') as HTMLAnchorElement | null;
-
-      if (uiDetailBtn) {
-        uiDetailBtn.href = film.detailUrl;
-      }
       if (uiTitleLink) {
         uiTitleLink.href = film.detailUrl;
-      }
-      if (uiDetailBtnText) {
-        const label = `VEURE FITXA DE ${film.title.toUpperCase()} →`;
-        uiDetailBtnText.setAttribute('data-text', label);
-        const span = uiDetailBtnText.querySelector('[data-hover-text]');
-        if (span) span.textContent = label;
       }
     };
 
@@ -1100,6 +1117,8 @@ export default function DiscografiaClient() {
     }
 
     async function goTo(targetIdx: number, source = 'default') {
+      if (isTransitioningOut) return;
+
       // 1. Limita el índice a 0…N-1 (sin bucle)
       const clamped = Math.max(0, Math.min(N - 1, Math.round(targetIdx)));
       const distance = Math.abs(clamped - L);
@@ -1133,12 +1152,12 @@ export default function DiscografiaClient() {
       const oldIndex = W;
       let hasSwappedMeta = false;
 
-      // Suave desvanecimiento del texto anterior al iniciar el viaje si cambiamos de disco
+      // Suave desvanecimiento del texto anterior al iniciar el viaje si cambiamos de disco (manteniendo el título nítido)
       if (clamped !== oldIndex && leftPanel && !prefersReducedMotion) {
-        gsap.to(['#ui-title', '#ui-description', '#ui-director', '#ui-year', '#ui-starring', '#ui-reviews'], {
-          opacity: 0.25,
+        gsap.to(['#ui-description', '#ui-director', '#ui-year', '#ui-starring', '#ui-reviews'], {
+          opacity: 0.35,
           y: dir > 0 ? -4 : 4,
-          duration: 0.2,
+          duration: 0.18,
           ease: 'power2.in',
           overwrite: 'auto'
         });
@@ -1200,7 +1219,7 @@ export default function DiscografiaClient() {
     };
 
     const onWheel = (e: WheelEvent) => {
-      if (e.ctrlKey) return;
+      if (e.ctrlKey || isTransitioningOut) return;
       e.preventDefault();
 
       const now = performance.now();
@@ -1365,7 +1384,7 @@ export default function DiscografiaClient() {
     }
 
     const onPointerDown = (e: PointerEvent) => {
-      if (!e.isPrimary || e.button !== 0) return;
+      if (!e.isPrimary || e.button !== 0 || isTransitioningOut) return;
       if (isInteractiveElement(e.target)) return;
 
       const hit = updateRaycasterFromEvent(e.clientX, e.clientY);
@@ -1570,7 +1589,7 @@ export default function DiscografiaClient() {
     const closeModalBtn = container.querySelector('#close-modal-btn') as HTMLButtonElement | null;
 
     function openFilmDetail(film: FilmData, openInNewTab = false) {
-      if (!film || !film.detailUrl) return;
+      if (!film || !film.detailUrl || isTransitioningOut) return;
 
       const targetUrl = film.detailUrl.startsWith('/')
         ? film.detailUrl
@@ -1581,15 +1600,116 @@ export default function DiscografiaClient() {
         return;
       }
 
-      const w = window as unknown as { barba?: { go?: (url: string) => void } };
-      if (w.barba && typeof w.barba.go === 'function') {
-        try {
-          w.barba.go(targetUrl);
-          return;
-        } catch (_) {}
+      if (prefersReducedMotion) {
+        window.location.href = targetUrl;
+        return;
       }
 
-      window.location.href = targetUrl;
+      isTransitioningOut = true;
+
+      if (activeTween) {
+        activeTween.kill();
+        activeTween = null;
+      }
+      dragInertia = 0;
+      settleVelocity = 0;
+      setScribbleActiveIntent(false);
+
+      const activeHolder = discHolders[W];
+      const exitOverlay = (container ? container.querySelector('#exit-transition-overlay') : null) as HTMLElement | null;
+
+      const exitTl = gsap.timeline({
+        onComplete: () => {
+          const w = window as unknown as { barba?: { go?: (url: string) => void } };
+          if (w.barba && typeof w.barba.go === 'function') {
+            try {
+              w.barba.go(targetUrl);
+              return;
+            } catch (_) {}
+          }
+          window.location.href = targetUrl;
+        }
+      });
+
+      // 1. Animació del CD actiu: gir ràpid sobre si mateix mentre disminueix de mida
+      if (activeHolder) {
+        const u = activeHolder.userData as DiscHolderUserData;
+        exitTl.to(
+          u,
+          {
+            dragSpinY: u.dragSpinY + Math.PI * 4,
+            dragSpinX: 0,
+            duration: 0.68,
+            ease: 'power2.in'
+          },
+          0
+        );
+
+        exitTl.to(
+          activeHolder.scale,
+          {
+            x: 0.001,
+            y: 0.001,
+            z: 0.001,
+            duration: 0.65,
+            ease: 'power3.in'
+          },
+          0
+        );
+
+        exitTl.to(
+          activeHolder.position,
+          {
+            y: activeHolder.position.y + 0.12,
+            z: activeHolder.position.z + 0.35,
+            duration: 0.65,
+            ease: 'power2.in'
+          },
+          0
+        );
+      }
+
+      // 2. Els altres discs desapareixen ràpidament
+      discHolders.forEach((holder, idx) => {
+        if (idx !== W) {
+          exitTl.to(
+            holder.scale,
+            {
+              x: 0,
+              y: 0,
+              z: 0,
+              duration: 0.35,
+              ease: 'power2.in'
+            },
+            0
+          );
+        }
+      });
+
+      // 3. Desvaniment dels elements d'interfície
+      exitTl.to(
+        ['header', 'footer', '#left-editorial-panel', '#ui-reviews-container', '#ui-quick-list'],
+        {
+          opacity: 0,
+          y: -10,
+          duration: 0.35,
+          ease: 'power2.in'
+        },
+        0
+      );
+
+      // 4. Fundit en blanc cap a la pàgina de la fitxa del CD
+      if (exitOverlay) {
+        exitTl.to(
+          exitOverlay,
+          {
+            opacity: 1,
+            duration: 0.45,
+            ease: 'power2.out'
+          },
+          0.26
+        );
+      }
     }
 
     const onCloseModal = () => {
@@ -1601,7 +1721,7 @@ export default function DiscografiaClient() {
     }
 
     const onContainerClick = (e: MouseEvent) => {
-      if (performance.now() < suppressClickUntil) return;
+      if (performance.now() < suppressClickUntil || isTransitioningOut) return;
       const target = e.target as Element | null;
       if (target && target.closest && target.closest('a, button, [data-disc-no-open]')) return;
 
@@ -1616,6 +1736,16 @@ export default function DiscografiaClient() {
     };
 
     container.addEventListener('click', onContainerClick);
+
+    // Clic sobre el títol a dalt a l'esquerra per obrir la fitxa amb l'animació de sortida
+    const uiTitleLink = container.querySelector('#ui-title-link') as HTMLAnchorElement | null;
+    const onTitleLinkClick = (e: MouseEvent) => {
+      e.preventDefault();
+      openFilmDetail(films[W]);
+    };
+    if (uiTitleLink) {
+      uiTitleLink.addEventListener('click', onTitleLinkClick);
+    }
 
     // ============================================================================
     // 13. MENÚ INDEX Y CUSTOM EVENT 'discgallerynavigate'
@@ -1671,6 +1801,7 @@ export default function DiscografiaClient() {
     });
 
     const onKeyDown = (e: KeyboardEvent) => {
+      if (isTransitioningOut) return;
       if (e.key === 'Escape') {
         closeIndexDrawer();
         if (detailModal) detailModal.classList.add('opacity-0', 'pointer-events-none');
@@ -1834,8 +1965,10 @@ export default function DiscografiaClient() {
         );
 
         // Escala continua y sedosa: 1.0 en el centro exacto, desciende a inactiveScale = 0.8
-        const baseScale = SPEC.inactiveScale + smoothCenter * (1.0 - SPEC.inactiveScale);
-        holder.scale.setScalar(baseScale + u.hoverWeight * 0.028);
+        if (!isTransitioningOut) {
+          const baseScale = SPEC.inactiveScale + smoothCenter * (1.0 - SPEC.inactiveScale);
+          holder.scale.setScalar(baseScale + u.hoverWeight * 0.028);
+        }
 
         // Rotación con cabeceo aerodinámico (flowLean), alabeo natural (flowBank) y balanceo
         const isAct = p === W;
@@ -1864,12 +1997,7 @@ export default function DiscografiaClient() {
 
     // Redimensionado responsivo
     const onResize = () => {
-      if (!container) return;
-      const w = container.clientWidth;
-      const h = container.clientHeight;
-      camera.aspect = w / h;
-      camera.updateProjectionMatrix();
-      renderer.setSize(w, h);
+      updateCameraAndScale();
     };
 
     window.addEventListener('resize', onResize);
@@ -1897,6 +2025,7 @@ export default function DiscografiaClient() {
       container.removeEventListener('pointercancel', endPointerDrag);
       container.removeEventListener('pointerleave', onPointerLeave);
       container.removeEventListener('click', onContainerClick);
+      if (uiTitleLink) uiTitleLink.removeEventListener('click', onTitleLinkClick);
 
       if (prevBtn) prevBtn.removeEventListener('click', onPrevClick);
       if (nextBtn) nextBtn.removeEventListener('click', onNextClick);
@@ -1979,96 +2108,83 @@ export default function DiscografiaClient() {
         </div>
       </header>
 
-      {/* PANELES LATERALES DE METADATOS Y RESEÑAS */}
-      <div className="absolute inset-0 z-20 pointer-events-none flex items-center justify-between px-6 md:px-12 pt-24 md:pt-28 pb-20">
-        {/* Columna Izquierda: Ficha Editorial A24 con Título Serif grande en PP Eiko */}
-        <div id="left-editorial-panel" className="w-80 md:w-96 lg:w-[28rem] flex flex-col self-start">
-          {/* Título en tipografía PP Eiko en formato grande */}
-          <div className="pb-3.5">
-            <div className="a24-label mb-1.5 flex items-center justify-between">
-              <span>EDICIÓ</span>
-              <span id="ui-catalog-num" className="text-black/60 font-mono text-[10px]">
-                A24—01
-              </span>
-            </div>
-            <a
-              id="ui-title-link"
-              href="/discografia/viatger/"
-              className="pointer-events-auto block hover:opacity-75 transition-opacity"
-              title="Veure la fitxa completa de l'edició"
-            >
-              <h1 id="ui-title" className="a24-serif-title"></h1>
-            </a>
+      {/* OVERLAY DE TRANSICIÓ DE SORTIDA (FUNDIT A LA FITXA) */}
+      <div
+        id="exit-transition-overlay"
+        className="fixed inset-0 z-50 bg-white pointer-events-none opacity-0 transition-opacity"
+        aria-hidden="true"
+      />
+
+      {/* BLOC EDITORIAL SUPERIOR ESQUERRA */}
+      <div
+        id="left-editorial-panel"
+        className="absolute top-14 sm:top-16 md:top-20 left-4 sm:left-6 md:left-12 z-20 pointer-events-none w-[calc(100vw-2rem)] sm:w-80 md:w-96 lg:w-[26rem] max-w-sm sm:max-w-md flex flex-col"
+      >
+        {/* Número de catàleg i Títol en majúscules */}
+        <div className="pb-1 sm:pb-2">
+          <div className="a24-label mb-1 flex items-center justify-between font-bold text-black text-[10px]">
+            <span className="text-black font-bold">EDICIÓ</span>
+            <span id="ui-catalog-num" className="text-black font-mono font-bold text-[10px]">
+              A24—01
+            </span>
           </div>
+          <a
+            id="ui-title-link"
+            href="/discografia/viatger/"
+            className="pointer-events-auto block hover:opacity-80 transition-opacity"
+            title="Veure la fitxa completa de l'edició"
+          >
+            <h1 id="ui-title" className="a24-serif-title uppercase font-semibold text-black"></h1>
+          </a>
+        </div>
 
-          {/* Línea divisoria 1 */}
-          <div className="editorial-line"></div>
+        {/* Línia divisòria */}
+        <div className="editorial-line my-1.5 sm:my-2"></div>
 
-          {/* Descripción del CD */}
-          <div className="py-3.5">
-            <div className="a24-label mb-1.5">SINOPSI / NOTES</div>
-            <p id="ui-description" className="a24-desc"></p>
+        {/* Descripció del CD (compacta en mòbil) */}
+        <div className="py-1.5 sm:py-2">
+          <div className="a24-label mb-1 font-bold text-black text-[10px]">SINOPSI / NOTES</div>
+          <p id="ui-description" className="a24-desc text-black text-[11px] sm:text-xs leading-relaxed line-clamp-3 sm:line-clamp-none"></p>
+        </div>
+
+        {/* Línia divisòria */}
+        <div className="editorial-line my-1.5 sm:my-2"></div>
+
+        {/* Producció i Any */}
+        <div className="py-1.5 sm:py-2 grid grid-cols-3 gap-2">
+          <div className="col-span-2">
+            <div className="a24-label mb-0.5 font-bold text-black text-[10px]">PRODUCCIÓ</div>
+            <div id="ui-director" className="a24-value font-semibold text-black text-[11px] sm:text-xs"></div>
           </div>
-
-          {/* Línea divisoria 2 */}
-          <div className="editorial-line"></div>
-
-          {/* Dirección / Producción & Año */}
-          <div className="py-3.5 grid grid-cols-3 gap-2">
-            <div className="col-span-2">
-              <div className="a24-label mb-1">PRODUCCIÓ</div>
-              <div id="ui-director" className="a24-value"></div>
-            </div>
-            <div>
-              <div className="a24-label mb-1">ANY</div>
-              <div id="ui-year" className="a24-value"></div>
-            </div>
-          </div>
-
-          {/* Línea divisoria 3 */}
-          <div className="editorial-line"></div>
-
-          {/* Featuring / Intérpretes */}
-          <div className="pt-3.5">
-            <div className="a24-label mb-1">COL·LABORACIONS</div>
-            <div id="ui-starring" className="a24-value leading-relaxed whitespace-pre-line"></div>
-          </div>
-
-          {/* Línea divisoria 4 */}
-          <div className="editorial-line mt-3.5"></div>
-
-          {/* Botó directe a la fitxa tècnica completa de l'àlbum */}
-          <div className="pt-3.5 pointer-events-auto">
-            <a
-              id="ui-detail-btn"
-              href="/discografia/viatger/"
-              className="btn a24-btn w-full block text-center"
-              data-hover=""
-              title="Obrir la fitxa tècnica completa de l'edició"
-            >
-              <div className="btn__divider" />
-              <span className="btn__p-mask w-full">
-                <span
-                  id="ui-detail-btn-text"
-                  className="btn__p w-full text-center"
-                  data-hover-inner
-                  data-text="VEURE FITXA DE L'EDICIÓ →"
-                >
-                  <span data-hover-text>VEURE FITXA DE L'EDICIÓ →</span>
-                </span>
-              </span>
-              <div className="btn__divider" />
-            </a>
+          <div>
+            <div className="a24-label mb-0.5 font-bold text-black text-[10px]">ANY</div>
+            <div id="ui-year" className="a24-value font-semibold text-black text-[11px] sm:text-xs"></div>
           </div>
         </div>
 
-        {/* Columna Derecha: Reseñas + Lista rápida de navegación */}
-        <div className="flex items-center gap-10">
-          <div id="ui-reviews" className="hidden lg:flex flex-col gap-4 w-52"></div>
-
-          {/* Lista vertical derecha interactiva (como en a24.raviklaassens.com) */}
-          <ul id="ui-quick-list" className="hidden md:flex flex-col gap-1.5 text-right pointer-events-auto"></ul>
+        {/* Col·laboracions (ocult en mòbils molt estrets) */}
+        <div className="editorial-line my-1.5 sm:my-2 hidden sm:block"></div>
+        <div className="pt-1.5 hidden sm:block">
+          <div className="a24-label mb-0.5 font-bold text-black text-[10px]">COL·LABORACIONS</div>
+          <div id="ui-starring" className="a24-value font-semibold text-black text-[11px] sm:text-xs leading-relaxed whitespace-pre-line"></div>
         </div>
+      </div>
+
+      {/* LLISTA RÀPIDA VERTICAL DRETA (NOMÉS ESCRIPTORI) */}
+      <ul
+        id="ui-quick-list"
+        className="absolute top-16 md:top-20 right-6 md:right-12 z-20 hidden lg:flex flex-col gap-1.5 text-right pointer-events-auto"
+      ></ul>
+
+      {/* SECCIÓ DE RESSENYES AMPLIADES A SOTA DELS DISCOS */}
+      <div
+        id="ui-reviews-container"
+        className="absolute bottom-12 sm:bottom-14 md:bottom-16 left-0 w-full z-20 pointer-events-none flex items-center justify-center px-4 sm:px-6"
+      >
+        <div
+          id="ui-reviews"
+          className="w-full max-w-4xl flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-8 md:gap-16 text-center pointer-events-auto"
+        ></div>
       </div>
 
       {/* PIE DE PÁGINA CON REGLA NUMÉRICA Y AYUDA */}
