@@ -23,6 +23,14 @@ export default function ProductionClient({ album }: ProductionClientProps) {
   const [progress, setProgress] = useState(0);
   const [volume, setVolume] = useState(65);
 
+  // Format seconds to MM:SS
+  const formatSeconds = (totalSec: number) => {
+    if (isNaN(totalSec) || totalSec < 0) return '00:00';
+    const m = Math.floor(totalSec / 60);
+    const s = Math.floor(totalSec % 60);
+    return `${m < 10 ? '0' : ''}${m}:${s < 10 ? '0' : ''}${s}`;
+  };
+
   // Extraer ID de YouTube
   const getYouTubeId = (url: string) => {
     const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
@@ -42,8 +50,102 @@ export default function ProductionClient({ album }: ProductionClientProps) {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const playerRef = useRef<any>(null);
   const expandBoxRef = useRef<HTMLDivElement>(null);
+  const isScrubbingRef = useRef<boolean>(false);
 
   const [pushProgress, setPushProgress] = useState(0);
+
+  // ============================================================================
+  // YOUTUBE IFRAME API CONTROLS INTEGRATION
+  // ============================================================================
+  useEffect(() => {
+    if (!trailerOpen) {
+      if (playerRef.current) {
+        try {
+          playerRef.current.destroy();
+        } catch (e) {
+          // ignore
+        }
+        playerRef.current = null;
+      }
+      return;
+    }
+
+    let intervalId: NodeJS.Timeout | null = null;
+
+    const initPlayer = () => {
+      const YT = (window as any).YT;
+      if (!YT || !YT.Player) return;
+
+      playerRef.current = new YT.Player('yt-trailer-player', {
+        events: {
+          onReady: (event: any) => {
+            try {
+              event.target.playVideo();
+              setIsPlaying(true);
+              const dur = event.target.getDuration();
+              if (dur && dur > 0) {
+                setTotalTime(formatSeconds(dur));
+              }
+              if (isMuted) {
+                event.target.mute();
+              } else {
+                event.target.unMute();
+                event.target.setVolume(volume);
+              }
+            } catch (err) {
+              console.warn('YT onReady error:', err);
+            }
+          },
+          onStateChange: (event: any) => {
+            // YT.PlayerState: 1 = PLAYING, 2 = PAUSED, 0 = ENDED
+            if (event.data === 1) {
+              setIsPlaying(true);
+            } else if (event.data === 2) {
+              setIsPlaying(false);
+            } else if (event.data === 0) {
+              setIsPlaying(false);
+              setProgress(100);
+            }
+          }
+        }
+      });
+
+      // Poll current time and sync with custom controls
+      intervalId = setInterval(() => {
+        if (!playerRef.current || isScrubbingRef.current) return;
+        try {
+          if (typeof playerRef.current.getCurrentTime === 'function' && typeof playerRef.current.getDuration === 'function') {
+            const cur = playerRef.current.getCurrentTime() || 0;
+            const dur = playerRef.current.getDuration() || 0;
+            if (dur > 0) {
+              setCurrentTime(formatSeconds(cur));
+              setTotalTime(formatSeconds(dur));
+              setProgress((cur / dur) * 100);
+            }
+          }
+        } catch (e) {
+          // player might be unmounting
+        }
+      }, 250);
+    };
+
+    if ((window as any).YT && (window as any).YT.Player) {
+      // Small timeout to allow DOM element to render
+      const timer = setTimeout(initPlayer, 100);
+      return () => {
+        clearTimeout(timer);
+        if (intervalId) clearInterval(intervalId);
+      };
+    } else {
+      (window as any).onYouTubeIframeAPIReady = () => {
+        initPlayer();
+      };
+    }
+
+    return () => {
+      if (intervalId) clearInterval(intervalId);
+    };
+  }, [trailerOpen, volume, isMuted]);
 
   // ============================================================================
   // 1. ANIMACIÓN DE ENTRADA DE BOTONES (GSAP SEGÚN ESPECIFICACIÓN A24)
@@ -1171,7 +1273,8 @@ export default function ProductionClient({ album }: ProductionClientProps) {
               ) : (
                 <iframe
                   ref={iframeRef}
-                  src={`https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&controls=0&rel=0&modestbranding=1&playsinline=1&enablejsapi=1`}
+                  id="yt-trailer-player"
+                  src={`https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&controls=0&disablekb=1&modestbranding=1&rel=0&iv_load_policy=3&playsinline=1&enablejsapi=1&origin=${typeof window !== 'undefined' ? window.location.origin : ''}`}
                   title={`${album.title} — Trailer`}
                   allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
                   allowFullScreen
