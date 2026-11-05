@@ -1455,7 +1455,7 @@ export default function DiscografiaClient() {
       // Suave desvanecimiento del texto anterior al iniciar el viaje si cambiamos de disco (manteniendo el título nítido)
       if (clamped !== oldIndex && leftPanel && !prefersReducedMotion) {
         gsap.to(['#ui-description', '#ui-director', '#ui-year', '#ui-starring', '#ui-reviews'], {
-          opacity: 0.35,
+          opacity: 0.6,
           y: dir > 0 ? -4 : 4,
           duration: 0.18,
           ease: 'power2.in',
