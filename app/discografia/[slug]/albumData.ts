@@ -67,10 +67,10 @@ export const ALBUMS_DATA: Record<string, AlbumDetail> = {
       "Crònica musical que commemora vint-i-cinc anys de trajectòria en solitari de Miquel Gil, transportant-nos a través de paisatges emocionals i històries íntimes. Amb una combinació de melodies melancòliques, lletres evocadores i textures contemporànies, 'Viatger' és una oda a la transformació personal i a la memòria viva del cant mediterrani.",
     quote: "Vint-i-cinc anys de viatge sonor per les venes obertes de la Mediterrània",
     quoteAuthor: 'Miquel Gil · Viatger (2024)',
-    trailerSrc: 'https://www.youtube.com/watch?v=sWcE9X5yV6g',
+    trailerSrc: 'https://www.youtube.com/watch?v=kNwJUff7NlU',
     trailerStill: '/images/MiquelGilViatger_Principal.webp',
     streamUrl: 'https://open.spotify.com/search/Miquel%20Gil%20Viatger',
-    buyUrl: 'https://www.totfolk.cat/discografia-miquel-gil',
+    buyUrl: 'https://www.youtube.com/watch?v=kNwJUff7NlU',
     awards: [
       { title: 'PREMIS CARLES SANTOS 2024', value: 'MILLOR DISC DE MÚSICA D’ARREL' },
       { title: 'CRÍTICA ENDERROCK 2024', value: 'FINALISTA AL DISC DE L’ANY' },
