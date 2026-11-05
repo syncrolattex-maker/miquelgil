@@ -17,6 +17,15 @@ export default function ProductionClient({ album }: ProductionClientProps) {
   // Estados para el Modal de Vídeo
   const [trailerOpen, setTrailerOpen] = useState(false);
 
+  // Extraer ID de YouTube
+  const getYouTubeId = (url: string) => {
+    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+    const match = url.match(regExp);
+    return match && match[2].length === 11 ? match[2] : 'yVT-HCsypyk';
+  };
+
+  const videoId = getYouTubeId(album.trailerSrc);
+
   // Refs de elementos
   const containerRef = useRef<HTMLDivElement>(null);
   const heroRef = useRef<HTMLElement>(null);
@@ -1017,12 +1026,22 @@ export default function ProductionClient({ album }: ProductionClientProps) {
               ✕
             </button>
             <div className="a24-modal-player">
-              <AnnnimateVideoPlayer
-                src={album.videoSrc || '/video/nineta.mp4'}
-                poster={album.videoPoster || album.trailerStill || '/video/nineta_frame.jpg'}
-                title={`${album.title} — Videoclip Oficial`}
-                credits={album.videoCredits || album.director}
-              />
+              {album.videoSrc ? (
+                <AnnnimateVideoPlayer
+                  src={album.videoSrc}
+                  poster={album.videoPoster || album.trailerStill || '/video/nineta_frame.jpg'}
+                  title={`${album.title} — Videoclip Oficial`}
+                  credits={album.videoCredits || album.director}
+                />
+              ) : (
+                <iframe
+                  src={`https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&rel=0&modestbranding=1&playsinline=1`}
+                  title={`${album.title} — Vídeo Oficial`}
+                  className="w-full h-full border-0"
+                  allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
+                  allowFullScreen
+                />
+              )}
             </div>
           </div>
         </div>
