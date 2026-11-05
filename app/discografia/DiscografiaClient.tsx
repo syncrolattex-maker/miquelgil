@@ -139,7 +139,9 @@ export default function DiscografiaClient() {
       wheelPauseGap: 130,
       wheelIdleReset: 150,
       wheelSustainDelay: 480,
-      wheelStepThreshold: 6
+      wheelStepThreshold: 6,
+      maxSpinAngle: 180,
+      spinResetDuration: 1.15
     };
 
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -205,6 +207,51 @@ export default function DiscografiaClient() {
     scene.add(topStripLight);
 
     scene.add(new THREE.AmbientLight(0xffffff, 0.75 * LIGHT_SCALE));
+
+    // Mapa de entorno reflectante de estudio (PMREM softboxes estilo A24) para los reflejos especulares e iridiscentes de la cara opuesta y anillos del CD
+    function createStudioEnvMap() {
+      const envCanvas = document.createElement('canvas');
+      envCanvas.width = 1024;
+      envCanvas.height = 512;
+      const eCtx = envCanvas.getContext('2d')!;
+
+      const bgGrad = eCtx.createLinearGradient(0, 0, 0, 512);
+      bgGrad.addColorStop(0, '#25282f');
+      bgGrad.addColorStop(0.5, '#0e0f13');
+      bgGrad.addColorStop(1, '#020203');
+      eCtx.fillStyle = bgGrad;
+      eCtx.fillRect(0, 0, 1024, 512);
+
+      // Tiras de luz de estudio (softboxes horizontales)
+      const lightStrips: [number, number, number][] = [
+        [0.14, 0.07, 1.0],
+        [0.4, 0.049, 0.6],
+        [0.26, 0.077, 0.85],
+        [0.62, 0.035, 0.35]
+      ];
+      for (const [yNorm, hNorm, alpha] of lightStrips) {
+        const yCenter = 512 * yNorm;
+        const halfH = 512 * hNorm;
+        const sGrad = eCtx.createLinearGradient(0, yCenter - halfH, 0, yCenter + halfH);
+        sGrad.addColorStop(0, 'rgba(255,255,255,0)');
+        sGrad.addColorStop(0.5, `rgba(255,255,255,${alpha})`);
+        sGrad.addColorStop(1, 'rgba(255,255,255,0)');
+        eCtx.fillStyle = sGrad;
+        eCtx.fillRect(0, yCenter - halfH, 1024, halfH * 2);
+      }
+
+      const equirectTex = new THREE.CanvasTexture(envCanvas);
+      equirectTex.mapping = THREE.EquirectangularReflectionMapping;
+      const pmrem = new THREE.PMREMGenerator(renderer);
+      pmrem.compileEquirectangularShader();
+      const envRT = pmrem.fromEquirectangular(equirectTex);
+      equirectTex.dispose();
+      pmrem.dispose();
+      return envRT;
+    }
+
+    const studioEnvRT = createStudioEnvMap();
+    scene.environment = studioEnvRT.texture;
 
     // Grupo principal inclinado galleryRotX = -22°, galleryRotY = -22°
     const galleryGroup = new THREE.Group();
@@ -354,7 +401,7 @@ export default function DiscografiaClient() {
       return tex;
     }
 
-    // 5. Geometrías compartidas del CD (grosor 0.01, agujero 0.14, buje 0.24, radio 1.0)
+    // 5. Geometrías y materiales de alta precisión óptica (estilo A24)
     function remapRingUVs(geo: THREE.RingGeometry, outerR: number) {
       const pos = geo.attributes.position;
       const uvs = geo.attributes.uv;
@@ -365,66 +412,343 @@ export default function DiscografiaClient() {
       }
     }
 
-    const sharedDiscGeo = new THREE.RingGeometry(SPEC.hubRadius, SPEC.discRadius, 72, 1);
+    const edgeBleed = 0.026;
+    const sharedDiscGeo = new THREE.RingGeometry(SPEC.hubRadius, SPEC.discRadius - edgeBleed, 256, 1);
     remapRingUVs(sharedDiscGeo, SPEC.discRadius);
 
-    const sharedHubGeo = new THREE.RingGeometry(SPEC.holeRadius, SPEC.hubRadius, 64, 1);
-    remapRingUVs(sharedHubGeo, SPEC.discRadius);
+    // Anillos concéntricos en volumen 3D (LatheGeometry) para el borde biselado y el buje multicapa (visibles por delante y por detrás)
+    const halfThick = SPEC.discThickness * 0.5;
+    const hubSpan = SPEC.hubRadius - SPEC.holeRadius;
+    const rFrostOuter = SPEC.holeRadius + hubSpan * 0.34;
+    const rMatrixOuter = SPEC.holeRadius + hubSpan * 0.64;
 
-    const sharedEdgeGeo = new THREE.CylinderGeometry(
-      SPEC.discRadius,
-      SPEC.discRadius,
-      SPEC.discThickness,
-      72,
-      1,
-      true
-    );
-    sharedEdgeGeo.rotateX(Math.PI / 2);
-
-    // Material trasero iridiscente (Cara B láser)
-    function createIridescentBackTexture() {
-      const size = 512;
-      const c = document.createElement('canvas');
-      c.width = size;
-      c.height = size;
-      const ctx = c.getContext('2d')!;
-      const cx = size / 2;
-      const cy = size / 2;
-      const grad = ctx.createConicGradient(0, cx, cy);
-      grad.addColorStop(0.0, '#d8dee9');
-      grad.addColorStop(0.18, '#a3be8c');
-      grad.addColorStop(0.35, '#88c0d0');
-      grad.addColorStop(0.5, '#e5e9f0');
-      grad.addColorStop(0.68, '#b48ead');
-      grad.addColorStop(0.85, '#81a1c1');
-      grad.addColorStop(1.0, '#d8dee9');
-      ctx.fillStyle = grad;
-      ctx.fillRect(0, 0, size, size);
-      return new THREE.CanvasTexture(c);
+    function buildAnnulusLatheGeo(innerR: number, outerR: number, h: number) {
+      const pts = [
+        new THREE.Vector2(innerR, -h),
+        new THREE.Vector2(outerR, -h),
+        new THREE.Vector2(outerR, h),
+        new THREE.Vector2(innerR, h),
+        new THREE.Vector2(innerR, -h)
+      ];
+      const geo = new THREE.LatheGeometry(pts, 180);
+      geo.rotateX(Math.PI / 2);
+      const pos = geo.attributes.position;
+      const uvs = geo.attributes.uv;
+      for (let i = 0; i < pos.count; i++) {
+        const x = pos.getX(i);
+        const y = pos.getY(i);
+        uvs.setXY(i, x * 0.5 + 0.5, y * 0.5 + 0.5);
+      }
+      return geo;
     }
 
+    const sharedEdgeGeo = (() => {
+      const rIn = SPEC.discRadius - edgeBleed;
+      const pts = [
+        new THREE.Vector2(rIn, -halfThick),
+        new THREE.Vector2(0.996, -halfThick),
+        new THREE.Vector2(1.0, -halfThick * 0.45),
+        new THREE.Vector2(1.0, halfThick * 0.45),
+        new THREE.Vector2(0.996, halfThick),
+        new THREE.Vector2(rIn, halfThick),
+        new THREE.Vector2(rIn, -halfThick)
+      ];
+      const geo = new THREE.LatheGeometry(pts, 256);
+      geo.rotateX(Math.PI / 2);
+      return geo;
+    })();
+
+    const sharedHubGeo = buildAnnulusLatheGeo(rMatrixOuter, SPEC.hubRadius, halfThick * 0.94);
+    const sharedMatrixGeo = buildAnnulusLatheGeo(rFrostOuter, rMatrixOuter, halfThick * 0.96);
+    const sharedFrostGeo = buildAnnulusLatheGeo(SPEC.holeRadius, rFrostOuter, halfThick * 0.98);
+
+    // Ruido pseudoaleatorio suave (valueNoise) para micro-surcos ópticos de la cara opuesta
+    function hash2D(ix: number, iy: number) {
+      const n = Math.sin(ix * 127.1 + iy * 311.7) * 43758.5453123;
+      return n - Math.floor(n);
+    }
+
+    function valueNoise(x: number, y: number) {
+      const ix = Math.floor(x);
+      const iy = Math.floor(y);
+      const fx = x - ix;
+      const fy = y - iy;
+      const ux = fx * fx * (3 - 2 * fx);
+      const uy = fy * fy * (3 - 2 * fy);
+      const a = hash2D(ix, iy);
+      const b = hash2D(ix + 1, iy);
+      const c = hash2D(ix, iy + 1);
+      const d = hash2D(ix + 1, iy + 1);
+      return a + (b - a) * ux + (c - a) * uy + (a - b - c + d) * ux * uy;
+    }
+
+    // Mapas procedurales de alta definición para la cara opuesta (Cara B láser de lectura óptica)
+    function createOpticalBackMaps() {
+      // 1. Mapa de normales de micro-surcos concéntricos de láser (512x512)
+      const nSize = 512;
+      const heights = new Float32Array(nSize * nSize);
+      const halfN = nSize * 0.5;
+      for (let y = 0; y < nSize; y++) {
+        for (let x = 0; x < nSize; x++) {
+          const dx = x - halfN;
+          const dy = y - halfN;
+          const dist = Math.hypot(dx, dy);
+          const ringGroove = Math.sin(dist * 3.2) * 0.5 + Math.sin(dist * 0.45) * 0.25;
+          const microGrain = (valueNoise(x * 0.6, y * 0.6) - 0.5) * 0.08;
+          heights[y * nSize + x] = 0.5 + ringGroove * 0.16 + microGrain;
+        }
+      }
+
+      const normCanvas = document.createElement('canvas');
+      normCanvas.width = nSize;
+      normCanvas.height = nSize;
+      const nCtx = normCanvas.getContext('2d')!;
+      const nImg = nCtx.createImageData(nSize, nSize);
+      const nData = nImg.data;
+      const strength = 2.6;
+
+      for (let y = 0; y < nSize; y++) {
+        const yPrev = Math.max(0, y - 1);
+        const yNext = Math.min(nSize - 1, y + 1);
+        for (let x = 0; x < nSize; x++) {
+          const xPrev = Math.max(0, x - 1);
+          const xNext = Math.min(nSize - 1, x + 1);
+          const dX = (heights[y * nSize + xNext] - heights[y * nSize + xPrev]) * strength;
+          const dY = (heights[yNext * nSize + x] - heights[yPrev * nSize + x]) * strength;
+          const invLen = 1 / Math.hypot(dX, dY, 1);
+          const idx = (y * nSize + x) * 4;
+          nData[idx] = Math.round((-dX * invLen * 0.5 + 0.5) * 255);
+          nData[idx + 1] = Math.round((-dY * invLen * 0.5 + 0.5) * 255);
+          nData[idx + 2] = Math.round((invLen * 0.5 + 0.5) * 255);
+          nData[idx + 3] = 255;
+        }
+      }
+      nCtx.putImageData(nImg, 0, 0);
+      const normalMap = new THREE.CanvasTexture(normCanvas);
+      normalMap.anisotropy = renderer.capabilities.getMaxAnisotropy();
+      normalMap.needsUpdate = true;
+
+      // 2. Mapa de rugosidad radial de pistas ópticas (512x512)
+      const rSize = 512;
+      const roughCanvas = document.createElement('canvas');
+      roughCanvas.width = rSize;
+      roughCanvas.height = rSize;
+      const rCtx = roughCanvas.getContext('2d')!;
+      const rImg = rCtx.createImageData(rSize, rSize);
+      const rData = rImg.data;
+      const halfR = rSize * 0.5;
+
+      for (let y = 0; y < rSize; y++) {
+        for (let x = 0; x < rSize; x++) {
+          const dx = x - halfR;
+          const dy = y - halfR;
+          const dist = Math.hypot(dx, dy);
+          const normR = dist / halfR;
+          const trackBand = Math.sin(dist * 1.6) * 0.05 + Math.sin(dist * 0.22) * 0.03;
+          const grain = (valueNoise(x * 1.2, y * 1.2) - 0.5) * 0.035;
+          // Zona espejo más pulida cerca del anillo interno de lead-in y borde de lead-out
+          const mirrorZone = (normR > 0.24 && normR < 0.29) || (normR > 0.93 && normR < 0.965) ? -0.1 : 0;
+          const rVal = Math.max(0.06, Math.min(0.45, 0.21 + trackBand + grain + mirrorZone));
+          const byte = Math.round(rVal * 255);
+          const idx = (y * rSize + x) * 4;
+          rData[idx] = byte;
+          rData[idx + 1] = byte;
+          rData[idx + 2] = byte;
+          rData[idx + 3] = 255;
+        }
+      }
+      rCtx.putImageData(rImg, 0, 0);
+      const roughnessMap = new THREE.CanvasTexture(roughCanvas);
+      roughnessMap.anisotropy = renderer.capabilities.getMaxAnisotropy();
+      roughnessMap.needsUpdate = true;
+
+      // 3. Textura óptica iridiscente de policarbonato metalizado con sectores de difracción láser y anillos de datos (1024x1024)
+      const cSize = 1024;
+      const colCanvas = document.createElement('canvas');
+      colCanvas.width = cSize;
+      colCanvas.height = cSize;
+      const cCtx = colCanvas.getContext('2d')!;
+      const cx = cSize * 0.5;
+      const cy = cSize * 0.5;
+
+      // Base metálica profunda de policarbonato óptico
+      const baseRad = cCtx.createRadialGradient(cx, cy, cSize * 0.11, cx, cy, cSize * 0.5);
+      baseRad.addColorStop(0.0, '#2a2f3d');
+      baseRad.addColorStop(0.24, '#394052');
+      baseRad.addColorStop(0.27, '#5a6378');
+      baseRad.addColorStop(0.31, '#262b38');
+      baseRad.addColorStop(0.68, '#2f3545');
+      baseRad.addColorStop(0.92, '#242936');
+      baseRad.addColorStop(0.955, '#525b70');
+      baseRad.addColorStop(1.0, '#1d212c');
+      cCtx.fillStyle = baseRad;
+      cCtx.fillRect(0, 0, cSize, cSize);
+
+      // Lóbulos cónicos de difracción espectral (mariposa óptica característica de un CD real)
+      const conic = cCtx.createConicGradient(-Math.PI * 0.18, cx, cy);
+      conic.addColorStop(0.0, 'rgba(210, 222, 245, 0.34)');
+      conic.addColorStop(0.07, 'rgba(94, 212, 235, 0.28)');
+      conic.addColorStop(0.14, 'rgba(130, 232, 168, 0.25)');
+      conic.addColorStop(0.21, 'rgba(240, 205, 120, 0.22)');
+      conic.addColorStop(0.28, 'rgba(224, 130, 195, 0.26)');
+      conic.addColorStop(0.36, 'rgba(125, 145, 235, 0.28)');
+      conic.addColorStop(0.44, 'rgba(42, 48, 64, 0.18)');
+      conic.addColorStop(0.5, 'rgba(215, 228, 250, 0.36)');
+      conic.addColorStop(0.57, 'rgba(94, 212, 235, 0.28)');
+      conic.addColorStop(0.64, 'rgba(130, 232, 168, 0.25)');
+      conic.addColorStop(0.71, 'rgba(240, 205, 120, 0.22)');
+      conic.addColorStop(0.78, 'rgba(224, 130, 195, 0.26)');
+      conic.addColorStop(0.86, 'rgba(125, 145, 235, 0.28)');
+      conic.addColorStop(0.94, 'rgba(42, 48, 64, 0.18)');
+      conic.addColorStop(1.0, 'rgba(210, 222, 245, 0.34)');
+      cCtx.fillStyle = conic;
+      cCtx.fillRect(0, 0, cSize, cSize);
+
+      // Pistas concéntricas de datos láser (surcos finos de diferente densidad)
+      const trackRadii = [0.285, 0.36, 0.48, 0.61, 0.74, 0.85, 0.935];
+      trackRadii.forEach((rNorm, idx) => {
+        cCtx.beginPath();
+        cCtx.arc(cx, cy, cSize * 0.5 * rNorm, 0, Math.PI * 2);
+        cCtx.strokeStyle = idx % 2 === 0 ? 'rgba(255, 255, 255, 0.14)' : 'rgba(12, 15, 22, 0.28)';
+        cCtx.lineWidth = idx === 0 || idx === trackRadii.length - 1 ? 2.5 : 1.2;
+        cCtx.stroke();
+      });
+
+      // Micro-anillos concéntricos de alta frecuencia
+      for (let r = cSize * 0.135; r < cSize * 0.485; r += 3.5) {
+        cCtx.beginPath();
+        cCtx.arc(cx, cy, r, 0, Math.PI * 2);
+        cCtx.strokeStyle = 'rgba(255, 255, 255, 0.032)';
+        cCtx.lineWidth = 0.75;
+        cCtx.stroke();
+      }
+
+      // Anillo espejo de lead-in / código de barras IFPI alrededor del buje
+      cCtx.beginPath();
+      cCtx.arc(cx, cy, cSize * 0.132, 0, Math.PI * 2);
+      cCtx.strokeStyle = 'rgba(230, 236, 248, 0.65)';
+      cCtx.lineWidth = 8;
+      cCtx.stroke();
+
+      // Código técnico de matriz grabado en espejo (invertido para lectura realista en la cara trasera)
+      cCtx.save();
+      cCtx.translate(cx, cy);
+      cCtx.fillStyle = 'rgba(235, 240, 250, 0.55)';
+      cCtx.font = '600 13px "PP Neue Montreal", monospace';
+      cCtx.textAlign = 'center';
+      cCtx.fillText('IFPI L024 · MIQUEL GIL OPTICAL ARCHIVE MASTER · A24-MG', 0, -cSize * 0.136);
+      cCtx.fillText('▮▯▮▮▯▮▯▮▮▯▮▯▮▮▯▮  MASTERING SID CODE IFPI 0788', 0, cSize * 0.144);
+      cCtx.restore();
+
+      const colorMap = new THREE.CanvasTexture(colCanvas);
+      colorMap.anisotropy = renderer.capabilities.getMaxAnisotropy();
+      colorMap.needsUpdate = true;
+
+      // 4. Textura metálica para la banda espejo de matriz del buje (matrixMap)
+      const mSize = 512;
+      const matCanvas = document.createElement('canvas');
+      matCanvas.width = mSize;
+      matCanvas.height = mSize;
+      const mCtx = matCanvas.getContext('2d')!;
+      const mImg = mCtx.createImageData(mSize, mSize);
+      const mData = mImg.data;
+      const halfM = mSize * 0.5;
+      const rInM = rFrostOuter * halfM;
+      const rOutM = rMatrixOuter * halfM;
+      const spanM = Math.max(1e-4, rOutM - rInM);
+
+      for (let y = 0; y < mSize; y++) {
+        for (let x = 0; x < mSize; x++) {
+          const t = (Math.hypot(x - halfM, y - halfM) - rInM) / spanM;
+          let shade = 215;
+          if (t >= 0 && t <= 1) {
+            const edgeBand =
+              (t > 0.05 && t < 0.12) || (t > 0.88 && t < 0.95)
+                ? 0.52
+                : 0.8 + Math.sin(t * Math.PI * 26) * 0.08;
+            const n = (valueNoise(x * 0.9, y * 0.9) - 0.5) * 0.06;
+            shade = Math.round(Math.max(90, Math.min(248, (edgeBand + n) * 255)));
+          }
+          const idx = (y * mSize + x) * 4;
+          mData[idx] = shade;
+          mData[idx + 1] = shade;
+          mData[idx + 2] = Math.min(255, shade + 6);
+          mData[idx + 3] = 255;
+        }
+      }
+      mCtx.putImageData(mImg, 0, 0);
+      const matrixMap = new THREE.CanvasTexture(matCanvas);
+      matrixMap.needsUpdate = true;
+
+      return { normalMap, roughnessMap, colorMap, matrixMap };
+    }
+
+    const backOpticalMaps = createOpticalBackMaps();
+
+    // Material trasero físico con iridiscencia óptica real de película delgada (380-720 nm), micro-surcos normales y reflejos de estudio
     const backMatShared = new THREE.MeshPhysicalMaterial({
-      map: createIridescentBackTexture(),
-      roughness: 0.08,
-      metalness: 0.82,
-      clearcoat: 1.0,
-      clearcoatRoughness: 0.04,
-      side: THREE.BackSide
+      color: new THREE.Color('#282e3d'),
+      map: backOpticalMaps.colorMap,
+      roughness: 0.22,
+      metalness: 0.96,
+      roughnessMap: backOpticalMaps.roughnessMap,
+      normalMap: backOpticalMaps.normalMap,
+      normalScale: new THREE.Vector2(0.52, 0.52),
+      clearcoat: 0.65,
+      clearcoatRoughness: 0.05,
+      iridescence: 1.0,
+      iridescenceIOR: 1.86,
+      iridescenceThicknessRange: [140, 900],
+      envMapIntensity: 1.65,
+      side: THREE.FrontSide
     });
 
     const sharedHubMat = new THREE.MeshPhysicalMaterial({
       color: 0xffffff,
       transparent: true,
-      opacity: 0.42,
-      roughness: 0.12,
+      opacity: 0.55,
+      roughness: 0.36,
       metalness: 0.05,
-      clearcoat: 1.0
+      clearcoat: 1.0,
+      clearcoatRoughness: 0.08,
+      envMapIntensity: 1.35,
+      depthWrite: false
+    });
+
+    const sharedMatrixMat = new THREE.MeshPhysicalMaterial({
+      color: new THREE.Color('#dfe3ea'),
+      map: backOpticalMaps.matrixMap,
+      roughness: 0.26,
+      metalness: 0.84,
+      clearcoat: 0.75,
+      clearcoatRoughness: 0.1,
+      iridescence: 0.38,
+      iridescenceIOR: 1.6,
+      iridescenceThicknessRange: [180, 520],
+      envMapIntensity: 1.5
+    });
+
+    const sharedFrostMat = new THREE.MeshPhysicalMaterial({
+      color: new THREE.Color('#eeeef2'),
+      transparent: true,
+      opacity: 0.76,
+      roughness: 0.52,
+      metalness: 0.04,
+      clearcoat: 0.65,
+      clearcoatRoughness: 0.25,
+      depthWrite: false
     });
 
     const sharedEdgeMat = new THREE.MeshPhysicalMaterial({
-      color: 0xd0d4dc,
-      roughness: 0.15,
-      metalness: 0.35
+      color: 0xffffff,
+      roughness: 0.04,
+      metalness: 0.58,
+      clearcoat: 0.75,
+      clearcoatRoughness: 0.04,
+      iridescence: 0.32,
+      iridescenceIOR: 1.5,
+      iridescenceThicknessRange: [160, 480],
+      envMapIntensity: 1.8
     });
 
     // Construcción de los 12 discos
@@ -446,14 +770,18 @@ export default function DiscografiaClient() {
       });
 
       const frontMesh = new THREE.Mesh(sharedDiscGeo, frontMat);
-      frontMesh.position.z = SPEC.discThickness * 0.5;
+      frontMesh.position.z = SPEC.discThickness * 0.5 + 0.0006;
 
+      // La cara opuesta mira hacia -Z con rotación Y = Math.PI y FrontSide para iluminación y normales exactas al girar
       const backMesh = new THREE.Mesh(sharedDiscGeo, backMatShared);
-      backMesh.position.z = -SPEC.discThickness * 0.5;
+      backMesh.rotation.y = Math.PI;
+      backMesh.position.z = -SPEC.discThickness * 0.5 - 0.0006;
 
       const hubMesh = new THREE.Mesh(sharedHubGeo, sharedHubMat);
       hubMesh.name = 'hub';
 
+      const matrixMesh = new THREE.Mesh(sharedMatrixGeo, sharedMatrixMat);
+      const frostMesh = new THREE.Mesh(sharedFrostGeo, sharedFrostMat);
       const edgeMesh = new THREE.Mesh(sharedEdgeGeo, sharedEdgeMat);
 
       // Malla invisible para hit-testing preciso sobre todo el círculo de radio 1
@@ -482,7 +810,7 @@ export default function DiscografiaClient() {
       };
       holder.userData = userData;
 
-      holder.add(frontMesh, backMesh, hubMesh, edgeMesh, hitMesh);
+      holder.add(frontMesh, backMesh, hubMesh, matrixMesh, frostMesh, edgeMesh, hitMesh);
       galleryGroup.add(holder);
       discHolders.push(holder);
     });
@@ -1462,10 +1790,16 @@ export default function DiscografiaClient() {
       if (dragState.mode === 'disc-spin' && activeHolder) {
         const rect = container.getBoundingClientRect();
         const u = activeHolder.userData as DiscHolderUserData;
-        const spinDx = (dx / rect.width) * Math.PI * 2 * SPEC.dragSensitivity;
-        const spinDy = (dy / rect.height) * Math.PI * 2 * SPEC.dragSensitivity;
-        u.dragSpinY += spinDx;
-        u.dragSpinX += spinDy;
+        const maxSpinRad = THREE.MathUtils.degToRad(SPEC.maxSpinAngle);
+        const applyElasticSpin = (current: number, delta: number) => {
+          const excess = Math.max(0, Math.abs(current) - maxSpinRad * 0.8) / maxSpinRad;
+          const factor = 1 / (1 + excess * excess * 14);
+          return current + delta * (Math.sign(delta) === Math.sign(current) || current === 0 ? factor : 1);
+        };
+        const spinDx = (dx / Math.max(1, rect.width)) * Math.PI * 2 * SPEC.dragSensitivity;
+        const spinDy = (dy / Math.max(1, rect.height)) * Math.PI * 2 * SPEC.dragSensitivity;
+        u.dragSpinY = applyElasticSpin(u.dragSpinY, spinDx);
+        u.dragSpinX = applyElasticSpin(u.dragSpinX, spinDy);
         const instSpinVel = spinDx / (dt / 1000);
         dragState.spinVelocityY =
           dragState.spinVelocityY * (1 - SPEC.dragVelocitySmoothing) +
@@ -1500,15 +1834,13 @@ export default function DiscografiaClient() {
       const activeHolder = discHolders[W];
       if (dragState.mode === 'disc-spin' && activeHolder) {
         const u = activeHolder.userData as DiscHolderUserData;
-        const absSpin = Math.abs(u.dragSpinY);
-        const isFlipFlick = Math.abs(dragState.spinVelocityY) >= SPEC.flipFlickVelocity * 10;
-        const shouldFlip = absSpin >= Math.PI / 2 || isFlipFlick;
-        const targetSpinY = shouldFlip ? Math.sign(u.dragSpinY || 1) * Math.PI : 0;
+        // El CD nunca puede quedarse en la parte opuesta a la carátula: siempre vuelve suavemente a su posición original frontal (0, 0)
         gsap.to(u, {
-          dragSpinY: targetSpinY,
+          dragSpinY: 0,
           dragSpinX: 0,
-          duration: shouldFlip ? SPEC.flipDuration : 0.6,
-          ease: 'power2.out'
+          duration: prefersReducedMotion ? 0.15 : SPEC.spinResetDuration,
+          ease: 'power3.out',
+          overwrite: true
         });
       } else {
         if (dragState.pointerType !== 'mouse') {
@@ -2558,17 +2890,24 @@ export default function DiscografiaClient() {
 
         // Rotación con cabeceo aerodinámico (flowLean), alabeo natural (flowBank) y balanceo
         const isAct = p === W;
+        if (!isAct && (Math.abs(u.dragSpinX) > 1e-4 || Math.abs(u.dragSpinY) > 1e-4)) {
+          const decay = Math.min(1, dt * 8);
+          u.dragSpinX += (0 - u.dragSpinX) * decay;
+          u.dragSpinY += (0 - u.dragSpinY) * decay;
+          if (Math.abs(u.dragSpinX) <= 1e-4) u.dragSpinX = 0;
+          if (Math.abs(u.dragSpinY) <= 1e-4) u.dragSpinY = 0;
+        }
         const rotX =
           flowSignal * SPEC.flowLean +
           u.hoverTiltCurrentX +
           u.zeroGRot.x +
           buoyPitch +
-          (isAct ? u.dragSpinX : 0);
+          u.dragSpinX;
         const rotY =
           -a - flowSignal * 0.035 +
           u.hoverTiltCurrentY +
           u.zeroGRot.y +
-          (isAct ? u.dragSpinY : 0);
+          u.dragSpinY;
         const rotZ =
           -flowSignal * SPEC.flowBank + u.zeroGRot.z + buoyRoll;
 
@@ -2644,10 +2983,19 @@ export default function DiscografiaClient() {
 
       sharedDiscGeo.dispose();
       sharedHubGeo.dispose();
+      sharedMatrixGeo.dispose();
+      sharedFrostGeo.dispose();
       sharedEdgeGeo.dispose();
       backMatShared.dispose();
       sharedHubMat.dispose();
+      sharedMatrixMat.dispose();
+      sharedFrostMat.dispose();
       sharedEdgeMat.dispose();
+      backOpticalMaps.normalMap.dispose();
+      backOpticalMaps.roughnessMap.dispose();
+      backOpticalMaps.colorMap.dispose();
+      backOpticalMaps.matrixMap.dispose();
+      studioEnvRT.dispose();
       scribbleMaterial.dispose();
       printMaps.bumpMap.dispose();
       renderer.dispose();
