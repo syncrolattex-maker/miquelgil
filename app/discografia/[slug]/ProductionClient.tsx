@@ -1037,7 +1037,7 @@ export default function ProductionClient({ album }: ProductionClientProps) {
                 <iframe
                   src={`https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&rel=0&modestbranding=1&playsinline=1`}
                   title={`${album.title} — Vídeo Oficial`}
-                  className="w-full h-full border-0"
+                  className="a24-modal-iframe"
                   allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
                   allowFullScreen
                 />
