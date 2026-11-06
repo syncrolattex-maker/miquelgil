@@ -3,14 +3,14 @@
    ============================================================ */
 
 .nav {
-  z-index: 50;
+  z-index: 100;
   color: #000000;
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   font-size: 14px;
-  --nav-open-height: 25.5em;
+  --nav-open-height: 30em;
   --nav-scroll-fade: 2.5em;
   --nav-ease: cubic-bezier(0.32, 0.72, 0, 1);
   --nav-open-duration: 0.62s;
@@ -18,6 +18,7 @@
   --nav-active-bg: #000000;
   --nav-active-text: #f2f2f2;
   --nav-dot-gap: 0.3em;
+  pointer-events: none;
 }
 
 .nav-container {
@@ -28,6 +29,7 @@
   padding-left: 3em;
   padding-right: 3em;
   position: relative;
+  pointer-events: none;
 }
 
 .nav-inner {
@@ -37,6 +39,15 @@
   align-items: center;
   display: flex;
   position: relative;
+  pointer-events: none;
+}
+
+.nav-center,
+.nav-center__list,
+.nav-logo,
+.nav-link,
+.nav-menu-button {
+  pointer-events: auto;
 }
 
 /* Recuadro blanco del menú A24 (width optimizado para logo grande + botón Index) */
@@ -57,7 +68,9 @@
 .nav[data-nav-dropdown='open'] .nav-bg {
   height: var(--nav-open-height);
   transition-duration: var(--nav-open-duration);
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  pointer-events: auto;
 }
 
 /* Fondo oscurecido de la página cuando se abre el menú */
@@ -456,7 +469,7 @@
     --nav-dock-height: 3.5em;
     --nav-dock-inset: 1em;
     --nav-dock-radius: 0;
-    --nav-open-height: min(28em, 75vh);
+    --nav-open-height: min(32em, 82vh);
     --nav-dock-list-gap: 2.25em;
     --nav-dock-open-width: min(100%, max(var(--nav-dock-width, 100%), 23.75em));
     padding-left: var(--nav-dock-inset);
