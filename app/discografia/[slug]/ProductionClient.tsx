@@ -5,6 +5,7 @@ import Link from 'next/link';
 import * as THREE from 'three';
 import gsap from 'gsap';
 import AnnnimateVideoPlayer from '@/components/AnnnimateVideoPlayer';
+import A24Nav from '@/components/A24Nav';
 import { AlbumDetail } from './albumData';
 import { initDissolve } from './dissolveEngine';
 import './production.css';
@@ -1109,7 +1110,10 @@ export default function ProductionClient({ album }: ProductionClientProps) {
 
   return (
     <div ref={containerRef} className="production-page" data-production-hero-init="true">
-      {/* HEADER MINIMALISTA A24 */}
+      {/* MENÚ DE NAVEGACIÓN A24 CON LOGO GRANDE E INDEX DESPLEGABLE */}
+      <A24Nav currentSection="/discografia" theme="dark" />
+
+      {/* HEADER MINIMALISTA A24 CON ENLACE DE RETORNO Y VÍDEO */}
       <header className="fixed top-0 left-0 w-full z-40 flex items-center justify-between px-6 py-5 bg-white/80 backdrop-blur-md border-b border-black/5">
         <Link
           href="/discografia"
@@ -1118,7 +1122,7 @@ export default function ProductionClient({ album }: ProductionClientProps) {
           <span>←</span>
           <span>ARXIU / DISCOGRAFIA</span>
         </Link>
-        <span className="a24-label tracking-widest font-medium">
+        <span className="a24-label tracking-widest font-medium hidden md:inline">
           MIQUEL GIL — {album.editionNumber}
         </span>
         <div className="flex items-center gap-4">
