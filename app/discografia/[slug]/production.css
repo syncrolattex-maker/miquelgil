@@ -777,10 +777,14 @@
   flex-direction: column;
   text-decoration: none;
   display: flex;
-  position: absolute;
+  position: fixed;
   bottom: 3.5rem;
   right: 3.5rem;
   pointer-events: none;
+}
+
+[data-scroll-next] .scroll-to__credit {
+  position: absolute;
 }
 
 .scroll-to__link {
@@ -867,27 +871,61 @@
 }
 
 .trailer-lightbox__stage {
-  flex: 1;
-  position: relative;
+  position: absolute;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 4rem 2rem;
+  padding: 0;
+  margin: 0;
+  overflow: hidden;
 }
 
 .trailer-lightbox__player {
-  position: relative;
-  width: 100%;
-  max-width: 1100px;
-  aspect-ratio: 16 / 9;
-  background: #0a0a0a;
-  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.8);
+  position: absolute;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  max-width: none;
+  aspect-ratio: auto;
+  background: #000000;
+  box-shadow: none;
+  overflow: hidden;
 }
 
-.trailer-lightbox__player iframe {
-  width: 100%;
-  height: 100%;
+/* Ocultar interfaz y marcas de agua de YouTube escalando y enmascarando */
+.trailer-lightbox__player iframe,
+.trailer-lightbox__iframe-masked {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(1.18);
+  width: 100vw !important;
+  height: 100vh !important;
+  min-width: 177.78vh; /* Garantiza proporción 16:9 llenando la pantalla */
+  min-height: 56.25vw;
   border: none;
+  pointer-events: none; /* YouTube no recibe clicks directamente */
+}
+
+/* Capa de protección para atrapar el clic de usuario y hacer Play/Pausa */
+.trailer-lightbox__click-shield {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  cursor: pointer;
+  background: transparent;
+}
+
+.trailer-lightbox__editorial {
+  position: absolute;
+  top: 2rem;
+  left: 2.5rem;
+  z-index: 15;
+  width: clamp(16.5rem, 24vw, 24rem);
+  pointer-events: none;
 }
 
 .trailer-lightbox__ui {
@@ -1051,8 +1089,20 @@
 }
 
 .a24-modal-player {
+  position: relative;
   width: 100%;
   height: 100%;
+  display: flex;
+}
+
+.a24-modal-player iframe,
+.a24-modal-iframe {
+  position: absolute;
+  inset: 0;
+  width: 100% !important;
+  height: 100% !important;
+  border: 0;
+  display: block;
 }
 
 /* ============================================================
@@ -1079,5 +1129,55 @@
     display: flex;
     flex-direction: column;
     gap: 1rem;
+  }
+
+  /* Sección Footer UP NEXT en Móvil: los textos no deben montarse sobre el CD */
+  .scroll-to__label {
+    padding: 3rem 1.5rem 0 1.5rem;
+    position: relative;
+    z-index: 10;
+  }
+
+  .scroll-to__label h2 {
+    font-size: clamp(2.4rem, 9vw, 4rem);
+    line-height: 0.95;
+    margin-bottom: 0.75rem;
+  }
+
+  /* Any - Gènere pasa justo debajo del título del Disc Següent */
+  .scroll-to__credit,
+  [data-scroll-next] .scroll-to__credit {
+    position: relative !important;
+    inset: auto !important;
+    bottom: auto !important;
+    right: auto !important;
+    margin-top: 0.5rem;
+    align-items: center;
+    text-align: center;
+    z-index: 10;
+    pointer-events: auto;
+  }
+
+  .scroll-to__credit .text-right {
+    text-align: center;
+    margin-top: 0.35rem;
+  }
+
+  /* Empeny per passar de disc también se ubica limpiamente debajo */
+  .scroll-to__hint {
+    position: absolute;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    width: auto;
+    z-index: 10;
+  }
+
+  .trailer-lightbox__editorial {
+    display: none; /* En pantallas pequeñas se oculta para no tapar el vídeo */
+  }
+
+  .trailer-lightbox__ui {
+    padding: 1rem 1.25rem;
   }
 }
