@@ -2094,11 +2094,16 @@ export default function DiscografiaClient() {
 
     // Pestañas principales de la página para el desplegable Index
     const navSections = [
-      { title: 'Discografia', url: '/discografia', year: '01' },
-      { title: 'Directes', url: '/agenda', year: '02' },
-      { title: 'Biografia', url: '/biografia', year: '03' },
-      { title: 'Contractació', url: '/contractacio', year: '04' },
-      { title: 'Contacte', url: '/contacte', year: '05' }
+      { title: 'Inici', url: '/start', year: '01' },
+      { title: 'Discografia', url: '/discografia', year: '02' },
+      { title: 'Directes', url: '/agenda', year: '03' },
+      { title: 'Biografia', url: '/biografia', year: '04' },
+      { title: 'Contractació', url: '/contractacio', year: '05' },
+      { title: 'Media', url: '/media', year: '06' },
+      { title: 'Mural Sonor', url: '/mural-sonor', year: '07' },
+      { title: 'Cronologia', url: '/cronologia', year: '08' },
+      { title: 'Descàrregues', url: '/descarregues', year: '09' },
+      { title: 'Contacte', url: '/contacte', year: '10' }
     ];
 
     // Poblar las 5 pestañas dentro de .nav-dropdown__content-li

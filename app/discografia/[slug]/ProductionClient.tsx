@@ -1113,19 +1113,19 @@ export default function ProductionClient({ album }: ProductionClientProps) {
       {/* MENÚ DE NAVEGACIÓN A24 CON LOGO GRANDE E INDEX DESPLEGABLE */}
       <A24Nav currentSection="/discografia" theme="dark" />
 
-      {/* HEADER MINIMALISTA A24 CON ENLACE DE RETORNO Y VÍDEO */}
-      <header className="fixed top-0 left-0 w-full z-40 flex items-center justify-between px-6 py-5 bg-white/80 backdrop-blur-md border-b border-black/5">
+      {/* HEADER MINIMALISTA A24 CON ENLACE DE RETORNO Y VÍDEO (z-30 y pointer-events-none en el contenedor para no bloquear el menú de navegación) */}
+      <header className="fixed top-0 left-0 w-full z-30 flex items-center justify-between px-6 py-5 bg-white/80 backdrop-blur-md border-b border-black/5 pointer-events-none">
         <Link
           href="/discografia"
-          className="a24-label flex items-center gap-2 hover:text-black transition-colors"
+          className="a24-label flex items-center gap-2 hover:text-black transition-colors pointer-events-auto"
         >
           <span>←</span>
           <span>ARXIU / DISCOGRAFIA</span>
         </Link>
-        <span className="a24-label tracking-widest font-medium hidden md:inline">
+        <span className="a24-label tracking-widest font-medium hidden md:inline select-none">
           MIQUEL GIL — {album.editionNumber}
         </span>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-4 pointer-events-auto">
           <span className="a24-label hidden sm:inline">{album.year}</span>
           <button
             onClick={openTrailer}

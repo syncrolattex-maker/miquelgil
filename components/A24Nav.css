@@ -3,14 +3,14 @@
    ============================================================ */
 
 .nav {
-  z-index: 100;
+  z-index: 50;
   color: #000000;
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   font-size: 14px;
-  --nav-open-height: 16.5em;
+  --nav-open-height: 25.5em;
   --nav-scroll-fade: 2.5em;
   --nav-ease: cubic-bezier(0.32, 0.72, 0, 1);
   --nav-open-duration: 0.62s;
@@ -456,7 +456,7 @@
     --nav-dock-height: 3.5em;
     --nav-dock-inset: 1em;
     --nav-dock-radius: 0;
-    --nav-open-height: min(18em, 55vh);
+    --nav-open-height: min(28em, 75vh);
     --nav-dock-list-gap: 2.25em;
     --nav-dock-open-width: min(100%, max(var(--nav-dock-width, 100%), 23.75em));
     padding-left: var(--nav-dock-inset);
