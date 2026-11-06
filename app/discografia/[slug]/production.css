@@ -946,6 +946,7 @@
   justify-content: space-between;
   pointer-events: auto;
   gap: 1.5rem;
+  z-index: 25;
 }
 
 .trailer-lightbox__ctl {
@@ -959,6 +960,12 @@
   text-transform: uppercase;
   cursor: pointer;
   transition: all 0.2s ease;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  touch-action: manipulation;
+  pointer-events: auto;
 }
 
 .trailer-lightbox__ctl:hover {
@@ -1179,5 +1186,42 @@
 
   .trailer-lightbox__ui {
     padding: 1rem 1.25rem;
+  }
+
+  /* Forzar rotación horizontal en móvil para el reproductor si el dispositivo se sostiene vertical */
+  @media (orientation: portrait) {
+    .trailer-lightbox__stage {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 100vh !important;
+      height: 100vw !important;
+      transform: translate(-50%, -50%) rotate(90deg);
+      transform-origin: center center;
+    }
+
+    .trailer-lightbox__player {
+      width: 100vh !important;
+      height: 100vw !important;
+    }
+
+    .trailer-lightbox__player iframe,
+    .trailer-lightbox__iframe-masked {
+      width: 100vh !important;
+      height: 100vw !important;
+      min-width: 177.78vw;
+      min-height: 56.25vh;
+      transform: translate(-50%, -50%) scale(1.15);
+    }
+
+    .trailer-lightbox__ui {
+      width: 100vh !important;
+      height: 100vw !important;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) rotate(90deg);
+      transform-origin: center center;
+      padding: 1rem 1.75rem;
+    }
   }
 }

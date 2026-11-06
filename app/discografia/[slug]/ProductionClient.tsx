@@ -53,59 +53,119 @@ export default function ProductionClient({ album }: ProductionClientProps) {
   const [pushProgress, setPushProgress] = useState(0);
 
   // ============================================================================
-  // 1. ANIMACIÓN DE ENTRADA DE BOTONES (GSAP SEGÚN ESPECIFICACIÓN A24)
+  // 1. ANIMACIÓN DE ENTRADA HERO & BOTONES (GSAP SEGÚN ESPECIFICACIÓN A24)
   // ============================================================================
   useEffect(() => {
+    // Al entrar en la ficha del disco, resetear scroll arriba del todo
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' as ScrollBehavior });
+
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const heroInfo = heroRef.current?.querySelector<HTMLElement>('.production__info');
+    const heroTitle = heroInfo?.querySelector<HTMLElement>('.production__title');
+    const heroCredits = heroInfo?.querySelector<HTMLElement>('.production__credits');
+    const heroMeta = heroInfo?.querySelector<HTMLElement>('.production__metadata');
+    const heroDividers = heroInfo?.querySelectorAll<HTMLElement>('.divider-horizontal');
     const buttons = containerRef.current?.querySelectorAll<HTMLElement>('[data-reveal="btn"]');
-    if (!buttons || !buttons.length) return;
+    const heroCover = heroRef.current?.querySelector<HTMLElement>('.production__cover');
 
     if (prefersReducedMotion) {
-      buttons.forEach((btn) => {
-        const dividers = btn.querySelectorAll<HTMLElement>('.btn__divider');
-        const text = btn.querySelector<HTMLElement>('.btn__p');
-        gsap.set(dividers, { scaleX: 1 });
-        if (text) gsap.set(text, { yPercent: 0 });
-      });
+      if (buttons) {
+        buttons.forEach((btn) => {
+          const dividers = btn.querySelectorAll<HTMLElement>('.btn__divider');
+          const text = btn.querySelector<HTMLElement>('.btn__p');
+          gsap.set(dividers, { scaleX: 1 });
+          if (text) gsap.set(text, { yPercent: 0 });
+        });
+      }
       return;
     }
 
-    const ctaStart = 0.48; // ctaStart 0.38 + 0.1
-    const btnStagger = 0.09;
-    const duration = 0.7;
-    const textDelay = 0.04;
-    const easeCurve = 'power3.out';
+    // Timeline de revelación coordinada para los elementos de entrada de la ficha
+    const entranceTl = gsap.timeline({ defaults: { ease: 'power3.out' } });
 
-    buttons.forEach((btn, idx) => {
-      const startTime = ctaStart + idx * btnStagger;
-      const dividers = btn.querySelectorAll<HTMLElement>('.btn__divider');
-      const text = btn.querySelector<HTMLElement>('.btn__p');
+    // 1. Entrada fluida del título (sube suave y se desvanece de opacidad 0 a 1)
+    if (heroTitle) {
+      entranceTl.fromTo(
+        heroTitle,
+        { opacity: 0, y: 35 },
+        { opacity: 1, y: 0, duration: 0.9, delay: 0.08 },
+        0
+      );
+    }
 
-      // Estado inicial
-      gsap.set(dividers, { scaleX: 0, transformOrigin: 'left center' });
-      if (text) gsap.set(text, { yPercent: 120 });
+    // 2. Despliegue horizontal de las líneas divisoras del hero
+    if (heroDividers && heroDividers.length) {
+      entranceTl.fromTo(
+        heroDividers,
+        { scaleX: 0, transformOrigin: 'left center' },
+        { scaleX: 1, duration: 0.85, stagger: 0.1 },
+        0.2
+      );
+    }
 
-      // Crecimiento de las líneas
-      gsap.to(dividers, {
-        scaleX: 1,
-        duration: duration,
-        ease: easeCurve,
-        delay: startTime,
-        overwrite: 'auto'
-      });
+    // 3. Aparición de créditos y metadatos
+    if (heroCredits) {
+      entranceTl.fromTo(
+        heroCredits,
+        { opacity: 0, y: 20 },
+        { opacity: 1, y: 0, duration: 0.75 },
+        0.3
+      );
+    }
 
-      // Subida del texto con 0.04s de retraso
-      if (text) {
-        gsap.to(text, {
-          yPercent: 0,
+    if (heroMeta) {
+      entranceTl.fromTo(
+        heroMeta,
+        { opacity: 0, y: 20 },
+        { opacity: 1, y: 0, duration: 0.75 },
+        0.4
+      );
+    }
+
+    if (heroCover) {
+      entranceTl.fromTo(
+        heroCover,
+        { opacity: 0, scale: 0.96 },
+        { opacity: 1, scale: 1, duration: 1.0 },
+        0.15
+      );
+    }
+
+    // 4. Animación cinemática de los botones CTA
+    if (buttons && buttons.length) {
+      const ctaStart = 0.55;
+      const btnStagger = 0.09;
+      const duration = 0.7;
+      const textDelay = 0.04;
+
+      buttons.forEach((btn, idx) => {
+        const startTime = ctaStart + idx * btnStagger;
+        const dividers = btn.querySelectorAll<HTMLElement>('.btn__divider');
+        const text = btn.querySelector<HTMLElement>('.btn__p');
+
+        gsap.set(dividers, { scaleX: 0, transformOrigin: 'left center' });
+        if (text) gsap.set(text, { yPercent: 120 });
+
+        gsap.to(dividers, {
+          scaleX: 1,
           duration: duration,
-          ease: easeCurve,
-          delay: startTime + textDelay,
+          ease: 'power3.out',
+          delay: startTime,
           overwrite: 'auto'
         });
-      }
-    });
-  }, []);
+
+        if (text) {
+          gsap.to(text, {
+            yPercent: 0,
+            duration: duration,
+            ease: 'power3.out',
+            delay: startTime + textDelay,
+            overwrite: 'auto'
+          });
+        }
+      });
+    }
+  }, [album.slug]);
 
   // ============================================================================
   // 2. SEPARADOR LÍQUIDO A24 (DATA-DISSOLVE ENGINE: MARCHING SQUARES + CURSOR)
@@ -168,6 +228,18 @@ export default function ProductionClient({ album }: ProductionClientProps) {
       tag.src = 'https://www.youtube.com/iframe_api';
       const firstScriptTag = document.getElementsByTagName('script')[0];
       firstScriptTag?.parentNode?.insertBefore(tag, firstScriptTag);
+    }
+
+    // En móviles, solicitar orientación horizontal si la Screen Orientation API está disponible
+    if (typeof window !== 'undefined' && window.innerWidth <= 991) {
+      try {
+        const screenAny = window.screen as any;
+        if (screenAny?.orientation?.lock) {
+          screenAny.orientation.lock('landscape').catch(() => {
+            // No admitido o requiere interacción fullscreen previa
+          });
+        }
+      } catch (_) {}
     }
   }, []);
 
@@ -309,6 +381,14 @@ export default function ProductionClient({ album }: ProductionClientProps) {
         setTrailerOpen(false);
         if (playerRef.current && typeof playerRef.current.pauseVideo === 'function') {
           playerRef.current.pauseVideo();
+        }
+        if (typeof window !== 'undefined') {
+          try {
+            const screenAny = window.screen as any;
+            if (screenAny?.orientation?.unlock) {
+              screenAny.orientation.unlock();
+            }
+          } catch (_) {}
         }
       }
     };
@@ -1438,6 +1518,15 @@ export default function ProductionClient({ album }: ProductionClientProps) {
                 <div
                   className="trailer-lightbox__click-shield"
                   onClick={() => {
+                    const nextPlaying = !isPlaying;
+                    setIsPlaying(nextPlaying);
+                    if (playerRef.current) {
+                      if (nextPlaying) playerRef.current.playVideo?.();
+                      else playerRef.current.pauseVideo?.();
+                    }
+                  }}
+                  onTouchEnd={(e) => {
+                    e.preventDefault();
                     const nextPlaying = !isPlaying;
                     setIsPlaying(nextPlaying);
                     if (playerRef.current) {
