@@ -463,8 +463,33 @@ export default function ProductionClient({ album }: ProductionClientProps) {
       transparent: true,
       side: THREE.DoubleSide
     });
-    const hubMesh = new THREE.Mesh(hubGeom, hubMaterial);
-    spinGroup.add(hubMesh);
+    // 5. Anillo / Stroke de carga circular encima del disco (animación de scroll)
+    const strokeGeom = new THREE.RingGeometry(discRadius + 0.012, discRadius + 0.038, 128, 1, 0, 0);
+    const strokeMaterial = new THREE.MeshBasicMaterial({
+      color: 0x111111,
+      side: THREE.DoubleSide,
+      transparent: true,
+      opacity: 0.95
+    });
+    const strokeMesh = new THREE.Mesh(strokeGeom, strokeMaterial);
+    strokeMesh.position.z = 0.012; // Justo delante de la cara frontal
+    spinGroup.add(strokeMesh);
+
+    // Helper para actualizar la porción dibujada del stroke según el progreso
+    const updateStrokeArc = (progressRatio: number) => {
+      const arcLength = Math.max(0.0001, Math.min(1, progressRatio) * Math.PI * 2);
+      strokeMesh.geometry.dispose();
+      strokeMesh.geometry = new THREE.RingGeometry(
+        discRadius + 0.012,
+        discRadius + 0.038,
+        128,
+        1,
+        -Math.PI / 2, // Empieza arriba a las 12 en punto
+        arcLength
+      );
+      strokeMesh.visible = progressRatio > 0.01;
+    };
+    updateStrokeArc(0);
 
     // Variables de estado físico y animación
     let ht = 0.01;
@@ -562,35 +587,45 @@ export default function ProductionClient({ album }: ProductionClientProps) {
 
       const exitTl = gsap.timeline();
 
-      // 1. Giro rápido y elevación del disco
+      // 1. Giro ultra rápido y elevación del disco
       exitTl.to(
         exitPhysics,
         {
-          spin: -16,
-          lift: 0.35,
-          duration: 0.7,
+          spin: -24,
+          lift: 0.45,
+          duration: 0.75,
           ease: 'power2.in'
         },
         0
       );
 
-      // 2. Encogimiento del disco (popOut a 0.35)
+      // 2. Encogimiento y desvanecimiento cinemático del disco (popOut a 0)
       exitTl.to(
         popScaleState,
         {
-          value: 0.35,
-          duration: 0.45,
-          ease: 'power2.in'
+          value: 0,
+          duration: 0.55,
+          ease: 'power3.in'
         },
         0
       );
 
-      // 3. Subida del texto fuera de la pantalla (yPercent -120)
+      // 3. Desaparición fluida de todas las letras y títulos hacia arriba
       const texts = section.querySelectorAll(
-        '[data-scroll-next-kicker], [data-scroll-next-title], [data-reveal]'
+        '[data-scroll-next-kicker], [data-scroll-next-title], [data-reveal], .scroll-to__credit, .scroll-to__label'
       );
       if (texts.length) {
-        exitTl.to(texts, { yPercent: -120, duration: 0.45, ease: 'power3.out', stagger: 0.03 }, 0);
+        exitTl.to(
+          texts,
+          {
+            yPercent: -100,
+            opacity: 0,
+            duration: 0.5,
+            ease: 'power3.inOut',
+            stagger: 0.02
+          },
+          0
+        );
       }
 
       // 4. Colapso de las líneas horizontales
@@ -600,21 +635,27 @@ export default function ProductionClient({ album }: ProductionClientProps) {
           rowEls,
           {
             scaleX: 0,
+            opacity: 0,
             duration: 0.5,
             ease: 'power3.out',
-            stagger: { each: 0.04, from: 'end' }
+            stagger: { each: 0.03, from: 'end' }
           },
-          0.05
+          0.02
         );
       }
 
-      // 5. Navegación a la siguiente ficha en 0.48s
+      // 5. Fade out del canvas / stroke
+      if (container) {
+        exitTl.to(container, { opacity: 0, duration: 0.5, ease: 'power2.in' }, 0);
+      }
+
+      // 6. Navegación fluida a la siguiente ficha al culminar el fundido
       exitTl.call(
         () => {
           window.location.href = `/discografia/${album.nextAlbum.slug}/`;
         },
         [],
-        0.48
+        0.58
       );
     };
 
@@ -775,6 +816,7 @@ export default function ProductionClient({ album }: ProductionClientProps) {
 
       const o = smoothedPush;
       setPushProgress(o);
+      updateStrokeArc(o);
 
       // Interpolación de llegada de scroll (arriveStart: 0.3 -> arriveEnd: 0.97)
       const arriveProgress = Math.max(0, Math.min(1, (Ce - 0.3) / (0.97 - 0.3)));
@@ -1179,19 +1221,6 @@ export default function ProductionClient({ album }: ProductionClientProps) {
             href={`/discografia/${album.nextAlbum.slug}/`}
             className="scroll-to__link"
           />
-
-          {/* Indicador de ayuda y barra de progreso de empuje */}
-          <div data-scroll-next-hint="" className="scroll-to__hint">
-            <div className="scroll-to__hint-inner">
-              <span className="subheading-xs">EMPENY PER PASSAR DE DISC</span>
-              <div className="scroll-to__push-bar">
-                <div
-                  className="scroll-to__push-fill"
-                  style={{ width: `${Math.round(pushProgress * 100)}%` }}
-                />
-              </div>
-            </div>
-          </div>
 
           {/* Lista oculta de datos para resolución de producciones */}
           <div data-scroll-next-list="" style={{ display: 'none' }} aria-hidden="true">
