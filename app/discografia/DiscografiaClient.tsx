@@ -2480,6 +2480,18 @@ export default function DiscografiaClient() {
       positionPageDot(false);
     }
 
+    const navMenuBtn = navEl?.querySelector('[data-menu-button]') as HTMLButtonElement | null;
+
+    // Control de bloqueo de scroll de página accesible (window.siteScrollLock)
+    function setScrollLock(locked: boolean) {
+      (window as any).siteScrollLock = locked;
+      if (locked) {
+        document.documentElement.style.overflow = 'hidden';
+      } else {
+        document.documentElement.style.overflow = '';
+      }
+    }
+
     function openNavDropdown(force = false) {
       if (!navEl || !dropdownToggle || !navDropdown) return;
       if ((navDropdownState.suppressHover && !force) || navDropdownState.isOpen) return;
@@ -2488,6 +2500,7 @@ export default function DiscografiaClient() {
       dropdownToggle.setAttribute('aria-expanded', 'true');
       navDropdown.setAttribute('aria-hidden', 'false');
       navEl.setAttribute('data-nav-dropdown', 'open');
+      setScrollLock(true);
       window.clearTimeout(navDropdownState.resetTimer);
       if (navScroller && !navDropdownState.dragging) {
         navScroller.scrollTop = 0;
@@ -2506,6 +2519,7 @@ export default function DiscografiaClient() {
       dropdownToggle.setAttribute('aria-expanded', 'false');
       navDropdown.setAttribute('aria-hidden', 'true');
       navEl.setAttribute('data-nav-dropdown', 'closed');
+      setScrollLock(false);
       morphNavLabel('word');
       trackDotDuringTransition(650);
       window.clearTimeout(navDropdownState.resetTimer);
@@ -2516,6 +2530,26 @@ export default function DiscografiaClient() {
         }
         updateMobileDockWidth();
       }, 520);
+    }
+
+    // Toggle de menú móvil ([data-menu-button], <= 991px)
+    function toggleMobileMenu() {
+      if (!navEl || !navMenuBtn) return;
+      const currentStatus = navEl.getAttribute('data-menu-status') || 'closed';
+      const nextStatus = currentStatus === 'open' ? 'closed' : 'open';
+      navEl.setAttribute('data-menu-status', nextStatus);
+      navMenuBtn.setAttribute('aria-expanded', nextStatus === 'open' ? 'true' : 'false');
+      if (nextStatus === 'open') {
+        closeNavDropdown(true);
+      }
+    }
+
+    if (navMenuBtn) {
+      navMenuBtn.addEventListener('click', (ev) => {
+        ev.preventDefault();
+        ev.stopPropagation();
+        toggleMobileMenu();
+      });
     }
 
     // Eventos de scroll y arrastre de la barra de progreso del dropdown
@@ -2610,7 +2644,17 @@ export default function DiscografiaClient() {
       navScrollbar.addEventListener('wheel', onScrollbarWheel, { passive: false });
     }
 
-    // Hover y click sobre el botón Index y la región del dropdown
+    // Hover, foco accesible y teclado sobre el botón Index y la región del dropdown
+    let isFocusFromKeyboard = false;
+    const onWindowKeyDownForFocus = (ev: KeyboardEvent) => {
+      if (ev.key === 'Tab') isFocusFromKeyboard = true;
+    };
+    const onWindowMouseDownForFocus = () => {
+      isFocusFromKeyboard = false;
+    };
+    window.addEventListener('keydown', onWindowKeyDownForFocus, true);
+    window.addEventListener('mousedown', onWindowMouseDownForFocus, true);
+
     const onNavRegionMouseEnter = () => {
       if (canHoverNav()) {
         navDropdownState.suppressHover = false;
@@ -2623,6 +2667,19 @@ export default function DiscografiaClient() {
         closeNavDropdown();
       }
     };
+
+    // Foco accesible con teclado (focusin abre solo si viene de Tab, focusout cierra si sale de la región)
+    const onNavRegionFocusIn = (ev: FocusEvent) => {
+      if (isFocusFromKeyboard && !navDropdownState.isOpen) {
+        openNavDropdown(true);
+      }
+    };
+    const onNavRegionFocusOut = (ev: FocusEvent) => {
+      const related = ev.relatedTarget as Node | null;
+      if (navRegion && related && navRegion.contains(related)) return;
+      closeNavDropdown(true);
+    };
+
     const onDropdownToggleClick = (ev: MouseEvent) => {
       ev.preventDefault();
       ev.stopPropagation();
@@ -2637,12 +2694,69 @@ export default function DiscografiaClient() {
       }
     };
 
+    // Navegación con teclado en el propio botón Index
+    const onDropdownToggleKeyDown = (ev: KeyboardEvent) => {
+      if (ev.key === 'ArrowDown') {
+        ev.preventDefault();
+        openNavDropdown(true);
+        const firstLink = dropdownLinks[0];
+        firstLink?.focus();
+      } else if (ev.key === 'ArrowUp') {
+        ev.preventDefault();
+        openNavDropdown(true);
+        const lastLink = dropdownLinks[dropdownLinks.length - 1];
+        lastLink?.focus();
+      } else if (ev.key === 'Escape') {
+        ev.preventDefault();
+        closeNavDropdown(true);
+        dropdownToggle?.focus();
+      }
+    };
+
+    // Focus trap accesible dentro del desplegable (teclas ArrowUp/ArrowDown, Home/End, Tab cíclico)
+    dropdownLinks.forEach((linkEl, linkIdx) => {
+      linkEl.addEventListener('keydown', (ev: KeyboardEvent) => {
+        if (ev.key === 'ArrowDown') {
+          ev.preventDefault();
+          const nextIdx = (linkIdx + 1) % dropdownLinks.length;
+          dropdownLinks[nextIdx]?.focus();
+        } else if (ev.key === 'ArrowUp') {
+          ev.preventDefault();
+          const prevIdx = (linkIdx - 1 + dropdownLinks.length) % dropdownLinks.length;
+          dropdownLinks[prevIdx]?.focus();
+        } else if (ev.key === 'Home') {
+          ev.preventDefault();
+          dropdownLinks[0]?.focus();
+        } else if (ev.key === 'End') {
+          ev.preventDefault();
+          dropdownLinks[dropdownLinks.length - 1]?.focus();
+        } else if (ev.key === 'Escape') {
+          ev.preventDefault();
+          closeNavDropdown(true);
+          dropdownToggle?.focus();
+        } else if (ev.key === 'Tab') {
+          if (!ev.shiftKey && linkIdx === dropdownLinks.length - 1) {
+            ev.preventDefault();
+            closeNavDropdown(true);
+            dropdownToggle?.focus();
+          } else if (ev.shiftKey && linkIdx === 0) {
+            ev.preventDefault();
+            closeNavDropdown(true);
+            dropdownToggle?.focus();
+          }
+        }
+      });
+    });
+
     if (navRegion) {
       navRegion.addEventListener('mouseenter', onNavRegionMouseEnter);
       navRegion.addEventListener('mouseleave', onNavRegionMouseLeave);
+      navRegion.addEventListener('focusin', onNavRegionFocusIn);
+      navRegion.addEventListener('focusout', onNavRegionFocusOut);
     }
     if (dropdownToggle) {
       dropdownToggle.addEventListener('click', onDropdownToggleClick);
+      dropdownToggle.addEventListener('keydown', onDropdownToggleKeyDown);
     }
     navPageLinks.forEach((link) => {
       link.addEventListener('mouseenter', () => {
@@ -2712,6 +2826,18 @@ export default function DiscografiaClient() {
         positionPageDot(false);
       });
     }
+
+    // Listener para cambio de breakpoint (cruce de 991px): cerrar todo y recalcular ancho
+    const onBreakpointChange = () => {
+      closeNavDropdown(true);
+      if (navEl) {
+        navEl.setAttribute('data-menu-status', 'closed');
+        navMenuBtn?.setAttribute('aria-expanded', 'false');
+      }
+      updateMobileDockWidth();
+      positionPageDot(false);
+    };
+    mqlMobile.addEventListener('change', onBreakpointChange);
 
     const onKeyDown = (e: KeyboardEvent) => {
       if (isTransitioningOut) return;
@@ -2962,11 +3088,19 @@ export default function DiscografiaClient() {
 
       if (prevBtn) prevBtn.removeEventListener('click', onPrevClick);
       if (nextBtn) nextBtn.removeEventListener('click', onNextClick);
+      window.removeEventListener('keydown', onWindowKeyDownForFocus, true);
+      window.removeEventListener('mousedown', onWindowMouseDownForFocus, true);
+      mqlMobile.removeEventListener('change', onBreakpointChange);
       if (navRegion) {
         navRegion.removeEventListener('mouseenter', onNavRegionMouseEnter);
         navRegion.removeEventListener('mouseleave', onNavRegionMouseLeave);
+        navRegion.removeEventListener('focusin', onNavRegionFocusIn);
+        navRegion.removeEventListener('focusout', onNavRegionFocusOut);
       }
-      if (dropdownToggle) dropdownToggle.removeEventListener('click', onDropdownToggleClick);
+      if (dropdownToggle) {
+        dropdownToggle.removeEventListener('click', onDropdownToggleClick);
+        dropdownToggle.removeEventListener('keydown', onDropdownToggleKeyDown);
+      }
       if (navScroller) navScroller.removeEventListener('scroll', onScrollerScroll);
       if (navScrollbar) {
         navScrollbar.removeEventListener('pointerdown', onScrollbarPointerDown);
@@ -3035,7 +3169,7 @@ export default function DiscografiaClient() {
             <div className="nav-center">
               <ul className="nav-center__list">
                 <li>
-                  <a href="/start" className="nav-logo" aria-label="Miquel Gil Inici">
+                  <a href="/start" className="nav-logo" aria-label="A24 home">
                     <img
                       src="/images/logo-W.png"
                       alt="Miquel Gil"
@@ -3080,6 +3214,8 @@ export default function DiscografiaClient() {
                     className="nav-link"
                     aria-expanded="false"
                     aria-haspopup="true"
+                    aria-controls="nav-index-dropdown"
+                    id="nav-dropdown-toggle-btn"
                   >
                     <span className="nav-link__label">Index</span>
                     <svg
@@ -3100,7 +3236,7 @@ export default function DiscografiaClient() {
                       ></path>
                     </svg>
                   </button>
-                  <div className="nav-dropdown" aria-hidden="true">
+                  <div className="nav-dropdown" id="nav-index-dropdown" aria-hidden="true">
                     <div className="nav-dropdown__overflow">
                       <div className="nav-dropdown__overflow-inner">
                         <div
@@ -3120,6 +3256,19 @@ export default function DiscografiaClient() {
                 </li>
               </ul>
             </div>
+
+            {/* BOTÓN DE MENÚ MÓVIL A24 ([data-menu-button], <= 991px) */}
+            <button
+              type="button"
+              data-menu-button=""
+              className="nav-menu-button"
+              aria-label="Menú de navegació"
+              aria-expanded="false"
+              aria-controls="nav-center-menu"
+            >
+              <span className="nav-menu-button__line" aria-hidden="true"></span>
+              <span className="nav-menu-button__line" aria-hidden="true"></span>
+            </button>
           </div>
         </div>
         <div className="page-bg"></div>
