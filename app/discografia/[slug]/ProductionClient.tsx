@@ -463,33 +463,168 @@ export default function ProductionClient({ album }: ProductionClientProps) {
       transparent: true,
       side: THREE.DoubleSide
     });
-    // 5. Anillo / Stroke de carga circular encima del disco (animación de scroll)
-    const strokeGeom = new THREE.RingGeometry(discRadius + 0.012, discRadius + 0.038, 128, 1, 0, 0);
-    const strokeMaterial = new THREE.MeshBasicMaterial({
-      color: 0x111111,
+    // 5. SISTEMA SCRIBBLE DE TRAZO A MANO (STROKE IDÉNTICO A /discografia CON STOP-MOTION A 10 FPS)
+    const SCRIBBLE_SPEC = {
+      segments: 72,
+      baseRadii: [1.055, 1.095], // padding 0.055, loopGap 0.04
+      thickness: 0.013,
+      taperMin: 0.15,
+      noiseCount: 24,
+      noiseAmp: 0.028, // ±2.8% del radio
+      baseSweep: 0.70,
+      sweepVariance: 0.20,
+      fpsIntervalMs: 100 // 10 fps stop motion
+    };
+
+    const scribbleMaterial = new THREE.MeshBasicMaterial({
+      color: 0x000000,
       side: THREE.DoubleSide,
+      depthWrite: false,
+      depthTest: false,
       transparent: true,
       opacity: 0.95
     });
-    const strokeMesh = new THREE.Mesh(strokeGeom, strokeMaterial);
-    strokeMesh.position.z = 0.012; // Justo delante de la cara frontal
-    spinGroup.add(strokeMesh);
 
-    // Helper para actualizar la porción dibujada del stroke según el progreso
-    const updateStrokeArc = (progressRatio: number) => {
-      const arcLength = Math.max(0.0001, Math.min(1, progressRatio) * Math.PI * 2);
-      strokeMesh.geometry.dispose();
-      strokeMesh.geometry = new THREE.RingGeometry(
-        discRadius + 0.012,
-        discRadius + 0.038,
-        128,
-        1,
-        -Math.PI / 2, // Empieza arriba a las 12 en punto
-        arcLength
-      );
-      strokeMesh.visible = progressRatio > 0.01;
+    const scribbleGroup = new THREE.Group();
+    scribbleGroup.visible = false;
+    scribbleGroup.renderOrder = 950;
+    spinGroup.add(scribbleGroup);
+
+    interface ScribbleRingInstance {
+      baseRadius: number;
+      geometry: THREE.BufferGeometry;
+      positions: Float32Array;
+      mesh: THREE.Mesh;
+      noiseValues: Float32Array;
+      startAngle: number;
+      sweepFraction: number;
+    }
+
+    function createScribbleRing(baseRadius: number): ScribbleRingInstance {
+      const segs = SCRIBBLE_SPEC.segments;
+      const vertexCount = (segs + 1) * 2;
+      const indexCount = segs * 6;
+
+      const geometry = new THREE.BufferGeometry();
+      const positions = new Float32Array(vertexCount * 3);
+      const indices = new Uint16Array(indexCount);
+
+      let ptr = 0;
+      for (let i = 0; i < segs; i++) {
+        const v0 = i * 2;
+        const v1 = v0 + 1;
+        const v2 = v0 + 2;
+        const v3 = v0 + 3;
+        indices[ptr++] = v0;
+        indices[ptr++] = v2;
+        indices[ptr++] = v1;
+        indices[ptr++] = v1;
+        indices[ptr++] = v2;
+        indices[ptr++] = v3;
+      }
+
+      geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+      geometry.setIndex(new THREE.BufferAttribute(indices, 1));
+
+      const mesh = new THREE.Mesh(geometry, scribbleMaterial);
+      mesh.renderOrder = 950;
+      scribbleGroup.add(mesh);
+
+      return {
+        baseRadius,
+        geometry,
+        positions,
+        mesh,
+        noiseValues: new Float32Array(SCRIBBLE_SPEC.noiseCount),
+        startAngle: -Math.PI / 2,
+        sweepFraction: SCRIBBLE_SPEC.baseSweep
+      };
+    }
+
+    const scribbleRings: ScribbleRingInstance[] = [
+      createScribbleRing(SCRIBBLE_SPEC.baseRadii[0]),
+      createScribbleRing(SCRIBBLE_SPEC.baseRadii[1])
+    ];
+
+    function randomizeRing(ring: ScribbleRingInstance) {
+      for (let k = 0; k < SCRIBBLE_SPEC.noiseCount; k++) {
+        ring.noiseValues[k] = (Math.random() * 2 - 1) * SCRIBBLE_SPEC.noiseAmp;
+      }
+      ring.startAngle = -Math.PI / 2 + (Math.random() * 2 - 1) * 0.15;
+      const factor = 1 + (Math.random() * 2 - 1) * SCRIBBLE_SPEC.sweepVariance;
+      ring.sweepFraction = SCRIBBLE_SPEC.baseSweep * factor;
+    }
+
+    function sampleSmoothNoise(noiseArr: Float32Array, u: number) {
+      const len = noiseArr.length;
+      const scaled = (((u % 1) + 1) % 1) * len;
+      const i0 = Math.floor(scaled) % len;
+      const i1 = (i0 + 1) % len;
+      const frac = scaled - Math.floor(scaled);
+      const smooth = frac * frac * (3 - 2 * frac);
+      return noiseArr[i0] * (1 - smooth) + noiseArr[i1] * smooth;
+    }
+
+    function rebuildScribbleRibbon(ring: ScribbleRingInstance, progressRatio: number) {
+      const segs = SCRIBBLE_SPEC.segments;
+      const pos = ring.positions;
+      // El arco crece proporcionalmente al scroll/empuje (hasta la vuelta completa en 1.0)
+      const activeSweep = Math.max(0.001, Math.min(1.0, progressRatio)) * Math.PI * 2 * (ring.sweepFraction / SCRIBBLE_SPEC.baseSweep);
+
+      for (let i = 0; i <= segs; i++) {
+        const t = i / segs;
+        const theta = ring.startAngle + t * activeSweep;
+
+        const normAngle = (t * (activeSweep / (Math.PI * 2))) % 1;
+        const radialNoise = sampleSmoothNoise(ring.noiseValues, normAngle);
+        const rCenter = ring.baseRadius * (1 + radialNoise);
+
+        const edgeDist = Math.min(t, 1 - t);
+        const taperZone = 0.16;
+        const taperRatio = Math.min(1, edgeDist / taperZone);
+        const smoothTaper = taperRatio * taperRatio * (3 - 2 * taperRatio);
+        const halfWidth =
+          SCRIBBLE_SPEC.thickness *
+          0.5 *
+          (SCRIBBLE_SPEC.taperMin + (1 - SCRIBBLE_SPEC.taperMin) * smoothTaper);
+
+        const rInner = rCenter - halfWidth;
+        const rOuter = rCenter + halfWidth;
+
+        const cosA = Math.cos(theta);
+        const sinA = Math.sin(theta);
+
+        const vIdx = i * 6;
+        pos[vIdx] = cosA * rInner;
+        pos[vIdx + 1] = sinA * rInner;
+        pos[vIdx + 2] = 0.015;
+
+        pos[vIdx + 3] = cosA * rOuter;
+        pos[vIdx + 4] = sinA * rOuter;
+        pos[vIdx + 5] = 0.015;
+      }
+
+      ring.geometry.attributes.position.needsUpdate = true;
+    }
+
+    scribbleRings.forEach(randomizeRing);
+    let lastScribbleStepTime = performance.now();
+
+    const updateScribbleStroke = (now: number, progressRatio: number) => {
+      if (progressRatio <= 0.01) {
+        scribbleGroup.visible = false;
+        return;
+      }
+      scribbleGroup.visible = true;
+
+      // Actualizar temblor stop motion a 10 fps
+      if (now - lastScribbleStepTime >= SCRIBBLE_SPEC.fpsIntervalMs) {
+        lastScribbleStepTime = now;
+        scribbleRings.forEach(randomizeRing);
+      }
+
+      scribbleRings.forEach((r) => rebuildScribbleRibbon(r, progressRatio));
     };
-    updateStrokeArc(0);
 
     // Variables de estado físico y animación
     let ht = 0.01;
@@ -816,7 +951,7 @@ export default function ProductionClient({ album }: ProductionClientProps) {
 
       const o = smoothedPush;
       setPushProgress(o);
-      updateStrokeArc(o);
+      updateScribbleStroke(now, o);
 
       // Interpolación de llegada de scroll (arriveStart: 0.3 -> arriveEnd: 0.97)
       const arriveProgress = Math.max(0, Math.min(1, (Ce - 0.3) / (0.97 - 0.3)));
@@ -877,6 +1012,8 @@ export default function ProductionClient({ album }: ProductionClientProps) {
         linkEl.removeEventListener('click', onLinkClick);
       }
 
+      scribbleRings.forEach((r) => r.geometry.dispose());
+      scribbleMaterial.dispose();
       frontGeom.dispose();
       frontMaterial.dispose();
       backGeom.dispose();
