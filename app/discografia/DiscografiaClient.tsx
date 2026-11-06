@@ -163,8 +163,8 @@ export default function DiscografiaClient() {
     const targetIndex = () => (activeTween ? Math.round(targetL) : activeIndex());
 
     // 3. Configuración Three.js (WebGLRenderer + PerspectiveCamera)
-    // Match Three.js r128 color and lighting pipeline in modern Three.js
-    THREE.ColorManagement.enabled = false;
+    // Preservar fidelidad de color y gama sRGB completa para las carátulas de los CDs
+    THREE.ColorManagement.enabled = true;
 
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(
@@ -181,11 +181,11 @@ export default function DiscografiaClient() {
       alpha: true,
       powerPreference: 'high-performance'
     });
-    renderer.outputColorSpace = THREE.LinearSRGBColorSpace;
+    renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.setSize(container.clientWidth, container.clientHeight);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = SPEC.exposure;
+    renderer.toneMappingExposure = 1.05;
 
     // Iluminación según especificación: key, fill, rim azul (#499FF5) y tira superior
     // Multiply by Math.PI to match r128 non-physical punctual light scaleFactor
@@ -396,6 +396,7 @@ export default function DiscografiaClient() {
       ctx.stroke();
 
       const tex = new THREE.CanvasTexture(c);
+      tex.colorSpace = THREE.SRGBColorSpace;
       tex.anisotropy = renderer.capabilities.getMaxAnisotropy();
       tex.needsUpdate = true;
       return tex;
@@ -760,13 +761,13 @@ export default function DiscografiaClient() {
 
       const frontMat = new THREE.MeshPhysicalMaterial({
         color: 0xffffff,
-        roughness: 0.24,
-        metalness: 0.18,
+        roughness: 0.18,
+        metalness: 0.04,
         bumpMap: printMaps.bumpMap,
-        bumpScale: 0.004,
+        bumpScale: 0.003,
         roughnessMap: printMaps.roughnessMap,
-        clearcoat: 0.85,
-        clearcoatRoughness: 0.14
+        clearcoat: 0.9,
+        clearcoatRoughness: 0.06
       });
 
       const frontMesh = new THREE.Mesh(sharedDiscGeo, frontMat);

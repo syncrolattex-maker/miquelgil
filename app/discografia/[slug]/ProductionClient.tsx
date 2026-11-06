@@ -438,7 +438,7 @@ export default function ProductionClient({ album }: ProductionClientProps) {
     renderer.setSize(width, height);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 0.86;
+    renderer.toneMappingExposure = 1.05;
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.setClearColor(0x000000, 0);
 
@@ -457,23 +457,23 @@ export default function ProductionClient({ album }: ProductionClientProps) {
     wobbleGroup.add(spinGroup);
     scene.add(rootGroup);
 
-    // Iluminación cinemática A24
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.35);
+    // Iluminación cinemática A24 equilibrada para preservar los colores y viveza de la portada
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.75);
     scene.add(ambientLight);
 
-    const keyLight = new THREE.DirectionalLight(0xfff9e8, 0.9);
+    const keyLight = new THREE.DirectionalLight(0xffffff, 1.2);
     keyLight.position.set(3.5, 5, 6);
     scene.add(keyLight);
 
-    const fillLight = new THREE.DirectionalLight(0xffffff, 0.35);
+    const fillLight = new THREE.DirectionalLight(0xffffff, 0.65);
     fillLight.position.set(-5, -2, 4);
     scene.add(fillLight);
 
-    const rimLight = new THREE.DirectionalLight(0x499ff5, 0.85);
+    const rimLight = new THREE.DirectionalLight(0x499ff5, 0.65);
     rimLight.position.set(0, 3, -6);
     scene.add(rimLight);
 
-    const topLight = new THREE.DirectionalLight(0xffffff, 1.4);
+    const topLight = new THREE.DirectionalLight(0xffffff, 1.2);
     topLight.position.set(0, 3.2, 3);
     scene.add(topLight);
 
@@ -498,10 +498,10 @@ export default function ProductionClient({ album }: ProductionClientProps) {
 
     const frontMaterial = new THREE.MeshPhysicalMaterial({
       map: discTexture,
-      roughness: 0.38,
-      metalness: 0.42,
-      clearcoat: 0.8,
-      clearcoatRoughness: 0.08,
+      roughness: 0.18,
+      metalness: 0.04,
+      clearcoat: 0.85,
+      clearcoatRoughness: 0.06,
       side: THREE.FrontSide
     });
     const frontMesh = new THREE.Mesh(frontGeom, frontMaterial);
