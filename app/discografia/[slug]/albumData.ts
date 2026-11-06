@@ -54,7 +54,7 @@ export const ALBUMS_DATA: Record<string, AlbumDetail> = {
   viatger: {
     slug: 'viatger',
     title: 'Viatger',
-    editionNumber: 'EDICIÓ 12 / 12',
+    editionNumber: 'EDICIÓ 10 / 10',
     year: '2024',
     label: 'Temps Record',
     cover: '/images/disco_8.webp',
@@ -109,7 +109,7 @@ export const ALBUMS_DATA: Record<string, AlbumDetail> = {
   geometries: {
     slug: 'geometries',
     title: 'Geometries',
-    editionNumber: 'EDICIÓ 11 / 12',
+    editionNumber: 'EDICIÓ 09 / 10',
     year: '2019',
     label: 'Temps Record',
     cover: '/images/disco_7.jpg',
@@ -161,7 +161,7 @@ export const ALBUMS_DATA: Record<string, AlbumDetail> = {
   'per-marcianes': {
     slug: 'per-marcianes',
     title: 'Per marcianes',
-    editionNumber: 'EDICIÓ 10 / 12',
+    editionNumber: 'EDICIÓ 08 / 10',
     year: '2011',
     label: 'Temps Record',
     cover: '/images/disco_6.png',
@@ -214,7 +214,7 @@ export const ALBUMS_DATA: Record<string, AlbumDetail> = {
   'gil-camp-trio': {
     slug: 'gil-camp-trio',
     title: 'Gil & Camp Trio',
-    editionNumber: 'EDICIÓ 09 / 12',
+    editionNumber: 'EDICIÓ 07 / 10',
     year: '2009',
     label: 'Temps Record',
     cover: '/images/disco_4.png',
@@ -264,7 +264,7 @@ export const ALBUMS_DATA: Record<string, AlbumDetail> = {
   eixos: {
     slug: 'eixos',
     title: 'Eixos',
-    editionNumber: 'EDICIÓ 08 / 12',
+    editionNumber: 'EDICIÓ 06 / 10',
     year: '2006',
     label: 'Temps Record',
     cover: '/images/disco_5.png',
@@ -317,7 +317,7 @@ export const ALBUMS_DATA: Record<string, AlbumDetail> = {
   'en-concert': {
     slug: 'en-concert',
     title: 'En Concert',
-    editionNumber: 'EDICIÓ 07 / 12',
+    editionNumber: 'EDICIÓ 05 / 10',
     year: '2006',
     label: 'Galileo Music',
     cover: '/images/disco_4.png',
@@ -370,7 +370,7 @@ export const ALBUMS_DATA: Record<string, AlbumDetail> = {
   kata: {
     slug: 'kata',
     title: 'Katà',
-    editionNumber: 'EDICIÓ 06 / 12',
+    editionNumber: 'EDICIÓ 04 / 10',
     year: '2004',
     label: 'Temps Record',
     cover: '/images/disco_3.png',
@@ -423,7 +423,7 @@ export const ALBUMS_DATA: Record<string, AlbumDetail> = {
   organic: {
     slug: 'organic',
     title: 'Orgànic',
-    editionNumber: 'EDICIÓ 05 / 12',
+    editionNumber: 'EDICIÓ 03 / 10',
     year: '2001',
     label: 'Sonifolk',
     cover: '/images/disco_2.png',
@@ -476,7 +476,7 @@ export const ALBUMS_DATA: Record<string, AlbumDetail> = {
   'buscando-tu-olor': {
     slug: 'buscando-tu-olor',
     title: 'Buscando tu olor',
-    editionNumber: 'EDICIÓ 04 / 12',
+    editionNumber: 'EDICIÓ 02 / 10',
     year: '1997',
     label: 'Picap / Sons Flamencs',
     cover: '/images/disco_1.jpg',
@@ -526,7 +526,7 @@ export const ALBUMS_DATA: Record<string, AlbumDetail> = {
   viajero: {
     slug: 'viajero',
     title: 'Viajero',
-    editionNumber: 'EDICIÓ 03 / 12',
+    editionNumber: 'EDICIÓ 01 / 10',
     year: '1988',
     label: 'Plataforma Discos / PDI',
     cover: '/images/disco_1.jpg',
@@ -558,105 +558,6 @@ export const ALBUMS_DATA: Record<string, AlbumDetail> = {
       { num: '05', title: 'Vampiro', time: '4:02' },
       { num: '06', title: 'Esa Oscura Voz En Off', time: '4:50' },
       { num: '07', title: 'Blau', time: '5:10' }
-    ],
-    nextAlbum: {
-      slug: 'cants-arrel',
-      title: "Cants d'Arrel",
-      year: '1985',
-      type: 'Àlbum Tradicional',
-      genre: 'Cant Valencià, Polifonia',
-      runtime: '43:40',
-      discArtUrl: '/images/disco_8.webp'
-    }
-  },
-
-  // 11. CANTS D'ARREL (1985) - AL TALL & MIQUEL GIL
-  'cants-arrel': {
-    slug: 'cants-arrel',
-    title: "Cants d'Arrel",
-    editionNumber: 'EDICIÓ 02 / 12',
-    year: '1985',
-    label: 'Al Tall & Difusió Mediterrània',
-    cover: '/images/disco_8.webp',
-    discArtUrl: '/images/disco_8.webp',
-    director: 'Al Tall & Miquel Gil',
-    lyrics: 'Tradició Oral Valenciana, Vicent Torrent',
-    music: 'Al Tall & Miquel Gil',
-    musicians: 'Vicent Torrent, Miquel Gil, Manolo Lledó, Instruments Tradicionals',
-    genre: "Cant Valencià, Polifonia Tradicional, Cant d'Estil",
-    runtime: '43:40',
-    format: 'Vinil LP / Disc Òptic CD',
-    synopsis:
-      "Antologia essencial de polifonia tradicional i cant d'estil que preserva el llegat oral de les comarques centrals i l'Horta de València. Miquel Gil destaca per la seua potència vocal i el respecte absolut a la puresa dels cants de la terra.",
-    quote: "Memòria viva d'un poble i polifonia autèntica preservada per al futur",
-    quoteAuthor: "Al Tall & Miquel Gil · Cants d'Arrel (1985)",
-    trailerSrc: 'https://www.youtube.com/watch?v=yVT-HCsypyk',
-    trailerStill: '/images/trobada-vicent-torrent.png',
-    streamUrl: 'https://open.spotify.com/search/Al%20Tall%20Miquel%20Gil',
-    buyUrl: 'https://www.totfolk.cat/discografia-miquel-gil',
-    awards: [
-      { title: "SERRA D'OR 1985", value: 'MEMÒRIA VIVA D’UN POBLE (★★★★★)' },
-      { title: 'ENDERROCK CLÀSSICS', value: 'PATRIMONI HISTÒRIC ESSENCIAL' }
-    ],
-    tracklist: [
-      { num: '01', title: 'Cant De Batre', time: '4:05' },
-      { num: '02', title: "U I Dos De L'Horta", time: '3:50' },
-      { num: '03', title: 'Les Folies De Carcaixent', time: '4:12' },
-      { num: '04', title: 'Jota De La Vall', time: '3:38' },
-      { num: '05', title: 'Seguidilles De Requena', time: '3:45' },
-      { num: '06', title: 'Malaguenya De Barxeta', time: '4:20' },
-      { num: '07', title: "Cant D'Estil De L'Alcúdia", time: '4:55' },
-      { num: '08', title: 'Albaes Tradicionals', time: '5:15' },
-      { num: '09', title: "Fandango D'Aiora", time: '4:30' }
-    ],
-    nextAlbum: {
-      slug: 'tocs-i-vares',
-      title: 'Tocs i Vares',
-      year: '1982',
-      type: 'Àlbum Tradicional',
-      genre: 'Horta Sud, Percussions i Corda',
-      runtime: '38:45',
-      discArtUrl: '/images/disco_7.jpg'
-    }
-  },
-
-  // 12. TOCS I VARES (1982) - REGISTRE FONOGRÀFIC
-  'tocs-i-vares': {
-    slug: 'tocs-i-vares',
-    title: 'Tocs i Vares',
-    editionNumber: 'EDICIÓ 01 / 12',
-    year: '1982',
-    label: 'Arxiu Fonogràfic Valencià',
-    cover: '/images/disco_7.jpg',
-    discArtUrl: '/images/disco_7.jpg',
-    director: 'Arxiu Fonogràfic & Miquel Gil',
-    lyrics: "Llegat Oral de l'Horta Sud",
-    music: 'Tradicional Valencià',
-    musicians: 'Percussionistes tradicionals, Corda fregada, Miquel Gil (veu)',
-    genre: 'Horta Sud, Percussions de Canya, Corda Fregada',
-    runtime: '38:45',
-    format: 'Vinil LP / Disc Òptic CD',
-    synopsis:
-      "Registre fonogràfic històric de percussions de canya, corda fregada i melismes populars de l'Horta Sud en estat pur. Una joia etnomusical que documenta els orígens sonors i la formació d'arrel de Miquel Gil abans de les grans gires internacionals.",
-    quote: "La puresa de la canya, la corda i la gola de l'Horta en estat fundacional",
-    quoteAuthor: 'Miquel Gil · Tocs i Vares (1982)',
-    trailerSrc: 'https://www.youtube.com/watch?v=yVT-HCsypyk',
-    trailerStill: '/images/7.jpg',
-    streamUrl: 'https://open.spotify.com/search/Miquel%20Gil%20Tocs%20i%20Vares',
-    buyUrl: 'https://www.totfolk.cat/discografia-miquel-gil',
-    awards: [
-      { title: 'FONOTECA VALENCIANA', value: 'REGISTRE HISTÒRIC IMPRESCINDIBLE (★★★★★)' },
-      { title: 'CULTURA POPULAR', value: 'RAIG D’AUTENTICITAT PATRIMONIAL' }
-    ],
-    tracklist: [
-      { num: '01', title: 'Toc De Processó', time: '3:20' },
-      { num: '02', title: 'Dansa De Les Vares', time: '4:10' },
-      { num: '03', title: 'Canyes I Sons', time: '3:45' },
-      { num: '04', title: "Melisma De L'Horta", time: '4:30' },
-      { num: '05', title: 'Cant De Llaurador', time: '3:55' },
-      { num: '06', title: 'Percussió De Fang I Canya', time: '4:15' },
-      { num: '07', title: 'Sonata Popular', time: '4:05' },
-      { num: '08', title: 'Acomiadament', time: '4:40' }
     ],
     nextAlbum: {
       slug: 'viatger',

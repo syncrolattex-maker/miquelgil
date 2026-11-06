@@ -3382,36 +3382,6 @@ export default function DiscografiaClient() {
             RNE Radio 3|Avançat al seu temps|★★★★★;Discos Medicinales|Pioners de la fusió|★★★★★
           </span>
         </li>
-        <li data-film-item="">
-          <span data-film-field="title">Cants d&apos;Arrel</span>
-          <span data-film-field="description">
-            Antologia essencial de polifonia tradicional i cant d&apos;estil que preserva el llegat oral de
-            les comarques centrals i l&apos;Horta.
-          </span>
-          <span data-film-field="director">Al Tall &amp; Miquel Gil</span>
-          <span data-film-field="year">1985</span>
-          <span data-film-field="starring">Cant Valencià, Polifonia Tradicional</span>
-          <span data-film-field="detailUrl">/discografia/cants-arrel/</span>
-          <span data-film-field="discUrl">https://miquelgil.vercel.app/images/disco_8.webp</span>
-          <span data-film-field="reviews">
-            Serra d&apos;Or|Memòria viva d&apos;un poble|★★★★★;Enderrock|Clàssic essencial|★★★★★
-          </span>
-        </li>
-        <li data-film-item="">
-          <span data-film-field="title">Tocs i Vares</span>
-          <span data-film-field="description">
-            Registre fonogràfic de percussions de canya, corda fregada i melismes populars de l&apos;Horta
-            Sud en estat pur.
-          </span>
-          <span data-film-field="director">Arxiu Fonogràfic</span>
-          <span data-film-field="year">1982</span>
-          <span data-film-field="starring">Horta Sud, Percussions i Corda</span>
-          <span data-film-field="detailUrl">/discografia/tocs-i-vares/</span>
-          <span data-film-field="discUrl">https://miquelgil.vercel.app/images/disco_7.jpg</span>
-          <span data-film-field="reviews">
-            Fonoteca|Registre històric imprescindible|★★★★★;Cultura Popular|Raig d&apos;autenticitat|★★★★☆
-          </span>
-        </li>
       </ul>
     </main>
   );
