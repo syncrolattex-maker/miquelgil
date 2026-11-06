@@ -228,8 +228,8 @@
   left: 0;
   right: 0;
   font-size: 14px;
-  --nav-open-height: 24em;
-  --nav-scroll-fade: 3em;
+  --nav-open-height: 16.5em;
+  --nav-scroll-fade: 2.5em;
   --nav-ease: cubic-bezier(0.32, 0.72, 0, 1);
   --nav-open-duration: 0.62s;
   --nav-close-duration: 0.46s;
@@ -257,10 +257,10 @@
   position: relative;
 }
 
-/* Recuadro blanco que en desktop mide 34em de ancho (height: 0 -> 24em al abrir) */
+/* Recuadro blanco del menú A24 (width optimizado para logo grande + botón Index) */
 .nav-bg {
   background-color: #ffffff;
-  width: 34em;
+  width: 22em;
   max-width: calc(100vw - 2em);
   height: 0;
   margin-left: auto;
@@ -320,13 +320,18 @@
   position: relative;
 }
 
-/* Logo manuscrito de Miquel Gil invertido a negro nítido */
+/* Logo manuscrito de Miquel Gil invertido a negro nítido - Tamaño aumentado */
 .miquel-handwritten-logo {
-  height: 1.45em;
+  height: 2.15em;
   width: auto;
   display: block;
   filter: invert(1) brightness(0);
   object-fit: contain;
+  transition: transform 0.3s var(--nav-ease);
+}
+
+.nav-logo:hover .miquel-handwritten-logo {
+  transform: scale(1.05);
 }
 
 .nav-link {
@@ -437,14 +442,14 @@
   padding-bottom: 0;
 }
 
-/* Contenedor desplegable de los 12 discos (.nav-dropdown) */
+/* Contenedor desplegable de las secciones (.nav-dropdown) */
 .nav-dropdown {
   z-index: 1;
   box-sizing: border-box;
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
-  width: 34em;
+  width: 22em;
   max-width: calc(100vw - 2em);
   height: 0;
   margin-left: auto;
@@ -526,9 +531,9 @@
   width: 100%;
   height: auto;
   min-height: 0;
-  padding-bottom: 3.5em;
-  padding-left: 5.5em;
-  padding-right: 5.5em;
+  padding-bottom: 2em;
+  padding-left: 2.25em;
+  padding-right: 2.25em;
   display: block;
   overflow: visible;
 }
@@ -743,7 +748,7 @@
     --nav-dock-height: 3.5em;
     --nav-dock-inset: 1em;
     --nav-dock-radius: 0;
-    --nav-open-height: min(25em, 62vh);
+    --nav-open-height: min(18em, 55vh);
     --nav-dock-list-gap: 2.25em;
     --nav-dock-open-width: min(100%, max(var(--nav-dock-width, 100%), 23.75em));
     padding-left: var(--nav-dock-inset);
@@ -843,7 +848,7 @@
   }
 
   .miquel-handwritten-logo {
-    height: 1.3em;
+    height: 1.85em;
   }
 
   .nav-link {

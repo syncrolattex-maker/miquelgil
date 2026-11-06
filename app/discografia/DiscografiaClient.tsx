@@ -2092,20 +2092,29 @@ export default function DiscografiaClient() {
       return (str || '').trim().toLowerCase().replace(/\s+/g, ' ');
     }
 
-    // Poblar los 12 discos dentro de .nav-dropdown__content-li
+    // Pestañas principales de la página para el desplegable Index
+    const navSections = [
+      { title: 'Discografia', url: '/discografia', year: '01' },
+      { title: 'Directes', url: '/agenda', year: '02' },
+      { title: 'Biografia', url: '/biografia', year: '03' },
+      { title: 'Contractació', url: '/contractacio', year: '04' },
+      { title: 'Contacte', url: '/contacte', year: '05' }
+    ];
+
+    // Poblar las 5 pestañas dentro de .nav-dropdown__content-li
     if (navListContainer) {
       navListContainer.innerHTML = '';
-      films.forEach((f, idx) => {
+      navSections.forEach((sec, idx) => {
         const itemDiv = document.createElement('div');
         itemDiv.setAttribute('role', 'listitem');
         itemDiv.className = 'w-dyn-item';
 
         const link = document.createElement('a');
-        link.setAttribute('data-film-scroll', f.title);
-        link.setAttribute('data-film-status', idx === W ? 'active' : 'inactive');
-        if (idx === W) link.setAttribute('aria-current', 'true');
-        link.href = f.detailUrl;
+        link.href = sec.url;
         link.className = 'nav-dropdown__link';
+        const isCurrentPage = sec.url === '/discografia';
+        link.setAttribute('data-film-status', isCurrentPage ? 'active' : 'inactive');
+        if (isCurrentPage) link.setAttribute('aria-current', 'page');
 
         const bg = document.createElement('div');
         bg.className = 'nav-dropdown__link-bg';
@@ -2116,13 +2125,13 @@ export default function DiscografiaClient() {
 
         const titleH2 = document.createElement('h2');
         titleH2.className = 'nav-dropdown__link-label';
-        titleH2.textContent = f.title;
+        titleH2.textContent = sec.title;
 
         const yearMask = document.createElement('span');
         yearMask.setAttribute('data-nav-year-mask', '');
         const yearSpan = document.createElement('span');
         yearSpan.className = 'nav-dropdown__link-label';
-        yearSpan.textContent = f.year;
+        yearSpan.textContent = sec.year;
         yearMask.appendChild(yearSpan);
 
         inner.appendChild(titleH2);
@@ -2289,7 +2298,7 @@ export default function DiscografiaClient() {
         const countEl = document.createElement('span');
         countEl.setAttribute('data-nav-label-item', 'count');
         countEl.setAttribute('aria-hidden', 'true');
-        countEl.textContent = String(films.length);
+        countEl.textContent = String(navSections.length);
         track.appendChild(wordEl);
         track.appendChild(countEl);
         labelSpan.appendChild(track);
@@ -2316,7 +2325,7 @@ export default function DiscografiaClient() {
     function morphNavLabel(mode: 'word' | 'count', immediate = false) {
       if (!navLabelState) return;
       refreshLabelWidths();
-      const showCount = mode === 'count' && films.length > 0;
+      const showCount = mode === 'count' && navSections.length > 0;
       const targetMode = showCount ? 'count' : 'word';
       const targetW = showCount ? navLabelState.widths.count : navLabelState.widths.word;
       if (!targetW) return;
@@ -2506,7 +2515,6 @@ export default function DiscografiaClient() {
         navScroller.scrollTop = 0;
       }
       morphNavLabel('count');
-      syncActiveDropdownRow(W, films[W]?.title);
       trackDotDuringTransition(750);
       requestAnimationFrame(() => updateDropdownScrollbar());
     }
@@ -3175,36 +3183,6 @@ export default function DiscografiaClient() {
                       alt="Miquel Gil"
                       className="miquel-handwritten-logo"
                     />
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="/discografia"
-                    aria-current="page"
-                    data-nav-page="current"
-                    className="nav-link w--current"
-                  >
-                    <span className="nav-link__label">Discografia</span>
-                  </a>
-                </li>
-                <li>
-                  <a href="/agenda" data-nav-page="other" className="nav-link">
-                    <span className="nav-link__label">Directes</span>
-                  </a>
-                </li>
-                <li>
-                  <a href="/biografia" data-nav-page="other" className="nav-link">
-                    <span className="nav-link__label">Biografia</span>
-                  </a>
-                </li>
-                <li className="nav-hide-mobile">
-                  <a href="/contractacio" data-nav-page="other" className="nav-link">
-                    <span className="nav-link__label">Contractació</span>
-                  </a>
-                </li>
-                <li className="nav-hide-mobile">
-                  <a href="/contacte" data-nav-page="other" className="nav-link">
-                    <span className="nav-link__label">Contacte</span>
                   </a>
                 </li>
                 <li>
