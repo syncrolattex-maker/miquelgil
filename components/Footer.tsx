@@ -4,8 +4,6 @@ export default function Footer() {
       <span>© {new Date().getFullYear()} Miquel Gil — Tots els drets reservats</span>
       <div className="footer__links">
         <a href="/contacte">Contacte</a>
-        <a href="/media">Media</a>
-        <a href="/descarregues">Descàrregues</a>
         <a
           href="https://www.instagram.com/miquelgil.oficial/"
           target="_blank"

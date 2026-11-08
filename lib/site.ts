@@ -19,11 +19,8 @@ export const nav = [
   { label: "Directes", href: "/agenda", index: "03" },
   { label: "Contractació", href: "/contractacio", index: "04" },
   { label: "Biografia", href: "/biografia", index: "05" },
-  { label: "Contacte", href: "/contacte", index: "06" },
-  { label: "Premsa & Media", href: "/media", index: "07" },
-  { label: "Cronologia", href: "/cronologia", index: "08" },
-  { label: "Mural Sonor", href: "/mural-sonor", index: "09" },
-  { label: "Descàrregues", href: "/descarregues", index: "10" },
+  { label: "Cronologia", href: "/cronologia", index: "06" },
+  { label: "Contacte", href: "/contacte", index: "07" },
 ];
 
 export const siteKeyMessage = {

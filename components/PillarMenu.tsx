@@ -15,10 +15,7 @@ const MAIN_LINKS = [
 ];
 
 const SECONDARY_LINKS = [
-  { href: "/media", label: "Premsa & Media" },
   { href: "/cronologia", label: "Cronologia" },
-  { href: "/mural-sonor", label: "Mural Sonor" },
-  { href: "/descarregues", label: "Descàrregues" },
 ];
 
 export default function PillarMenu() {

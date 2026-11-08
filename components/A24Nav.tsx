@@ -16,11 +16,8 @@ export const NAV_SECTIONS = [
   { title: "Directes", url: "/agenda", year: "03" },
   { title: "Biografia", url: "/biografia", year: "04" },
   { title: "Contractació", url: "/contractacio", year: "05" },
-  { title: "Media", url: "/media", year: "06" },
-  { title: "Mural Sonor", url: "/mural-sonor", year: "07" },
-  { title: "Cronologia", url: "/cronologia", year: "08" },
-  { title: "Descàrregues", url: "/descarregues", year: "09" },
-  { title: "Contacte", url: "/contacte", year: "10" }
+  { title: "Cronologia", url: "/cronologia", year: "06" },
+  { title: "Contacte", url: "/contacte", year: "07" }
 ];
 
 export default function A24Nav({ currentSection = "/discografia", theme = "dark" }: A24NavProps) {
