@@ -230,18 +230,6 @@ export default function ProductionClient({ album }: ProductionClientProps) {
       const firstScriptTag = document.getElementsByTagName('script')[0];
       firstScriptTag?.parentNode?.insertBefore(tag, firstScriptTag);
     }
-
-    // En móviles, solicitar orientación horizontal si la Screen Orientation API está disponible
-    if (typeof window !== 'undefined' && window.innerWidth <= 991) {
-      try {
-        const screenAny = window.screen as any;
-        if (screenAny?.orientation?.lock) {
-          screenAny.orientation.lock('landscape').catch(() => {
-            // No admitido o requiere interacción fullscreen previa
-          });
-        }
-      } catch (_) {}
-    }
   }, []);
 
   // Inicializar y sincronizar reproductor de YouTube de forma bidireccional y robusta
@@ -382,14 +370,6 @@ export default function ProductionClient({ album }: ProductionClientProps) {
         setTrailerOpen(false);
         if (playerRef.current && typeof playerRef.current.pauseVideo === 'function') {
           playerRef.current.pauseVideo();
-        }
-        if (typeof window !== 'undefined') {
-          try {
-            const screenAny = window.screen as any;
-            if (screenAny?.orientation?.unlock) {
-              screenAny.orientation.unlock();
-            }
-          } catch (_) {}
         }
       }
     };
@@ -738,7 +718,7 @@ export default function ProductionClient({ album }: ProductionClientProps) {
       // Conversión de píxeles a unidades Three.js
       ht = (2 * cameraDistance * Math.tan(THREE.MathUtils.degToRad(cameraFOV) / 2)) / height;
       const isMobile = width <= 991;
-      const scaleMultiplier = isMobile ? (width <= 650 ? 0.72 : 0.82) : 1.0;
+      const scaleMultiplier = isMobile ? (width <= 650 ? 0.88 : 0.98) : 1.25;
       pt = ((Math.min(1.2 * height, 1.3 * width) * ht) / 2) * scaleMultiplier;
 
       // Alineación con la 4ª línea separadora horizontal (.divider-horizontal)

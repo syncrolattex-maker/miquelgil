@@ -111,7 +111,7 @@
 
 .nav-logo {
   z-index: 2;
-  padding: 0.4em 0.9em;
+  padding: 0.65em 1.4em;
   display: flex;
   align-items: center;
   position: relative;
@@ -565,7 +565,7 @@
   }
 
   .nav-logo {
-    padding: 0.25em 0.5em;
+    padding: 0.5em 1.1em;
   }
 
   .miquel-handwritten-logo {
@@ -628,21 +628,9 @@
     inset: auto 0% 0%;
   }
 
-  /* Botón de menú móvil A24 ([data-menu-button], <= 991px) */
+  /* Botón de menú móvil A24 eliminado */
   .nav-menu-button {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    gap: 5px;
-    width: 2.5em;
-    height: 2.5em;
-    background: transparent;
-    border: none;
-    cursor: pointer;
-    padding: 0;
-    margin-left: 0.25em;
-    z-index: 5;
+    display: none !important;
   }
 
   .nav-menu-button__line {

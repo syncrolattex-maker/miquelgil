@@ -322,23 +322,6 @@ export default function A24Nav({ currentSection = "/discografia", theme = "dark"
               </li>
             </ul>
           </div>
-
-          {/* BOTÓN DE MENÚ MÓVIL (<= 991px) */}
-          <button
-            type="button"
-            data-menu-button=""
-            className="nav-menu-button"
-            aria-label="Menú de navegació"
-            aria-expanded={menuStatus === "open"}
-            onClick={(e) => {
-              e.stopPropagation();
-              setMenuStatus(menuStatus === "open" ? "closed" : "open");
-              setDropdownOpen(false);
-            }}
-          >
-            <span className="nav-menu-button__line" aria-hidden="true" />
-            <span className="nav-menu-button__line" aria-hidden="true" />
-          </button>
         </div>
       </div>
       <div

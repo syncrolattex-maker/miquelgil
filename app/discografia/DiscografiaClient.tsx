@@ -2492,8 +2492,6 @@ export default function DiscografiaClient() {
       positionPageDot(false);
     }
 
-    const navMenuBtn = navEl?.querySelector('[data-menu-button]') as HTMLButtonElement | null;
-
     // Control de bloqueo de scroll de página accesible (window.siteScrollLock)
     function setScrollLock(locked: boolean) {
       (window as any).siteScrollLock = locked;
@@ -2541,26 +2539,6 @@ export default function DiscografiaClient() {
         }
         updateMobileDockWidth();
       }, 520);
-    }
-
-    // Toggle de menú móvil ([data-menu-button], <= 991px)
-    function toggleMobileMenu() {
-      if (!navEl || !navMenuBtn) return;
-      const currentStatus = navEl.getAttribute('data-menu-status') || 'closed';
-      const nextStatus = currentStatus === 'open' ? 'closed' : 'open';
-      navEl.setAttribute('data-menu-status', nextStatus);
-      navMenuBtn.setAttribute('aria-expanded', nextStatus === 'open' ? 'true' : 'false');
-      if (nextStatus === 'open') {
-        closeNavDropdown(true);
-      }
-    }
-
-    if (navMenuBtn) {
-      navMenuBtn.addEventListener('click', (ev) => {
-        ev.preventDefault();
-        ev.stopPropagation();
-        toggleMobileMenu();
-      });
     }
 
     // Eventos de scroll y arrastre de la barra de progreso del dropdown
@@ -2843,7 +2821,6 @@ export default function DiscografiaClient() {
       closeNavDropdown(true);
       if (navEl) {
         navEl.setAttribute('data-menu-status', 'closed');
-        navMenuBtn?.setAttribute('aria-expanded', 'false');
       }
       updateMobileDockWidth();
       positionPageDot(false);
@@ -3237,19 +3214,6 @@ export default function DiscografiaClient() {
                 </li>
               </ul>
             </div>
-
-            {/* BOTÓN DE MENÚ MÓVIL A24 ([data-menu-button], <= 991px) */}
-            <button
-              type="button"
-              data-menu-button=""
-              className="nav-menu-button"
-              aria-label="Menú de navegació"
-              aria-expanded="false"
-              aria-controls="nav-center-menu"
-            >
-              <span className="nav-menu-button__line" aria-hidden="true"></span>
-              <span className="nav-menu-button__line" aria-hidden="true"></span>
-            </button>
           </div>
         </div>
         <div className="page-bg"></div>

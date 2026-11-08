@@ -570,7 +570,7 @@
 
 .trailer__vh {
   position: relative;
-  min-height: 85vh;
+  min-height: 90vh;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -579,12 +579,12 @@
 
 .trailer__bg {
   position: absolute;
-  inset: -15%;
-  width: 130%;
-  height: 130%;
+  inset: -10%;
+  width: 120%;
+  height: 120%;
   object-fit: cover;
-  opacity: 0.35;
-  filter: grayscale(70%) brightness(0.6) contrast(1.2);
+  opacity: 0.65;
+  filter: grayscale(20%) brightness(0.85) contrast(1.1);
   pointer-events: none;
 }
 
@@ -1186,42 +1186,5 @@
 
   .trailer-lightbox__ui {
     padding: 1rem 1.25rem;
-  }
-
-  /* Forzar rotación horizontal en móvil para el reproductor si el dispositivo se sostiene vertical */
-  @media (orientation: portrait) {
-    .trailer-lightbox__stage {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      width: 100vh !important;
-      height: 100vw !important;
-      transform: translate(-50%, -50%) rotate(90deg);
-      transform-origin: center center;
-    }
-
-    .trailer-lightbox__player {
-      width: 100vh !important;
-      height: 100vw !important;
-    }
-
-    .trailer-lightbox__player iframe,
-    .trailer-lightbox__iframe-masked {
-      width: 100vh !important;
-      height: 100vw !important;
-      min-width: 177.78vw;
-      min-height: 56.25vh;
-      transform: translate(-50%, -50%) scale(1.15);
-    }
-
-    .trailer-lightbox__ui {
-      width: 100vh !important;
-      height: 100vw !important;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%) rotate(90deg);
-      transform-origin: center center;
-      padding: 1rem 1.75rem;
-    }
   }
 }
