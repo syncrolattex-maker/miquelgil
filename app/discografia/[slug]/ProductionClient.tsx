@@ -61,11 +61,15 @@ export default function ProductionClient({ album }: ProductionClientProps) {
     window.scrollTo({ top: 0, left: 0, behavior: 'instant' as ScrollBehavior });
 
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    // Elementos estructurados de la ficha de arriba a abajo
     const heroInfo = heroRef.current?.querySelector<HTMLElement>('.production__info');
     const heroTitle = heroInfo?.querySelector<HTMLElement>('.production__title');
     const heroCredits = heroInfo?.querySelector<HTMLElement>('.production__credits');
-    const heroMeta = heroInfo?.querySelector<HTMLElement>('.production__metadata');
+    const heroMetaItems = heroInfo?.querySelectorAll<HTMLElement>('.production-metadata__item');
     const heroDividers = heroInfo?.querySelectorAll<HTMLElement>('.divider-horizontal');
+    const ctaWrap = heroRef.current?.querySelector<HTMLElement>('.production__cta-wrap');
+    const ctaDivider = ctaWrap?.querySelector<HTMLElement>(':scope > .divider-horizontal');
+    const ctaCrosses = ctaWrap?.querySelectorAll<HTMLElement>('.plus');
     const buttons = containerRef.current?.querySelectorAll<HTMLElement>('[data-reveal="btn"]');
     const heroCover = heroRef.current?.querySelector<HTMLElement>('.production__cover');
 
@@ -81,45 +85,82 @@ export default function ProductionClient({ album }: ProductionClientProps) {
       return;
     }
 
-    // Timeline de revelación coordinada para los elementos de entrada de la ficha
+    // Timeline de revelación coordinada y sincronizada de arriba a abajo tipo cortina:
+    // 1. Título (de abajo hacia arriba)
+    // 2. Línea divisoria 1 (de izquierda a derecha)
+    // 3. Subtítulos y créditos (de abajo hacia arriba)
+    // 4. Línea divisoria 2 (de izquierda a derecha)
+    // 5. Metadatos tabulares (de abajo hacia arriba en cascada)
+    // 6. Línea divisoria inferior de CTAs y cruces en esquinas
+    // 7. Botones de acción desplegándose
     const entranceTl = gsap.timeline({ defaults: { ease: 'power3.out' } });
 
-    // 1. Entrada fluida del título (sube suave y se desvanece de opacidad 0 a 1)
+    // 1. Título: edición y h1 emergen de abajo a arriba
     if (heroTitle) {
       entranceTl.fromTo(
         heroTitle,
         { opacity: 0, y: 35 },
-        { opacity: 1, y: 0, duration: 0.9, delay: 0.08 },
-        0
+        { opacity: 1, y: 0, duration: 0.85 },
+        0.05
       );
     }
 
-    // 2. Despliegue horizontal de las líneas divisoras del hero
-    if (heroDividers && heroDividers.length) {
+    // 2. Primera línea horizontal se despliega de izquierda a derecha justo debajo del título
+    if (heroDividers && heroDividers[0]) {
       entranceTl.fromTo(
-        heroDividers,
+        heroDividers[0],
         { scaleX: 0, transformOrigin: 'left center' },
-        { scaleX: 1, duration: 0.85, stagger: 0.1 },
-        0.2
+        { scaleX: 1, duration: 0.75 },
+        0.25
       );
     }
 
-    // 3. Aparición de créditos y metadatos
+    // 3. Créditos de producción suben de abajo a arriba
     if (heroCredits) {
       entranceTl.fromTo(
         heroCredits,
-        { opacity: 0, y: 20 },
-        { opacity: 1, y: 0, duration: 0.75 },
-        0.3
+        { opacity: 0, y: 25 },
+        { opacity: 1, y: 0, duration: 0.7 },
+        0.45
       );
     }
 
-    if (heroMeta) {
+    // 4. Segunda línea horizontal se despliega de izquierda a derecha bajo los créditos
+    if (heroDividers && heroDividers[1]) {
       entranceTl.fromTo(
-        heroMeta,
+        heroDividers[1],
+        { scaleX: 0, transformOrigin: 'left center' },
+        { scaleX: 1, duration: 0.75 },
+        0.65
+      );
+    }
+
+    // 5. Bloques de metadatos (ANY, GÈNERE, DURADA, FORMAT) emergen de abajo a arriba escalonados
+    if (heroMetaItems && heroMetaItems.length) {
+      entranceTl.fromTo(
+        heroMetaItems,
         { opacity: 0, y: 20 },
-        { opacity: 1, y: 0, duration: 0.75 },
-        0.4
+        { opacity: 1, y: 0, duration: 0.65, stagger: 0.08 },
+        0.8
+      );
+    }
+
+    // 6. Línea de cierre superior de los botones CTA y cruces
+    if (ctaDivider) {
+      entranceTl.fromTo(
+        ctaDivider,
+        { scaleX: 0, transformOrigin: 'left center' },
+        { scaleX: 1, duration: 0.75 },
+        1.0
+      );
+    }
+
+    if (ctaCrosses && ctaCrosses.length) {
+      entranceTl.fromTo(
+        ctaCrosses,
+        { opacity: 0, scale: 0.5 },
+        { opacity: 1, scale: 1, duration: 0.5, stagger: 0.05 },
+        1.05
       );
     }
 
@@ -128,13 +169,13 @@ export default function ProductionClient({ album }: ProductionClientProps) {
         heroCover,
         { opacity: 0, scale: 0.96 },
         { opacity: 1, scale: 1, duration: 1.0 },
-        0.15
+        0.2
       );
     }
 
-    // 4. Animación cinemática de los botones CTA
+    // 7. Animación sincronizada de los botones CTA
     if (buttons && buttons.length) {
-      const ctaStart = 0.55;
+      const ctaStart = 1.15;
       const btnStagger = 0.09;
       const duration = 0.7;
       const textDelay = 0.04;
