@@ -55,17 +55,26 @@ export default function A24Nav({ currentSection = "/discografia", theme = "dark"
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [dropdownOpen, menuStatus]);
 
-  // Click outside to close
+  // Click / touch outside to close
   useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
+    const handlePointerDownOutside = (e: PointerEvent | MouseEvent | TouchEvent) => {
       if (!navRef.current) return;
-      if (!navRef.current.contains(e.target as Node)) {
-        setDropdownOpen(false);
-        setMenuStatus("closed");
+      const target = e.target as Node | null;
+      if (!target) return;
+      // Do not close if the event originated inside the nav or the toggle button
+      if (navRef.current.contains(target) || toggleBtnRef.current?.contains(target)) {
+        return;
       }
+      setDropdownOpen(false);
+      setMenuStatus("closed");
     };
-    document.addEventListener("click", handleClickOutside);
-    return () => document.removeEventListener("click", handleClickOutside);
+
+    document.addEventListener("pointerdown", handlePointerDownOutside);
+    document.addEventListener("click", handlePointerDownOutside);
+    return () => {
+      document.removeEventListener("pointerdown", handlePointerDownOutside);
+      document.removeEventListener("click", handlePointerDownOutside);
+    };
   }, []);
 
   // Update scrollbar dimensions
@@ -223,8 +232,12 @@ export default function A24Nav({ currentSection = "/discografia", theme = "dark"
                   aria-controls="nav-index-dropdown"
                   id="nav-dropdown-toggle-btn"
                   onClick={(e) => {
+                    e.preventDefault();
                     e.stopPropagation();
-                    setDropdownOpen(!dropdownOpen);
+                    setDropdownOpen((prev) => !prev);
+                  }}
+                  onPointerDown={(e) => {
+                    e.stopPropagation();
                   }}
                   onMouseEnter={() => {
                     if (window.matchMedia("(hover: hover) and (pointer: fine)").matches && window.innerWidth > 991) {

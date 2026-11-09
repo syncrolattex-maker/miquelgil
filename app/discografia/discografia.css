@@ -748,7 +748,7 @@
     --nav-dock-height: 3.5em;
     --nav-dock-inset: 1em;
     --nav-dock-radius: 0;
-    --nav-open-height: min(28em, 75vh);
+    --nav-open-height: min(34em, 85vh);
     --nav-dock-list-gap: 2.25em;
     --nav-dock-open-width: min(100%, max(var(--nav-dock-width, 100%), 23.75em));
     padding-left: var(--nav-dock-inset);
@@ -756,11 +756,13 @@
     padding-bottom: calc(var(--nav-dock-inset) + env(safe-area-inset-bottom, 0px));
     top: auto;
     bottom: 0;
+    pointer-events: none;
   }
 
   .nav-container {
     padding-left: 0;
     padding-right: 0;
+    pointer-events: none;
   }
 
   .nav-inner {
@@ -768,6 +770,7 @@
     height: var(--nav-dock-height);
     align-items: center;
     padding-top: 0;
+    pointer-events: none;
   }
 
   .nav-bg {
@@ -781,12 +784,14 @@
     inset: auto auto 0% 50%;
     transform: translateX(-50%);
     box-shadow: 0 2px 18px rgba(0, 0, 0, 0.06);
+    pointer-events: none;
   }
 
   .nav[data-nav-dropdown='open'] .nav-bg {
     width: var(--nav-dock-open-width);
     height: var(--nav-open-height);
     transition-duration: var(--nav-open-duration);
+    pointer-events: auto;
   }
 
   .nav-center {
@@ -797,6 +802,7 @@
     height: auto;
     position: static;
     transform: none;
+    pointer-events: auto;
   }
 
   .nav-center__list {
@@ -812,6 +818,7 @@
     margin-right: auto;
     padding-top: 0;
     overflow: visible;
+    pointer-events: auto;
   }
 
   .nav[data-nav-dropdown='open'] .nav-center__list {
@@ -845,6 +852,8 @@
 
   .nav-logo {
     padding: 0.5em 1.1em;
+    pointer-events: auto;
+    touch-action: manipulation;
   }
 
   .miquel-handwritten-logo {
@@ -854,7 +863,12 @@
   .nav-link {
     justify-content: center;
     width: auto;
-    padding: 0.25em 0.65em;
+    padding: 0.45em 0.85em;
+    min-height: 44px;
+    min-width: 44px;
+    pointer-events: auto;
+    touch-action: manipulation;
+    cursor: pointer;
   }
 
   .nav-dropdown {
@@ -869,11 +883,15 @@
 
   [data-dropdown-toggle='open'] + .nav-dropdown {
     height: calc(var(--nav-open-height) - var(--nav-dock-height));
+    pointer-events: auto;
   }
 
   .nav-dropdown__content {
-    padding-top: 1.75em;
+    padding-top: 1.5em;
     padding-bottom: 0.75em;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-y;
   }
 
   .nav-dropdown__content-li {
@@ -884,7 +902,10 @@
   }
 
   .nav-dropdown__link {
-    padding: 0.55em 0.5em;
+    padding: 0.65em 0.6em;
+    min-height: 42px;
+    pointer-events: auto;
+    touch-action: manipulation;
   }
 
   .nav-dropdown__scrollbar {

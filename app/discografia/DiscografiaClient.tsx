@@ -2683,6 +2683,10 @@ export default function DiscografiaClient() {
       }
     };
 
+    const onDropdownTogglePointerDown = (ev: PointerEvent) => {
+      ev.stopPropagation();
+    };
+
     // Navegación con teclado en el propio botón Index
     const onDropdownToggleKeyDown = (ev: KeyboardEvent) => {
       if (ev.key === 'ArrowDown') {
@@ -2745,6 +2749,7 @@ export default function DiscografiaClient() {
     }
     if (dropdownToggle) {
       dropdownToggle.addEventListener('click', onDropdownToggleClick);
+      dropdownToggle.addEventListener('pointerdown', onDropdownTogglePointerDown);
       dropdownToggle.addEventListener('keydown', onDropdownToggleKeyDown);
     }
     navPageLinks.forEach((link) => {
@@ -2753,13 +2758,14 @@ export default function DiscografiaClient() {
       });
     });
 
-    const onDocumentClickNav = (ev: MouseEvent) => {
+    const onDocumentPointerDownNav = (ev: PointerEvent | MouseEvent) => {
       const target = ev.target as Node | null;
       if (!target) return;
-      if (dropdownToggle?.contains(target) || navDropdown?.contains(target)) return;
+      if (dropdownToggle?.contains(target) || navDropdown?.contains(target) || navEl?.contains(target)) return;
       closeNavDropdown(true);
     };
-    document.addEventListener('click', onDocumentClickNav);
+    document.addEventListener('pointerdown', onDocumentPointerDownNav);
+    document.addEventListener('click', onDocumentPointerDownNav);
 
     // Sincronizar fila activa cuando cambia el disco del carrusel
     const onGalleryChangeForNav = (ev: Event) => {
@@ -3060,7 +3066,8 @@ export default function DiscografiaClient() {
 
       window.removeEventListener('keydown', onKeyDown);
       window.removeEventListener('resize', onResize);
-      document.removeEventListener('click', onDocumentClickNav);
+      document.removeEventListener('pointerdown', onDocumentPointerDownNav);
+      document.removeEventListener('click', onDocumentPointerDownNav);
 
       container.removeEventListener('discgallerychange', handleDiscGalleryChange);
       container.removeEventListener('discgallerychange', onGalleryChangeForNav);
