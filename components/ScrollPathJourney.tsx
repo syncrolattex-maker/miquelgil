@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { MotionPathPlugin } from "gsap/MotionPathPlugin";
@@ -14,211 +15,437 @@ if (typeof window !== "undefined") {
 
 interface CheckpointData {
   id: string;
+  stepNum: string;
   year: string;
   badge: string;
   stageNum: string;
   stageId: string;
   isMajorStage?: boolean;
   title: string;
-  subtitle?: string;
+  subtitle: string;
   text: string;
+  extendedNote: string;
   quote?: string;
   media: string;
+  mediaCaption: string;
+  tags: string[];
+  albumLink?: { label: string; href: string };
   progress: number;
   pinX: string;
   pinY: string;
   side: "left" | "right";
 }
 
+// 18 passos enriquits al llarg del Railway (coordenades exactes amb els 18 vèrtexs de la corba SVG d'altura 9400)
 const CHECKPOINTS: CheckpointData[] = [
   {
-    id: "cp-1956",
+    id: "step-01-1956",
+    stepNum: "01 / 18",
     year: "1956",
-    badge: "1956 · CATARROJA",
+    badge: "ETAPA 01 · 1956 · CATARROJA (HORTA SUD)",
     stageNum: "01",
     stageId: "comencar-comencant",
-    title: "BRESSOL I PRIMERS PASSOS",
-    text: "Naix a Catarroja (Horta Sud, València), bressol d'arrel i de tradició musical valenciana.",
+    title: "Bressol d'arrel a l'Horta Sud",
+    subtitle: "Naixement i memòria oral a Catarroja",
+    text: "Miquel Gil naix a Catarroja (Horta Sud, València), en un entorn on el cant d'estil, les albaes, els cants de batre i la cultura popular de l'Albufera formen part del paisatge sonor quotidià.",
+    extendedNote: "Aquesta primera empremta sonora —la veu nua, el melisma lliure i el ritme de la terra— esdevindrà la matèria primera sobre la qual construirà mig segle d'experimentació musical.",
     media: "/images/07-1978-6.jpg",
-    progress: 0.08,
-    pinX: "26%",
-    pinY: "9%",
+    mediaCaption: "Arxiu familiar i primeres arrels a l'Horta Sud",
+    tags: ["Catarroja", "Horta Sud", "Tradició Oral", "L'Albufera"],
+    progress: 0.0217,
+    pinX: "27%",
+    pinY: "4.26%",
     side: "right",
   },
   {
-    id: "cp-1971",
-    year: "1971",
-    badge: "H. 1971 · PRADA",
+    id: "step-02-1971",
+    stepNum: "02 / 18",
+    year: "h. 1971",
+    badge: "ETAPA 01 · H. 1971 · PRADA DE CONFLENT",
     stageNum: "01",
     stageId: "comencar-comencant",
-    title: "TROBADA AMB VICENT TORRENT",
-    text: "Als 15 anys coneix Vicent Torrent a la Universitat Catalana d'Estiu de Prada; Torrent li proposa formar un grup.",
+    title: "La trobada amb Vicent Torrent",
+    subtitle: "Universitat Catalana d'Estiu de Prada",
+    text: "Amb tot just 15 anys coincideix amb Vicent Torrent a la Universitat Catalana d'Estiu de Prada. En aquelles tertúlies d'inquietud cultural i política es gesta la llavor d'un nou moviment musical.",
+    extendedNote: "Torrent li proposa sumar la seua jove i potent veu a un projecte que buscava dignificar la música tradicional valenciana i portar-la al segle XX amb consciència crítica.",
     media: "/images/trobada-vicent-torrent.png",
-    progress: 0.17,
-    pinX: "74%",
-    pinY: "17%",
+    mediaCaption: "Trobada fundacional amb Vicent Torrent (h. 1971)",
+    tags: ["Prada de Conflent", "Vicent Torrent", "Nova Cançó", "Genesi"],
+    progress: 0.0778,
+    pinX: "73%",
+    pinY: "9.57%",
     side: "left",
   },
   {
-    id: "cp-1975",
-    year: "1973—1985",
-    badge: "ETAPA 01 · 1973—1985 · AL TALL",
+    id: "step-03-1975",
+    stepNum: "03 / 18",
+    year: "1975",
+    badge: "ETAPA 01 · 1975 · FUNDACIÓ D'AL TALL",
     stageNum: "01",
     stageId: "comencar-comencant",
     isMajorStage: true,
-    title: "COMENÇAR COMENÇANT",
-    subtitle: "Al Tall i la recuperació de la veu d'arrel",
-    text: "Amb 16 anys cofunda Al Tall al costat de Vicent Torrent i Manolo Miralles en plena clandestinitat. Culmina l'etapa amb l'històric 'Xarq Al-andalus' (1985).",
+    title: "Començar començant: Al Tall",
+    subtitle: "Clandestinitat, censura i recuperació del cant valencià",
+    text: "El 1975 cofunda oficialment Al Tall juntament amb Vicent Torrent i Manolo Miralles. Són anys convulsos de concerts sota vigilància, censura franquista i compromís democràtic.",
+    extendedNote: "Al Tall es converteix en l'escola definitiva on Miquel Gil domina els girs vocals de les jotes, fandangos, romanços i cants de batre, passant de la clandestinitat a omplir places de bous i camps de futbol.",
     quote: "Al Tall fou l'escola perfecta per a aprendre les formes de la música tradicional i mediterrània.",
     media: "/images/07-1978-6.jpg",
-    progress: 0.26,
-    pinX: "26%",
-    pinY: "25%",
+    mediaCaption: "Miquel Gil amb Al Tall durant els anys setanta",
+    tags: ["Al Tall", "Manolo Miralles", "Vicent Torrent", "Represa Cultural"],
+    progress: 0.1339,
+    pinX: "27%",
+    pinY: "14.89%",
     side: "right",
   },
   {
-    id: "cp-1986",
-    year: "1986—1988",
-    badge: "ETAPA 02 · 1986—1988 · SOLITARI",
+    id: "step-04-1985",
+    stepNum: "04 / 18",
+    year: "1985",
+    badge: "ETAPA 01 · 1985 · XARQ AL-ANDALUS",
+    stageNum: "01",
+    stageId: "comencar-comencant",
+    title: "'Xarq Al-andalus' i l'horitzó mediterrani",
+    subtitle: "Connexió amb el Magrib i tancament d'etapa",
+    text: "Fruit de les gires per l'Europa mediterrània i l'encontre amb l'ensemble Muluk el-Hwa de Marràqueix, Al Tall enregistra el llegendari disc 'Xarq Al-andalus' (1985).",
+    extendedNote: "Aquesta obra mestra reafirma la pertinença a una àrea cultural mediterrània comuna i tanca el cicle de Miquel Gil dins d'Al Tall després d'una dècada decisiva.",
+    media: "/images/miquel_gil_inicio.jpg",
+    mediaCaption: "Obertura cap a les sonoritats de la conca mediterrània (1985)",
+    tags: ["Xarq Al-andalus", "Muluk el-Hwa", "Mediterrània", "Comiat d'Al Tall"],
+    progress: 0.1900,
+    pinX: "73%",
+    pinY: "20.21%",
+    side: "left",
+  },
+  {
+    id: "step-05-1986",
+    stepNum: "05 / 18",
+    year: "1986",
+    badge: "ETAPA 02 · 1986 — 1988 · EN SOLITARI",
     stageNum: "02",
     stageId: "transicio-musical",
     isMajorStage: true,
-    title: "TRANSICIÓ MUSICAL",
-    subtitle: "L'esperit lliure i la recerca d'altres aires",
-    text: "Deixa Al Tall per emprendre un camí propi. Guanya els 'Encuentros de canción de autor' i compon per a teatre, cinema, televisió i doblatge.",
-    quote: "La necessitat de respirar altres aires i transgredir els límits del folk tradicional.",
+    title: "Transició musical i esperit lliure",
+    subtitle: "Nous llenguatges, teatre, audiovisual i doblatge",
+    text: "El 1986 emprèn el seu camí com a creador independent per respirar altres aires i transgredir els límits del folk ortodox cap al mestissatge i la contemporaneïtat.",
+    extendedNote: "Guanya els 'Encuentros de canción de autor para jóvenes intérpretes' i desenvolupa una intensa tasca com a compositor de bandes sonores per a teatre, cinema i televisió, així com actor i director de doblatge.",
+    quote: "La necessitat fonda de respirar altres aires i transgredir els límits del folk tradicional.",
     media: "/images/miquel-gil-delange-detras.jpg",
-    progress: 0.35,
-    pinX: "74%",
-    pinY: "34%",
-    side: "left",
+    mediaCaption: "Miquel Gil en l'etapa d'experimentació i recerca en solitari",
+    tags: ["Camí Propi", "Arts Escèniques", "Bandes Sonores", "Doblatge"],
+    progress: 0.2461,
+    pinX: "27%",
+    pinY: "25.53%",
+    side: "right",
   },
   {
-    id: "cp-1988",
-    year: "1988—1994",
-    badge: "ETAPA 03 · 1988—1994 · TERMINAL SUR",
+    id: "step-06-1988",
+    stepNum: "06 / 18",
+    year: "1988",
+    badge: "ETAPA 03 · 1988 — 1994 · TERMINAL SUR",
     stageNum: "03",
     stageId: "eclecticisme",
     isMajorStage: true,
-    title: "ECLECTICISME I FUSIÓ",
-    subtitle: "Terminal Sur: una dècada avançats a la world music",
-    text: "Amb Terminal Sur i Vicente Sabater grava 'Viajero' (1988), connectant sintetitzadors, samplers i loops amb llaüts, bouzoukis i cants de batre.",
+    title: "Eclecticisme i fusió: Terminal Sur",
+    subtitle: "'Viajero' (Plataforma Discos, 1988)",
+    text: "Amb la complicitat de Vicente Sabater crea Terminal Sur ('on acaba el Nord i comença el Sud') i publica l'àlbum 'Viajero', avançant-se una dècada a l'explosió europea de la world music.",
+    extendedNote: "Sintetitzadors, samplers, seqüenciadors i controladors MIDI dialoguen per primera vegada amb llaüts, bandúrries, bouzoukis, cümbüş, buleries i cants de batre.",
     quote: "On acaba el Nord i comença el Sud: sintetitzadors, samplers i instruments ancestrals de doble corda.",
     media: "/images/TerminalSur.jpg",
-    progress: 0.44,
-    pinX: "26%",
-    pinY: "43%",
-    side: "right",
-  },
-  {
-    id: "cp-1997",
-    year: "1997",
-    badge: "ETAPA 04 · 1997 · SEMINOLA",
-    stageNum: "04",
-    stageId: "organic",
-    title: "'BUSCANDO TU OLOR'",
-    text: "Primer disc en solitari publicat amb el seu propi nom: Miquel Gil, amb la veu i les composicions pròpies com a eix.",
-    media: "/images/buscando-tu-olor-1997.jpg",
-    progress: 0.53,
-    pinX: "74%",
-    pinY: "52%",
+    mediaCaption: "Portada original de 'Viajero' amb Terminal Sur (1988)",
+    tags: ["Terminal Sur", "Viajero", "Vicente Sabater", "Samplers & Llaüt"],
+    albumLink: { label: "FITXA DE VIAJERO ↗", href: "/discografia/terminal-sur/" },
+    progress: 0.3022,
+    pinX: "73%",
+    pinY: "30.85%",
     side: "left",
   },
   {
-    id: "cp-2001",
-    year: "1995—2003",
-    badge: "ETAPA 04 · 2001 · ORGÀNIC",
+    id: "step-07-1997",
+    stepNum: "07 / 18",
+    year: "1997",
+    badge: "ETAPA 04 · 1997 · SEMINOLA DISCOS",
     stageNum: "04",
     stageId: "organic",
-    isMajorStage: true,
-    title: "LA REVOLUCIÓ D'ORGÀNIC",
-    subtitle: "En primera persona i punt d'inflexió mediterrani",
-    text: "'Orgànic' (Sonifolk / Galileo MC): tres anys de recerca amb poesia d'Estellés i Casasses que redefiniren per sempre la música mediterrània contemporània.",
-    quote: "Quan Miquel Gil canta és la terra mateixa que s’expressa.",
-    media: "/images/disco_7.jpg",
-    progress: 0.62,
-    pinX: "26%",
-    pinY: "61%",
+    title: "'Buscando tu olor': En primera persona",
+    subtitle: "Primer disc signat amb el seu propi nom",
+    text: "Després de musicar poemes de Mario Benedetti i experimentar amb ritmes d'anada i tornada al costat d'Efrén López, el 1997 publica 'Buscando tu olor' sota el seu nom: Miquel Gil.",
+    extendedNote: "Aquest disc posa la veu i la composició pròpia en primer pla i prepara el laboratori sonor d'on brollarà la revolució d'Orgànic.",
+    media: "/images/buscando-tu-olor-1997.jpg",
+    mediaCaption: "'Buscando tu olor' (1997), inici de la discografia amb nom propi",
+    tags: ["Buscando tu olor", "Seminola", "Mario Benedetti", "Efrén López"],
+    albumLink: { label: "FITXA DEL DISC ↗", href: "/discografia/buscando-tu-olor/" },
+    progress: 0.3583,
+    pinX: "27%",
+    pinY: "36.17%",
     side: "right",
   },
   {
-    id: "cp-2004",
-    year: "2004—PRESENT",
-    badge: "ETAPA 05 · 2004 · KATÀ",
+    id: "step-08-2001",
+    stepNum: "08 / 18",
+    year: "2001",
+    badge: "ETAPA 04 · 2001 · PUNT D'INFLEXIÓ HISTÒRIC",
+    stageNum: "04",
+    stageId: "organic",
+    isMajorStage: true,
+    title: "La revolució d'Orgànic",
+    subtitle: "Sonifolk / Galileo MC · Producció d'Efrén López i Toni Xuclà",
+    text: "Gestat durant tres anys a partir de les lectures poètiques amb Ramon Guillem a la biblioteca de Catarroja (Estellés, Enric Casasses), 'Orgànic' (2001) transforma l'arrel valenciana en llenguatge universal.",
+    extendedNote: "Bordons, polirítmies i timbres ancestrals s'entrellacen amb una producció contemporània exquisida que situa Miquel Gil com una de les grans veus de la Mediterrània.",
+    quote: "Quan Miquel Gil canta és la terra mateixa que s’expressa.",
+    media: "/images/939x0w.jpg",
+    mediaCaption: "Portada d''Orgànic' (2001), obra capital de la música mediterrània",
+    tags: ["Orgànic (2001)", "Enric Casasses", "Estellés", "Toni Xuclà", "Galileo MC"],
+    albumLink: { label: "FITXA D'ORGÀNIC ↗", href: "/discografia/organic/" },
+    progress: 0.4144,
+    pinX: "73%",
+    pinY: "41.49%",
+    side: "left",
+  },
+  {
+    id: "step-09-2004",
+    stepNum: "09 / 18",
+    year: "2004",
+    badge: "ETAPA 05 · 2004 · PROJECCIÓ INTERNACIONAL",
     stageNum: "05",
     stageId: "kata-projeccio",
     isMajorStage: true,
-    title: "KATÀ I PROJECCIÓ UNIVERSAL",
-    subtitle: "World Music Charts Europe i gires internacionals",
-    text: "Amb 'Katà' entra al Top 5 de la World Music Charts Europe i porta el cant valencià als grans festivals d'Europa, el Magrib i la FIL de Guadalajara (Mèxic).",
+    title: "Katà: La porta d'entrada a Europa",
+    subtitle: "Top 5 a la World Music Charts Europe & FIL Guadalajara",
+    text: "Publicat el març del 2004 amb producció d'Òscar Roig i la guitarra flamenca de Raül Rodríguez, 'Katà' escala fins a les posicions 8 i 5 de la World Music Charts Europe.",
+    extendedNote: "Granaïnes, fandangos, rembetika i bolero mallorquí conviuen amb gaides búlgares, duducs i guitarrons, impulsant gires constants per Europa i Mèxic (FIL de Guadalajara).",
     quote: "La veu d'arrel que no s'atura de viatjar: de les llistes europees fins a 'Viatger'.",
     media: "/images/disco_6.png",
-    progress: 0.71,
-    pinX: "74%",
-    pinY: "70%",
-    side: "left",
-  },
-  {
-    id: "cp-2006",
-    year: "2006",
-    badge: "ETAPA 05 · 2006 · EIXOS",
-    stageNum: "05",
-    stageId: "kata-projeccio",
-    title: "PREMIS OVIDI MONTLLOR",
-    text: "'Eixos' (amb producció de Borja Penalba) esdevé el gran guanyador en la primera edició dels Premis Ovidi Montllor.",
-    media: "/images/disco_5.png",
-    progress: 0.80,
-    pinX: "26%",
-    pinY: "79%",
+    mediaCaption: "'Katà' (2004), reconeixement internacional a les llistes europees",
+    tags: ["Katà (2004)", "World Music Charts Europe", "Raül Rodríguez", "Òscar Roig"],
+    albumLink: { label: "FITXA DE KATÀ ↗", href: "/discografia/kata/" },
+    progress: 0.4705,
+    pinX: "27%",
+    pinY: "46.81%",
     side: "right",
   },
   {
-    id: "cp-2019",
-    year: "2019",
-    badge: "ETAPA 05 · 2019 · GEOMETRIES",
+    id: "step-10-2006",
+    stepNum: "10 / 18",
+    year: "2006",
+    badge: "ETAPA 05 · 2006 · EIXOS & EN CONCERT",
     stageNum: "05",
     stageId: "kata-projeccio",
-    title: "PALAU DE LA MÚSICA & À PUNT",
-    text: "'Geometries' (Temps Record), presentat al Palau de la Música de València, i conductor de 'Bambant per casa' a À Punt.",
-    media: "/images/disco_2.png",
-    progress: 0.89,
-    pinX: "74%",
-    pinY: "88%",
+    title: "'Eixos' i triomf als Premis Ovidi Montllor",
+    subtitle: "Producció de Borja Penalba i àlbum 'En Concert' (Galileo MC)",
+    text: "L'any 2006 publica 'Eixos' —amb què esdevé el gran guanyador de la primera edició dels Premis Ovidi Montllor— i el disc en viu 'En Concert' per al segell alemany Galileo Music.",
+    extendedNote: "Una etapa d'alta plenitud escènica que consolida la seua banda habitual i la projecció als principals festivals europeus com Glatt & Verkehrt (Àustria).",
+    media: "/images/disco_5.png",
+    mediaCaption: "'Eixos' (2006), guardonat als I Premis Ovidi Montllor",
+    tags: ["Eixos (2006)", "Premis Ovidi Montllor", "Borja Penalba", "En Concert"],
+    albumLink: { label: "FITXA D'EIXOS ↗", href: "/discografia/eixos/" },
+    progress: 0.5266,
+    pinX: "73%",
+    pinY: "52.13%",
     side: "left",
   },
   {
-    id: "cp-2024",
-    year: "2024—2026",
-    badge: "ETAPA 05 · 2024—2026 · VIATGER",
+    id: "step-11-2009",
+    stepNum: "11 / 18",
+    year: "2009",
+    badge: "ETAPA 05 · 2009 · JAZZ & EXPERIMENTACIÓ",
+    stageNum: "05",
+    stageId: "kata-projeccio",
+    title: "Diàleg amb el Jazz: Manel Camp Trio & David Pastor",
+    subtitle: "Edició limitada d'autor il·lustrada per Jordi Albinyana",
+    text: "El 2009 s'endinsa en la improvisació jazzística al costat del pianista Manel Camp i el trompetista David Pastor en una edició d'art per a col·leccionistes.",
+    extendedNote: "Fandangos i cançons de bressol es revesteixen d'harmonies de jazz contemporani i swing mediterrani, demostrant la versatilitat inesgotable del seu registre vocal.",
+    media: "/images/Captura-de-pantalla-2018-09-05-a-las-14.37.55.png",
+    mediaCaption: "Projecte amb Manel Camp Trio i David Pastor (2009)",
+    tags: ["Jazz Mediterrani", "Manel Camp", "David Pastor", "Jordi Albinyana"],
+    albumLink: { label: "FITXA DEL DISC ↗", href: "/discografia/jazz-manel-camp/" },
+    progress: 0.5827,
+    pinX: "27%",
+    pinY: "57.45%",
+    side: "right",
+  },
+  {
+    id: "step-12-2011",
+    stepNum: "12 / 18",
+    year: "2011",
+    badge: "ETAPA 05 · 2011 · TEMPS RECORD",
+    stageNum: "05",
+    stageId: "kata-projeccio",
+    title: "'Per marcianes': Maduresa d'autor",
+    subtitle: "Onze noves composicions abans d'un parèntesi reflexiu",
+    text: "Amb 'Per marcianes' (Temps Record, 2011), Miquel Gil signa un disc de cançó d'autor mediterrània amb arranjaments acústics depurats i una profunda càrrega poètica.",
+    extendedNote: "Aquest treball obre un període de set anys sense publicar disc en solitari, dedicat intensament als directes, les col·laboracions i la recerca escènica.",
+    media: "/images/disco_3.png",
+    mediaCaption: "'Per marcianes' (Temps Record, 2011)",
+    tags: ["Per marcianes", "Temps Record", "Cançó d'Autor", "Acústic"],
+    albumLink: { label: "FITXA DE PER MARCIANES ↗", href: "/discografia/marcianes/" },
+    progress: 0.6388,
+    pinX: "73%",
+    pinY: "62.77%",
+    side: "left",
+  },
+  {
+    id: "step-13-2013",
+    stepNum: "13 / 18",
+    year: "2013",
+    badge: "ETAPA 05 · 2013 · CAMP NOU (BARCELONA)",
+    stageNum: "05",
+    stageId: "kata-projeccio",
+    title: "Concert per la Llibertat davant 90.000 persones",
+    subtitle: "Clamor col·lectiu i presència als grans esdeveniments",
+    text: "El juny del 2013 participa en l'històric Concert per la Llibertat a l'estadi del Camp Nou davant de 90.000 espectadors, portant el cant valencià a un escenari d'abast internacional.",
+    extendedNote: "Durant aquests anys multiplica les col·laboracions amb formacions de tot el domini lingüístic i de la conca mediterrània, superant el centenar d'enregistraments col·lectius.",
+    media: "/images/2002espai2.jpg",
+    mediaCaption: "Actuació en grans auditoris i esdeveniments multitudinaris",
+    tags: ["Camp Nou", "90.000 espectadors", "Directe", "Compromís"],
+    progress: 0.6949,
+    pinX: "27%",
+    pinY: "68.09%",
+    side: "right",
+  },
+  {
+    id: "step-14-2015",
+    stepNum: "14 / 18",
+    year: "2015",
+    badge: "ETAPA 05 · 2015 · 40 ANYS D'ESCENARIS",
+    stageNum: "05",
+    stageId: "kata-projeccio",
+    title: "40 anys de carrera: 'Matèria' i 'Nus' amb Botifarra",
+    subtitle: "Cimera de les dos grans veus de l'arrel valenciana",
+    text: "Celebra quaranta anys damunt dels escenaris amb l'estrena de la gira 'Matèria' i l'espectacle íntim 'Nus' al costat del seu gran amic i mestre del cant d'estil Pep Gimeno «Botifarra».",
+    extendedNote: "L'espectacle 'Nus', despullat d'artificis i sostingut per la complicitat de dos veus irrepetibles, recorre teatres i places durant més de tres anys d'èxit absolut.",
+    media: "/images/miquel-gil-juan-miguel-morales-13-scaled.jpg",
+    mediaCaption: "Miquel Gil en escena durant la celebració dels 40 anys de trajectòria",
+    tags: ["40 Anys", "Gira Matèria", "Nus", "Pep Gimeno Botifarra"],
+    progress: 0.7510,
+    pinX: "73%",
+    pinY: "73.40%",
+    side: "left",
+  },
+  {
+    id: "step-15-2019",
+    stepNum: "15 / 18",
+    year: "2019",
+    badge: "ETAPA 05 · 2019 · PALAU DE LA MÚSICA & À PUNT",
+    stageNum: "05",
+    stageId: "kata-projeccio",
+    title: "'Geometries' i 'Bambant per casa'",
+    subtitle: "Poesia contemporània i divulgació televisiva a À Punt",
+    text: "Publica 'Geometries' (Temps Record, 2019), presentat solemnement al Palau de la Música de València, musicant versos d'Enric Casasses, Imma Màñez, Joanjo Garcia, Anna Montero i Estellés.",
+    extendedNote: "El mateix any condueix el programa 'Bambant per casa' a la televisió pública valenciana À Punt, recorrent el territori a través de la seua música i la seua gent.",
+    media: "/images/disco_2.png",
+    mediaCaption: "'Geometries' (2019), estrenat al Palau de la Música de València",
+    tags: ["Geometries (2019)", "Palau de la Música", "Bambant per casa", "À Punt"],
+    albumLink: { label: "FITXA DE GEOMETRIES ↗", href: "/discografia/geometries/" },
+    progress: 0.8071,
+    pinX: "27%",
+    pinY: "78.72%",
+    side: "right",
+  },
+  {
+    id: "step-16-2021",
+    stepNum: "16 / 18",
+    year: "2021–23",
+    badge: "ETAPA 05 · 2021 — 2023 · ANIVERSARI D'ORGÀNIC",
+    stageNum: "05",
+    stageId: "kata-projeccio",
+    title: "Gira '20 anys d'Orgànic' i Mural Sonor",
+    subtitle: "Inauguració del Festival ETNO de València (2023)",
+    text: "Commemora les dos dècades del disc que va canviar la música mediterrània amb la gira '20 anys d'Orgànic', inaugurant el festival ETNO de València a l'abril del 2023.",
+    extendedNote: "Paral·lelament encapçala l'espectacle 'Arrel' dins del cicle Mural Sonor (50è aniversari d'ACPV) juntament amb Noèlia Llorens «Titana», connectant generacions del cançoner tradicional.",
+    media: "/images/miquel-gil-juan-miguel-morales-8-scaled.jpg",
+    mediaCaption: "Celebració dels 20 anys d''Orgànic' amb la banda completa",
+    tags: ["20 Anys d'Orgànic", "Festival ETNO", "Mural Sonor", "Titana"],
+    progress: 0.8632,
+    pinX: "73%",
+    pinY: "84.04%",
+    side: "left",
+  },
+  {
+    id: "step-17-2024",
+    stepNum: "17 / 18",
+    year: "2024",
+    badge: "ETAPA 05 · 9 DE MARÇ DE 2024 · TEATRE PRINCIPAL",
     stageNum: "05",
     stageId: "kata-projeccio",
     isMajorStage: true,
-    title: "VIATGER & MIG SEGLE D'ESCENARIS",
-    subtitle: "Teatre Principal de València i continuïtat viva",
-    text: "Estrena de 'Viatger' en memòria de Manolo Miralles, single solidari per la DANA nominat als Premis Ovidi i 50 anys de trajectòria viva.",
+    title: "'Viatger': Homenatge a Manolo Miralles",
+    subtitle: "Artesania digital, memòria viva i estrena al Teatre Principal",
+    text: "El 9 de març del 2024 estrena al Teatre Principal de València 'Viatger' (Temps Record), un disc fet a mà amb producció digital dedicat a la memòria del seu company d'Al Tall Manolo Miralles.",
+    extendedNote: "Finançat amb el suport de la comunitat a Verkami, inclou lletres pròpies, un romanç tradicional, versos de Teresa Pasqual i un sentit homenatge a Joan Baptista Humet.",
     media: "/images/MiquelGilViatger_Principal.webp",
-    progress: 0.97,
+    mediaCaption: "Estrena de 'Viatger' al Teatre Principal de València (2024)",
+    tags: ["Viatger (2024)", "Manolo Miralles", "Teatre Principal", "Teresa Pasqual"],
+    albumLink: { label: "FITXA DE VIATGER ↗", href: "/discografia/viatger/" },
+    progress: 0.9193,
+    pinX: "27%",
+    pinY: "89.36%",
+    side: "right",
+  },
+  {
+    id: "step-18-2026",
+    stepNum: "18 / 18",
+    year: "2025–26",
+    badge: "ETAPA 05 · 2025 — 2026 · MIG SEGLE EN MOVIMENT",
+    stageNum: "05",
+    stageId: "kata-projeccio",
+    title: "Solidaritat amb l'Horta Sud i mig segle en viu",
+    subtitle: "Premis Ovidi 2025 i continuïtat als escenaris (2026)",
+    text: "Impulsa el single col·lectiu solidari per la DANA al costat de Vicent Torrent, Pep Gimeno «Botifarra», Titana i La Maria (nominat als Premis Ovidi 2025).",
+    extendedNote: "El 2026 continua en actiu arreu del territori —com el duo amb Eduard Navarro al festival 2 Terços de Mataró—, fidel a la seua premissa vital: la tradició és matèria viva que sempre camina cap endavant.",
+    media: "/images/portadaCD.webp",
+    mediaCaption: "Miquel Gil (2024–2026): cinquanta anys de viatge sonor ininterromput",
+    tags: ["Horta Sud · DANA", "Premis Ovidi 2025", "Eduard Navarro", "Mig Segle en Viu"],
+    albumLink: { label: "VEURE AGENDA DE DIRECTES ↗", href: "/agenda/" },
+    progress: 0.9698,
     pinX: "50%",
-    pinY: "96%",
+    pinY: "95.21%",
     side: "left",
   },
 ];
 
-// Mapa dels punts de progrés de cada gran etapa per al navegador ràpid superior
+// Mapa dels punts de progrés de cada gran etapa per al navegador superior
 const STAGE_PROGRESS_MAP: Record<string, number> = {
-  "comencar-comencant": 0.26,
-  "transicio-musical": 0.35,
-  "eclecticisme": 0.44,
-  "organic": 0.62,
-  "kata-projeccio": 0.71,
+  "comencar-comencant": 0.1339,
+  "transicio-musical": 0.2461,
+  "eclecticisme": 0.3022,
+  "organic": 0.4144,
+  "kata-projeccio": 0.4705,
 };
+
+const DESKTOP_RAILWAY_PATH = `
+  M 270 150
+  C 270 250, 270 300, 270 400
+  C 270 650, 730 650, 730 900
+  C 730 1150, 270 1150, 270 1400
+  C 270 1650, 730 1650, 730 1900
+  C 730 2150, 270 2150, 270 2400
+  C 270 2650, 730 2650, 730 2900
+  C 730 3150, 270 3150, 270 3400
+  C 270 3650, 730 3650, 730 3900
+  C 730 4150, 270 4150, 270 4400
+  C 270 4650, 730 4650, 730 4900
+  C 730 5150, 270 5150, 270 5400
+  C 270 5650, 730 5650, 730 5900
+  C 730 6150, 270 6150, 270 6400
+  C 270 6650, 730 6650, 730 6900
+  C 730 7150, 270 7150, 270 7400
+  C 270 7650, 730 7650, 730 7900
+  C 730 8150, 270 8150, 270 8400
+  C 270 8680, 500 8720, 500 8950
+`;
 
 export default function ScrollPathJourney() {
   const containerRef = useRef<HTMLDivElement>(null);
   const stRef = useRef<ScrollTrigger | null>(null);
   const [showFullArchive, setShowFullArchive] = useState(false);
   const [activeStageId, setActiveStageId] = useState<string>(BIO_SECTIONS[0].id);
+  const [expandedStepIds, setExpandedStepIds] = useState<Record<string, boolean>>({});
   const [modalSection, setModalSection] = useState<BioSection | null>(null);
+
+  const toggleStepNote = (id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setExpandedStepIds((prev) => ({ ...prev, [id]: !prev[id] }));
+  };
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -265,14 +492,14 @@ export default function ScrollPathJourney() {
           progressText.textContent = `${Math.round(p * 100)}%`;
         }
 
-        // Actualitzar l'etapa activa segons la posició de la guia del punter
-        if (p < 0.31) {
+        // Actualitzar l'etapa activa segons l'avanç del punter en el railway
+        if (p < 0.21) {
           setActiveStageId("comencar-comencant");
-        } else if (p < 0.40) {
+        } else if (p < 0.28) {
           setActiveStageId("transicio-musical");
-        } else if (p < 0.49) {
+        } else if (p < 0.34) {
           setActiveStageId("eclecticisme");
-        } else if (p < 0.67) {
+        } else if (p < 0.45) {
           setActiveStageId("organic");
         } else {
           setActiveStageId("kata-projeccio");
@@ -282,18 +509,24 @@ export default function ScrollPathJourney() {
 
         checkpointElements.forEach((cp) => {
           const targetP = parseFloat(cp.dataset.progress || "0");
-          const isActive = Math.abs(p - targetP) < 0.055;
-          const isPassed = p >= targetP - 0.015;
+          const isActive = Math.abs(p - targetP) < 0.036;
+          // Es revela lateralment quan el punter s'acosta o ja ha passat per la fita
+          const isRevealed = p >= targetP - 0.045;
+          const isPassed = p >= targetP - 0.01;
           cp.classList.toggle("is-active", isActive);
+          cp.classList.toggle("is-revealed", isRevealed);
           cp.classList.toggle("is-passed", isPassed);
         });
       };
+
+      // Revelar el primer pas des de l'inici
+      updateCheckpoints(0.025);
 
       const st = ScrollTrigger.create({
         trigger: containerRef.current,
         start: "top top",
         end: "bottom bottom",
-        scrub: 0.7,
+        scrub: 0.65,
         animation: tl,
         invalidateOnRefresh: true,
         onUpdate: (self) => {
@@ -326,7 +559,7 @@ export default function ScrollPathJourney() {
 
   const handleStageTabClick = (stage: BioSection) => {
     setActiveStageId(stage.id);
-    const targetP = STAGE_PROGRESS_MAP[stage.id] ?? 0.08;
+    const targetP = STAGE_PROGRESS_MAP[stage.id] ?? 0.0217;
     jumpToProgress(targetP);
   };
 
@@ -341,11 +574,13 @@ export default function ScrollPathJourney() {
   const activeStageObj = BIO_SECTIONS.find((s) => s.id === activeStageId) || BIO_SECTIONS[0];
 
   return (
-    <div className="journey-scroll theme-dark" ref={containerRef} data-path-journey id="cronologia">
-      {/* Barra superior sticky A24 amb indicador d'etapa i percentatge del punter */}
+    <div className="journey-scroll" ref={containerRef} data-path-journey id="cronologia">
+      <div className="divider-horizontal" />
+
+      {/* Barra superior sticky A24 en tema clar editorial */}
       <div className="journey-bar">
         <div className="journey-bar__left">
-          <span className="journey-bar__kicker">GUIA INTERACTIVA D&apos;ETAPES</span>
+          <span className="journey-bar__kicker">GUIA INTERACTIVA · 18 PASSOS</span>
           <span className="journey-bar__sep">—</span>
           <span className="journey-bar__stage">
             ETAPA {activeStageObj.num}: {activeStageObj.title.toUpperCase()} ({activeStageObj.period})
@@ -361,36 +596,38 @@ export default function ScrollPathJourney() {
               className={`journey-bar__pill ${activeStageId === sec.id ? "is-active" : ""}`}
               title={`Anar a Etapa ${sec.num}: ${sec.title} (${sec.period})`}
             >
-              <span>{sec.num}</span>
-              <span className="journey-bar__pill-name">{sec.title}</span>
+              <span>ETAPA {sec.num}</span>
+              <span className="journey-bar__pill-name">· {sec.title}</span>
             </button>
           ))}
         </div>
 
         <span className="journey-bar__progress">
-          RECORREGUT <span data-journey-progress-text>0%</span>
+          TRAJECTÒRIA <span data-journey-progress-text>0%</span>
         </span>
       </div>
 
-      {/* Capçalera editorial A24 de la guia d'etapes i cronologia */}
+      {/* Capçalera editorial A24 sobre fons clar */}
       <header className="journey-head">
         <div className="journey-head__title">
           <p className="journey-kicker">03 / LES 5 ETAPES I CRONOLOGIA INTERACTIVA (1956 — 2026)</p>
-          <h2>CINC DÈCADES DE CAMÍ I MÚSICA</h2>
+          <h2>CINC ETAPES, UNA VIDA DE MÚSICA</h2>
         </div>
         <div className="journey-head__intro">
           <p className="journey-lede">
-            De la fundació d&apos;Al Tall en plena clandestinitat a la revolució d&apos;<em>Orgànic</em>, l&apos;èxit europeu de <em>Katà</em> i l&apos;estrena de <em>Viatger</em>: segueix el punter al llarg de la guia per recórrer les cinc etapes biogràfiques i les fites històriques.
+            De la fundació d&apos;Al Tall el 1975 a la revolució d&apos;<em>Orgànic</em>, l&apos;èxit europeu de <em>Katà</em> i l&apos;estrena de <em>Viatger</em>: a mesura que baixes pel recorregut, el punter guia desplega pels laterals les imatges d&apos;arxiu, la història de cada etapa i les 18 fites capitals.
           </p>
           <p className="journey-prompt">
             <span className="journey-prompt__dot" aria-hidden="true"></span>
-            <strong>FES SCROLL PER FER BAIXAR EL PUNTER PER LA GUIA</strong>
-            <span>O CLICA QUALSEVOL ETAPA PER SALTAR-HI I LLEGIR LA CRÒNICA</span>
+            <strong>FES SCROLL PER BAIXAR PEL RECORREGUT (18 PASSOS INTERACTIUS)</strong>
+            <span>O SELECCIONA UNA ETAPA PER SALTAR-HI I OBRIR EL DOSSIER COMPLET</span>
           </p>
         </div>
       </header>
 
-      {/* Selector A24 de les 5 Grans Etapes connectat a la guia */}
+      <div className="divider-horizontal" />
+
+      {/* Navegador de les 5 Grans Etapes amb descripció i valor afegit */}
       <div className="journey-stages-index">
         {BIO_SECTIONS.map((sec) => {
           const isCurrent = activeStageId === sec.id;
@@ -414,14 +651,15 @@ export default function ScrollPathJourney() {
               </div>
               <h3 className="journey-stage-card__title">{sec.title}</h3>
               <p className="journey-stage-card__sub">{sec.subtitle}</p>
+              <p className="journey-stage-card__summary">{sec.summary}</p>
               <div className="journey-stage-card__actions">
-                <span className="journey-stage-card__goto">BAIXAR A LA GUIA ↓</span>
+                <span className="journey-stage-card__goto">ANAR AL PUNT DE LA GUIA ↓</span>
                 <button
                   type="button"
                   className="journey-stage-card__read"
                   onClick={(e) => openStageModal(sec.id, e)}
                 >
-                  CRÒNICA COMPLETA ↗
+                  DOSSIER DE L&apos;ETAPA ↗
                 </button>
               </div>
             </div>
@@ -429,83 +667,40 @@ export default function ScrollPathJourney() {
         })}
       </div>
 
-      {/* Escenari de la Guia Interactiva amb el Punter (MotionPathPlugin) */}
+      <div className="divider-horizontal" />
+
+      {/* Escenari del Railway amb Punter Guia i 18 Passos Laterals */}
       <div className="journey-stage">
-        {/* Ruta Sinuosa Desktop SVG */}
+        {/* Ruta Sinuosa Desktop SVG (18 passos / 9400px viewBox) */}
         <svg
           className="journey-map journey-map--desktop"
-          viewBox="0 0 1000 4800"
+          viewBox="0 0 1000 9400"
           aria-hidden="true"
           focusable="false"
         >
-          {/* Ruta Guia Puntejada Base */}
-          <path
-            className="route-shadow"
-            d="
-              M 260 200
-              C 160 380, 260 480, 260 580
-              C 260 760, 740 720, 740 920
-              C 740 1120, 260 1080, 260 1300
-              C 260 1520, 740 1480, 740 1700
-              C 740 1920, 260 1880, 260 2100
-              C 260 2320, 740 2280, 740 2500
-              C 740 2720, 260 2680, 260 2900
-              C 260 3120, 740 3080, 740 3300
-              C 740 3520, 260 3480, 260 3700
-              C 260 3920, 740 3880, 740 4100
-              C 740 4320, 500 4420, 500 4650
-            "
-          />
-          {/* Ruta de Progrés Il·luminada pel Punter */}
+          <path className="route-shadow" d={DESKTOP_RAILWAY_PATH} />
           <path
             className="route-progress"
             data-journey-progress="desktop"
-            d="
-              M 260 200
-              C 160 380, 260 480, 260 580
-              C 260 760, 740 720, 740 920
-              C 740 1120, 260 1080, 260 1300
-              C 260 1520, 740 1480, 740 1700
-              C 740 1920, 260 1880, 260 2100
-              C 260 2320, 740 2280, 740 2500
-              C 740 2720, 260 2680, 260 2900
-              C 260 3120, 740 3080, 740 3300
-              C 740 3520, 260 3480, 260 3700
-              C 260 3920, 740 3880, 740 4100
-              C 740 4320, 500 4420, 500 4650
-            "
+            d={DESKTOP_RAILWAY_PATH}
           />
-          {/* Path Guia de Moviment del Punter */}
           <path
             className="route-motion"
             data-journey-path="desktop"
-            d="
-              M 260 200
-              C 160 380, 260 480, 260 580
-              C 260 760, 740 720, 740 920
-              C 740 1120, 260 1080, 260 1300
-              C 260 1520, 740 1480, 740 1700
-              C 740 1920, 260 1880, 260 2100
-              C 260 2320, 740 2280, 740 2500
-              C 740 2720, 260 2680, 260 2900
-              C 260 3120, 740 3080, 740 3300
-              C 740 3520, 260 3480, 260 3700
-              C 260 3920, 740 3880, 740 4100
-              C 740 4320, 500 4420, 500 4650
-            "
+            d={DESKTOP_RAILWAY_PATH}
           />
         </svg>
 
         {/* Ruta Lineal Mòbil SVG */}
         <svg
           className="journey-map journey-map--mobile"
-          viewBox="0 0 380 4800"
+          viewBox="0 0 380 9400"
           aria-hidden="true"
           focusable="false"
         >
-          <path className="route-shadow" d="M 44 80 L 44 4650" />
-          <path className="route-progress" data-journey-progress="mobile" d="M 44 80 L 44 4650" />
-          <path className="route-motion" data-journey-path="mobile" d="M 44 80 L 44 4650" />
+          <path className="route-shadow" d="M 44 120 L 44 9000" />
+          <path className="route-progress" data-journey-progress="mobile" d="M 44 120 L 44 9000" />
+          <path className="route-motion" data-journey-path="mobile" d="M 44 120 L 44 9000" />
         </svg>
 
         {/* Punter Guia en Moviment (Marker Bead amb direcció) */}
@@ -513,78 +708,132 @@ export default function ScrollPathJourney() {
           <span className="journey-marker__nose"></span>
         </span>
 
-        {/* Fites i Etapes al llarg de la Guia */}
+        {/* Llista dels 18 Passos Laterals que apareixen amb l'avanç del Railway */}
         <ol className="checkpoint-list">
-          {CHECKPOINTS.map((cp) => (
-            <li key={cp.id}>
-              <div
-                role="button"
-                tabIndex={0}
-                className={`checkpoint checkpoint--${cp.side} ${
-                  cp.isMajorStage ? "checkpoint--stage" : ""
-                }`}
-                data-journey-checkpoint
-                data-progress={cp.progress}
-                onClick={() => jumpToProgress(cp.progress)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" || e.key === " ") {
-                    e.preventDefault();
-                    jumpToProgress(cp.progress);
+          {CHECKPOINTS.map((cp) => {
+            const isNoteExpanded = !!expandedStepIds[cp.id];
+            return (
+              <li key={cp.id}>
+                <div
+                  role="button"
+                  tabIndex={0}
+                  className={`checkpoint checkpoint--${cp.side} ${
+                    cp.isMajorStage ? "checkpoint--stage" : ""
+                  }`}
+                  data-journey-checkpoint
+                  data-progress={cp.progress}
+                  onClick={() => jumpToProgress(cp.progress)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      jumpToProgress(cp.progress);
+                    }
+                  }}
+                  style={
+                    {
+                      "--pin-x": cp.pinX,
+                      "--pin-y": cp.pinY,
+                      "--pin-x-m": "44px",
+                      "--pin-y-m": cp.pinY,
+                    } as React.CSSProperties
                   }
-                }}
-                style={
-                  {
-                    "--pin-x": cp.pinX,
-                    "--pin-y": cp.pinY,
-                    "--pin-x-m": "44px",
-                    "--pin-y-m": cp.pinY,
-                  } as React.CSSProperties
-                }
-              >
-                <span className="checkpoint-pin" aria-hidden="true"></span>
+                >
+                  {/* Pin sobre la guia i braç connector */}
+                  <span className="checkpoint-pin" aria-hidden="true"></span>
 
-                <span className="checkpoint-media">
-                  <img
-                    src={cp.media}
-                    alt={cp.title}
-                    width={420}
-                    height={260}
-                    loading="lazy"
-                    decoding="async"
-                  />
-                  {cp.isMajorStage && (
-                    <span className="checkpoint-stage-pill">ETAPA {cp.stageNum}</span>
-                  )}
-                </span>
+                  {/* Targeta editorial que entra des del lateral */}
+                  <div className="checkpoint-card-inner">
+                    <span className="checkpoint-media">
+                      <img
+                        src={cp.media}
+                        alt={cp.title}
+                        width={460}
+                        height={290}
+                        loading="lazy"
+                        decoding="async"
+                      />
+                      <span className="checkpoint-step-badge">PAS {cp.stepNum}</span>
+                      {cp.isMajorStage && (
+                        <span className="checkpoint-stage-pill">
+                          CAPÍTOL CLAU · ETAPA {cp.stageNum}
+                        </span>
+                      )}
+                    </span>
 
-                <span className="checkpoint-copy">
-                  <span className="checkpoint-day">{cp.badge}</span>
-                  <strong className="checkpoint-title">{cp.title}</strong>
-                  {cp.subtitle && (
-                    <span className="checkpoint-subtitle">{cp.subtitle}</span>
-                  )}
-                  <span className="checkpoint-note">{cp.text}</span>
-                  {cp.quote && (
-                    <span className="checkpoint-quote">“{cp.quote}”</span>
-                  )}
+                    <div className="checkpoint-caption-bar">
+                      <span>{cp.mediaCaption}</span>
+                      <span>{cp.year}</span>
+                    </div>
 
-                  <span className="checkpoint-actions">
-                    <button
-                      type="button"
-                      className="checkpoint-read-btn"
-                      onClick={(e) => openStageModal(cp.stageId, e)}
-                    >
-                      <span>LLEGIR CRÒNICA DE L&apos;ETAPA {cp.stageNum} ↗</span>
-                    </button>
-                  </span>
-                </span>
-              </div>
-            </li>
-          ))}
+                    <div className="checkpoint-copy">
+                      <span className="checkpoint-day">{cp.badge}</span>
+                      <strong className="checkpoint-title">{cp.title}</strong>
+                      <span className="checkpoint-subtitle">{cp.subtitle}</span>
+                      <span className="checkpoint-note">{cp.text}</span>
+
+                      {/* Valor afegit desplegable in-place */}
+                      {(isNoteExpanded || cp.isMajorStage) && (
+                        <div className="checkpoint-extended">
+                          <p className="checkpoint-extended__p">{cp.extendedNote}</p>
+                          {cp.quote && (
+                            <blockquote className="checkpoint-quote">
+                              “{cp.quote}”
+                            </blockquote>
+                          )}
+                        </div>
+                      )}
+
+                      {/* Etiquetes temàtiques de la fita */}
+                      <div className="checkpoint-tags">
+                        {cp.tags.map((tag) => (
+                          <span key={tag} className="checkpoint-tag">
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
+
+                      {/* Botons interactius de cada pas */}
+                      <div className="checkpoint-actions">
+                        {!cp.isMajorStage && (
+                          <button
+                            type="button"
+                            className="checkpoint-expand-btn"
+                            onClick={(e) => toggleStepNote(cp.id, e)}
+                          >
+                            {isNoteExpanded ? "MENYS DETALL −" : "MÉS CONTEXT +"}
+                          </button>
+                        )}
+
+                        <button
+                          type="button"
+                          className="checkpoint-read-btn"
+                          onClick={(e) => openStageModal(cp.stageId, e)}
+                        >
+                          <span>CRÒNICA ETAPA {cp.stageNum} ↗</span>
+                        </button>
+
+                        {cp.albumLink && (
+                          <Link
+                            href={cp.albumLink.href}
+                            className="checkpoint-album-link"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            {cp.albumLink.label}
+                          </Link>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </li>
+            );
+          })}
         </ol>
       </div>
 
-      {/* Botó A24 per desplegar el quadre complet de les 18 fites històriques */}
+      <div className="divider-horizontal" style={{ marginTop: "4rem" }} />
+
+      {/* Botó A24 per desplegar l'índex tabular complet de les 18 fites */}
       <div className="journey-archive-toggle">
         <button
           type="button"
@@ -598,14 +847,14 @@ export default function ScrollPathJourney() {
               data-hover-inner
               data-text={
                 showFullArchive
-                  ? "AMAGAR L'ARXIU CRONOLÒGIC COMPLET ↑"
-                  : "DESPLEGAR LES 18 FITES HISTÒRIQUES VERIFICADES ↓"
+                  ? "AMAGAR TAULA RESUM DE LES 18 FITES ↑"
+                  : "VEURE TAULA RESUM DE LES 18 FITES HISTÒRIQUES ↓"
               }
             >
               <span>
                 {showFullArchive
-                  ? "AMAGAR L'ARXIU CRONOLÒGIC COMPLET ↑"
-                  : "DESPLEGAR LES 18 FITES HISTÒRIQUES VERIFICADES ↓"}
+                  ? "AMAGAR TAULA RESUM DE LES 18 FITES ↑"
+                  : "VEURE TAULA RESUM DE LES 18 FITES HISTÒRIQUES ↓"}
               </span>
             </span>
           </span>
@@ -613,26 +862,36 @@ export default function ScrollPathJourney() {
         </button>
       </div>
 
-      {/* Quadre Editorial Complet de les 18 Fites (Desplegable) */}
+      {/* Quadre Editorial Complet de les 18 Fites (Desplegable en tema clar) */}
       {showFullArchive && (
         <div className="journey-full-ledger">
           <div className="journey-full-ledger__head">
-            <span className="subheading-xs">ÍNDEX CRONOLÒGIC COMPLET (1956 — 2026)</span>
+            <span className="subheading-xs">QUADRE CRONOLÒGIC VERIFICAT (1956 — 2026)</span>
             <span className="subheading-xs">18 FITES OFICIALS</span>
           </div>
           {chronologyFites.map((fita, idx) => (
-            <div key={`${fita.year}-${idx}`} className="ledger-row">
+            <div
+              key={`${fita.year}-${idx}`}
+              className="ledger-row"
+              onClick={() => {
+                const targetCp = CHECKPOINTS[idx];
+                if (targetCp) jumpToProgress(targetCp.progress);
+              }}
+              role="button"
+              tabIndex={0}
+            >
               <span className="ledger-idx">
-                {idx + 1 < 10 ? `0${idx + 1}` : idx + 1} / {chronologyFites.length}
+                PAS {idx + 1 < 10 ? `0${idx + 1}` : idx + 1} / {chronologyFites.length}
               </span>
               <span className="ledger-year">{fita.year}</span>
               <span className="ledger-text">{fita.text}</span>
+              <span className="ledger-goto">ANAR A LA GUIA ↑</span>
             </div>
           ))}
         </div>
       )}
 
-      {/* MODAL EDITORIAL A24 DE CRÒNICA COMPLETA DE L'ETAPA */}
+      {/* MODAL EDITORIAL A24 DE CRÒNICA COMPLETA DE L'ETAPA (FONS CLAR) */}
       {modalSection && (
         <div
           className="journey-modal-backdrop"
@@ -645,11 +904,10 @@ export default function ScrollPathJourney() {
             className="journey-modal-card"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Capçalera fixa del modal */}
             <div className="journey-modal__top">
               <div className="journey-modal__meta">
                 <span className="subheading-xs">
-                  ETAPA {modalSection.num} · {modalSection.period}
+                  DOSSIER BIOGRÀFIC · ETAPA {modalSection.num} ({modalSection.period})
                 </span>
               </div>
               <button
@@ -666,7 +924,7 @@ export default function ScrollPathJourney() {
               <div className="journey-modal__header">
                 <span className="subheading-xs">{modalSection.subtitle}</span>
                 <h2 id="journey-modal-title" className="heading-m">
-                  {modalSection.title}
+                  {modalSection.num}. {modalSection.title}
                 </h2>
               </div>
 
@@ -700,7 +958,7 @@ export default function ScrollPathJourney() {
                 </div>
 
                 <div className="journey-modal__text-col">
-                  <p className="paragraph-xl" style={{ margin: 0, color: "#ffffff" }}>
+                  <p className="paragraph-xl" style={{ margin: 0 }}>
                     {modalSection.summary}
                   </p>
 
