@@ -1,22 +1,12 @@
-import React from "react";
+import { Metadata } from "next";
 import ContractacioClient from "./ContractacioClient";
-import "./contractacio.css";
 
-export const metadata = {
-  title: "Contractació, Dossier i Riders — Miquel Gil",
+export const metadata: Metadata = {
+  title: "Contractació, Formats de Directe i Riders | Miquel Gil — Oficial",
   description:
-    "Informació oficial de contractació, formats de concert (Duo, Trio, Banda, Nus), descàrrega de riders tècnics i dossier per a programadors i festivals.",
+    "Informació oficial de contractació, 5 formats d'espectacle (Duo, Trio, Banda Completa, Nus amb Botifarra i Produccions Especials), riders tècnics i dossiers per a programadors.",
 };
 
 export default function ContractacioPage() {
-  return (
-    <main className="contractacio-page-container">
-      <ContractacioClient />
-      <footer className="contract-footer">
-        <p className="contract-footer-copyright">
-          © 2026 Miquel Gil — Tots els drets reservats
-        </p>
-      </footer>
-    </main>
-  );
+  return <ContractacioClient />;
 }

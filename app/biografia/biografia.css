@@ -299,16 +299,18 @@
     transform: translateY(-100%);
   }
   .bio-a24-page .btn:hover .btn__divider {
-    background-color: #891a20;
+    background-color: #111111;
+    opacity: 0.65;
   }
   .bio-a24-page .btn:hover .btn__p {
-    color: #891a20;
+    color: #111111;
   }
   .bio-a24-page .theme-dark .btn:hover .btn__divider {
-    background-color: #ff3344;
+    background-color: #ffffff;
+    opacity: 0.65;
   }
   .bio-a24-page .theme-dark .btn:hover .btn__p {
-    color: #ff3344;
+    color: #ffffff;
   }
 }
 

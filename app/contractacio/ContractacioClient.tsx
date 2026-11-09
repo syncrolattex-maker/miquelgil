@@ -1,12 +1,21 @@
 "use client";
 
 import React, { useState, useRef, useEffect, useCallback } from "react";
+import Link from "next/link";
 import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import A24Nav from "@/components/A24Nav";
 import { bookingInfo, downloads } from "@/lib/site";
-import InkBloom from "@/components/InkBloom";
+import { initDissolve } from "../discografia/[slug]/dissolveEngine";
+import "./contractacio.css";
+
+if (typeof window !== "undefined") {
+  gsap.registerPlugin(ScrollTrigger);
+}
 
 interface FormatDetail {
   id: string;
+  num: string;
   name: string;
   subtitle: string;
   musicians: string[];
@@ -16,76 +25,100 @@ interface FormatDetail {
   technicalSummary: string;
   riderLink: string;
   badge: string;
+  media: string;
+  mediaCaption: string;
 }
 
 const FORMAT_DETAILS: FormatDetail[] = [
   {
     id: "duo",
+    num: "01",
     name: "Duo Acústic d'Arrel",
     subtitle: "Miquel Gil & Eduard Navarro",
     musicians: [
-      "Miquel Gil (veu principal i guitarra acústica)",
-      "Eduard Navarro (dolçaina, gralla, xirimia, ney, duduc, cítola, moraharpa)",
+      "Miquel Gil — Veu principal i guitarra acústica",
+      "Eduard Navarro — Dolçaina, gralla, xirimia, ney, duduc, cítola i moraharpa",
     ],
     duration: "60 — 75 minuts",
-    idealVenues: "Claustres, ermites, museus, auditoris de cambra i festivals de paisatge.",
-    recentHighlight: "Can Soler (Mataró), Festival 2 Terços (2026).",
-    technicalSummary: "2 línies de veu, microfonia d'instruments acústics de vent i corda, 2 enviaments de monitor/in-ear. Il·luminació càlida de proximitat.",
-    riderLink: "https://drive.google.com/open?id=1R9nioosA6mmmuegtHsc2TClQRR1iIFDl",
-    badge: "Format Íntim",
+    idealVenues:
+      "Claustres patrimonials, ermites, museus, auditoris de cambra i festivals de paisatge.",
+    recentHighlight: "Can Soler (Mataró) · Festival 2 Terços (2026).",
+    technicalSummary:
+      "2 línies de veu, microfonia d'instruments acústics de vent i corda polsada, 2 enviaments de monitor o in-ear. Il·luminació càlida de proximitat.",
+    riderLink: "https://drive.google.com/open?id=1SfJ6nymMaJlXS7g4FYKcYQZH_S6gi8a1",
+    badge: "FORMAT 01 · ÍNTIM & ACÚSTIC",
+    media: "/images/miquel-gil-juan-miguel-morales-8-scaled.jpg",
+    mediaCaption: "Format Duo Acústic d'Arrel — Veu, guitarra i instruments mediterranis",
   },
   {
     id: "trio",
+    num: "02",
     name: "Miquel Gil Trio",
     subtitle: "Veu, Teclats i Baix Elèctric",
     musicians: [
-      "Miquel Gil (veu principal i guitarra)",
-      "Nelo Alfonso (teclats, sintetitzadors, piano i cors)",
-      "Gusmà Gil (baix elèctric)",
+      "Miquel Gil — Veu principal i guitarra",
+      "Nelo Alfonso — Teclats, sintetitzadors, piano i cors",
+      "Gusmà Gil — Baix elèctric",
     ],
     duration: "70 — 75 minuts",
-    idealVenues: "Teatres municipals, cases de cultura, sales de mitjà aforament i cicles de cançó.",
+    idealVenues:
+      "Teatres municipals, cases de cultura, sales de mitjà aforament i cicles de cançó d'autor.",
     recentHighlight: "Teatre Kursaal de Manresa (abril 2024).",
-    technicalSummary: "D.I. estèreo de teclats, D.I. de baix elèctric, veu principal i guitarra electroacústica, 3 mescles de monitor.",
+    technicalSummary:
+      "D.I. estèreo de teclats, D.I. de baix elèctric, veu principal i guitarra electroacústica, 3 mescles independents de monitoratge.",
     riderLink: "https://drive.google.com/open?id=1SfJ6nymMaJlXS7g4FYKcYQZH_S6gi8a1",
-    badge: "Format Versàtil",
+    badge: "FORMAT 02 · VERSÀTIL & CONTEMPORANI",
+    media: "/images/miquel-gil-juan-miguel-morales-13-scaled.jpg",
+    mediaCaption: "Miquel Gil Trio — Equilibri sonor per a teatres i auditoris",
   },
   {
     id: "banda",
+    num: "03",
     name: "Banda Completa (6 Músics)",
-    subtitle: "La màxima riquesa tímbrica i sonora",
+    subtitle: "La màxima potència tímbrica i escènica",
     musicians: [
-      "Miquel Gil (veu principal i guitarra)",
-      "Toni Porcar (guitarra flamenca i elèctrica)",
-      "Eduard Navarro (instruments tradicionals de vent i corda)",
-      "Nelo Alfonso (teclats i sintetitzadors)",
-      "José María Reillo (bateria mediterrània i percussions tradicionals)",
-      "Gusmà Gil (baix elèctric)",
+      "Miquel Gil — Veu principal i guitarra",
+      "Toni Porcar — Guitarra flamenca i elèctrica",
+      "Eduard Navarro — Instruments tradicionals de vent i corda",
+      "Nelo Alfonso — Teclats i sintetitzadors",
+      "José María Reillo — Bateria mediterrània i percussions tradicionals",
+      "Gusmà Gil — Baix elèctric",
     ],
     duration: "90 minuts",
-    idealVenues: "Grans teatres, places majors, auditoris a l'aire lliure i festivals d'estiu.",
-    recentHighlight: "Gira 20 anys d'Orgànic a l'ETNO de València (abril 2023).",
-    technicalSummary: "Sistema P.A. dimensionat, set complet de percussions microfades, 6 mescles independents, disseny d'il·luminació escènica.",
+    idealVenues:
+      "Grans teatres, places majors, auditoris a l'aire lliure i festivals internacionals.",
+    recentHighlight: "Gira 20 anys d'Orgànic · Festival ETNO de València (2023).",
+    technicalSummary:
+      "Sistema P.A. dimensionat a l'aforament, set complet de percussions microfades, 6 mescles independents, disseny d'il·luminació escènica.",
     riderLink: "https://drive.google.com/open?id=1R9nioosA6mmmuegtHsc2TClQRR1iIFDl",
-    badge: "Gran Format",
+    badge: "FORMAT 03 · GRAN FORMAT ESCÈNIC",
+    media: "/images/MiquelGilViatger_Principal.webp",
+    mediaCaption: "Banda Completa de Miquel Gil en directe al Teatre Principal de València",
   },
   {
     id: "nus",
+    num: "04",
     name: "«Nus» amb Pep Gimeno «Botifarra»",
-    subtitle: "Diàleg íntim entre dues veus cabdals de la tradició",
+    subtitle: "Diàleg despullat entre dues veus cabdals de la tradició",
     musicians: [
-      "Miquel Gil (veu i guitarra acústica)",
-      "Pep Gimeno «Botifarra» (veu, pandereta, postisses i percussions)",
+      "Miquel Gil — Veu i guitarra acústica",
+      "Pep Gimeno «Botifarra» — Veu, pandereta, postisses i percussions tradicionals",
     ],
     duration: "75 — 80 minuts",
-    idealVenues: "Teatres, auditoris culturals i trobades de música d'arrel.",
-    recentHighlight: "Més de tres anys de gira conjunta amb entrades exhaurides arreu del país.",
-    technicalSummary: "2 micròfons de veu d'alta sensibilitat, microfonia d'instruments acústics i percussió de mà, 2 monitors.",
+    idealVenues:
+      "Teatres històrics, auditoris culturals i grans trobades de música d'arrel.",
+    recentHighlight:
+      "Més de tres anys de gira conjunta amb entrades exhaurides arreu del país.",
+    technicalSummary:
+      "2 micròfons vocals d'alta sensibilitat, microfonia d'instruments acústics i percussió de mà, 2 mescles de monitoratge a terra.",
     riderLink: "https://drive.google.com/open?id=1SfJ6nymMaJlXS7g4FYKcYQZH_S6gi8a1",
-    badge: "Espectacle Compartit",
+    badge: "FORMAT 04 · PRODUCCIÓ COMPARTIDA",
+    media: "/images/2002espai2.jpg",
+    mediaCaption: "Espectacle «Nus» — Complicitat escènica de dos mestres del cant valencià",
   },
   {
     id: "estrena",
+    num: "05",
     name: "Estrena amb Convidats",
     subtitle: "Produccions Simfòniques i Grans Esdeveniments",
     musicians: [
@@ -93,15 +126,78 @@ const FORMAT_DETAILS: FormatDetail[] = [
       "Artistes convidats de l'escena musical segons repertori i projecte",
     ],
     duration: "90 — 100 minuts",
-    idealVenues: "Teatres principals, festivals inaugurals i auditoris simfònics.",
-    recentHighlight: "Palau de la Música de València (2019) i Teatre Principal de València (2024).",
-    technicalSummary: "Rider tècnic ampliat amb producció escenogràfica i tècnica a mida.",
+    idealVenues:
+      "Teatres principals, concerts inaugurals de festival i auditoris simfònics.",
+    recentHighlight:
+      "Palau de la Música de València (2019) i Teatre Principal de València (2024).",
+    technicalSummary:
+      "Rider tècnic ampliat amb producció escenogràfica, backline i coordinació tècnica a mida de l'auditori.",
     riderLink: "https://drive.google.com/open?id=1R9nioosA6mmmuegtHsc2TClQRR1iIFDl",
-    badge: "Producció Especial",
+    badge: "FORMAT 05 · PRODUCCIÓ ESPECIAL",
+    media: "/images/miquel-gil-juan-miguel-morales-14-scaled.jpg",
+    mediaCaption: "Producció especial per a grans auditoris i estrenes institucionals",
+  },
+];
+
+const OFFICIAL_DOCUMENTS = [
+  {
+    idx: "DOC 01",
+    category: "DOSSIER OFICIAL",
+    title: "Dossier Artístic de Gira 2026 / 2027",
+    description:
+      "Biografia actualitzada, trajectòria artística, fitxes dels 5 formats d'espectacle, repertori i reculls de premsa especialitzada.",
+    meta: "FORMAT PDF · DOCUMENT OFICIAL",
+    actionLabel: "DESCARREGAR DOSSIER ↗",
+    href: downloads[0]?.links[0]?.href || "#",
+  },
+  {
+    idx: "DOC 02",
+    category: "RIDER TÈCNIC · GRAN FORMAT",
+    title: "Rider Tècnic Banda Completa (6 Músics)",
+    description:
+      "Taula de canals d'entrada (Input List), plànol d'escenari (Stage Plot), microfonia requerida, monitoratge i especificacions de P.A.",
+    meta: "FORMAT PDF · EQUIP TÈCNIC",
+    actionLabel: "DESCARREGAR RIDER BANDA ↗",
+    href: downloads[5]?.links[0]?.href || "#",
+  },
+  {
+    idx: "DOC 03",
+    category: "RIDER TÈCNIC · ACÚSTIC",
+    title: "Rider Tècnic Duo, Trio & Format «Nus»",
+    description:
+      "Requeriments tècnics simplificats per a espais patrimonials, claustres, auditoris de cambra i teatres de petit o mitjà aforament.",
+    meta: "FORMAT PDF · EQUIP TÈCNIC",
+    actionLabel: "DESCARREGAR RIDER ACÚSTIC ↗",
+    href: downloads[5]?.links[1]?.href || "#",
+  },
+  {
+    idx: "DOC 04",
+    category: "PREMSA & CARTELLERIA",
+    title: "Pack de Fotografies en Alta Resolució",
+    description:
+      "Imatges promocionals d'autor (Juan Miguel Morales i arxiu oficial) amb drets cedits per a programes de mà, cartelleria i mitjans.",
+    meta: "GOOGLE DRIVE · ALTA RESOLUCIÓ",
+    actionLabel: "OBRIR CARPETA DE PREMSA ↗",
+    href: downloads[2]?.links[0]?.href || "#",
+  },
+  {
+    idx: "DOC 05",
+    category: "DOSSIER DE PREMSA",
+    title: "Recull Històric i Crítica Musical",
+    description:
+      "Selecció d'articles, entrevistes i ressenyes en publicacions nacionals i internacionals (World Music Charts Europe, Enderrock, El País).",
+    meta: "GOOGLE DRIVE · ARXIU DE PREMSA",
+    actionLabel: "CONSULTAR DOSSIER PREMSA ↗",
+    href: downloads[1]?.links[0]?.href || "#",
   },
 ];
 
 export default function ContractacioClient() {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const heroRef = useRef<HTMLElement>(null);
+  const formatsRef = useRef<HTMLElement>(null);
+  const docsRef = useRef<HTMLElement>(null);
+
   const [selectedFormat, setSelectedFormat] = useState<string>("duo");
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
 
@@ -130,13 +226,11 @@ export default function ContractacioClient() {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  // Open modal with specific format preselected
   const handleOpenModal = (formatId: string) => {
     setSelectedFormat(formatId);
     setIsModalOpen(true);
   };
 
-  // Smooth GSAP Close animation
   const handleCloseModal = useCallback(() => {
     if (modalTimelineRef.current) {
       modalTimelineRef.current.kill();
@@ -157,8 +251,7 @@ export default function ContractacioClient() {
 
     tl.to(card, {
       opacity: 0,
-      y: 25,
-      scale: 0.94,
+      y: 24,
       duration: 0.22,
       ease: "power2.in",
     }).to(
@@ -172,7 +265,263 @@ export default function ContractacioClient() {
     );
   }, []);
 
-  // GSAP Entrance animation when modal opens
+  // ============================================================================
+  // 1. ANIMACIÓ D'ENTRADA EN CORTINA SINCRONITZADA (HERO DE DALT A BAIX)
+  // ============================================================================
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: "instant" as ScrollBehavior });
+
+    const prefersReducedMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)"
+    ).matches;
+    const heroInfo = heroRef.current?.querySelector<HTMLElement>(".contract-hero__info");
+    const heroTitle = heroInfo?.querySelector<HTMLElement>(".contract-hero__title");
+    const heroCredits = heroInfo?.querySelector<HTMLElement>(".contract-hero__credits");
+    const heroMetaItems = heroInfo?.querySelectorAll<HTMLElement>(
+      ".contract-metadata__item"
+    );
+    const heroDividers = heroInfo?.querySelectorAll<HTMLElement>(".divider-horizontal");
+    const ctaWrap = heroRef.current?.querySelector<HTMLElement>(
+      ".contract-hero__cta-wrap"
+    );
+    const ctaDividers = ctaWrap?.querySelectorAll<HTMLElement>(
+      ":scope > .divider-horizontal"
+    );
+    const ctaCrosses = ctaWrap?.querySelectorAll<HTMLElement>(".plus");
+    const buttons = heroRef.current?.querySelectorAll<HTMLElement>('[data-reveal="btn"]');
+
+    if (prefersReducedMotion) {
+      if (buttons) {
+        buttons.forEach((btn) => {
+          const dividers = btn.querySelectorAll<HTMLElement>(".btn__divider");
+          const text = btn.querySelector<HTMLElement>(".btn__p");
+          gsap.set(dividers, { scaleX: 1 });
+          if (text) gsap.set(text, { yPercent: 0 });
+        });
+      }
+      return;
+    }
+
+    const entranceTl = gsap.timeline({ defaults: { ease: "power3.out" } });
+
+    if (heroTitle) {
+      entranceTl.fromTo(
+        heroTitle,
+        { opacity: 0, y: 35 },
+        { opacity: 1, y: 0, duration: 0.85 },
+        0.05
+      );
+    }
+
+    if (heroDividers && heroDividers[0]) {
+      entranceTl.fromTo(
+        heroDividers[0],
+        { scaleX: 0, transformOrigin: "left center" },
+        { scaleX: 1, duration: 0.75 },
+        0.25
+      );
+    }
+
+    if (heroCredits) {
+      entranceTl.fromTo(
+        heroCredits,
+        { opacity: 0, y: 25 },
+        { opacity: 1, y: 0, duration: 0.7 },
+        0.45
+      );
+    }
+
+    if (heroDividers && heroDividers[1]) {
+      entranceTl.fromTo(
+        heroDividers[1],
+        { scaleX: 0, transformOrigin: "left center" },
+        { scaleX: 1, duration: 0.75 },
+        0.65
+      );
+    }
+
+    if (heroMetaItems && heroMetaItems.length) {
+      entranceTl.fromTo(
+        heroMetaItems,
+        { opacity: 0, y: 20 },
+        { opacity: 1, y: 0, duration: 0.65, stagger: 0.08 },
+        0.8
+      );
+    }
+
+    if (ctaDividers && ctaDividers.length) {
+      entranceTl.fromTo(
+        ctaDividers,
+        { scaleX: 0, transformOrigin: "left center" },
+        { scaleX: 1, duration: 0.75, stagger: 0.1 },
+        1.0
+      );
+    }
+
+    if (ctaCrosses && ctaCrosses.length) {
+      entranceTl.fromTo(
+        ctaCrosses,
+        { opacity: 0, scale: 0.5 },
+        { opacity: 1, scale: 1, duration: 0.5, stagger: 0.05 },
+        1.05
+      );
+    }
+
+    if (buttons && buttons.length) {
+      const ctaStart = 1.15;
+      const btnStagger = 0.09;
+      const duration = 0.7;
+      const textDelay = 0.04;
+
+      buttons.forEach((btn, idx) => {
+        const startTime = ctaStart + idx * btnStagger;
+        const dividers = btn.querySelectorAll<HTMLElement>(".btn__divider");
+        const text = btn.querySelector<HTMLElement>(".btn__p");
+
+        gsap.set(dividers, { scaleX: 0, transformOrigin: "left center" });
+        if (text) gsap.set(text, { yPercent: 120 });
+
+        gsap.to(dividers, {
+          scaleX: 1,
+          duration,
+          ease: "power3.out",
+          delay: startTime,
+          overwrite: "auto",
+        });
+
+        if (text) {
+          gsap.to(text, {
+            yPercent: 0,
+            duration,
+            ease: "power3.out",
+            delay: startTime + textDelay,
+            overwrite: "auto",
+          });
+        }
+      });
+    }
+  }, []);
+
+  // ============================================================================
+  // 2. MOTOR DE DISSOLUCIÓ LÍQUIDA A24 + REVELACIÓ EN CORTINA DE CADA FORMAT
+  // ============================================================================
+  useEffect(() => {
+    if (!containerRef.current) return;
+    initDissolve(containerRef.current);
+
+    const ctx = gsap.context(() => {
+      const formatRows = containerRef.current?.querySelectorAll<HTMLElement>(
+        "[data-format-row]"
+      );
+
+      formatRows?.forEach((row) => {
+        const topRule = row.querySelector<HTMLElement>(".contract-format-row__rule");
+        const numEl = row.querySelector<HTMLElement>(".contract-format-row__num");
+        const titleEl = row.querySelector<HTMLElement>(".contract-format-row__title");
+        const subEl = row.querySelector<HTMLElement>(".contract-format-row__subtitle");
+        const imgWrap = row.querySelector<HTMLElement>(".contract-format-row__img-wrap");
+        const imgEl = row.querySelector<HTMLElement>(
+          ".contract-format-row__img-wrap img"
+        );
+        const specBlocks = row.querySelectorAll<HTMLElement>(".contract-spec-block");
+        const actionsWrap = row.querySelector<HTMLElement>(
+          ".contract-format-row__actions"
+        );
+
+        const tl = gsap.timeline({
+          scrollTrigger: {
+            trigger: row,
+            start: "top 84%",
+            toggleActions: "play none none reverse",
+          },
+          defaults: { ease: "power3.out" },
+        });
+
+        if (topRule) {
+          tl.fromTo(
+            topRule,
+            { scaleX: 0, transformOrigin: "left center" },
+            { scaleX: 1, duration: 0.8, ease: "power3.inOut" },
+            0
+          );
+        }
+
+        if (numEl) {
+          tl.fromTo(
+            numEl,
+            { opacity: 0, y: 28 },
+            { opacity: 1, y: 0, duration: 0.7 },
+            0.08
+          );
+        }
+
+        if (titleEl) {
+          tl.fromTo(
+            titleEl,
+            { opacity: 0, y: 34, filter: "blur(8px)" },
+            { opacity: 1, y: 0, filter: "blur(0px)", duration: 0.8 },
+            0.14
+          );
+        }
+
+        if (subEl) {
+          tl.fromTo(
+            subEl,
+            { opacity: 0, y: 22 },
+            { opacity: 1, y: 0, duration: 0.65 },
+            0.24
+          );
+        }
+
+        if (imgWrap) {
+          tl.fromTo(
+            imgWrap,
+            { clipPath: "inset(0% 100% 0% 0%)", opacity: 0 },
+            {
+              clipPath: "inset(0% 0% 0% 0%)",
+              opacity: 1,
+              duration: 0.95,
+              ease: "power3.inOut",
+            },
+            0.16
+          );
+        }
+
+        if (imgEl) {
+          tl.fromTo(
+            imgEl,
+            { scale: 1.18 },
+            { scale: 1, duration: 1.15, ease: "power3.out" },
+            0.16
+          );
+        }
+
+        if (specBlocks.length) {
+          tl.fromTo(
+            specBlocks,
+            { opacity: 0, y: 22 },
+            { opacity: 1, y: 0, duration: 0.65, stagger: 0.07 },
+            0.32
+          );
+        }
+
+        if (actionsWrap) {
+          tl.fromTo(
+            actionsWrap,
+            { opacity: 0, y: 18 },
+            { opacity: 1, y: 0, duration: 0.6 },
+            0.52
+          );
+        }
+      });
+    }, containerRef);
+
+    return () => ctx.revert();
+  }, []);
+
+  // ============================================================================
+  // 3. GSAP MODAL ANIMATION & KEYBOARD ESCAPE
+  // ============================================================================
   useEffect(() => {
     if (!isModalOpen) return;
 
@@ -180,9 +529,10 @@ export default function ContractacioClient() {
     const card = modalCardRef.current;
     if (!backdrop || !card) return;
 
-    const header = card.querySelector(".contract-modal-header");
-    const closeBtn = card.querySelector(".contract-modal-close");
-    const formFields = card.querySelectorAll(".contract-field-group, .contract-fields-row, .contract-submit-btn");
+    const closeBtn = card.querySelector(".contract-modal__close");
+    const formFields = card.querySelectorAll(
+      ".contract-field-group, .contract-fields-row, .contract-modal__submit-wrap"
+    );
 
     const tl = gsap.timeline();
     modalTimelineRef.current = tl;
@@ -190,46 +540,35 @@ export default function ContractacioClient() {
     tl.fromTo(
       backdrop,
       { opacity: 0 },
-      { opacity: 1, duration: 0.32, ease: "power2.out" }
+      { opacity: 1, duration: 0.3, ease: "power2.out" }
     );
 
     tl.fromTo(
       card,
-      {
-        opacity: 0,
-        y: 40,
-        scale: 0.92,
-      },
-      {
-        opacity: 1,
-        y: 0,
-        scale: 1,
-        duration: 0.46,
-        ease: "power3.out",
-      },
-      "-=0.2"
+      { opacity: 0, y: 36 },
+      { opacity: 1, y: 0, duration: 0.45, ease: "power3.out" },
+      "-=0.18"
     );
 
     if (closeBtn) {
       tl.fromTo(
         closeBtn,
-        { opacity: 0, scale: 0.6, rotation: -90 },
-        { opacity: 1, scale: 1, rotation: 0, duration: 0.3, ease: "back.out(2)" },
-        "-=0.28"
+        { opacity: 0, scale: 0.8 },
+        { opacity: 1, scale: 1, duration: 0.25, ease: "power2.out" },
+        "-=0.25"
       );
     }
 
     if (formFields.length > 0) {
       tl.fromTo(
         formFields,
-        { opacity: 0, y: 12 },
+        { opacity: 0, y: 14 },
         { opacity: 1, y: 0, duration: 0.3, stagger: 0.035, ease: "power2.out" },
         "-=0.25"
       );
     }
   }, [isModalOpen]);
 
-  // Keyboard shortcut: Escape to close
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape" && isModalOpen) {
@@ -240,11 +579,23 @@ export default function ContractacioClient() {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isModalOpen, handleCloseModal]);
 
+  const scrollToFormats = () => {
+    formatsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
+  const scrollToDocs = () => {
+    docsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
   const generateMailtoUrl = () => {
-    const subject = `Sol·licitud de contractació: ${activeFormatObj.name} — ${formData.city || "Nova data"}`;
+    const subject = `Sol·licitud de contractació: ${activeFormatObj.name} — ${
+      formData.city || "Nova data"
+    }`;
     const body = `Hola equip de management de Miquel Gil,
 
-Us contacte des de ${formData.entity || "la nostra entitat / ajuntament / festival"} per sol·licitar disponibilitat i pressupost per al concert:
+Us contacte des de ${
+      formData.entity || "la nostra entitat / ajuntament / festival"
+    } per sol·licitar disponibilitat i pressupost per al concert:
 
 - Format desitjat: ${activeFormatObj.name} (${activeFormatObj.subtitle})
 - Municipi / Ciutat: ${formData.city || "Per concretar"}
@@ -267,302 +618,625 @@ Moltes gràcies.`;
   };
 
   return (
-    <div className="contract-page">
+    <div ref={containerRef} className="contract-a24-page">
+      {/* MENÚ DE NAVEGACIÓ A24 INTEGRAT */}
+      <A24Nav currentSection="/contractacio/" theme="dark" />
+
       {/* ============================================================
-          HERO EDITORIAL
-          ============================================================ */}
-      <header className="contract-hero">
-        {/* InkBloom Effect at the top */}
-        <InkBloom
-          edge="top"
-          color="#b80018"
-          colorOuter="#ff0528"
-          ground="transparent"
-        />
+          1 & 2. TRACK DE REVELACIÓ AMB SEPARADOR LÍQUID A24
+         ============================================================ */}
+      <div data-dissolve-track="" className="reveal-track">
+        {/* 1. HERO DE CONTRACTACIÓ (CORTINA BLANCA SUPERIOR) */}
+        <section
+          id="contract_hero"
+          ref={heroRef}
+          data-dissolve=""
+          className="contract-hero"
+        >
+          <div className="contract-hero__content">
+            <div className="contract-hero__info">
+              <div className="contract-hero__title">
+                <span className="subheading-xs block mb-2">
+                  DOSSIER OFICIAL DE CONTRACTACIÓ & MANAGEMENT — TEMPORADA 2026 · 2027
+                </span>
+                <h1 className="heading-l">CONTRACTACIÓ</h1>
+              </div>
 
-        <div className="contract-hero-inner">
-          <span className="contract-hero-eyebrow">
-            Management & Programació // Temporada 2026 — 2027
-          </span>
-          <h1 className="contract-hero-title">Contractació</h1>
-          <p className="contract-hero-lead">
-            Cinc formats de concert pensats com a productes escènics clars i adaptables a
-            qualsevol espai: des de la màxima intimitat acústica d&apos;un claustre patrimonial
-            en format Duo fins a la potència d&apos;un festival a l&apos;aire lliure amb la Banda
-            Completa.
-          </p>
+              <div className="divider-horizontal my-4" />
 
-          <div className="contract-hero-pills">
-            <a href="#formats" className="contract-quick-pill">
-              5 Formats disponibles
-            </a>
-            <a href="#documents" className="contract-quick-pill">
-              Riders tècnics (PDF)
-            </a>
-            <a href="#documents" className="contract-quick-pill">
-              Dossier artístic
-            </a>
-            <button
-              type="button"
-              className="contract-quick-pill contract-quick-pill--red"
-              onClick={() => handleOpenModal("duo")}
-            >
-              Sol·licitar disponibilitat
-            </button>
+              <div className="contract-hero__credits">
+                <span className="subheading-xs">DIRECCIÓ & BOOKING</span>
+                <span className="paragraph-m font-medium">
+                  Gusmà Gil · PPF Produccions Culturals
+                </span>
+
+                <span className="subheading-xs ml-4">FORMATS EN ACTIU</span>
+                <span className="paragraph-m font-medium">
+                  Duo · Trio · Banda Completa · «Nus» amb Botifarra · Estrenes
+                </span>
+
+                <span className="subheading-xs ml-4">TRAMITACIÓ</span>
+                <span className="paragraph-m font-medium">
+                  Contractació directa i Plataforma de Contractació Pública
+                </span>
+              </div>
+
+              <div className="divider-horizontal my-4" />
+
+              <div className="contract-hero__metadata">
+                <div className="contract-metadata__item">
+                  <span className="subheading-xs">CATÀLEG ESCÈNIC</span>
+                  <div className="contract-metadata__content">
+                    <span className="paragraph-m font-medium">
+                      5 formats dimensionables
+                    </span>
+                    <span className="subheading-xs">2 a 6+ músics</span>
+                  </div>
+                </div>
+
+                <div className="contract-metadata__item">
+                  <span className="subheading-xs">REPERTORI ACTUAL</span>
+                  <div className="contract-metadata__content">
+                    <span className="paragraph-m font-medium">
+                      Viatger & Antologia d&apos;Arrel
+                    </span>
+                    <span className="subheading-xs">60 — 100 min</span>
+                  </div>
+                </div>
+
+                <div className="contract-metadata__item">
+                  <span className="subheading-xs">DOCUMENTACIÓ TÈCNICA</span>
+                  <div className="contract-metadata__content">
+                    <span className="paragraph-m font-medium">
+                      Riders, Stage Plots & Dossier
+                    </span>
+                    <span className="subheading-xs">PDF Oficials</span>
+                  </div>
+                </div>
+
+                <div className="contract-metadata__item">
+                  <span className="subheading-xs">CONTACTE DIRECTE</span>
+                  <div className="contract-metadata__content">
+                    <span className="paragraph-m font-medium">
+                      {bookingInfo.managementEmail}
+                    </span>
+                    <span className="subheading-xs">Resposta 24/48h</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* CONTENIDOR FULLWIDTH PER A BOTONS I CREUS VECTORIALS */}
+            <div className="contract-hero__cta-wrap">
+              <div
+                className="divider-horizontal"
+                style={{ position: "absolute", top: 0 }}
+              />
+
+              <div className="plus is--tl">
+                <div className="plus-stroke is--hor" />
+                <div className="plus-stroke is--ver" />
+              </div>
+              <div className="plus is--tr">
+                <div className="plus-stroke is--hor" />
+                <div className="plus-stroke is--ver" />
+              </div>
+              <div className="plus is--bl">
+                <div className="plus-stroke is--hor" />
+                <div className="plus-stroke is--ver" />
+              </div>
+              <div className="plus is--br">
+                <div className="plus-stroke is--hor" />
+                <div className="plus-stroke is--ver" />
+              </div>
+
+              <div className="contract-hero__cta">
+                <button
+                  type="button"
+                  data-reveal="btn"
+                  onClick={scrollToFormats}
+                  className="btn a24-btn"
+                >
+                  <div className="btn__divider" />
+                  <span className="btn__p-mask">
+                    <span
+                      className="btn__p"
+                      data-hover-inner
+                      data-text="ELS 5 FORMATS DE CONCERT ↓"
+                    >
+                      <span>ELS 5 FORMATS DE CONCERT ↓</span>
+                    </span>
+                  </span>
+                  <div className="btn__divider" />
+                </button>
+
+                <button
+                  type="button"
+                  data-reveal="btn"
+                  onClick={scrollToDocs}
+                  className="btn a24-btn"
+                >
+                  <div className="btn__divider" />
+                  <span className="btn__p-mask">
+                    <span
+                      className="btn__p"
+                      data-hover-inner
+                      data-text="RIDERS TÈCNICS & DOSSIERS ↓"
+                    >
+                      <span>RIDERS TÈCNICS & DOSSIERS ↓</span>
+                    </span>
+                  </span>
+                  <div className="btn__divider" />
+                </button>
+
+                <button
+                  type="button"
+                  data-reveal="btn"
+                  onClick={() => handleOpenModal("duo")}
+                  className="btn a24-btn"
+                >
+                  <div className="btn__divider" />
+                  <span className="btn__p-mask">
+                    <span
+                      className="btn__p"
+                      data-hover-inner
+                      data-text="SOL·LICITAR DISPONIBILITAT +"
+                    >
+                      <span>SOL·LICITAR DISPONIBILITAT +</span>
+                    </span>
+                  </span>
+                  <div className="btn__divider" />
+                </button>
+              </div>
+
+              <div
+                className="divider-horizontal"
+                style={{ position: "absolute", bottom: 0 }}
+              />
+            </div>
           </div>
-        </div>
-      </header>
+        </section>
+
+        {/* 2. SECCIÓ D'IMATGE DE FONS A PANTALLA COMPLETA (100VH SOTA LA CORTINA LÍQUIDA) */}
+        <section
+          data-theme-change="nav:base"
+          className="contract-stage-bleed theme-dark"
+        >
+          <div data-dissolve-bleed="" className="contract-stage-bleed__vh">
+            <img
+              src="/images/MiquelGilViatger_Principal.webp"
+              alt="Miquel Gil en directe al Teatre Principal de València"
+              className="contract-stage-bleed__bg"
+            />
+            <div className="contract-stage-bleed__overlay" />
+
+            <div className="contract-stage-bleed__content">
+              <span
+                className="subheading-xs"
+                style={{ color: "rgba(255, 255, 255, 0.72)" }}
+              >
+                PRODUCCIÓ ESCÈNICA & DIVERSITAT DE FORMATS
+              </span>
+              <blockquote className="contract-stage-quote">
+                “Cinc formats de concert concebuts amb rigor escènic i adaptables a
+                qualsevol espai: des de la intimitat acústica d’un claustre fins a la
+                plenitud simfònica dels grans auditoris.”
+              </blockquote>
+              <span
+                className="subheading-xs"
+                style={{ color: "rgba(255, 255, 255, 0.55)" }}
+              >
+                GIRA VIATGER & ANTOLOGIA MEDITERRÀNIA (2026 — 2027)
+              </span>
+
+              <div style={{ marginTop: "1rem" }}>
+                <button
+                  type="button"
+                  onClick={() => handleOpenModal("banda")}
+                  className="btn a24-btn"
+                >
+                  <div className="btn__divider" />
+                  <span className="btn__p-mask">
+                    <span
+                      className="btn__p"
+                      data-hover-inner
+                      data-text="CONSULTAR DATES I PRESSUPOST +"
+                    >
+                      <span>CONSULTAR DATES I PRESSUPOST +</span>
+                    </span>
+                  </span>
+                  <div className="btn__divider" />
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
 
       {/* ============================================================
-          SECCIÓ 1: ELS 5 FORMATS COM A PRODUCTES CLARS
-          ============================================================ */}
-      <section id="formats" className="contract-section">
-        <div className="contract-section-inner">
-          <div className="contract-section-header">
-            <span className="contract-section-kicker">Catàleg d&apos;espectacles</span>
-            <h2 className="contract-section-title">Formats de concert</h2>
-            <p className="contract-section-subtitle">
-              Cadascun dels formats disposa de fitxa artística, necessitats tècniques
-              dimensionades i repertori adaptable.
+          3. CATÀLEG EDITORIAL OBERT DELS 5 FORMATS DE CONCERT
+             Sense caixes ni targetes arrodonides: estructura editorial A24
+         ============================================================ */}
+      <section
+        id="formats"
+        ref={formatsRef}
+        className="contract-formats"
+        aria-label="Catàleg dels 5 formats de concert"
+      >
+        <div className="contract-formats__header">
+          <div>
+            <span className="subheading-xs block mb-2">
+              01 / CATÀLEG D&apos;ESPECTACLES EN ACTIU
+            </span>
+            <h2 className="heading-m">FORMATS DE CONCERT</h2>
+          </div>
+          <p className="paragraph-l" style={{ maxWidth: "46ch", margin: 0 }}>
+            Cadascun dels cinc formats disposa de fitxa artística pròpia, requeriments
+            tècnics dimensionats a l&apos;espai i repertori adaptable per a ajuntaments,
+            teatres, cicles culturals i festivals.
+          </p>
+        </div>
+
+        {/* Barra d'accés ràpid tabular als 5 formats */}
+        <div className="divider-horizontal" />
+        <div className="contract-formats__index">
+          {FORMAT_DETAILS.map((fmt) => (
+            <a
+              key={fmt.id}
+              href={`#format-${fmt.id}`}
+              className="contract-index-cell"
+            >
+              <div className="contract-index-cell__top">
+                <span className="subheading-xs">FORMAT {fmt.num}</span>
+                <span className="subheading-xs">{fmt.duration}</span>
+              </div>
+              <span className="contract-index-cell__name">{fmt.name}</span>
+              <span className="paragraph-m" style={{ opacity: 0.68 }}>
+                {fmt.subtitle}
+              </span>
+            </a>
+          ))}
+        </div>
+        <div className="divider-horizontal" />
+
+        {/* Desplegament editorial de cada format */}
+        <div className="contract-formats__list">
+          {FORMAT_DETAILS.map((fmt) => (
+            <article
+              key={fmt.id}
+              id={`format-${fmt.id}`}
+              data-format-row
+              className="contract-format-row"
+            >
+              <div className="contract-format-row__rule" />
+
+              <div className="contract-format-row__inner">
+                {/* Capçalera del format */}
+                <div className="contract-format-row__top">
+                  <span className="contract-format-row__num">{fmt.num}</span>
+                  <div className="contract-format-row__headings">
+                    <span className="subheading-xs">{fmt.badge}</span>
+                    <h3 className="contract-format-row__title">{fmt.name}</h3>
+                    <p className="contract-format-row__subtitle">{fmt.subtitle}</p>
+                  </div>
+                  <div className="contract-format-row__duration">
+                    <span className="subheading-xs">DURADA ESCÈNICA</span>
+                    <span className="paragraph-m font-medium">{fmt.duration}</span>
+                  </div>
+                </div>
+
+                {/* Cos del format: Fotografia + Especificacions obertes */}
+                <div className="contract-format-row__body">
+                  {/* Columna visual */}
+                  <figure className="contract-format-row__figure">
+                    <div className="contract-format-row__img-wrap">
+                      <img
+                        src={fmt.media}
+                        alt={fmt.name}
+                        loading="lazy"
+                        decoding="async"
+                      />
+                    </div>
+                    <figcaption className="contract-format-row__caption">
+                      <span>{fmt.mediaCaption}</span>
+                      <span>FORMAT {fmt.num} / 05</span>
+                    </figcaption>
+                  </figure>
+
+                  {/* Columna d'especificacions tècniques i artístiques */}
+                  <div className="contract-format-row__specs">
+                    <div className="contract-spec-block">
+                      <span className="subheading-xs">FORMACIÓ A L&apos;ESCENARI</span>
+                      <ul className="contract-musicians-list">
+                        {fmt.musicians.map((m, idx) => (
+                          <li key={idx} className="paragraph-m font-medium">
+                            {m}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+
+                    <div className="contract-spec-grid">
+                      <div className="contract-spec-block">
+                        <span className="subheading-xs">ESPAIS I AFORAMENTS IDEALS</span>
+                        <p className="paragraph-m" style={{ margin: 0 }}>
+                          {fmt.idealVenues}
+                        </p>
+                      </div>
+
+                      <div className="contract-spec-block">
+                        <span className="subheading-xs">REFERÈNCIA RECENT</span>
+                        <p className="paragraph-m font-medium" style={{ margin: 0 }}>
+                          {fmt.recentHighlight}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="contract-spec-block">
+                      <span className="subheading-xs">
+                        SÍNTESI DE REQUERIMENTS TÈCNICS (SO I LLUM)
+                      </span>
+                      <p className="paragraph-m" style={{ margin: 0 }}>
+                        {fmt.technicalSummary}
+                      </p>
+                    </div>
+
+                    {/* Botons A24 del format */}
+                    <div className="contract-format-row__actions">
+                      <button
+                        type="button"
+                        onClick={() => handleOpenModal(fmt.id)}
+                        className="btn a24-btn"
+                      >
+                        <div className="btn__divider" />
+                        <span className="btn__p-mask">
+                          <span
+                            className="btn__p"
+                            data-hover-inner
+                            data-text={`SOL·LICITAR FORMAT ${fmt.num} +`}
+                          >
+                            <span>SOL·LICITAR FORMAT {fmt.num} +</span>
+                          </span>
+                        </span>
+                        <div className="btn__divider" />
+                      </button>
+
+                      <a
+                        href={fmt.riderLink}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="btn a24-btn"
+                      >
+                        <div className="btn__divider" />
+                        <span className="btn__p-mask">
+                          <span
+                            className="btn__p"
+                            data-hover-inner
+                            data-text="DESCARREGAR RIDER TÈCNIC (PDF) ↗"
+                          >
+                            <span>DESCARREGAR RIDER TÈCNIC (PDF) ↗</span>
+                          </span>
+                        </span>
+                        <div className="btn__divider" />
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <div className="divider-horizontal" />
+
+      {/* ============================================================
+          4. TAULA EDITORIAL DE DOSSIERS I RIDERS OFICIALS
+         ============================================================ */}
+      <section
+        id="documents"
+        ref={docsRef}
+        className="contract-docs"
+        aria-label="Dossiers i riders oficials per a professionals"
+      >
+        <div className="contract-docs__inner">
+          <div className="contract-docs__header">
+            <div>
+              <span className="subheading-xs block mb-2">
+                02 / DOCUMENTACIÓ TÈCNICA I ARTÍSTICA
+              </span>
+              <h2 className="heading-m">DOSSIERS I RIDERS OFICIALS</h2>
+            </div>
+            <p className="paragraph-l" style={{ maxWidth: "44ch", margin: 0 }}>
+              Material verificat d&apos;accés directe per a caps tècnics de sala,
+              programadors culturals, regidories i equips de comunicació.
             </p>
           </div>
 
-          <div className="contract-formats-grid">
-            {FORMAT_DETAILS.map((fmt) => (
-              <div key={fmt.id} className="contract-format-card">
-                <div className="contract-card-top">
-                  <span className="contract-card-badge">{fmt.badge}</span>
-                  <span className="contract-card-duration">{fmt.duration}</span>
+          <div className="contract-docs__ledger">
+            <div className="contract-docs__ledger-head">
+              <span className="subheading-xs">CODI</span>
+              <span className="subheading-xs">CATEGORIA</span>
+              <span className="subheading-xs">DOCUMENT & ESPECIFICACIONS</span>
+              <span className="subheading-xs" style={{ textAlign: "right" }}>
+                ACCIÓ DIRECTA
+              </span>
+            </div>
+
+            {OFFICIAL_DOCUMENTS.map((doc) => (
+              <a
+                key={doc.idx}
+                href={doc.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="contract-doc-row"
+              >
+                <span className="contract-doc-row__idx">{doc.idx}</span>
+                <div className="contract-doc-row__cat">
+                  <span className="subheading-xs">{doc.category}</span>
+                  <span className="contract-doc-row__meta">{doc.meta}</span>
                 </div>
-
-                <h3 className="contract-card-name">{fmt.name}</h3>
-                <p className="contract-card-sub">{fmt.subtitle}</p>
-
-                <div className="contract-card-details">
-                  <div className="contract-detail-block">
-                    <span className="contract-detail-label">Músics a l&apos;escenari:</span>
-                    <ul className="contract-musicians-list">
-                      {fmt.musicians.map((m, idx) => (
-                        <li key={idx}>{m}</li>
-                      ))}
-                    </ul>
-                  </div>
-
-                  <div className="contract-detail-block">
-                    <span className="contract-detail-label">Espais ideals:</span>
-                    <p className="contract-detail-text">{fmt.idealVenues}</p>
-                  </div>
-
-                  <div className="contract-detail-block">
-                    <span className="contract-detail-label">Exemple recent de referència:</span>
-                    <p className="contract-detail-text contract-detail-text--highlight">
-                      {fmt.recentHighlight}
-                    </p>
-                  </div>
-
-                  <div className="contract-detail-block">
-                    <span className="contract-detail-label">Requeriments tècnics bàsics:</span>
-                    <p className="contract-detail-text">{fmt.technicalSummary}</p>
-                  </div>
+                <div className="contract-doc-row__main">
+                  <h3 className="contract-doc-row__title">{doc.title}</h3>
+                  <p className="contract-doc-row__desc">{doc.description}</p>
                 </div>
-
-                <div className="contract-card-actions">
-                  {/* Clicking this button opens the booking modal preselected for this format */}
-                  <button
-                    type="button"
-                    className="contract-card-btn contract-card-btn--primary"
-                    onClick={() => handleOpenModal(fmt.id)}
-                  >
-                    Demanar disponibilitat
-                  </button>
-
-                  <a
-                    href={fmt.riderLink}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="contract-card-btn contract-card-btn--secondary"
-                    title={`Descarregar Rider tècnic de ${fmt.name}`}
-                  >
-                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2">
-                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3" />
-                    </svg>
-                    <span>Rider tècnic</span>
-                  </a>
+                <div className="contract-doc-row__action">
+                  <span className="contract-doc-row__cta">{doc.actionLabel}</span>
                 </div>
-              </div>
+              </a>
             ))}
           </div>
         </div>
       </section>
 
+      <div className="divider-horizontal" />
+
       {/* ============================================================
-          SECCIÓ 2: CENTRE DE DESCÀRREGA DE DOCUMENTS I RIDERS
-          ============================================================ */}
-      <section id="documents" className="contract-section contract-section--alt">
-        <div className="contract-section-inner">
-          <div className="contract-section-header">
-            <span className="contract-section-kicker">Material per a professionals</span>
-            <h2 className="contract-section-title">Dossiers i riders oficials</h2>
-            <p className="contract-section-subtitle">
-              Documentació tècnica, plans d&apos;escenari i dossiers artístics per a caps
-              tècnics, programadors i equips de producció.
+          5. OFICINA DE MANAGEMENT & CONTRACTACIÓ PÚBLICA
+         ============================================================ */}
+      <section
+        className="contract-management"
+        aria-label="Oficina de Management i Contacte Directe"
+      >
+        <div className="contract-management__inner">
+          <div className="contract-management__left">
+            <span className="subheading-xs">03 / OFICINA DE MANAGEMENT OFICIAL</span>
+            <h2 className="heading-s" style={{ marginTop: "0.4rem" }}>
+              GUSMÀ GIL · PPF PRODUCCIONS CULTURALS
+            </h2>
+            <p className="paragraph-l" style={{ margin: "0.75rem 0 0 0" }}>
+              Atenció directa a ajuntaments, diputacions, universitats, festivals i
+              circuit internacional. Es realitza facturació i tramitació íntegra a
+              través de la Plataforma de Contractació del Sector Públic (FACE / DIR3).
             </p>
           </div>
 
-          <div className="contract-docs-grid">
-            <div className="contract-doc-card">
-              <div className="contract-doc-icon">
-                <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" strokeWidth="1.8">
-                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                  <polyline points="14 2 14 8 20 8" />
-                  <line x1="16" y1="13" x2="8" y2="13" />
-                  <line x1="16" y1="17" x2="8" y2="17" />
-                  <polyline points="10 9 9 9 8 9" />
-                </svg>
-              </div>
-              <div className="contract-doc-info">
-                <h4 className="contract-doc-title">Dossier Artístic de Gira 2026/27</h4>
-                <p className="contract-doc-desc">
-                  Biografia actualitzada, trajectòria, fitxes dels 5 formats de concert,
-                  repertori i reculls de premsa.
-                </p>
-                <span className="contract-doc-meta">Format PDF · Actualitzat octubre 2026</span>
-              </div>
+          <div className="contract-management__right">
+            <div className="contract-mgmt-item">
+              <span className="subheading-xs">CORREU ELECTRÒNIC OFICIAL</span>
               <a
-                href={downloads[0]?.links[0]?.href || "#"}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="contract-doc-download-btn"
+                href={`mailto:${bookingInfo.managementEmail}`}
+                className="contract-mgmt-item__val"
               >
-                <span>Descarregar</span>
-                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3" />
-                </svg>
+                {bookingInfo.managementEmail} ↗
               </a>
             </div>
 
-            <div className="contract-doc-card">
-              <div className="contract-doc-icon">
-                <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" strokeWidth="1.8">
-                  <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
-                  <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07" />
-                </svg>
-              </div>
-              <div className="contract-doc-info">
-                <h4 className="contract-doc-title">Rider Tècnic Banda Completa</h4>
-                <p className="contract-doc-desc">
-                  Taula d&apos;entrades (Input List), plànol d&apos;escenari (Stage Plot), microfonia,
-                  necessitats de monitoratge i sistema de so.
-                </p>
-                <span className="contract-doc-meta">Format PDF · Document oficial</span>
-              </div>
-              <a
-                href={downloads[5]?.links[0]?.href || "#"}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="contract-doc-download-btn"
-              >
-                <span>Descarregar</span>
-                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3" />
-                </svg>
-              </a>
+            <div className="contract-mgmt-item">
+              <span className="subheading-xs">AGÈNCIA REPRESENTANT</span>
+              <span className="contract-mgmt-item__val">
+                PPF Produccions Culturals
+              </span>
             </div>
 
-            <div className="contract-doc-card">
-              <div className="contract-doc-icon">
-                <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" strokeWidth="1.8">
-                  <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
-                </svg>
+            <div className="contract-mgmt-item">
+              <span className="subheading-xs">SOL·LICITUD IMMEDIATA</span>
+              <div style={{ marginTop: "0.5rem" }}>
+                <button
+                  type="button"
+                  onClick={() => handleOpenModal("duo")}
+                  className="btn a24-btn"
+                >
+                  <div className="btn__divider" />
+                  <span className="btn__p-mask">
+                    <span
+                      className="btn__p"
+                      data-hover-inner
+                      data-text="OBRIR FORMULARI DE CONTRACTACIÓ +"
+                    >
+                      <span>OBRIR FORMULARI DE CONTRACTACIÓ +</span>
+                    </span>
+                  </span>
+                  <div className="btn__divider" />
+                </button>
               </div>
-              <div className="contract-doc-info">
-                <h4 className="contract-doc-title">Rider Acústic Duo & Trio</h4>
-                <p className="contract-doc-desc">
-                  Requeriments tècnics simplificats per a espais patrimonials, auditoris
-                  petits, claustres i teatres de petit aforament.
-                </p>
-                <span className="contract-doc-meta">Format PDF · Document oficial</span>
-              </div>
-              <a
-                href={downloads[5]?.links[1]?.href || "#"}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="contract-doc-download-btn"
-              >
-                <span>Descarregar</span>
-                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3" />
-                </svg>
-              </a>
-            </div>
-
-            <div className="contract-doc-card">
-              <div className="contract-doc-icon">
-                <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" strokeWidth="1.8">
-                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
-                  <circle cx="8.5" cy="8.5" r="1.5" />
-                  <polyline points="21 15 16 10 5 21" />
-                </svg>
-              </div>
-              <div className="contract-doc-info">
-                <h4 className="contract-doc-title">Pack de Fotografies en Alta Resolució</h4>
-                <p className="contract-doc-desc">
-                  Imatges promocionals d&apos;autor (Juan Miguel Morales i Eva Balcells) amb
-                  drets cedits per a cartelleria i premsa cultural.
-                </p>
-                <span className="contract-doc-meta">Enllaç directe a Google Drive</span>
-              </div>
-              <a
-                href={downloads[2]?.links[0]?.href || "#"}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="contract-doc-download-btn"
-              >
-                <span>Obrir carpeta</span>
-                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3" />
-                </svg>
-              </a>
             </div>
           </div>
         </div>
       </section>
 
       {/* ============================================================
-          OFICINA DE MANAGEMENT EN PETIT (Discret, compacte i elegant)
-          ============================================================ */}
-      <section className="contract-mgmt-compact-section" aria-label="Oficina de Management">
-        <div className="contract-mgmt-compact-inner">
-          <div className="contract-mgmt-compact-header">
-            <span className="contract-mgmt-compact-badge">Oficina de Management</span>
-            <span className="contract-mgmt-compact-title">Gusmà Gil · PPF Produccions Culturals</span>
+          6. PEU EDITORIAL A24 — SEGÜENT PAS
+         ============================================================ */}
+      <footer className="contract-next-footer">
+        <div className="divider-horizontal" />
+
+        <div className="contract-next-footer__inner" style={{ position: "relative" }}>
+          <div className="plus is--tl">
+            <div className="plus-stroke is--hor" />
+            <div className="plus-stroke is--ver" />
+          </div>
+          <div className="plus is--tr">
+            <div className="plus-stroke is--hor" />
+            <div className="plus-stroke is--ver" />
+          </div>
+          <div className="plus is--bl">
+            <div className="plus-stroke is--hor" />
+            <div className="plus-stroke is--ver" />
+          </div>
+          <div className="plus is--br">
+            <div className="plus-stroke is--hor" />
+            <div className="plus-stroke is--ver" />
           </div>
 
-          <div className="contract-mgmt-compact-info">
-            <a
-              href={`mailto:${bookingInfo.managementEmail}`}
-              className="contract-mgmt-compact-link"
-              title="Enviar correu a management"
-            >
-              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
-                <polyline points="22,6 12,13 2,6" />
-              </svg>
-              <span>{bookingInfo.managementEmail}</span>
-            </a>
-            <span className="contract-mgmt-compact-sep">·</span>
-            <span className="contract-mgmt-compact-text">Direcció de Producció i Booking Oficial</span>
-            <span className="contract-mgmt-compact-sep">·</span>
-            <span className="contract-mgmt-compact-note">
-              Admet contractació directa i tramitació mitjançant Plataforma de Contractació Pública
-            </span>
+          <span className="subheading-xs">CONTINUAR EXPLORANT L&apos;ARXIU</span>
+          <h2 className="heading-l">DISCOGRAFIA & AGENDA</h2>
+          <p className="paragraph-m" style={{ maxWidth: "48ch", margin: 0 }}>
+            Consulta les pròximes dates en directe de la gira actual o explora les 10
+            produccions discogràfiques essencials de Miquel Gil.
+          </p>
+
+          <div className="contract-hero__cta" style={{ marginTop: "0.5rem" }}>
+            <Link href="/agenda/" className="btn a24-btn">
+              <div className="btn__divider" />
+              <span className="btn__p-mask">
+                <span
+                  className="btn__p"
+                  data-hover-inner
+                  data-text="VEURE AGENDA DE DIRECTES ↗"
+                >
+                  <span>VEURE AGENDA DE DIRECTES ↗</span>
+                </span>
+              </span>
+              <div className="btn__divider" />
+            </Link>
+
+            <Link href="/discografia/" className="btn a24-btn">
+              <div className="btn__divider" />
+              <span className="btn__p-mask">
+                <span
+                  className="btn__p"
+                  data-hover-inner
+                  data-text="OBRIR CATÀLEG DISCOGRÀFIC ↗"
+                >
+                  <span>OBRIR CATÀLEG DISCOGRÀFIC ↗</span>
+                </span>
+              </span>
+              <div className="btn__divider" />
+            </Link>
+
+            <Link href="/biografia/" className="btn a24-btn">
+              <div className="btn__divider" />
+              <span className="btn__p-mask">
+                <span
+                  className="btn__p"
+                  data-hover-inner
+                  data-text="LLEGIR BIOGRAFIA OFICIAL ↗"
+                >
+                  <span>LLEGIR BIOGRAFIA OFICIAL ↗</span>
+                </span>
+              </span>
+              <div className="btn__divider" />
+            </Link>
           </div>
         </div>
-      </section>
+
+        <div className="divider-horizontal" />
+      </footer>
 
       {/* ============================================================
-          POPUP MODAL DEL FORMULARI (ANIMACIÓ GSAP PER AL FORMAT SELECCIONAT)
-          ============================================================ */}
+          7. MODAL EDITORIAL A24 DE SOL·LICITUD DE DISPONIBILITAT
+         ============================================================ */}
       {isModalOpen && (
         <div
           ref={modalBackdropRef}
@@ -574,42 +1248,54 @@ Moltes gràcies.`;
         >
           <div
             ref={modalCardRef}
-            className="contract-modal-card"
+            className="contract-modal"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Botó de tancament 'X' */}
-            <button
-              type="button"
-              className="contract-modal-close"
-              onClick={handleCloseModal}
-              aria-label="Tancar formulari (Esc)"
-              title="Tancar formulari (Esc)"
-            >
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ pointerEvents: "none" }}>
-                <line x1="18" y1="6" x2="6" y2="18" />
-                <line x1="6" y1="6" x2="18" y2="18" />
-              </svg>
-            </button>
-
-            {/* Capçalera del Modal */}
-            <div className="contract-modal-header">
-              <span className="contract-modal-kicker">Sol·licitud de Disponibilitat</span>
-              <h2 id="contract-modal-title" className="contract-modal-title">
-                {activeFormatObj.name}
-              </h2>
-              <p className="contract-modal-desc">
-                Ompli aquest formulari i l&apos;equip de management de Miquel Gil respondrà amb
-                la disponibilitat i pressupost detallat en 24-48 hores.
-              </p>
-
-              {/* Format Preseleccionat Indicator */}
-              <div className="contract-modal-format-badge">
-                <span className="format-badge-dot" />
-                <span>Format preseleccionat: <strong>{activeFormatObj.name}</strong> ({activeFormatObj.duration})</span>
-              </div>
+            <div className="plus is--tl">
+              <div className="plus-stroke is--hor" />
+              <div className="plus-stroke is--ver" />
+            </div>
+            <div className="plus is--tr">
+              <div className="plus-stroke is--hor" />
+              <div className="plus-stroke is--ver" />
+            </div>
+            <div className="plus is--bl">
+              <div className="plus-stroke is--hor" />
+              <div className="plus-stroke is--ver" />
+            </div>
+            <div className="plus is--br">
+              <div className="plus-stroke is--hor" />
+              <div className="plus-stroke is--ver" />
             </div>
 
-            {/* Formulari amb acció Mailto */}
+            <div className="contract-modal__top">
+              <div>
+                <span className="subheading-xs block mb-2">
+                  SOL·LICITUD DE DISPONIBILITAT & PRESSUPOST
+                </span>
+                <h2 id="contract-modal-title" className="heading-s">
+                  {activeFormatObj.name}
+                </h2>
+              </div>
+
+              <button
+                type="button"
+                className="contract-modal__close"
+                onClick={handleCloseModal}
+                aria-label="Tancar formulari (Esc)"
+              >
+                <span>TANCAR [ESC]</span>
+              </button>
+            </div>
+
+            <div className="divider-local" style={{ margin: "1.25rem 0" }} />
+
+            <p className="paragraph-m" style={{ margin: "0 0 1.5rem 0", opacity: 0.78 }}>
+              Completa les dades de l&apos;esdeveniment i l&apos;oficina de management (
+              {bookingInfo.managementEmail}) respondrà amb disponibilitat i proposta
+              econòmica detallada en 24-48 hores.
+            </p>
+
             <form
               className="contract-form"
               onSubmit={(e) => {
@@ -617,9 +1303,8 @@ Moltes gràcies.`;
                 window.location.href = generateMailtoUrl();
               }}
             >
-              {/* Selector de format (per si vol canviar) */}
               <div className="contract-field-group">
-                <label className="contract-label">Format de concert *</label>
+                <label className="subheading-xs">FORMAT D&apos;ESPECTACLE *</label>
                 <select
                   name="selectedFormat"
                   value={selectedFormat}
@@ -628,7 +1313,7 @@ Moltes gràcies.`;
                 >
                   {FORMAT_DETAILS.map((f) => (
                     <option key={f.id} value={f.id}>
-                      {f.name} — {f.subtitle} ({f.duration})
+                      FORMAT {f.num}: {f.name} — {f.subtitle} ({f.duration})
                     </option>
                   ))}
                 </select>
@@ -636,11 +1321,13 @@ Moltes gràcies.`;
 
               <div className="contract-fields-row">
                 <div className="contract-field-group">
-                  <label className="contract-label">Entitat, Ajuntament o Festival *</label>
+                  <label className="subheading-xs">
+                    ENTITAT, AJUNTAMENT O FESTIVAL *
+                  </label>
                   <input
                     type="text"
                     name="entity"
-                    placeholder="Ex: Regidoria de Cultura de..."
+                    placeholder="Ex: Regidoria de Cultura / Festival..."
                     value={formData.entity}
                     onChange={handleInputChange}
                     required
@@ -649,11 +1336,11 @@ Moltes gràcies.`;
                 </div>
 
                 <div className="contract-field-group">
-                  <label className="contract-label">Municipi o Comarca *</label>
+                  <label className="subheading-xs">MUNICIPI O CIUTAT *</label>
                   <input
                     type="text"
                     name="city"
-                    placeholder="Ex: Alcoi, Gandia, Manresa..."
+                    placeholder="Ex: València, Alcoi, Manresa..."
                     value={formData.city}
                     onChange={handleInputChange}
                     required
@@ -664,11 +1351,11 @@ Moltes gràcies.`;
 
               <div className="contract-fields-row">
                 <div className="contract-field-group">
-                  <label className="contract-label">Data o període previst</label>
+                  <label className="subheading-xs">DATA O PERÍODE PREVIST</label>
                   <input
                     type="text"
                     name="date"
-                    placeholder="Ex: Juliol 2026 / Tardor 2026"
+                    placeholder="Ex: Octubre 2026 / Tardor 2026"
                     value={formData.date}
                     onChange={handleInputChange}
                     className="contract-input"
@@ -676,11 +1363,11 @@ Moltes gràcies.`;
                 </div>
 
                 <div className="contract-field-group">
-                  <label className="contract-label">Espai / Recinte previst</label>
+                  <label className="subheading-xs">ESPAI O RECINTE PREVIST</label>
                   <input
                     type="text"
                     name="venue"
-                    placeholder="Ex: Teatre Municipal / Plaça Major"
+                    placeholder="Ex: Teatre Municipal / Claustre / Plaça"
                     value={formData.venue}
                     onChange={handleInputChange}
                     className="contract-input"
@@ -690,7 +1377,7 @@ Moltes gràcies.`;
 
               <div className="contract-fields-row">
                 <div className="contract-field-group">
-                  <label className="contract-label">Persona de contacte *</label>
+                  <label className="subheading-xs">PERSONA DE CONTACTE *</label>
                   <input
                     type="text"
                     name="contactName"
@@ -703,7 +1390,7 @@ Moltes gràcies.`;
                 </div>
 
                 <div className="contract-field-group">
-                  <label className="contract-label">Correu electrònic *</label>
+                  <label className="subheading-xs">CORREU ELECTRÒNIC *</label>
                   <input
                     type="email"
                     name="email"
@@ -717,7 +1404,7 @@ Moltes gràcies.`;
               </div>
 
               <div className="contract-field-group">
-                <label className="contract-label">Telèfon de contacte</label>
+                <label className="subheading-xs">TELÈFON DE CONTACTE</label>
                 <input
                   type="tel"
                   name="phone"
@@ -729,24 +1416,36 @@ Moltes gràcies.`;
               </div>
 
               <div className="contract-field-group">
-                <label className="contract-label">Observacions o necessitats particulars</label>
+                <label className="subheading-xs">
+                  OBSERVACIONS O NECESSITATS PARTICULARS
+                </label>
                 <textarea
                   name="notes"
                   rows={3}
-                  placeholder="Detalls sobre l'esdeveniment, cicle de concerts, condicions particulars d'escenari..."
+                  placeholder="Detalls sobre el cicle, horaris, condicions tècniques o administratives..."
                   value={formData.notes}
                   onChange={handleInputChange}
                   className="contract-textarea"
                 />
               </div>
 
-              <button type="submit" className="contract-submit-btn">
-                <span>Generar i Enviar Sol·licitud per a {activeFormatObj.name}</span>
-                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2">
-                  <line x1="22" y1="2" x2="11" y2="13" />
-                  <polygon points="22 2 15 22 11 13 2 9 22 2" />
-                </svg>
-              </button>
+              <div className="contract-modal__submit-wrap">
+                <button type="submit" className="btn a24-btn" style={{ width: "100%" }}>
+                  <div className="btn__divider" />
+                  <span className="btn__p-mask">
+                    <span
+                      className="btn__p"
+                      data-hover-inner
+                      data-text={`ENVIAR SOL·LICITUD PER A ${activeFormatObj.name.toUpperCase()} ↗`}
+                    >
+                      <span>
+                        ENVIAR SOL·LICITUD PER A {activeFormatObj.name.toUpperCase()} ↗
+                      </span>
+                    </span>
+                  </span>
+                  <div className="btn__divider" />
+                </button>
+              </div>
             </form>
           </div>
         </div>

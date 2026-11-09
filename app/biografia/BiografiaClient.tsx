@@ -8,61 +8,9 @@ import ScrollPathJourney from "@/components/ScrollPathJourney";
 import {
   siteKeyMessage,
   biographyIntro,
-  liveFormats,
 } from "@/lib/site";
 import { initDissolve } from "../discografia/[slug]/dissolveEngine";
 import "./biografia.css";
-
-const FEATURED_VENUES = [
-  {
-    name: "Palau de la Música",
-    city: "València",
-    territory: "País Valencià",
-    type: "Auditori Simfònic & Grans Concerts",
-  },
-  {
-    name: "Teatre Principal",
-    city: "València",
-    territory: "País Valencià",
-    type: "Teatre Històric · Estrena de Viatger (2024)",
-  },
-  {
-    name: "Barnasants",
-    city: "Barcelona",
-    territory: "Catalunya",
-    type: "Festival Internacional de Cançó d'Autor",
-  },
-  {
-    name: "Tradicionàrius (C.A.T.)",
-    city: "Barcelona",
-    territory: "Catalunya",
-    type: "Festival Folk & Arrel Mediterrània",
-  },
-  {
-    name: "Festival Strenes",
-    city: "Girona",
-    territory: "Catalunya",
-    type: "Cicle d'Estrenes i Creació Contemporània",
-  },
-  {
-    name: "Fira Mediterrània",
-    city: "Manresa",
-    territory: "Catalunya",
-    type: "Mercat d'Arrel i Projecció Internacional",
-  },
-  {
-    name: "Glatt & Verkehrt",
-    city: "Krems an der Donau",
-    territory: "Àustria",
-    type: "Festival Europeu de World Music",
-  },
-  {
-    name: "FIL de Guadalajara",
-    city: "Guadalajara",
-    territory: "Mèxic",
-    type: "Fira Internacional & Projecció Americana",
-  },
-];
 
 const ARTISTIC_PILLARS = [
   {
@@ -522,87 +470,7 @@ export default function BiografiaClient() {
       </section>
 
       {/* ============================================================
-          6. ESCENARIS INTERNACIONALS I FORMATS EN DIRECTE
-         ============================================================ */}
-      <section className="bio-venues" aria-label="Escenaris i formats en directe">
-        <div className="bio-venues__inner">
-          {/* Escenaris i Festivals */}
-          <div>
-            <div className="bio-venues__header" style={{ marginBottom: "2.5rem" }}>
-              <div>
-                <span className="subheading-xs block mb-2">PROJECCIÓ I CIRCUITS</span>
-                <h2 className="heading-m">PRINCIPALS ESCENARIS I FESTIVALS</h2>
-              </div>
-              <p className="paragraph-m" style={{ maxWidth: "44ch", margin: 0 }}>
-                De les grans sales simfòniques i teatres històrics del País Valencià i Catalunya als festivals referents de la world music a Europa i Amèrica.
-              </p>
-            </div>
-
-            <div className="bio-venues__grid">
-              {FEATURED_VENUES.map((venue) => (
-                <div key={venue.name} className="bio-venue-cell">
-                  <div className="bio-venue-cell__top">
-                    <span className="subheading-xs">{venue.territory}</span>
-                    <span className="subheading-xs">{venue.city}</span>
-                  </div>
-                  <div>
-                    <h3 className="bio-venue-cell__name">{venue.name}</h3>
-                    <span className="paragraph-m" style={{ opacity: 0.75 }}>
-                      {venue.type}
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="divider-horizontal" />
-
-          {/* Formats de directe actuals */}
-          <div>
-            <div className="bio-venues__header" style={{ marginBottom: "2rem" }}>
-              <div>
-                <span className="subheading-xs block mb-2">PROPOSTES ESCÈNIQUES EN ACTIU</span>
-                <h2 className="heading-s">FORMATS DE DIRECTE</h2>
-              </div>
-              <Link href="/contractacio/" className="btn a24-btn">
-                <div className="btn__divider" />
-                <span className="btn__p-mask">
-                  <span
-                    className="btn__p"
-                    data-hover-inner
-                    data-text="FITXA DE CONTRACTACIÓ ↗"
-                  >
-                    <span>FITXA DE CONTRACTACIÓ ↗</span>
-                  </span>
-                </span>
-                <div className="btn__divider" />
-              </Link>
-            </div>
-
-            <div className="bio-formats__grid">
-              {liveFormats.map((fmt, idx) => (
-                <div key={fmt.id} className="bio-format-item">
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
-                    <span className="subheading-xs">FORMAT 0{idx + 1}</span>
-                    {fmt.duration && <span className="subheading-xs">{fmt.duration}</span>}
-                  </div>
-                  <h3 className="bio-format-item__title">{fmt.name}</h3>
-                  <p className="paragraph-m font-medium" style={{ margin: 0 }}>
-                    {fmt.musicians}
-                  </p>
-                  <p className="paragraph-m" style={{ margin: 0, color: "rgba(17,17,17,0.72)" }}>
-                    {fmt.description}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ============================================================
-          7. PEU EDITORIAL A24 — SEGÜENT PAS (DISCOGRAFIA & CONTRACTACIÓ)
+          5. PEU EDITORIAL A24 — SEGÜENT PAS (DISCOGRAFIA & CONTRACTACIÓ)
          ============================================================ */}
       <footer className="bio-next-footer">
         <div className="divider-horizontal" />
