@@ -51,9 +51,9 @@ const CHECKPOINTS: CheckpointData[] = [
     media: "/images/07-1978-6.jpg",
     mediaCaption: "Arxiu familiar i primeres arrels a l'Horta Sud",
     tags: ["Catarroja", "Horta Sud", "Tradició Oral", "L'Albufera"],
-    progress: 0.0217,
-    pinX: "27%",
-    pinY: "4.26%",
+    progress: 0.0287,
+    pinX: "43.5%",
+    pinY: "3.85%",
     side: "right",
   },
   {
@@ -70,9 +70,9 @@ const CHECKPOINTS: CheckpointData[] = [
     media: "/images/trobada-vicent-torrent.png",
     mediaCaption: "Trobada fundacional amb Vicent Torrent (h. 1971)",
     tags: ["Prada de Conflent", "Vicent Torrent", "Nova Cançó", "Gènesi"],
-    progress: 0.0778,
-    pinX: "73%",
-    pinY: "9.57%",
+    progress: 0.0837,
+    pinX: "57.5%",
+    pinY: "9.19%",
     side: "left",
   },
   {
@@ -91,9 +91,9 @@ const CHECKPOINTS: CheckpointData[] = [
     media: "/images/07-1978-6.jpg",
     mediaCaption: "Miquel Gil amb Al Tall durant els anys setanta",
     tags: ["Al Tall", "Manolo Miralles", "Vicent Torrent", "Represa Cultural"],
-    progress: 0.1339,
-    pinX: "27%",
-    pinY: "14.89%",
+    progress: 0.1411,
+    pinX: "41.0%",
+    pinY: "14.74%",
     side: "right",
   },
   {
@@ -110,9 +110,9 @@ const CHECKPOINTS: CheckpointData[] = [
     media: "/images/miquel_gil_inicio.jpg",
     mediaCaption: "Obertura cap a les sonoritats de la conca mediterrània (1985)",
     tags: ["Xarq Al-andalus", "Muluk el-Hwa", "Mediterrània", "Comiat d'Al Tall"],
-    progress: 0.1900,
-    pinX: "73%",
-    pinY: "20.21%",
+    progress: 0.1970,
+    pinX: "59.0%",
+    pinY: "20.07%",
     side: "left",
   },
   {
@@ -131,9 +131,9 @@ const CHECKPOINTS: CheckpointData[] = [
     media: "/images/miquel-gil-delange-detras.jpg",
     mediaCaption: "Miquel Gil en l'etapa d'experimentació i recerca en solitari",
     tags: ["Camí Propi", "Arts Escèniques", "Bandes Sonores", "Doblatge"],
-    progress: 0.2461,
-    pinX: "27%",
-    pinY: "25.53%",
+    progress: 0.2530,
+    pinX: "45.5%",
+    pinY: "25.63%",
     side: "right",
   },
   {
@@ -153,9 +153,9 @@ const CHECKPOINTS: CheckpointData[] = [
     mediaCaption: "Portada original de 'Viajero' amb Terminal Sur (1988)",
     tags: ["Terminal Sur", "Viajero", "Vicente Sabater", "Samplers & Llaüt"],
     albumLink: { label: "FITXA DE VIAJERO ↗", href: "/discografia/terminal-sur/" },
-    progress: 0.3022,
-    pinX: "73%",
-    pinY: "30.85%",
+    progress: 0.3056,
+    pinX: "54.5%",
+    pinY: "30.96%",
     side: "left",
   },
   {
@@ -173,9 +173,9 @@ const CHECKPOINTS: CheckpointData[] = [
     mediaCaption: "'Buscando tu olor' (1997), inici de la discografia amb nom propi",
     tags: ["Buscando tu olor", "Seminola", "Mario Benedetti", "Efrén López"],
     albumLink: { label: "FITXA DEL DISC ↗", href: "/discografia/buscando-tu-olor/" },
-    progress: 0.3583,
-    pinX: "27%",
-    pinY: "36.17%",
+    progress: 0.3621,
+    pinX: "40.5%",
+    pinY: "36.52%",
     side: "right",
   },
   {
@@ -195,9 +195,9 @@ const CHECKPOINTS: CheckpointData[] = [
     mediaCaption: "Portada d''Orgànic' (2001), obra capital de la música mediterrània",
     tags: ["Orgànic (2001)", "Enric Casasses", "Estellés", "Toni Xuclà", "Galileo MC"],
     albumLink: { label: "FITXA D'ORGÀNIC ↗", href: "/discografia/organic/" },
-    progress: 0.4144,
-    pinX: "73%",
-    pinY: "41.49%",
+    progress: 0.4196,
+    pinX: "58.0%",
+    pinY: "42.07%",
     side: "left",
   },
   {
@@ -217,9 +217,9 @@ const CHECKPOINTS: CheckpointData[] = [
     mediaCaption: "'Katà' (2004), reconeixement internacional a les llistes europees",
     tags: ["Katà (2004)", "World Music Charts Europe", "Raül Rodríguez", "Òscar Roig"],
     albumLink: { label: "FITXA DE KATÀ ↗", href: "/discografia/kata/" },
-    progress: 0.4705,
-    pinX: "27%",
-    pinY: "46.81%",
+    progress: 0.4745,
+    pinX: "44.5%",
+    pinY: "47.48%",
     side: "right",
   },
   {
@@ -237,9 +237,9 @@ const CHECKPOINTS: CheckpointData[] = [
     mediaCaption: "'Eixos' (2006), guardonat als I Premis Ovidi Montllor",
     tags: ["Eixos (2006)", "Premis Ovidi Montllor", "Borja Penalba", "En Concert"],
     albumLink: { label: "FITXA D'EIXOS ↗", href: "/discografia/eixos/" },
-    progress: 0.5266,
-    pinX: "73%",
-    pinY: "52.13%",
+    progress: 0.5300,
+    pinX: "56.0%",
+    pinY: "53.04%",
     side: "left",
   },
   {
@@ -257,9 +257,9 @@ const CHECKPOINTS: CheckpointData[] = [
     mediaCaption: "Projecte amb Manel Camp Trio i David Pastor (2009)",
     tags: ["Jazz Mediterrani", "Manel Camp", "David Pastor", "Jordi Albinyana"],
     albumLink: { label: "FITXA DEL DISC ↗", href: "/discografia/jazz-manel-camp/" },
-    progress: 0.5827,
-    pinX: "27%",
-    pinY: "57.45%",
+    progress: 0.5866,
+    pinX: "39.5%",
+    pinY: "58.52%",
     side: "right",
   },
   {
@@ -277,9 +277,9 @@ const CHECKPOINTS: CheckpointData[] = [
     mediaCaption: "'Per marcianes' (Temps Record, 2011)",
     tags: ["Per marcianes", "Temps Record", "Cançó d'Autor", "Acústic"],
     albumLink: { label: "FITXA DE PER MARCIANES ↗", href: "/discografia/marcianes/" },
-    progress: 0.6388,
-    pinX: "73%",
-    pinY: "62.77%",
+    progress: 0.6433,
+    pinX: "57.0%",
+    pinY: "64.00%",
     side: "left",
   },
   {
@@ -296,9 +296,9 @@ const CHECKPOINTS: CheckpointData[] = [
     media: "/images/2002espai2.jpg",
     mediaCaption: "Actuació en grans auditoris i esdeveniments multitudinaris",
     tags: ["Camp Nou", "90.000 espectadors", "Directe", "Compromís"],
-    progress: 0.6949,
-    pinX: "27%",
-    pinY: "68.09%",
+    progress: 0.6996,
+    pinX: "43.0%",
+    pinY: "69.56%",
     side: "right",
   },
   {
@@ -315,9 +315,9 @@ const CHECKPOINTS: CheckpointData[] = [
     media: "/images/miquel-gil-juan-miguel-morales-13-scaled.jpg",
     mediaCaption: "Miquel Gil en escena durant la celebració dels 40 anys de trajectòria",
     tags: ["40 Anys", "Gira Matèria", "Nus", "Pep Gimeno Botifarra"],
-    progress: 0.7510,
-    pinX: "73%",
-    pinY: "73.40%",
+    progress: 0.7556,
+    pinX: "59.5%",
+    pinY: "74.96%",
     side: "left",
   },
   {
@@ -335,9 +335,9 @@ const CHECKPOINTS: CheckpointData[] = [
     mediaCaption: "'Geometries' (2019), estrenat al Palau de la Música de València",
     tags: ["Geometries (2019)", "Palau de la Música", "Bambant per casa", "À Punt"],
     albumLink: { label: "FITXA DE GEOMETRIES ↗", href: "/discografia/geometries/" },
-    progress: 0.8071,
-    pinX: "27%",
-    pinY: "78.72%",
+    progress: 0.8132,
+    pinX: "41.5%",
+    pinY: "80.52%",
     side: "right",
   },
   {
@@ -354,9 +354,9 @@ const CHECKPOINTS: CheckpointData[] = [
     media: "/images/miquel-gil-juan-miguel-morales-8-scaled.jpg",
     mediaCaption: "Celebració dels 20 anys d''Orgànic' amb la banda completa",
     tags: ["20 Anys d'Orgànic", "Festival ETNO", "Mural Sonor", "Titana"],
-    progress: 0.8632,
-    pinX: "73%",
-    pinY: "84.04%",
+    progress: 0.8683,
+    pinX: "55.5%",
+    pinY: "85.93%",
     side: "left",
   },
   {
@@ -375,9 +375,9 @@ const CHECKPOINTS: CheckpointData[] = [
     mediaCaption: "Estrena de 'Viatger' al Teatre Principal de València (2024)",
     tags: ["Viatger (2024)", "Manolo Miralles", "Teatre Principal", "Teresa Pasqual"],
     albumLink: { label: "FITXA DE VIATGER ↗", href: "/discografia/viatger/" },
-    progress: 0.9193,
-    pinX: "27%",
-    pinY: "89.36%",
+    progress: 0.9236,
+    pinX: "42.5%",
+    pinY: "91.41%",
     side: "right",
   },
   {
@@ -395,33 +395,52 @@ const CHECKPOINTS: CheckpointData[] = [
     mediaCaption: "Miquel Gil (2024–2026): cinquanta anys de viatge sonor ininterromput",
     tags: ["Horta Sud · DANA", "Premis Ovidi 2025", "Eduard Navarro", "Mig Segle en Viu"],
     albumLink: { label: "VEURE AGENDA DE DIRECTES ↗", href: "/agenda/" },
-    progress: 0.9698,
-    pinX: "50%",
-    pinY: "95.21%",
+    progress: 0.9772,
+    pinX: "54.0%",
+    pinY: "96.74%",
     side: "left",
   },
 ];
 
+// Traçat irregular i orgànic (1000 x 13500) amb inflexions asimètriques i canal lliure per als textos
 const DESKTOP_RAILWAY_PATH = `
-  M 270 150
-  C 270 250, 270 300, 270 400
-  C 270 650, 730 650, 730 900
-  C 730 1150, 270 1150, 270 1400
-  C 270 1650, 730 1650, 730 1900
-  C 730 2150, 270 2150, 270 2400
-  C 270 2650, 730 2650, 730 2900
-  C 730 3150, 270 3150, 270 3400
-  C 270 3650, 730 3650, 730 3900
-  C 730 4150, 270 4150, 270 4400
-  C 270 4650, 730 4650, 730 4900
-  C 730 5150, 270 5150, 270 5400
-  C 270 5650, 730 5650, 730 5900
-  C 730 6150, 270 6150, 270 6400
-  C 270 6650, 730 6650, 730 6900
-  C 730 7150, 270 7150, 270 7400
-  C 270 7650, 730 7650, 730 7900
-  C 730 8150, 270 8150, 270 8400
-  C 270 8680, 500 8720, 500 8950
+  M 495 120
+  C 495 250, 420 340, 435 520
+  C 435 670, 385 750, 385 860
+  C 385 980, 575 1080, 575 1240
+  C 575 1390, 615 1490, 615 1600
+  C 615 1720, 410 1830, 410 1990
+  C 410 2140, 375 2230, 375 2340
+  C 375 2460, 590 2550, 590 2710
+  C 590 2860, 620 2970, 620 3080
+  C 620 3200, 455 3300, 455 3460
+  C 455 3610, 425 3700, 425 3810
+  C 425 3930, 545 4020, 545 4180
+  C 545 4330, 585 4430, 585 4540
+  C 585 4660, 405 4770, 405 4930
+  C 405 5080, 370 5180, 370 5290
+  C 370 5410, 580 5520, 580 5680
+  C 580 5830, 615 5930, 615 6040
+  C 615 6160, 445 6250, 445 6410
+  C 445 6560, 410 6660, 410 6770
+  C 410 6890, 560 7000, 560 7160
+  C 560 7310, 595 7410, 595 7520
+  C 595 7640, 395 7740, 395 7900
+  C 395 8050, 365 8150, 365 8260
+  C 365 8380, 570 8480, 570 8640
+  C 570 8790, 605 8900, 605 9010
+  C 605 9130, 430 9230, 430 9390
+  C 430 9540, 395 9640, 395 9750
+  C 395 9870, 595 9960, 595 10120
+  C 595 10270, 625 10380, 625 10490
+  C 625 10610, 415 10710, 415 10870
+  C 415 11020, 380 11120, 380 11230
+  C 380 11350, 555 11440, 555 11600
+  C 555 11750, 590 11850, 590 11960
+  C 590 12080, 425 12180, 425 12340
+  C 425 12490, 390 12580, 390 12690
+  C 390 12810, 540 12900, 540 13060
+  C 540 13200, 500 13260, 500 13380
 `;
 
 export default function ScrollPathJourney() {
@@ -850,10 +869,10 @@ export default function ScrollPathJourney() {
 
       {/* Escenari del Railway amb Punter Guia Sincronitzat i Cortina d'Aparició en cada Data */}
       <div className="journey-stage" ref={stageRef}>
-        {/* Ruta Sinuosa Desktop SVG (18 passos / 9400px viewBox) */}
+        {/* Ruta Irregular i Orgànica Desktop SVG (18 passos / 13500px viewBox) */}
         <svg
           className="journey-map journey-map--desktop"
-          viewBox="0 0 1000 9400"
+          viewBox="0 0 1000 13500"
           aria-hidden="true"
           focusable="false"
         >
@@ -932,15 +951,15 @@ export default function ScrollPathJourney() {
                 <span className="checkpoint-pin__line" aria-hidden="true" />
               </button>
 
-              {/* ELEMENT VISUAL LATERAL (Apareix des del costat amb clip-path i fade-in al fer scroll) */}
+              {/* ELEMENT VISUAL LATERAL (En desktop és de gran format i solapat a l'extrem lateral de la finestra) */}
               <figure className="checkpoint-visual">
                 <div className="checkpoint-visual__scroll" data-visual-scroll>
                   <div className="checkpoint-visual__img-wrap">
                     <img
                       src={cp.media}
                       alt={cp.title}
-                      width={520}
-                      height={340}
+                      width={760}
+                      height={510}
                       loading="lazy"
                       decoding="async"
                     />

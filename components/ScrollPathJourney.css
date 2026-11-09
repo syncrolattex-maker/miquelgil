@@ -58,10 +58,13 @@
 
 /* ============================================================
    2. ESCENARI DEL RAILWAY I PUNTER (.journey-stage)
+   En desktop ocupa 100% d'amplada perquè les imatges laterals
+   puguen aparèixer en gran format i solapades als laterals de la finestra.
    ============================================================ */
 .journey-stage {
   position: relative;
-  width: min(100% - 2 * clamp(20px, 3vw, 48px), 1380px);
+  width: 100%;
+  max-width: 100%;
   margin: 0 auto;
   padding-top: 2rem;
   isolation: isolate;
@@ -206,7 +209,7 @@
 .checkpoint-pin__line {
   position: absolute;
   top: 50%;
-  width: 38px;
+  width: 46px;
   height: 0.5px;
   background: rgba(17, 17, 17, 0.35);
   transition: background-color 0.35s ease;
@@ -215,13 +218,13 @@
 
 .checkpoint-row--right .checkpoint-pin__line {
   left: 100%;
-  margin-left: 4px;
+  margin-left: 6px;
   transform-origin: left center;
 }
 
 .checkpoint-row--left .checkpoint-pin__line {
   right: 100%;
-  margin-right: 4px;
+  margin-right: 6px;
   transform-origin: right center;
 }
 
@@ -232,8 +235,8 @@
 
 /* ------------------------------------------------------------
    ELEMENT VISUAL LATERAL (.checkpoint-visual)
-   Apareix des del marge lateral oposat al text amb clip-path,
-   fade-in, blur-to-sharp i parallax amb el scroll
+   En desktop apareix en mida gran i solapat a l'extrem lateral
+   de la finestra (-4.5vw), sense envair mai la guia del Railway.
    ------------------------------------------------------------ */
 .checkpoint-visual {
   position: absolute;
@@ -246,17 +249,17 @@
   pointer-events: auto;
 }
 
-/* Quan el vèrtex és a l'esquerra (27%), la fotografia apareix pel lateral esquerre (0% -> 23.5%) */
+/* Quan el vèrtex és a l'esquerra (39.5%..45.5%), la fotografia gran surt solapada pel lateral esquerre de la finestra */
 .checkpoint-row--right .checkpoint-visual {
-  left: 0;
-  width: 23.5%;
+  left: -4.5vw;
+  width: min(39vw, 660px);
   transform: translate(0, -50%);
 }
 
-/* Quan el vèrtex és a la dreta (73%), la fotografia apareix pel lateral dret (76.5% -> 100%) */
+/* Quan el vèrtex és a la dreta (54%..59.5%), la fotografia gran surt solapada pel lateral dret de la finestra */
 .checkpoint-row--left .checkpoint-visual {
-  right: 0;
-  width: 23.5%;
+  right: -4.5vw;
+  width: min(39vw, 660px);
   transform: translate(0, -50%);
 }
 
@@ -275,7 +278,7 @@
   display: block;
   width: 100%;
   height: auto;
-  aspect-ratio: 4 / 3;
+  aspect-ratio: 16 / 10;
   object-fit: cover;
   filter: contrast(1.03) saturate(1.04);
   will-change: transform;
@@ -298,10 +301,18 @@
   will-change: transform, opacity;
 }
 
+.checkpoint-row--right .checkpoint-visual__caption {
+  padding-left: 5.5vw;
+}
+
+.checkpoint-row--left .checkpoint-visual__caption {
+  padding-right: 5.5vw;
+}
+
 /* ------------------------------------------------------------
    ELEMENT DE TEXT EDITORIAL OBERT (.checkpoint-editorial)
    Es desplega com una cortina sincronitzada de dalt a baix
-   com a les fitxes dels CDs (sense marc de card)
+   al costat lliure del pin, sense muntar-se mai sobre el rail.
    ------------------------------------------------------------ */
 .checkpoint-editorial {
   position: absolute;
@@ -314,18 +325,18 @@
   pointer-events: auto;
 }
 
-/* Quan el vèrtex és a l'esquerra (27%), el bloc de text s'obre a la dreta del pin (31% -> 76%) */
+/* Quan el vèrtex és a l'esquerra, el bloc de text s'obre a la dreta del pin amb marge de seguretat sobre el rail */
 .checkpoint-row--right .checkpoint-editorial {
-  left: calc(var(--pin-x) + 44px);
-  width: min(44%, 530px);
+  left: calc(var(--pin-x) + 64px);
+  width: min(calc(95% - var(--pin-x) - 64px), 520px);
   text-align: left;
   transform: translate(0, -50%);
 }
 
-/* Quan el vèrtex és a la dreta (73%), el bloc de text s'obre a l'esquerra del pin (24% -> 69%) */
+/* Quan el vèrtex és a la dreta, el bloc de text s'obre a l'esquerra del pin amb marge de seguretat sobre el rail */
 .checkpoint-row--left .checkpoint-editorial {
-  left: calc(var(--pin-x) - 44px);
-  width: min(44%, 530px);
+  left: calc(var(--pin-x) - 64px);
+  width: min(calc(var(--pin-x) - 5% - 64px), 520px);
   text-align: left;
   transform: translate(-100%, -50%);
 }
@@ -560,20 +571,25 @@
    flux vertical natural (sense solapaments), amb la guia del
    Railway i el punter recorrent el marge esquerre al 100% d'alçada.
    ============================================================ */
-@media (max-width: 1024px) {
-  .checkpoint-row--right .checkpoint-visual,
+@media (max-width: 1180px) and (min-width: 769px) {
+  .checkpoint-row--right .checkpoint-visual {
+    left: -4vw;
+    width: 37vw;
+  }
+
   .checkpoint-row--left .checkpoint-visual {
-    width: 24.5%;
+    right: -4vw;
+    width: 37vw;
   }
 
   .checkpoint-row--right .checkpoint-editorial {
-    left: calc(var(--pin-x) + 32px);
-    width: min(46%, 480px);
+    left: calc(var(--pin-x) + 46px);
+    width: calc(96% - var(--pin-x) - 46px);
   }
 
   .checkpoint-row--left .checkpoint-editorial {
-    left: calc(var(--pin-x) - 32px);
-    width: min(46%, 480px);
+    left: calc(var(--pin-x) - 46px);
+    width: calc(var(--pin-x) - 4% - 46px);
   }
 }
 
