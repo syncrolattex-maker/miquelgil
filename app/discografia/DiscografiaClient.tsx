@@ -1395,6 +1395,16 @@ export default function DiscografiaClient() {
     // 8. FUNCIÓN DE ACTIVACIÓN ur(index) Y NAVEGACIÓN CENTRAL goTo(index, source)
     // ============================================================================
     function motionFor(source: string, distance: number) {
+      const isDesktop = typeof window !== 'undefined' && window.innerWidth > 991;
+
+      if (isDesktop) {
+        // En desktop: deslizamiento pausado, sereno y majestuoso (poco a poco y uno a uno)
+        const duration = source === 'wheel' ? 0.95 : source === 'click' ? 0.88 : 0.90;
+        const kick = source === 'wheel' ? 0.75 : 0.85;
+        const ease = 'power3.out';
+        return { duration, kick, ease };
+      }
+
       const base = SPEC.snapDuration; // 0.46
       let duration = base;
       let kick = 1.6;
@@ -1530,8 +1540,41 @@ export default function DiscografiaClient() {
 
       // Si el modal de detalle está abierto, la rueda no mueve la fila (solo se sigue el gesto para no heredar cola)
       const isModalOpen = Boolean(detailModal && !detailModal.classList.contains('opacity-0'));
+      if (isModalOpen) return;
 
-      // Normalización de deltaMode
+      const isDesktop = typeof window !== 'undefined' && window.innerWidth > 991;
+
+      if (isDesktop) {
+        // En desktop: avance estricto UNO A UNO y POCO A POCO
+        // Cooldown para evitar saltos múltiples causados por inercia de trackpads o ruedas libres
+        const sinceLastStep = now - wheelState.lastStepTime;
+        if (sinceLastStep < 650) {
+          wheelState.accum = 0;
+          return;
+        }
+
+        const modeMultiplier = e.deltaMode === 1 ? 16 : e.deltaMode === 2 ? 100 : 1;
+        const dx = e.deltaX * modeMultiplier;
+        const dy = e.deltaY * modeMultiplier;
+        const rawDelta = Math.abs(dx) > 1.25 * Math.abs(dy) ? dx : dy;
+        const absDelta = Math.abs(rawDelta);
+
+        // Filtrar ruido y micromovimientos
+        if (absDelta < 2.5) return;
+
+        wheelState.accum += rawDelta;
+
+        // Umbral definido para disparar exactamente un único paso (uno a uno)
+        if (Math.abs(wheelState.accum) >= 14) {
+          const stepDir = Math.sign(wheelState.accum);
+          wheelState.accum = 0;
+          wheelState.lastStepTime = now;
+          goTo(W + stepDir, 'wheel');
+        }
+        return;
+      }
+
+      // Normalización de deltaMode (dispositivos no-desktop / pantallas estrechas)
       const modeMultiplier = e.deltaMode === 1 ? 16 : e.deltaMode === 2 ? 100 : 1;
       const dx = e.deltaX * modeMultiplier;
       const dy = e.deltaY * modeMultiplier;
@@ -1808,7 +1851,9 @@ export default function DiscografiaClient() {
           instSpinVel * SPEC.dragVelocitySmoothing;
       } else {
         const width = Math.max(1, container.clientWidth);
-        const span = dragState.pointerType === 'mouse' ? 6 * SPEC.dragSensitivity : SPEC.touchDragSpan;
+        const isDesktopMouse = typeof window !== 'undefined' && window.innerWidth > 991 && dragState.pointerType === 'mouse';
+        // En desktop con ratón: sensibilidad moderada y controlada, sin tirones excesivos
+        const span = isDesktopMouse ? 1.35 : (dragState.pointerType === 'mouse' ? 6 * SPEC.dragSensitivity : SPEC.touchDragSpan);
         const deltaL = -(dx / width) * span;
         L = Math.max(0, Math.min(N - 1, L + deltaL));
 
@@ -1845,8 +1890,24 @@ export default function DiscografiaClient() {
           overwrite: true
         });
       } else {
-        if (dragState.pointerType !== 'mouse') {
-          // Táctil: si |inercia| ≥ touchFlickVelocity: 0.035, goTo(target, 'flick')
+        const isDesktopMouse = typeof window !== 'undefined' && window.innerWidth > 991 && dragState.pointerType === 'mouse';
+
+        if (isDesktopMouse) {
+          // En desktop con ratón: avanzar estrictamente de uno en uno ("uno a uno") con transición suave ("poco a poco")
+          const totalDragX = e.clientX - dragState.startX;
+          const absDragX = Math.abs(totalDragX);
+          const vel = dragState.velocity;
+
+          if (absDragX > 45 || Math.abs(vel) > 0.012) {
+            const stepDir = Math.sign(Math.abs(vel) > 0.008 ? vel : -totalDragX);
+            goTo(W + stepDir, 'flick');
+          } else {
+            goTo(W, 'default');
+          }
+          dragInertia = 0;
+          settleVelocity = 0;
+        } else if (dragState.pointerType !== 'mouse') {
+          // Táctil móvil: comportamiento touch nativo intacto
           if (Math.abs(dragState.velocity) >= SPEC.touchFlickVelocity) {
             const stepDelta = Math.sign(dragState.velocity) * Math.min(2, Math.max(1, Math.round(Math.abs(dragState.velocity) * 8)));
             goTo(activeIndex() + stepDelta, 'flick');
@@ -1854,8 +1915,7 @@ export default function DiscografiaClient() {
             goTo(activeIndex(), 'default');
           }
         } else {
-          // Ratón: no hace snap inmediato. Conserva inercia, la amortigua con fricción (friction: 0.89)
-          // hasta que el muelle crítico (snapFreq: 9.5, snapDamping: 12) la atrae al índice más cercano.
+          // Ratón en pantallas no-desktop
           dragInertia = dragState.velocity;
           settleVelocity = 0;
         }

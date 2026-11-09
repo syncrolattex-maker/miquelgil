@@ -39,17 +39,12 @@ export default function A24Nav({
   const toggleBtnRef = useRef<HTMLButtonElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const scrollerRef = useRef<HTMLDivElement>(null);
-  const scrollbarRef = useRef<HTMLDivElement>(null);
-  const thumbRef = useRef<HTMLDivElement>(null);
   const labelSpanRef = useRef<HTMLSpanElement>(null);
   const wordSpanRef = useRef<HTMLSpanElement>(null);
   const countSpanRef = useRef<HTMLSpanElement>(null);
 
   const hoverTimerRef = useRef<NodeJS.Timeout | null>(null);
   const lastHoverOpenTimeRef = useRef<number>(0);
-  const draggingRef = useRef(false);
-  const grabOffsetRef = useRef(0);
-  const pointerIdRef = useRef<number | null>(null);
   const labelShowingRef = useRef<"word" | "count">("word");
   const labelWidthsRef = useRef<{ word: number; count: number }>({
     word: 0,
@@ -334,36 +329,9 @@ export default function A24Nav({
     };
   }, []);
 
-  // Update scrollbar dimensions
-  const updateScrollbar = useCallback(() => {
-    const scroller = scrollerRef.current;
-    const thumb = thumbRef.current;
-    const scrollbar = scrollbarRef.current;
-    if (!scroller || !thumb || !scrollbar) return;
-
-    const visible = scroller.clientHeight;
-    const total = scroller.scrollHeight;
-    if (total <= visible) {
-      scrollbar.classList.add("is-disabled");
-      return;
-    }
-    scrollbar.classList.remove("is-disabled");
-    const thumbHeight = Math.max(
-      scrollbar.clientHeight * (visible / total),
-      24
-    );
-    thumb.style.height = `${thumbHeight}px`;
-
-    const maxScroll = total - visible;
-    const travel = scrollbar.clientHeight - thumbHeight;
-    const progress = maxScroll > 0 ? scroller.scrollTop / maxScroll : 0;
-    thumb.style.transform = `translateY(${progress * travel}px)`;
-  }, []);
-
   useEffect(() => {
     if (dropdownOpen) {
       morphNavLabel("count");
-      requestAnimationFrame(updateScrollbar);
       document.documentElement.style.overflow = "hidden";
     } else {
       morphNavLabel("word");
@@ -373,73 +341,7 @@ export default function A24Nav({
     return () => {
       document.documentElement.style.overflow = "";
     };
-  }, [dropdownOpen, morphNavLabel, updateScrollbar, updateMobileDockWidth]);
-
-  // Dragging scrollbar logic
-  const onPointerDownScrollbar = (e: React.PointerEvent) => {
-    const thumb = thumbRef.current;
-    const scrollbar = scrollbarRef.current;
-    const scroller = scrollerRef.current;
-    if (!thumb || !scrollbar || !scroller) return;
-
-    e.preventDefault();
-    e.stopPropagation();
-
-    const isThumb = e.target === thumb || thumb.contains(e.target as Node);
-    const thumbRect = thumb.getBoundingClientRect();
-    const grabOffset = isThumb
-      ? Math.min(thumbRect.height, Math.max(0, e.clientY - thumbRect.top))
-      : thumbRect.height / 2;
-    grabOffsetRef.current = grabOffset;
-    draggingRef.current = true;
-    pointerIdRef.current = e.pointerId;
-    thumb.classList.add("is-dragging");
-
-    try {
-      scrollbar.setPointerCapture(e.pointerId);
-    } catch (_) {}
-
-    const scrollbarRect = scrollbar.getBoundingClientRect();
-    const travel = scrollbar.clientHeight - thumb.clientHeight;
-    const maxScroll = scroller.scrollHeight - scroller.clientHeight;
-    if (travel > 0 && maxScroll > 0) {
-      const offset = Math.min(
-        travel,
-        Math.max(0, e.clientY - scrollbarRect.top - grabOffset)
-      );
-      scroller.scrollTop = (offset / travel) * maxScroll;
-      updateScrollbar();
-    }
-  };
-
-  const onPointerMoveScrollbar = (e: React.PointerEvent) => {
-    if (!draggingRef.current) return;
-    const scrollbar = scrollbarRef.current;
-    const scroller = scrollerRef.current;
-    const thumb = thumbRef.current;
-    if (!scrollbar || !scroller || !thumb) return;
-
-    const scrollbarRect = scrollbar.getBoundingClientRect();
-    const travel = scrollbar.clientHeight - thumb.clientHeight;
-    const maxScroll = scroller.scrollHeight - scroller.clientHeight;
-    if (travel > 0 && maxScroll > 0) {
-      const offset = Math.min(
-        travel,
-        Math.max(0, e.clientY - scrollbarRect.top - grabOffsetRef.current)
-      );
-      scroller.scrollTop = (offset / travel) * maxScroll;
-      updateScrollbar();
-    }
-  };
-
-  const onPointerUpScrollbar = (e: React.PointerEvent) => {
-    if (!draggingRef.current) return;
-    draggingRef.current = false;
-    thumbRef.current?.classList.remove("is-dragging");
-    try {
-      scrollbarRef.current?.releasePointerCapture(e.pointerId);
-    } catch (_) {}
-  };
+  }, [dropdownOpen, morphNavLabel, updateMobileDockWidth]);
 
   const handleNavMouseEnter = () => {
     if (hoverTimerRef.current) {
@@ -578,10 +480,6 @@ export default function A24Nav({
                       <div
                         ref={scrollerRef}
                         className="nav-dropdown__content"
-                        data-lenis-prevent=""
-                        data-lenis-prevent-wheel=""
-                        data-lenis-prevent-touch=""
-                        onScroll={updateScrollbar}
                       >
                         <div role="list" className="nav-dropdown__content-li">
                           {NAV_SECTIONS.map((sec) => {
@@ -670,18 +568,6 @@ export default function A24Nav({
                         </div>
                       </div>
                     </div>
-                  </div>
-                  <div
-                    ref={scrollbarRef}
-                    className="nav-dropdown__scrollbar"
-                    onPointerDown={onPointerDownScrollbar}
-                    onPointerMove={onPointerMoveScrollbar}
-                    onPointerUp={onPointerUpScrollbar}
-                  >
-                    <div
-                      ref={thumbRef}
-                      className="nav-dropdown__scrollbar-progress"
-                    />
                   </div>
                 </div>
               </li>

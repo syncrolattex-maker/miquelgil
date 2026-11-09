@@ -1125,8 +1125,73 @@
    RESPONSIVE MÓVIL (<= 991px)
    ============================================================ */
 @media (max-width: 991px) {
+  /* En versión móvil: sección de imagen más estrecha y compacta en altura (no tan alta) */
+  [data-dissolve][data-dissolve-ready] + * {
+    margin-top: 0 !important;
+  }
+
+  .trailer {
+    background-color: transparent !important;
+    padding: 2rem 1.25rem !important;
+    overflow: visible !important;
+  }
+
   .trailer__vh {
-    padding: calc(var(--dissolve-overlap, 0px) + 4rem) 1.5rem 5rem 1.5rem;
+    min-height: auto !important;
+    height: clamp(280px, 44vh, 380px) !important;
+    max-height: 400px !important;
+    width: 100% !important;
+    max-width: 480px !important;
+    margin: 0 auto !important;
+    padding: 1.75rem 1.25rem !important;
+    border-radius: 6px !important;
+    overflow: hidden !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25) !important;
+    position: relative !important;
+  }
+
+  [data-dissolve-bleed] {
+    --bleed-cover: 100% !important;
+    --bleed-lead: 0% !important;
+    clip-path: none !important;
+  }
+
+  [data-dissolve-bleed] > img,
+  .trailer__bg {
+    position: absolute !important;
+    inset: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    top: 0 !important;
+    object-fit: cover !important;
+    border-radius: 6px !important;
+  }
+
+  .trailer__vh::before {
+    content: "" !important;
+    position: absolute !important;
+    inset: 0 !important;
+    background: linear-gradient(
+      to bottom,
+      rgba(0, 0, 0, 0.45) 0%,
+      rgba(0, 0, 0, 0.25) 45%,
+      rgba(0, 0, 0, 0.72) 100%
+    ) !important;
+    pointer-events: none !important;
+    z-index: 1 !important;
+    border-radius: 6px !important;
+  }
+
+  .trailer__content {
+    max-width: 100% !important;
+    padding: 0 !important;
+    z-index: 2 !important;
+  }
+
+  .trailer-quote-text {
+    font-size: clamp(1.1rem, 4vw, 1.45rem) !important;
+    line-height: 1.22 !important;
+    margin: 0.35rem 0 !important;
   }
 
   .production__metadata {
