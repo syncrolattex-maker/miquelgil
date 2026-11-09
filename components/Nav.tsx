@@ -1,22 +1,6 @@
 "use client";
 
-import { usePathname } from "next/navigation";
-import PillarMenu from "./PillarMenu";
-
 export default function Nav() {
-  const pathname = usePathname();
-
-  // No mostrar el menú flotant a la Home, /start, /discografia, /biografia, /contractacio ni /agenda (que tenen la seva pròpia navegació A24)
-  const isDedicatedExperience =
-    pathname === "/" ||
-    pathname?.startsWith("/start") ||
-    pathname?.startsWith("/discografia") ||
-    pathname?.startsWith("/biografia") ||
-    pathname?.startsWith("/contractacio") ||
-    pathname?.startsWith("/agenda") ||
-    pathname?.startsWith("/directes");
-  if (isDedicatedExperience) return null;
-
-  // Únic menú de navegació del lloc: Annnimate Pillar Menu ("Float beside it")
-  return <PillarMenu />;
+  // Totes les seccions de la web utilitzen la navegació editorial A24 (<A24Nav />)
+  return null;
 }

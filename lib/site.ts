@@ -14,13 +14,11 @@ export const socials: Social[] = [
 ];
 
 export const nav = [
-  { label: "Inici", href: "/start", index: "01" },
-  { label: "Música", href: "/discografia", index: "02" },
-  { label: "Directes", href: "/agenda", index: "03" },
+  { label: "Discografia", href: "/discografia", index: "01" },
+  { label: "Directes", href: "/agenda", index: "02" },
+  { label: "Biografia", href: "/biografia", index: "03" },
   { label: "Contractació", href: "/contractacio", index: "04" },
-  { label: "Biografia", href: "/biografia", index: "05" },
-  { label: "Cronologia", href: "/cronologia", index: "06" },
-  { label: "Contacte", href: "/contacte", index: "07" },
+  { label: "Contacte", href: "/contacte", index: "05" },
 ];
 
 export const siteKeyMessage = {

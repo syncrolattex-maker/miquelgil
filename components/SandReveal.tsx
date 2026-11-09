@@ -8,6 +8,7 @@ interface SandRevealProps {
   brushSize?: number;
   starterCue?: boolean;
   className?: string;
+  resetTrigger?: number;
 }
 
 const clamp = (v: number, a: number, b: number) => Math.max(a, Math.min(b, v));
@@ -39,6 +40,7 @@ export default function SandReveal({
   brushSize = 85,
   starterCue = true,
   className = "",
+  resetTrigger = 0,
 }: SandRevealProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -619,13 +621,19 @@ export default function SandReveal({
       sweep([s.lastPointer, currentPt]);
       s.lastPointer = currentPt;
     } else if (s.pointerId === null) {
-      // Hovering: check if cursor is over a cleared link area or empty area
+      // Hovering: check if cursor is over a cleared link/button area or empty area
       const pt = getCanvasCoords(e);
       const sandAmount = sample(pt.x * s.gridW, pt.y * s.gridH);
       if (sandAmount < 0.25) {
         const elements = document.elementsFromPoint(e.clientX, e.clientY);
-        const anchor = elements.find((el) => el.tagName === "A" || el.closest("a"));
-        if (anchor) {
+        const interactive = elements.find(
+          (el) =>
+            el.tagName === "A" ||
+            el.closest("a") ||
+            el.tagName === "BUTTON" ||
+            el.closest("button")
+        );
+        if (interactive) {
           canvas.style.cursor = "pointer";
           return;
         }
@@ -646,20 +654,37 @@ export default function SandReveal({
     // Check if it was a quick tap/click rather than a drag stroke
     if (s.dragStart) {
       const dist = Math.hypot(e.clientX - s.dragStart.x, e.clientY - s.dragStart.y);
-      if (dist < 8) {
+      if (dist < 10) {
         const pt = getCanvasCoords(e);
         const sandAmount = sample(pt.x * s.gridW, pt.y * s.gridH);
-        // Only trigger underlying link if sand has been cleared over that spot
-        if (sandAmount < 0.4) {
+        // Trigger underlying link or button if sand has been cleared over that spot
+        if (sandAmount < 0.45) {
           const elements = document.elementsFromPoint(e.clientX, e.clientY);
-          const anchor = elements.find((el) => el.tagName === "A" || el.closest("a")) as HTMLAnchorElement | undefined;
-          const targetLink = anchor?.tagName === "A" ? anchor : (anchor?.closest("a") as HTMLAnchorElement | null);
-          if (targetLink && targetLink.href) {
-            if (targetLink.target === "_blank") {
-              window.open(targetLink.href, "_blank", "noopener,noreferrer");
+          const interactive = elements.find(
+            (el) =>
+              el.tagName === "A" ||
+              el.closest("a") ||
+              el.tagName === "BUTTON" ||
+              el.closest("button")
+          ) as HTMLElement | undefined;
+
+          const targetAnchor =
+            interactive?.tagName === "A"
+              ? (interactive as HTMLAnchorElement)
+              : (interactive?.closest("a") as HTMLAnchorElement | null);
+          const targetButton =
+            interactive?.tagName === "BUTTON"
+              ? (interactive as HTMLButtonElement)
+              : (interactive?.closest("button") as HTMLButtonElement | null);
+
+          if (targetAnchor && targetAnchor.href) {
+            if (targetAnchor.target === "_blank") {
+              window.open(targetAnchor.href, "_blank", "noopener,noreferrer");
             } else {
-              targetLink.click();
+              targetAnchor.click();
             }
+          } else if (targetButton) {
+            targetButton.click();
           }
         }
       }
@@ -673,6 +698,16 @@ export default function SandReveal({
     s.dragStart = null;
     setIsBrushing(false);
   };
+
+  useEffect(() => {
+    if (resetTrigger > 0 && stateRef.current.heightmap) {
+      fillDunes();
+      stateRef.current.particles = [];
+      stateRef.current.settleTime = 0;
+      stateRef.current.needsRedraw = true;
+      draw();
+    }
+  }, [resetTrigger, fillDunes, draw]);
 
   useEffect(() => {
     initCanvas();

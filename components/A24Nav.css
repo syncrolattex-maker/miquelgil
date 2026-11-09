@@ -3,14 +3,14 @@
    ============================================================ */
 
 .nav {
-  z-index: 100;
+  z-index: 250;
   color: #000000;
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   font-size: 14px;
-  --nav-open-height: 30em;
+  --nav-open-height: 22.5em;
   --nav-scroll-fade: 2.5em;
   --nav-ease: cubic-bezier(0.32, 0.72, 0, 1);
   --nav-open-duration: 0.62s;
@@ -19,6 +19,15 @@
   --nav-active-text: #f2f2f2;
   --nav-dot-gap: 0.3em;
   pointer-events: none;
+}
+
+/* En escritorio con fondo oscuro (p.ej. /directes), mantenemos una placa blanca compacta para que el menú sea siempre visible e idéntico */
+@media (min-width: 992px) {
+  .nav.theme-base .nav-bg {
+    height: 4.15em;
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.18);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+  }
 }
 
 .nav-container {
@@ -336,11 +345,8 @@
   inset: 0%;
   transform: scaleY(0);
   transform-origin: center bottom;
-  transition: transform 0.34s cubic-bezier(0.32, 0.72, 0, 1);
 }
 
-.nav-dropdown__link:hover .nav-dropdown__link-bg,
-.nav-dropdown__link:focus-visible .nav-dropdown__link-bg,
 .nav-dropdown__link[data-film-status='active'] .nav-dropdown__link-bg {
   transform: scaleY(1);
 }
@@ -391,7 +397,7 @@
 
 [data-nav-year-mask] > .nav-dropdown__link-label {
   will-change: transform;
-  transition: transform 0.26s cubic-bezier(0.32, 0.72, 0, 1);
+  transition: none;
   display: block;
 }
 
@@ -405,6 +411,51 @@
 .nav-dropdown__link:focus-visible [data-nav-year-mask] > .nav-dropdown__link-label,
 .nav-dropdown__link[data-film-status='active'] [data-nav-year-mask] > .nav-dropdown__link-label {
   color: var(--nav-active-text) !important;
+}
+
+@keyframes nav-plate-jitter {
+  0% {
+    translate: 0;
+  }
+  30% {
+    translate: 0.05em -0.03em;
+  }
+  60% {
+    translate: -0.04em 0.045em;
+  }
+  80% {
+    translate: 0.025em 0.02em;
+  }
+  to {
+    translate: 0;
+  }
+}
+
+@keyframes nav-text-jitter {
+  0% {
+    translate: 0;
+  }
+  30% {
+    translate: 0.02em -0.012em;
+  }
+  60% {
+    translate: -0.015em 0.018em;
+  }
+  80% {
+    translate: 0.01em 0.008em;
+  }
+  to {
+    translate: 0;
+  }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .nav-dropdown__link:is(:hover, :focus-visible) .nav-dropdown__link-bg {
+    animation: 0.55s step-end 0.15s infinite nav-plate-jitter;
+  }
+  .nav-dropdown__link:is(:hover, :focus-visible) .nav-dropdown__link-inner {
+    animation: 0.45s step-end 0.15s infinite reverse nav-text-jitter;
+  }
 }
 
 /* Barra de scroll lateral derecha dentro del recuadro blanco */

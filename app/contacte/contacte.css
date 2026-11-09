@@ -1,53 +1,94 @@
 /* ============================================================
-   PÀGINA /CONTACTE — MIQUEL GIL
-   Efecte de l'arena (Sand Reveal): Un "montoncito" d'arena sobre el text
-   Sense requadre gris, fons blanc net, degradat suau a la foto
-   Tipografia original: GRIFINITO L per al subtítol i GRAPHIK
+   A24 EDITORIAL SPECIFICATION — PÀGINA /CONTACTE (SAND REVEAL)
+   Sistema tipogràfic unificat: PP Eiko, PP Museum i PP Neue Montreal
    ============================================================ */
 
 @font-face {
-  font-family: 'GRIFINITO L';
+  font-family: 'PP Eiko';
+  src: url('/fonts/PPEiko-Medium.woff2') format('woff2');
+  font-weight: 500;
   font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'PP Museum';
+  src: url('/fonts/PPMuseum-Regular.woff2') format('woff2');
   font-weight: 400;
+  font-style: normal;
   font-display: swap;
-  src: url('/fonts/grifinito.woff') format('woff'),
-       url('/fonts/grifinito.ttf') format('truetype');
 }
 
 @font-face {
-  font-family: 'GRIFINITO L';
-  font-style: normal;
-  font-weight: 600;
-  font-display: swap;
-  src: url('/fonts/grifinito.woff') format('woff'),
-       url('/fonts/grifinito.ttf') format('truetype');
-}
-
-@font-face {
-  font-family: 'GRAPHIK';
-  font-style: normal;
+  font-family: 'PP Neue Montreal';
+  src: url('/fonts/PPNeueMontreal-Regular.woff2') format('woff2');
   font-weight: 400;
+  font-style: normal;
   font-display: swap;
-  src: url('/fonts/Graphik-Regular.woff2') format('woff2');
 }
 
 @font-face {
-  font-family: 'GRAPHIK';
+  font-family: 'PP Neue Montreal';
+  src: url('/fonts/PPNeueMontreal-Medium.woff2') format('woff2');
+  font-weight: 500;
   font-style: normal;
-  font-weight: 700;
   font-display: swap;
-  src: url('/fonts/Graphik-Bold.woff2') format('woff2');
 }
 
-.contacte-page-root {
+.contacte-a24-page {
   min-height: 100vh;
   background-color: #ffffff;
+  color: #111111;
   position: relative;
   overflow-x: hidden;
   width: 100%;
+  font-family: 'PP Neue Montreal', -apple-system, BlinkMacSystemFont, sans-serif;
+  -webkit-font-smoothing: antialiased;
 }
 
-/* El mantell d'arena a pantalla completa (Full-screen canvas a tota la pantalla) */
+/* Barra flotant discreta per indicar l'efecte d'arena i permetre restaurar la duna */
+.contacte-sand-controls {
+  position: fixed;
+  top: 1.5rem;
+  right: 2.25rem;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  background-color: rgba(255, 255, 255, 0.9);
+  border: 0.5px solid rgba(17, 17, 17, 0.22);
+  padding: 0.4rem 0.45rem 0.4rem 0.85rem;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.contacte-sand-cue {
+  font-family: 'PP Museum', serif;
+  font-size: 9.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(17, 17, 17, 0.68);
+}
+
+.contacte-sand-reset-btn {
+  background-color: #111111;
+  color: #ffffff;
+  border: 0.5px solid #111111;
+  padding: 0.35rem 0.7rem;
+  font-family: 'PP Eiko', serif;
+  font-size: 10px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.contacte-sand-reset-btn:hover {
+  background-color: #ffffff;
+  color: #111111;
+}
+
+/* El mantell d'arena a pantalla completa (Full-screen canvas) */
 .contacte-sand-fullscreen {
   position: relative;
   width: 100%;
@@ -66,9 +107,9 @@
   position: relative;
 }
 
-/* Columna de contingut de text */
+/* Columna de contingut editorial */
 .contacte-content-col {
-  flex: 1.15;
+  flex: 1.18;
   min-width: 320px;
   position: relative;
   background-color: #ffffff;
@@ -103,7 +144,7 @@
   background: transparent;
 }
 
-/* Canvas del mantell d'arena: cobreix absolutament tota la pantalla (100vw x 100vh) */
+/* Canvas del mantell d'arena: cobreix tota la pantalla */
 .sand-reveal-canvas {
   position: absolute;
   top: 0;
@@ -123,89 +164,200 @@
   cursor: grabbing;
 }
 
-/* Bloc intern de text que queda cobert pel mantell de platja */
-.contacte-text-block {
+/* Panell intern editorial A24 que queda cobert pel mantell d'arena */
+.contacte-editorial-panel {
   position: relative;
-  max-width: 680px;
-  padding: clamp(60px, 8vh, 110px) clamp(24px, 3.5vw, 48px) clamp(60px, 8vh, 110px) clamp(96px, 8vw, 140px);
+  max-width: 740px;
+  padding: clamp(5.5rem, 9vh, 7.5rem) clamp(1.75rem, 3.5vw, 3.5rem)
+    clamp(3.5rem, 6vh, 5rem) clamp(2.25rem, 5.5vw, 5.5rem);
   box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 1.35rem;
 }
 
-/* Tipografia i colors originals Miquel Gil */
-.contacte-subtitle {
-  font-family: 'GRIFINITO L', serif;
-  font-size: clamp(44px, 4.4vw, 72px);
-  line-height: clamp(42px, 4.1vw, 63px);
-  color: #000000;
+.contacte-header-block {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.contacte-kicker {
+  font-family: 'PP Museum', serif;
+  font-size: 10.5px;
+  line-height: 1.3;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(17, 17, 17, 0.58);
+}
+
+.contacte-display-title {
+  font-family: 'PP Eiko', serif;
+  font-weight: 500;
+  font-size: clamp(2.8rem, 5.6vw, 5.2rem);
+  line-height: 0.9;
+  letter-spacing: -0.03em;
+  text-transform: uppercase;
+  color: #111111;
   margin: 0;
+}
+
+.contacte-divider {
+  width: 100%;
+  height: 0.5px;
+  background-color: rgba(17, 17, 17, 0.2);
+}
+
+/* Subtítol amb la classe .contacte-subtitle perquè SandReveal hi faci el traç inicial */
+.contacte-subtitle {
+  font-family: 'PP Eiko', serif;
   font-weight: 400;
-  letter-spacing: -0.015em;
-  max-width: 620px;
+  font-size: clamp(1.45rem, 2.35vw, 2.25rem);
+  line-height: 1.18;
+  letter-spacing: -0.02em;
+  color: #111111;
+  margin: 0;
+  max-width: 34ch;
   user-select: text;
 }
 
-/* Graella de contacte */
-.contacte-info-grid {
-  display: flex;
-  flex-direction: row;
-  align-items: flex-start;
-  gap: clamp(36px, 5vw, 68px);
-  margin-top: clamp(32px, 4vh, 52px);
+/* Graella de 2 columnes (Management & Dossier Tècnic) */
+.contacte-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 2rem;
 }
 
-.contacte-info-block {
+.contacte-cell {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 0.45rem;
 }
 
-.contacte-block-label {
-  font-family: 'GRAPHIK', sans-serif;
-  font-size: 14px;
-  font-weight: 700;
-  color: #000000;
+.contacte-cell__head {
+  display: flex;
+  align-items: baseline;
+  gap: 0.55rem;
+}
+
+.contacte-cell__num {
+  font-family: 'PP Eiko', serif;
+  font-size: 12px;
+  color: #111111;
+}
+
+.contacte-cell__label {
+  font-family: 'PP Museum', serif;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(17, 17, 17, 0.58);
+}
+
+.contacte-cell__role {
+  font-family: 'PP Neue Montreal', sans-serif;
+  font-size: 13.5px;
+  font-weight: 500;
+  color: #111111;
   margin: 0;
-  line-height: 1.3;
 }
 
-.contacte-email-link {
-  font-family: 'GRAPHIK', sans-serif;
-  font-size: 15px;
-  line-height: 18px;
-  color: #000000;
-  text-decoration: underline;
-  text-underline-offset: 3px;
+.contacte-primary-link {
+  display: inline-block;
+  font-family: 'PP Eiko', serif;
+  font-size: clamp(1.05rem, 1.35vw, 1.3rem);
+  color: #111111;
+  text-decoration: none;
+  border-bottom: 1px solid #111111;
+  padding-bottom: 0.15rem;
+  width: fit-content;
   word-break: break-all;
-  transition: color 0.18s ease;
+  transition: opacity 0.2s ease;
 }
 
-.contacte-email-link:hover {
-  color: #B10000;
+.contacte-primary-link:hover {
+  opacity: 0.65;
 }
 
-.contacte-social-list {
+.contacte-cell__meta {
+  font-family: 'PP Museum', serif;
+  font-size: 9.5px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(17, 17, 17, 0.5);
+  margin-top: 0.15rem;
+}
+
+/* Bloc 03: Xarxes Socials en graella A24 */
+.contacte-socials-section {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 0.85rem;
 }
 
-.contacte-social-link {
-  font-family: 'GRAPHIK', sans-serif;
-  font-size: 15px;
-  line-height: 18px;
-  color: #000000;
-  text-decoration: underline;
-  text-underline-offset: 3px;
-  transition: color 0.18s ease;
+.contacte-socials-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  border-top: 0.5px solid rgba(17, 17, 17, 0.2);
+  border-left: 0.5px solid rgba(17, 17, 17, 0.2);
 }
 
-.contacte-social-link:hover {
-  color: #B10000;
+.contacte-social-pill {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.65rem 0.85rem;
+  border-right: 0.5px solid rgba(17, 17, 17, 0.2);
+  border-bottom: 0.5px solid rgba(17, 17, 17, 0.2);
+  color: #111111;
+  text-decoration: none;
+  background-color: rgba(255, 255, 255, 0.6);
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
-/* Columna de la fotografia (completament lliure d'arena) amb degradat suau a blanc */
+.contacte-social-pill:hover {
+  background-color: #111111;
+  color: #ffffff;
+}
+
+.contacte-social-pill__idx {
+  font-family: 'PP Museum', serif;
+  font-size: 9.5px;
+  letter-spacing: 0.06em;
+  opacity: 0.55;
+}
+
+.contacte-social-pill__name {
+  font-family: 'PP Eiko', serif;
+  font-size: 12.5px;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  flex: 1;
+}
+
+.contacte-social-pill__arrow {
+  font-size: 11px;
+  opacity: 0.7;
+}
+
+/* Peu d'arxiu */
+.contacte-archival-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  font-family: 'PP Museum', serif;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(17, 17, 17, 0.55);
+}
+
+/* Columna de la fotografia (lliure d'arena) amb degradat suau a blanc */
 .contacte-photo-col {
-  flex: 1.25;
+  flex: 1.15;
   position: relative;
   min-height: 100vh;
   background-image: url("/images/7.jpg");
@@ -213,9 +365,14 @@
   background-repeat: no-repeat;
   background-size: cover;
   overflow: hidden;
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-end;
+  padding: 1.75rem 2.25rem;
+  box-sizing: border-box;
 }
 
-/* Degradat suau cap a blanc en escriptori (d'esquerra a dreta per fondre amb el text) */
+/* Degradat suau cap a blanc en escriptori (d'esquerra a dreta per fondre amb el text i la duna) */
 .contacte-photo-col::before {
   content: "";
   position: absolute;
@@ -233,28 +390,56 @@
   z-index: 1;
 }
 
+.contacte-photo-caption {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.15rem;
+  font-family: 'PP Museum', serif;
+  font-size: 9.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.88);
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.55);
+}
+
 /* ============================================================
    RESPONSIVE (Tauletes i Mòbils)
    ============================================================ */
 
 @media (max-width: 1024px) and (min-width: 768px) {
-  .contacte-text-block {
-    padding: 50px 32px 50px 96px;
+  .contacte-editorial-panel {
+    padding: 5.5rem 2rem 4rem 2.5rem;
   }
 
-  .contacte-subtitle {
-    font-size: clamp(38px, 4.4vw, 54px);
-    line-height: clamp(35px, 4vw, 48px);
+  .contacte-grid {
+    grid-template-columns: 1fr;
+    gap: 1.35rem;
   }
 
-  .contacte-info-grid {
-    gap: 36px;
-    margin-top: 36px;
+  .contacte-socials-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 991px) {
+  .contacte-sand-controls {
+    top: 0.85rem;
+    right: 0.85rem;
+    left: 0.85rem;
+    justify-content: space-between;
+    padding: 0.35rem 0.45rem 0.35rem 0.7rem;
+  }
+
+  .contacte-sand-cue {
+    font-size: 8.5px;
   }
 }
 
 @media (max-width: 767px) {
-  .contacte-page-root {
+  .contacte-a24-page {
     padding-top: 0;
     min-height: 100vh;
   }
@@ -264,66 +449,71 @@
     min-height: 100vh;
   }
 
-  /* Imatge de Miquel Gil a la platja a la part superior amb degradat suau cap a la platja */
+  /* Imatge de Miquel Gil a la platja a la part superior amb degradat suau cap a la duna inferior */
   .contacte-photo-col {
     order: -1;
-    min-height: 250px;
-    height: 36vh;
-    max-height: 330px;
+    min-height: 240px;
+    height: 34vh;
+    max-height: 310px;
     flex: none;
-    background-position: 65% 20%;
+    background-position: 65% 22%;
+    padding: 1rem;
   }
 
   .contacte-photo-col::before {
     background: linear-gradient(
       to bottom,
-      rgba(255, 255, 255, 0) 45%,
+      rgba(255, 255, 255, 0) 42%,
       rgba(255, 255, 255, 0.55) 72%,
       rgba(255, 255, 255, 0.95) 94%,
       #ffffff 100%
     );
   }
 
-  /* Secció inferior de text amb l'arena entrant de baix a dalt (sensació real de platja) */
+  .contacte-photo-caption {
+    display: none;
+  }
+
+  /* Secció inferior de text amb l'arena entrant de baix a dalt */
   .contacte-content-col {
     order: 1;
     padding: 0;
     margin: 0;
     flex: 1;
     width: 100%;
-    min-height: 64vh;
+    min-height: 66vh;
     display: flex;
     flex-direction: column;
   }
 
-  .contacte-sand-full,
   .sand-reveal-container {
-    min-height: 64vh;
+    min-height: 100vh;
     height: 100%;
     width: 100%;
-    justify-content: flex-start;
   }
 
-  .sand-reveal-content {
-    justify-content: flex-start;
-  }
-
-  .contacte-text-block {
-    padding: 32px 24px 60px 24px;
+  .contacte-editorial-panel {
+    padding: 1.5rem 1.25rem 6.5rem 1.25rem;
     max-width: 100%;
     width: 100%;
-    box-sizing: border-box;
+    gap: 1.1rem;
+  }
+
+  .contacte-display-title {
+    font-size: clamp(2.35rem, 10vw, 3.2rem);
   }
 
   .contacte-subtitle {
-    font-size: clamp(30px, 7.5vw, 42px);
-    line-height: clamp(29px, 7.2vw, 40px);
+    font-size: clamp(1.25rem, 5.2vw, 1.65rem);
   }
 
-  .contacte-info-grid {
-    flex-direction: column;
-    gap: 24px;
-    margin-top: 26px;
+  .contacte-grid {
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+  }
+
+  .contacte-socials-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 

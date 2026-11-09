@@ -11,19 +11,28 @@ interface A24NavProps {
 }
 
 export const NAV_SECTIONS = [
-  { title: "Inici", url: "/start/", year: "01" },
-  { title: "Discografia", url: "/discografia/", year: "02" },
-  { title: "Directes", url: "/agenda/", year: "03" },
-  { title: "Biografia", url: "/biografia/", year: "04" },
-  { title: "Contractació", url: "/contractacio/", year: "05" },
-  { title: "Cronologia", url: "/cronologia/", year: "06" },
-  { title: "Contacte", url: "/contacte/", year: "07" }
+  { title: "Discografia", url: "/discografia/", year: "01" },
+  { title: "Directes", url: "/agenda/", year: "02" },
+  { title: "Biografia", url: "/biografia/", year: "03" },
+  { title: "Contractació", url: "/contractacio/", year: "04" },
+  { title: "Contacte", url: "/contacte/", year: "05" },
 ];
 
-export default function A24Nav({ currentSection = "/discografia/", theme = "dark" }: A24NavProps) {
+const NAV_G = {
+  minThumbRatio: 0.2,
+  labelDuration: 0.55,
+  labelShift: 130,
+  rowDuration: 0.34,
+  rowYearDuration: 0.26,
+  rowYearShift: 125,
+};
+
+export default function A24Nav({
+  currentSection = "/discografia/",
+  theme = "dark",
+}: A24NavProps) {
   const [menuStatus, setMenuStatus] = useState<"open" | "closed">("closed");
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const [labelMode, setLabelMode] = useState<"word" | "count">("word");
 
   const navRef = useRef<HTMLElement>(null);
   const listRef = useRef<HTMLUListElement>(null);
@@ -32,7 +41,7 @@ export default function A24Nav({ currentSection = "/discografia/", theme = "dark
   const scrollerRef = useRef<HTMLDivElement>(null);
   const scrollbarRef = useRef<HTMLDivElement>(null);
   const thumbRef = useRef<HTMLDivElement>(null);
-  const labelTrackRef = useRef<HTMLSpanElement>(null);
+  const labelSpanRef = useRef<HTMLSpanElement>(null);
   const wordSpanRef = useRef<HTMLSpanElement>(null);
   const countSpanRef = useRef<HTMLSpanElement>(null);
 
@@ -41,6 +50,11 @@ export default function A24Nav({ currentSection = "/discografia/", theme = "dark
   const draggingRef = useRef(false);
   const grabOffsetRef = useRef(0);
   const pointerIdRef = useRef<number | null>(null);
+  const labelShowingRef = useRef<"word" | "count">("word");
+  const labelWidthsRef = useRef<{ word: number; count: number }>({
+    word: 0,
+    count: 0,
+  });
 
   const canHover = () => {
     return (
@@ -49,6 +63,100 @@ export default function A24Nav({ currentSection = "/discografia/", theme = "dark
       window.innerWidth > 991
     );
   };
+
+  const isSectionActive = useCallback(
+    (secUrl: string) => {
+      const normCurrent = currentSection.replace(/\/$/, "");
+      const normSec = secUrl.replace(/\/$/, "");
+      if (normCurrent === normSec) return true;
+      if (normSec === "/discografia" && normCurrent.startsWith("/discografia"))
+        return true;
+      if (
+        normSec === "/agenda" &&
+        (normCurrent.startsWith("/agenda") ||
+          normCurrent.startsWith("/directes"))
+      )
+        return true;
+      return false;
+    },
+    [currentSection]
+  );
+
+  // Measure word & count widths for smooth width + yPercent morph
+  const measureTextWidth = (el: HTMLElement) => {
+    try {
+      const range = document.createRange();
+      range.selectNodeContents(el);
+      const w = range.getBoundingClientRect().width;
+      if (w > 0) return w;
+    } catch (_) {}
+    return el.getBoundingClientRect().width;
+  };
+
+  const refreshLabelWidths = useCallback(() => {
+    const wordEl = wordSpanRef.current;
+    const countEl = countSpanRef.current;
+    if (!wordEl || !countEl) return;
+    if (wordEl.getClientRects().length) {
+      labelWidthsRef.current.word = measureTextWidth(wordEl);
+      labelWidthsRef.current.count = measureTextWidth(countEl);
+    }
+  }, []);
+
+  const morphNavLabel = useCallback(
+    (mode: "word" | "count", immediate = false) => {
+      const labelEl = labelSpanRef.current;
+      const wordEl = wordSpanRef.current;
+      const countEl = countSpanRef.current;
+      if (!labelEl || !wordEl || !countEl) return;
+
+      refreshLabelWidths();
+      const showCount = mode === "count";
+      const targetMode = showCount ? "count" : "word";
+      const targetW = showCount
+        ? labelWidthsRef.current.count
+        : labelWidthsRef.current.word;
+      const changed = labelShowingRef.current !== targetMode;
+      labelShowingRef.current = targetMode;
+
+      const prefersReducedMotion =
+        typeof window !== "undefined" &&
+        window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+      if (prefersReducedMotion || immediate) {
+        gsap.killTweensOf([labelEl, wordEl, countEl]);
+        if (targetW) gsap.set(labelEl, { width: targetW });
+        gsap.set(wordEl, { yPercent: showCount ? -NAV_G.labelShift : 0 });
+        gsap.set(countEl, { yPercent: showCount ? 0 : NAV_G.labelShift });
+        return;
+      }
+
+      if (targetW) {
+        gsap.to(labelEl, {
+          width: targetW,
+          duration: NAV_G.labelDuration,
+          ease: "power3.out",
+          overwrite: "auto",
+        });
+      }
+
+      if (changed) {
+        gsap.to(wordEl, {
+          yPercent: showCount ? -NAV_G.labelShift : 0,
+          duration: NAV_G.labelDuration,
+          ease: "power3.out",
+          overwrite: "auto",
+        });
+        gsap.to(countEl, {
+          yPercent: showCount ? 0 : NAV_G.labelShift,
+          duration: NAV_G.labelDuration,
+          ease: "power3.out",
+          overwrite: "auto",
+        });
+      }
+    },
+    [refreshLabelWidths]
+  );
 
   // Compute mobile dock width for elegant pill appearance
   const updateMobileDockWidth = useCallback(() => {
@@ -62,24 +170,127 @@ export default function A24Nav({ currentSection = "/discografia/", theme = "dark
     }
     if (nav.getAttribute("data-nav-dropdown") === "open") return;
 
-    const items = Array.from(list.children).filter((c) => c.tagName === "LI") as HTMLElement[];
+    const items = Array.from(list.children).filter(
+      (c) => c.tagName === "LI"
+    ) as HTMLElement[];
     if (!items.length) return;
 
     const gap = Number.parseFloat(getComputedStyle(list).columnGap) || 0;
-    const widths = items.map((li) => ((li.firstElementChild as HTMLElement) || li).getBoundingClientRect().width);
+    const widths = items.map(
+      (li) =>
+        ((li.firstElementChild as HTMLElement) || li).getBoundingClientRect()
+          .width
+    );
     const validCount = widths.filter((w) => w > 0).length;
-    const sum = widths.reduce((a, b) => a + b, 0) + gap * Math.max(0, validCount - 1);
+    const sum =
+      widths.reduce((a, b) => a + b, 0) + gap * Math.max(0, validCount - 1);
     if (!sum) return;
 
     const pad = Number.parseFloat(getComputedStyle(nav).fontSize) || 14;
-    nav.style.setProperty("--nav-dock-width", `${Math.ceil(sum + pad * 1.5)}px`);
+    nav.style.setProperty(
+      "--nav-dock-width",
+      `${Math.ceil(sum + pad * 1.5)}px`
+    );
   }, []);
 
+  // Animate individual dropdown row (bidirectional plate + masked year number)
+  const animateDropdownRow = useCallback(
+    (linkEl: HTMLElement, fromTop: boolean, active: boolean) => {
+      const background = linkEl.querySelector(
+        ".nav-dropdown__link-bg"
+      ) as HTMLElement | null;
+      const year = linkEl.querySelector(
+        "[data-nav-year-mask] > .nav-dropdown__link-label"
+      ) as HTMLElement | null;
+      if (!background) return;
+
+      const prefersReducedMotion =
+        typeof window !== "undefined" &&
+        window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+      if (prefersReducedMotion) {
+        background.style.transform = `scaleY(${active ? 1 : 0})`;
+        if (year) {
+          year.style.transform = `translate(0%, ${
+            active ? 0 : NAV_G.rowYearShift
+          }%)`;
+        }
+        return;
+      }
+
+      const curScale = Number(gsap.getProperty(background, "scaleY")) || 0;
+      if ((active && curScale <= 0.001) || (!active && curScale >= 0.999)) {
+        gsap.set(background, {
+          transformOrigin: fromTop ? "center top" : "center bottom",
+        });
+      }
+
+      gsap.to(background, {
+        scaleY: active ? 1 : 0,
+        duration: NAV_G.rowDuration,
+        ease: "power3.out",
+        overwrite: true,
+      });
+
+      if (year) {
+        gsap.to(year, {
+          yPercent: active ? 0 : NAV_G.rowYearShift,
+          duration: NAV_G.rowYearDuration,
+          ease: "power3.out",
+          overwrite: true,
+        });
+      }
+    },
+    []
+  );
+
+  // Sync initial row states when currentSection changes or component mounts
   useEffect(() => {
+    const dropdown = dropdownRef.current;
+    if (!dropdown) return;
+    const links = Array.from(
+      dropdown.querySelectorAll(".nav-dropdown__link")
+    ) as HTMLElement[];
+
+    links.forEach((linkEl) => {
+      const isAct = linkEl.getAttribute("data-film-status") === "active";
+      const background = linkEl.querySelector(
+        ".nav-dropdown__link-bg"
+      ) as HTMLElement | null;
+      const year = linkEl.querySelector(
+        "[data-nav-year-mask] > .nav-dropdown__link-label"
+      ) as HTMLElement | null;
+      if (background) {
+        gsap.set(background, {
+          scaleY: isAct ? 1 : 0,
+          transformOrigin: "center bottom",
+        });
+      }
+      if (year) {
+        gsap.set(year, { yPercent: isAct ? 0 : NAV_G.rowYearShift });
+      }
+    });
+  }, [currentSection]);
+
+  // Initial label setup & resize listener
+  useEffect(() => {
+    morphNavLabel("word", true);
     updateMobileDockWidth();
-    window.addEventListener("resize", updateMobileDockWidth);
-    return () => window.removeEventListener("resize", updateMobileDockWidth);
-  }, [updateMobileDockWidth]);
+
+    if (typeof document !== "undefined" && (document as any).fonts?.ready) {
+      (document as any).fonts.ready.then(() => {
+        morphNavLabel(dropdownOpen ? "count" : "word", true);
+        updateMobileDockWidth();
+      });
+    }
+
+    const onResize = () => {
+      morphNavLabel(dropdownOpen ? "count" : "word", true);
+      updateMobileDockWidth();
+    };
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, [dropdownOpen, morphNavLabel, updateMobileDockWidth]);
 
   // Focus trap / escape key listener
   useEffect(() => {
@@ -99,12 +310,16 @@ export default function A24Nav({ currentSection = "/discografia/", theme = "dark
 
   // Click / touch outside to close
   useEffect(() => {
-    const handlePointerDownOutside = (e: PointerEvent | MouseEvent | TouchEvent) => {
+    const handlePointerDownOutside = (
+      e: PointerEvent | MouseEvent | TouchEvent
+    ) => {
       if (!navRef.current) return;
       const target = e.target as Node | null;
       if (!target) return;
-      // Do not close if the event originated inside the nav or the toggle button
-      if (navRef.current.contains(target) || toggleBtnRef.current?.contains(target)) {
+      if (
+        navRef.current.contains(target) ||
+        toggleBtnRef.current?.contains(target)
+      ) {
         return;
       }
       setDropdownOpen(false);
@@ -133,7 +348,10 @@ export default function A24Nav({ currentSection = "/discografia/", theme = "dark
       return;
     }
     scrollbar.classList.remove("is-disabled");
-    const thumbHeight = Math.max(scrollbar.clientHeight * (visible / total), 24);
+    const thumbHeight = Math.max(
+      scrollbar.clientHeight * (visible / total),
+      24
+    );
     thumb.style.height = `${thumbHeight}px`;
 
     const maxScroll = total - visible;
@@ -144,42 +362,18 @@ export default function A24Nav({ currentSection = "/discografia/", theme = "dark
 
   useEffect(() => {
     if (dropdownOpen) {
-      setLabelMode("count");
+      morphNavLabel("count");
       requestAnimationFrame(updateScrollbar);
       document.documentElement.style.overflow = "hidden";
     } else {
-      setLabelMode("word");
+      morphNavLabel("word");
       document.documentElement.style.overflow = "";
       updateMobileDockWidth();
     }
     return () => {
       document.documentElement.style.overflow = "";
     };
-  }, [dropdownOpen, updateScrollbar, updateMobileDockWidth]);
-
-  // Animate word <-> count morph
-  useEffect(() => {
-    const word = wordSpanRef.current;
-    const count = countSpanRef.current;
-    if (!word || !count) return;
-
-    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const shift = 130;
-
-    if (prefersReducedMotion) {
-      gsap.set(word, { yPercent: labelMode === "word" ? 0 : -shift });
-      gsap.set(count, { yPercent: labelMode === "count" ? 0 : shift });
-      return;
-    }
-
-    if (labelMode === "count") {
-      gsap.to(word, { yPercent: -shift, duration: 0.45, ease: "power3.out", overwrite: "auto" });
-      gsap.to(count, { yPercent: 0, duration: 0.45, ease: "power3.out", overwrite: "auto" });
-    } else {
-      gsap.to(word, { yPercent: 0, duration: 0.45, ease: "power3.out", overwrite: "auto" });
-      gsap.to(count, { yPercent: shift, duration: 0.45, ease: "power3.out", overwrite: "auto" });
-    }
-  }, [labelMode]);
+  }, [dropdownOpen, morphNavLabel, updateScrollbar, updateMobileDockWidth]);
 
   // Dragging scrollbar logic
   const onPointerDownScrollbar = (e: React.PointerEvent) => {
@@ -193,7 +387,9 @@ export default function A24Nav({ currentSection = "/discografia/", theme = "dark
 
     const isThumb = e.target === thumb || thumb.contains(e.target as Node);
     const thumbRect = thumb.getBoundingClientRect();
-    const grabOffset = isThumb ? Math.min(thumbRect.height, Math.max(0, e.clientY - thumbRect.top)) : thumbRect.height / 2;
+    const grabOffset = isThumb
+      ? Math.min(thumbRect.height, Math.max(0, e.clientY - thumbRect.top))
+      : thumbRect.height / 2;
     grabOffsetRef.current = grabOffset;
     draggingRef.current = true;
     pointerIdRef.current = e.pointerId;
@@ -207,7 +403,10 @@ export default function A24Nav({ currentSection = "/discografia/", theme = "dark
     const travel = scrollbar.clientHeight - thumb.clientHeight;
     const maxScroll = scroller.scrollHeight - scroller.clientHeight;
     if (travel > 0 && maxScroll > 0) {
-      const offset = Math.min(travel, Math.max(0, e.clientY - scrollbarRect.top - grabOffset));
+      const offset = Math.min(
+        travel,
+        Math.max(0, e.clientY - scrollbarRect.top - grabOffset)
+      );
       scroller.scrollTop = (offset / travel) * maxScroll;
       updateScrollbar();
     }
@@ -224,7 +423,10 @@ export default function A24Nav({ currentSection = "/discografia/", theme = "dark
     const travel = scrollbar.clientHeight - thumb.clientHeight;
     const maxScroll = scroller.scrollHeight - scroller.clientHeight;
     if (travel > 0 && maxScroll > 0) {
-      const offset = Math.min(travel, Math.max(0, e.clientY - scrollbarRect.top - grabOffsetRef.current));
+      const offset = Math.min(
+        travel,
+        Math.max(0, e.clientY - scrollbarRect.top - grabOffsetRef.current)
+      );
       scroller.scrollTop = (offset / travel) * maxScroll;
       updateScrollbar();
     }
@@ -273,6 +475,15 @@ export default function A24Nav({ currentSection = "/discografia/", theme = "dark
     }
   };
 
+  const isPointerInTopHalf = (
+    el: HTMLElement,
+    ev: React.PointerEvent<HTMLAnchorElement>
+  ) => {
+    const rect = el.getBoundingClientRect();
+    if (!rect.height) return false;
+    return ev.clientY - rect.top < rect.height / 2;
+  };
+
   return (
     <nav
       ref={navRef}
@@ -289,7 +500,11 @@ export default function A24Nav({ currentSection = "/discografia/", theme = "dark
           <div className="nav-center">
             <ul ref={listRef} className="nav-center__list">
               <li>
-                <Link href="/start/" className="nav-logo" aria-label="Miquel Gil Inici">
+                <Link
+                  href="/discografia/"
+                  className="nav-logo"
+                  aria-label="Miquel Gil Discografia"
+                >
                   <img
                     src="/images/logo-W.png"
                     alt="Miquel Gil"
@@ -315,12 +530,20 @@ export default function A24Nav({ currentSection = "/discografia/", theme = "dark
                     e.stopPropagation();
                   }}
                 >
-                  <span className="nav-link__label" data-nav-label="">
-                    <span ref={labelTrackRef} data-nav-label-track="">
+                  <span
+                    ref={labelSpanRef}
+                    className="nav-link__label"
+                    data-nav-label=""
+                  >
+                    <span data-nav-label-track="">
                       <span ref={wordSpanRef} data-nav-label-item="word">
                         Index
                       </span>
-                      <span ref={countSpanRef} data-nav-label-item="count" aria-hidden="true">
+                      <span
+                        ref={countSpanRef}
+                        data-nav-label-item="count"
+                        aria-hidden="true"
+                      >
                         {NAV_SECTIONS.length}
                       </span>
                     </span>
@@ -355,30 +578,89 @@ export default function A24Nav({ currentSection = "/discografia/", theme = "dark
                       <div
                         ref={scrollerRef}
                         className="nav-dropdown__content"
+                        data-lenis-prevent=""
+                        data-lenis-prevent-wheel=""
+                        data-lenis-prevent-touch=""
                         onScroll={updateScrollbar}
                       >
                         <div role="list" className="nav-dropdown__content-li">
                           {NAV_SECTIONS.map((sec) => {
-                            const isCurrent =
-                              currentSection === sec.url ||
-                              (sec.url.startsWith("/discografia") && currentSection.startsWith("/discografia"));
+                            const isCurrent = isSectionActive(sec.url);
                             return (
-                              <div key={sec.url} role="listitem" className="w-dyn-item">
+                              <div
+                                key={sec.url}
+                                role="listitem"
+                                className="w-dyn-item"
+                              >
                                 <Link
                                   href={sec.url}
                                   className="nav-dropdown__link"
-                                  data-film-status={isCurrent ? "active" : "inactive"}
+                                  data-film-status={
+                                    isCurrent ? "active" : "inactive"
+                                  }
                                   aria-current={isCurrent ? "page" : undefined}
+                                  onPointerEnter={(ev) => {
+                                    if (canHover() && !isCurrent) {
+                                      animateDropdownRow(
+                                        ev.currentTarget,
+                                        isPointerInTopHalf(
+                                          ev.currentTarget,
+                                          ev
+                                        ),
+                                        true
+                                      );
+                                    }
+                                  }}
+                                  onPointerLeave={(ev) => {
+                                    if (canHover() && !isCurrent) {
+                                      animateDropdownRow(
+                                        ev.currentTarget,
+                                        isPointerInTopHalf(
+                                          ev.currentTarget,
+                                          ev
+                                        ),
+                                        false
+                                      );
+                                    }
+                                  }}
+                                  onFocus={(ev) => {
+                                    if (!isCurrent) {
+                                      animateDropdownRow(
+                                        ev.currentTarget,
+                                        false,
+                                        true
+                                      );
+                                    }
+                                  }}
+                                  onBlur={(ev) => {
+                                    if (
+                                      !isCurrent &&
+                                      !ev.currentTarget.matches(":hover")
+                                    ) {
+                                      animateDropdownRow(
+                                        ev.currentTarget,
+                                        false,
+                                        false
+                                      );
+                                    }
+                                  }}
                                   onClick={() => {
                                     setDropdownOpen(false);
                                     setMenuStatus("closed");
                                   }}
                                 >
-                                  <div className="nav-dropdown__link-bg" aria-hidden="true" />
+                                  <div
+                                    className="nav-dropdown__link-bg"
+                                    aria-hidden="true"
+                                  />
                                   <div className="nav-dropdown__link-inner">
-                                    <h2 className="nav-dropdown__link-label">{sec.title}</h2>
+                                    <h2 className="nav-dropdown__link-label">
+                                      {sec.title}
+                                    </h2>
                                     <span data-nav-year-mask="">
-                                      <span className="nav-dropdown__link-label">{sec.year}</span>
+                                      <span className="nav-dropdown__link-label">
+                                        {sec.year}
+                                      </span>
                                     </span>
                                   </div>
                                 </Link>
@@ -396,7 +678,10 @@ export default function A24Nav({ currentSection = "/discografia/", theme = "dark
                     onPointerMove={onPointerMoveScrollbar}
                     onPointerUp={onPointerUpScrollbar}
                   >
-                    <div ref={thumbRef} className="nav-dropdown__scrollbar-progress" />
+                    <div
+                      ref={thumbRef}
+                      className="nav-dropdown__scrollbar-progress"
+                    />
                   </div>
                 </div>
               </li>
