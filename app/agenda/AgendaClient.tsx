@@ -59,13 +59,23 @@ function randomRange(min: number, max: number) {
   return min + Math.random() * (max - min);
 }
 
-const INITIAL_OFFSETS: [number, number, number][] = [
+const DESKTOP_OFFSETS: [number, number, number][] = [
   [-1.35, 0.02, -0.15],
   [-0.45, 0.02, 0.22],
   [0.45, 0.02, -0.12],
   [1.35, 0.02, 0.18],
   [-0.9, 0.02, 0.58],
   [0.9, 0.02, 0.52],
+];
+
+const MOBILE_OFFSETS: [number, number, number][] = [
+  [-0.48, 0.02, -0.28],
+  [0.48, 0.02, -0.22],
+  [-0.52, 0.02, 0.34],
+  [0.52, 0.02, 0.38],
+  [0.0, 0.02, 0.06],
+  [-0.38, 0.02, 0.92],
+  [0.38, 0.02, 0.88],
 ];
 
 export default function AgendaClient() {
@@ -113,15 +123,64 @@ export default function AgendaClient() {
     const floorColor = "#dedbd2";
     scene.background = new THREE.Color(bgColor);
 
-    const cameraSettings = { x: 0, y: 2.2, z: 3.6, targetY: 0.35 };
+    const FLOOR_VISUAL_Y = -0.1;
+    const WALL_Z = -1.1;
+
+    function getViewportProfile() {
+      const w = window.innerWidth;
+      const h = window.innerHeight;
+      const isMobile = w <= 768;
+      const isPortrait = w < h;
+
+      if (isMobile) {
+        return {
+          isMobile: true,
+          fov: isPortrait ? 47 : 42,
+          camX: 0,
+          camY: isPortrait ? 2.85 : 2.35,
+          camZ: isPortrait ? 4.45 : 3.8,
+          targetY: isPortrait ? 0.16 : 0.28,
+          bounds: {
+            minX: isPortrait ? -0.98 : -1.55,
+            maxX: isPortrait ? 0.98 : 1.55,
+            minZ: WALL_Z + 0.18,
+            maxZ: isPortrait ? 1.52 : 1.58,
+          },
+          openRatioW: 0.91,
+          openRatioH: 0.56,
+          openYShift: 0.05,
+        };
+      }
+
+      return {
+        isMobile: false,
+        fov: 40,
+        camX: 0,
+        camY: 2.2,
+        camZ: 3.6,
+        targetY: 0.35,
+        bounds: {
+          minX: -2.35,
+          maxX: 2.35,
+          minZ: WALL_Z + 0.15,
+          maxZ: 1.65,
+        },
+        openRatioW: 0.84,
+        openRatioH: 0.82,
+        openYShift: 0.0,
+      };
+    }
+
+    let profile = getViewportProfile();
+
     const camera = new THREE.PerspectiveCamera(
-      40,
+      profile.fov,
       window.innerWidth / window.innerHeight,
       0.01,
       100
     );
-    camera.position.set(cameraSettings.x, cameraSettings.y, cameraSettings.z);
-    camera.lookAt(0, cameraSettings.targetY, 0);
+    camera.position.set(profile.camX, profile.camY, profile.camZ);
+    camera.lookAt(0, profile.targetY, 0);
 
     const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
@@ -134,9 +193,6 @@ export default function AgendaClient() {
     container.appendChild(renderer.domElement);
 
     // 2. Stage Floor & Backdrop Wall
-    const FLOOR_VISUAL_Y = -0.1;
-    const WALL_Z = -1.1;
-
     const floorMat = new THREE.MeshStandardMaterial({
       color: floorColor,
       roughness: 0.92,
@@ -153,8 +209,8 @@ export default function AgendaClient() {
       roughness: 0.95,
       metalness: 0.0,
     });
-    const wall = new THREE.Mesh(new THREE.PlaneGeometry(16, 6), wallMat);
-    wall.position.set(0, FLOOR_VISUAL_Y + 3, WALL_Z);
+    const wall = new THREE.Mesh(new THREE.PlaneGeometry(16, 8), wallMat);
+    wall.position.set(0, FLOOR_VISUAL_Y + 4, WALL_Z);
     wall.receiveShadow = true;
     scene.add(wall);
 
@@ -165,7 +221,7 @@ export default function AgendaClient() {
     const dirLight = new THREE.DirectionalLight(0xffffff, 1.18);
     dirLight.position.set(-2, 2.6, 1.4);
     dirLight.castShadow = true;
-    dirLight.shadow.mapSize.set(2048, 2048);
+    dirLight.shadow.mapSize.set(profile.isMobile ? 1024 : 2048, profile.isMobile ? 1024 : 2048);
     dirLight.shadow.camera.left = -4;
     dirLight.shadow.camera.right = 4;
     dirLight.shadow.camera.top = 4;
@@ -192,13 +248,11 @@ export default function AgendaClient() {
     composer.addPass(new OutputPass());
 
     // 5. Physics Constants & World
-    const OPEN_SCREEN_RATIO = 0.84;
     const OPEN_DISTANCE = 1.5;
-    const CLOSED_SCALE = 0.82;
-    const STAGE_BOUNDS = { minX: -2.35, maxX: 2.35, minZ: WALL_Z + 0.15, maxZ: 1.65 };
-    const OPEN_DURATION = 1.15;
-    const DISCARD_DURATION = 1.25;
-    const ANIM_SPEED = 1.5;
+    const CLOSED_SCALE = profile.isMobile ? 0.78 : 0.82;
+    const OPEN_DURATION = 1.1;
+    const DISCARD_DURATION = 1.2;
+    const ANIM_SPEED = 1.55;
     const OPEN_FRAME = 4;
     const ROLL_LINEAR_RESISTANCE = 2.6;
     const ROLL_ANGULAR_RESISTANCE = 4.5;
@@ -209,8 +263,8 @@ export default function AgendaClient() {
     const GRAB_STIFFNESS = 14;
     const GRAB_MAX_SPEED = 4.5;
     const THROW_MAX_SPEED = 3.2;
-    const CLICK_DRAG_THRESHOLD_PX = 6;
-    const BOUNDS_PULL = 3.0;
+    const CLICK_DRAG_THRESHOLD_PX = profile.isMobile ? 12 : 6;
+    const BOUNDS_PULL = 3.2;
 
     const flatSize = { width: 1, depth: 1.4 };
     let collisionRadius = 0.25;
@@ -359,10 +413,11 @@ export default function AgendaClient() {
     }
 
     function applyPhysicsBounds(dt: number) {
-      const minX = STAGE_BOUNDS.minX + collisionRadius;
-      const maxX = STAGE_BOUNDS.maxX - collisionRadius;
-      const minZ = STAGE_BOUNDS.minZ + collisionRadius;
-      const maxZ = STAGE_BOUNDS.maxZ - collisionRadius;
+      const b = profile.bounds;
+      const minX = b.minX + collisionRadius;
+      const maxX = b.maxX - collisionRadius;
+      const minZ = b.minZ + collisionRadius;
+      const maxZ = b.maxZ - collisionRadius;
 
       for (const paper of papers) {
         if (!paper.body || paper.body.type !== CANNON.Body.DYNAMIC) continue;
@@ -408,12 +463,16 @@ export default function AgendaClient() {
         new THREE.Matrix4().makeBasis(xAxis, yAxis, zAxis)
       );
 
+      if (profile.openYShift !== 0) {
+        position.addScaledVector(zAxis, profile.openYShift);
+      }
+
       const viewH =
         2 * Math.tan(THREE.MathUtils.degToRad(camera.fov * 0.5)) * OPEN_DISTANCE;
       const viewW = viewH * camera.aspect;
       const scale = Math.min(
-        (viewH * OPEN_SCREEN_RATIO) / flatSize.depth,
-        (viewW * OPEN_SCREEN_RATIO) / flatSize.width
+        (viewH * profile.openRatioH) / flatSize.depth,
+        (viewW * profile.openRatioW) / flatSize.width
       );
 
       return { position, quaternion, scale };
@@ -435,18 +494,20 @@ export default function AgendaClient() {
     }
 
     function initialPaperPosition(i: number) {
-      if (i < INITIAL_OFFSETS.length) {
+      const offsets = profile.isMobile ? MOBILE_OFFSETS : DESKTOP_OFFSETS;
+      const b = profile.bounds;
+      if (i < offsets.length) {
         return new THREE.Vector3(
-          INITIAL_OFFSETS[i][0] + randomRange(-0.12, 0.12),
+          offsets[i][0] + randomRange(-0.08, 0.08),
           restMeshY,
-          INITIAL_OFFSETS[i][2] + randomRange(-0.1, 0.1)
+          offsets[i][2] + randomRange(-0.08, 0.08)
         );
       }
-      const margin = collisionRadius * 1.3;
+      const margin = collisionRadius * 1.25;
       return new THREE.Vector3(
-        randomRange(STAGE_BOUNDS.minX + margin, STAGE_BOUNDS.maxX - margin),
+        randomRange(b.minX + margin, b.maxX - margin),
         restMeshY,
-        randomRange(STAGE_BOUNDS.minZ + margin, STAGE_BOUNDS.maxZ - margin)
+        randomRange(b.minZ + margin, b.maxZ - margin)
       );
     }
 
@@ -522,9 +583,9 @@ export default function AgendaClient() {
       if (paper.state === "discarding" || paper.state === "rolling") return;
 
       const dir = new THREE.Vector3(
-        randomRange(-1, 1),
+        randomRange(-0.85, 0.85),
         0,
-        randomRange(-1.3, -0.45)
+        randomRange(-1.2, -0.4)
       ).normalize();
 
       paper.state = "discarding";
@@ -533,9 +594,9 @@ export default function AgendaClient() {
       setPaperBodyDynamic(paper, true);
       syncBodyToMesh(paper);
       paper.body.velocity.set(
-        dir.x * randomRange(1.4, 2.0),
-        randomRange(0.5, 0.9),
-        dir.z * randomRange(1.4, 2.0)
+        dir.x * randomRange(1.2, 1.8),
+        randomRange(0.45, 0.85),
+        dir.z * randomRange(1.2, 1.8)
       );
       paper.body.angularVelocity.set(
         randomRange(-2.4, 2.4),
@@ -575,7 +636,7 @@ export default function AgendaClient() {
       }
     };
 
-    // 6. Raycasting & Pointer Interactions (Click to unfold/crumple, Drag to throw)
+    // 6. Raycasting & Pointer Interactions (Click/Tap to unfold/crumple, Drag to throw)
     const raycaster = new THREE.Raycaster();
     const pointer = new THREE.Vector2();
     const grabPlane = new THREE.Plane();
@@ -640,15 +701,16 @@ export default function AgendaClient() {
       grabPlane.constant = -(restCenterY + GRAB_LIFT);
       if (!raycaster.ray.intersectPlane(grabPlane, grabHitPoint)) return;
 
+      const b = profile.bounds;
       paper.grab.target.set(
         Math.min(
-          Math.max(grabHitPoint.x, STAGE_BOUNDS.minX + collisionRadius),
-          STAGE_BOUNDS.maxX - collisionRadius
+          Math.max(grabHitPoint.x, b.minX + collisionRadius),
+          b.maxX - collisionRadius
         ),
         restCenterY + GRAB_LIFT,
         Math.min(
-          Math.max(grabHitPoint.z, STAGE_BOUNDS.minZ + collisionRadius),
-          STAGE_BOUNDS.maxZ - collisionRadius
+          Math.max(grabHitPoint.z, b.minZ + collisionRadius),
+          b.maxZ - collisionRadius
         )
       );
     }
@@ -728,7 +790,7 @@ export default function AgendaClient() {
 
     const onPointerMove = (e: PointerEvent) => {
       if (!pointerState) {
-        if (!animData) return;
+        if (!animData || profile.isMobile) return;
         const p = pickPaper(e);
         renderer.domElement.style.cursor = p
           ? isGrabbable(p)
@@ -919,8 +981,12 @@ export default function AgendaClient() {
 
         setIsLoading(false);
 
-        // Spawn 18 crumpled papers (repeating the concert dates across the floor like the original demo)
-        const totalBalls = Math.max(concertsList.length * 3, 18);
+        // On mobile spawn 12 paper balls so the narrow portrait stage stays clean and responsive;
+        // on desktop spawn 18 paper balls across the wide stage.
+        const totalBalls = profile.isMobile
+          ? Math.max(concertsList.length * 2, 12)
+          : Math.max(concertsList.length * 3, 18);
+
         for (let i = 0; i < totalBalls; i++) {
           const concert = concertsList[i % concertsList.length];
           const concertIdx = i % concertsList.length;
@@ -933,7 +999,7 @@ export default function AgendaClient() {
               concertsList.length,
               initialPaperPosition(i),
               true,
-              randomRange(3.8, 7.6)
+              randomRange(3.5, 6.8)
             );
           }, delay);
           timeouts.push(tid);
@@ -946,7 +1012,11 @@ export default function AgendaClient() {
 
     // 9. Resize & Keyboard Escape handler
     const onResize = () => {
+      profile = getViewportProfile();
+      camera.fov = profile.fov;
       camera.aspect = window.innerWidth / window.innerHeight;
+      camera.position.set(profile.camX, profile.camY, profile.camZ);
+      camera.lookAt(0, profile.targetY, 0);
       camera.updateProjectionMatrix();
       renderer.setSize(window.innerWidth, window.innerHeight);
       composer.setSize(window.innerWidth, window.innerHeight);
@@ -1001,8 +1071,11 @@ export default function AgendaClient() {
         </div>
 
         <div className="agenda-crumble-hud-top__right">
-          <span className="agenda-crumble-instruction">
+          <span className="agenda-crumble-instruction agenda-crumble-instruction--desktop">
             CLICA UNA BOLA DE PAPER PER DESPLEGAR EL CONCERT · ARROSSEGA PER LLANÇAR
+          </span>
+          <span className="agenda-crumble-instruction agenda-crumble-instruction--mobile">
+            TOCA UNA BOLA O UNA DATA INFERIOR PER DESPLEGAR · ARROSSEGA PER LLANÇAR
           </span>
         </div>
       </header>
@@ -1036,7 +1109,7 @@ export default function AgendaClient() {
                 rel="noopener noreferrer"
                 className="agenda-crumble-btn"
               >
-                <span>MÉS INFORMACIÓ / ENTRADES ↗</span>
+                <span>ENTRADES / INFO ↗</span>
               </a>
             )}
 
@@ -1049,13 +1122,13 @@ export default function AgendaClient() {
               onClick={() => closeActivePaperRef.current?.()}
               className="agenda-crumble-btn"
             >
-              <span>ARRUGAR I TORNAR [ESC]</span>
+              <span>TANCAR [×]</span>
             </button>
           </div>
         </div>
       )}
 
-      {/* BARRA INFERIOR D'ÍNDEX RÀPID DE DATES (PER OBRIR QUALSEVOL DATA AMB UN CLIC) */}
+      {/* BARRA INFERIOR D'ÍNDEX RÀPID DE DATES (SEMPRE ACCESSIBLE EN DESKTOP I MÒBIL) */}
       <nav
         className="agenda-crumble-dock"
         aria-label="Índex ràpid de concerts de l'agenda"
