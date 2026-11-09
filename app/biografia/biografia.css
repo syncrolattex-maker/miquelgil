@@ -1063,33 +1063,63 @@
 }
 
 /* ============================================================
-   RESPONSIVE MÒBIL I TABLET (<= 991px)
+   RESPONSIVE MÒBIL I TABLET (<= 991px i <= 640px)
    ============================================================ */
 @media (max-width: 991px) {
   .bio-hero__content {
-    padding: 4.5rem 1.5rem 5rem 1.5rem;
+    padding: 5.25rem 1.25rem 2.75rem 1.25rem;
+    min-height: auto;
+    gap: 2rem;
+  }
+
+  .bio-hero__credits {
+    gap: 0.45rem 0.65rem;
+    margin: 1rem auto;
+  }
+
+  .bio-hero__credits .ml-4 {
+    margin-left: 0 !important;
   }
 
   .bio-hero__metadata {
     grid-template-columns: repeat(2, 1fr);
+    gap: 1.25rem;
+    margin-top: 1.5rem;
+  }
+
+  .bio-hero__cta-wrap {
+    padding: 2.75rem 0 2.5rem 0;
   }
 
   .bio-hero__cta {
     flex-direction: column;
-    gap: 1.5rem;
+    gap: 1.25rem;
+    padding: 0 1.25rem;
+  }
+
+  .bio-a24-page .a24-btn,
+  .bio-a24-page .btn {
+    width: 100%;
+    max-width: 22rem;
+    min-width: 0;
   }
 
   .bio-portrait-bleed__vh {
-    padding: calc(var(--dissolve-overlap, 0px) + 4rem) 1.5rem 5rem 1.5rem;
+    padding: calc(var(--dissolve-overlap, 0px) + 3.5rem) 1.25rem 4.5rem 1.25rem;
+  }
+
+  .bio-portrait-quote {
+    font-size: clamp(1.65rem, 6.2vw, 2.6rem);
+    line-height: 1.12;
   }
 
   .bio-synthesis {
-    padding: 4.5rem 1.5rem;
+    padding: 4rem 1.25rem;
   }
 
   .bio-synthesis__grid {
     grid-template-columns: 1fr;
-    gap: 3.5rem;
+    gap: 3rem;
   }
 
   .bio-chapters__nav {
@@ -1115,22 +1145,65 @@
     gap: 1rem;
   }
 
+  .bio-venues {
+    padding: 4rem 0;
+  }
+
+  .bio-venues__inner {
+    padding: 0 1.25rem;
+    gap: 3rem;
+  }
+
   .bio-venues__grid {
     grid-template-columns: repeat(2, 1fr);
   }
 
   .bio-formats__grid {
     grid-template-columns: 1fr;
+    gap: 1.5rem;
   }
 
   .bio-next-footer {
-    padding-bottom: 8.5rem;
+    padding: 3.5rem 0 6.5rem 0;
+  }
+
+  .bio-next-footer__inner {
+    padding: 2.75rem 1.25rem;
+    gap: 1.75rem;
   }
 }
 
 @media (max-width: 640px) {
+  .bio-a24-page .heading-l {
+    font-size: clamp(2.55rem, 11.5vw, 3.8rem);
+    line-height: 0.92;
+  }
+
+  .bio-a24-page .heading-m {
+    font-size: clamp(1.85rem, 8.5vw, 2.6rem);
+  }
+
+  .bio-a24-page .paragraph-xl {
+    font-size: clamp(1.22rem, 5.2vw, 1.55rem);
+    line-height: 1.3;
+  }
+
+  .bio-hero__credits {
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+  }
+
   .bio-hero__metadata {
     grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .bio-portrait-Card__caption,
+  .bio-portrait-card__caption {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
   }
 
   .bio-chapters__nav {
@@ -1144,5 +1217,11 @@
 
   .bio-venues__grid {
     grid-template-columns: 1fr;
+  }
+
+  .bio-venue-cell {
+    min-height: auto;
+    padding: 1.35rem 1.15rem;
+    gap: 0.75rem;
   }
 }

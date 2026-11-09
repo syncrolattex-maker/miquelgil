@@ -485,27 +485,37 @@ export default function ScrollPathJourney() {
         }
       }
 
-      // 2. Sincronització exacta del Railway i el Punter amb el centre de la pantalla ("top 55%" -> "bottom 55%")
-      // Així la punta de la línia i el punter sempre viatgen exactament a l'alçada dels ulls de l'usuari!
+      // 2. Sincronització exacta del Railway i el Punter amb el centre de la pantalla ("top 58%" -> "bottom 58%")
+      // En mòbil l'alçada real de l'etapa ve donada pels 18 passos en flux vertical, així que l'SVG s'adapta a 100% de l'alçada.
       const pathLength = motionPath.getTotalLength();
       gsap.set(progressBar, { strokeDasharray: pathLength, strokeDashoffset: pathLength });
 
       const railTl = gsap.timeline({ paused: true });
       railTl.to(progressBar, { strokeDashoffset: 0, duration: 1, ease: "none" }, 0);
-      railTl.to(
-        marker,
-        {
-          motionPath: {
-            path: motionPath,
-            align: motionPath,
-            alignOrigin: [0.5, 0.5],
-            autoRotate: true,
+      if (isMobile) {
+        gsap.set(marker, { left: 20, top: 0, xPercent: -50, yPercent: -50 });
+        railTl.fromTo(
+          marker,
+          { top: "0%" },
+          { top: "100%", duration: 1, ease: "none" },
+          0
+        );
+      } else {
+        railTl.to(
+          marker,
+          {
+            motionPath: {
+              path: motionPath,
+              align: motionPath,
+              alignOrigin: [0.5, 0.5],
+              autoRotate: true,
+            },
+            duration: 1,
+            ease: "none",
           },
-          duration: 1,
-          ease: "none",
-        },
-        0
-      );
+          0
+        );
+      }
 
       const st = ScrollTrigger.create({
         trigger: stageRef.current,
@@ -516,10 +526,12 @@ export default function ScrollPathJourney() {
         invalidateOnRefresh: true,
         onUpdate: (self) => {
           const p = self.progress;
-          checkpointElements?.forEach((cp) => {
-            const targetP = parseFloat(cp.dataset.progress || "0");
-            const isActive = Math.abs(p - targetP) < 0.035;
-            const isPassed = p >= targetP - 0.008;
+          checkpointElements?.forEach((cp, idx) => {
+            const targetP = isMobile
+              ? idx / Math.max(1, checkpointElements.length - 1)
+              : parseFloat(cp.dataset.progress || "0");
+            const isActive = Math.abs(p - targetP) < 0.045;
+            const isPassed = p >= targetP - 0.01;
             cp.classList.toggle("is-active", isActive);
             cp.classList.toggle("is-passed", isPassed);
           });
@@ -858,16 +870,31 @@ export default function ScrollPathJourney() {
           />
         </svg>
 
-        {/* Ruta Lineal Mòbil SVG */}
+        {/* Ruta Lineal Mòbil SVG (s'adapta al 100% de l'alçada dels 18 passos en mòbil) */}
         <svg
           className="journey-map journey-map--mobile"
-          viewBox="0 0 380 9400"
+          viewBox="0 0 100 1000"
+          preserveAspectRatio="none"
           aria-hidden="true"
           focusable="false"
         >
-          <path className="route-shadow" d="M 44 120 L 44 9000" />
-          <path className="route-progress" data-journey-progress="mobile" d="M 44 120 L 44 9000" />
-          <path className="route-motion" data-journey-path="mobile" d="M 44 120 L 44 9000" />
+          <path
+            className="route-shadow"
+            vectorEffect="non-scaling-stroke"
+            d="M 20 0 L 20 1000"
+          />
+          <path
+            className="route-progress"
+            data-journey-progress="mobile"
+            vectorEffect="non-scaling-stroke"
+            d="M 20 0 L 20 1000"
+          />
+          <path
+            className="route-motion"
+            data-journey-path="mobile"
+            vectorEffect="non-scaling-stroke"
+            d="M 20 0 L 20 1000"
+          />
         </svg>
 
         {/* Punter Guia en Moviment (Marker Bead amb direcció) */}

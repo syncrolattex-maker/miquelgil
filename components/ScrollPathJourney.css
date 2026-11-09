@@ -556,12 +556,52 @@
 
 /* ============================================================
    5. RESPONSIVE MÒBIL I TAULETA
+   En dispositius mòbils i tauletes, els 18 passos passen a un
+   flux vertical natural (sense solapaments), amb la guia del
+   Railway i el punter recorrent el marge esquerre al 100% d'alçada.
    ============================================================ */
+@media (max-width: 1024px) {
+  .checkpoint-row--right .checkpoint-visual,
+  .checkpoint-row--left .checkpoint-visual {
+    width: 24.5%;
+  }
+
+  .checkpoint-row--right .checkpoint-editorial {
+    left: calc(var(--pin-x) + 32px);
+    width: min(46%, 480px);
+  }
+
+  .checkpoint-row--left .checkpoint-editorial {
+    left: calc(var(--pin-x) - 32px);
+    width: min(46%, 480px);
+  }
+}
+
 @media (max-width: 768px) {
+  .journey-scroll {
+    padding-bottom: 4rem;
+  }
+
   .journey-head {
     grid-template-columns: minmax(0, 1fr);
-    gap: 1.25rem;
-    padding: 2.5rem 1.25rem 1.5rem 1.25rem;
+    gap: 1rem;
+    padding: 2.75rem 1.25rem 2rem 1.25rem;
+  }
+
+  .journey-head h2 {
+    font-size: clamp(2.1rem, 9vw, 3rem);
+    line-height: 0.96;
+  }
+
+  .journey-lede {
+    font-size: 0.96rem;
+    line-height: 1.58;
+  }
+
+  .journey-stage {
+    width: 100%;
+    padding: 2rem 1.25rem 1rem 1.25rem;
+    box-sizing: border-box;
   }
 
   .journey-map--desktop {
@@ -570,28 +610,99 @@
 
   .journey-map--mobile {
     display: block;
+    position: absolute;
+    top: 2rem;
+    bottom: 1rem;
+    left: 1.25rem;
+    width: 40px;
+    height: calc(100% - 3rem);
+    pointer-events: none;
+    z-index: 5;
+  }
+
+  .journey-marker {
+    left: calc(1.25rem + 8px) !important;
+    width: 16px;
+    height: 16px;
+    box-shadow: 0 0 0 3px #ffffff, 0 0 0 4.5px #111111, 0 4px 12px rgba(137, 26, 32, 0.45);
+  }
+
+  .journey-marker__nose {
+    display: none;
+  }
+
+  .checkpoint-list {
+    display: flex;
+    flex-direction: column;
+    gap: 3.25rem;
+    position: relative;
+    z-index: 10;
+  }
+
+  .checkpoint-row {
+    position: relative !important;
+    top: auto !important;
+    left: auto !important;
+    right: auto !important;
+    height: auto !important;
+    padding-left: 44px;
+    pointer-events: auto;
   }
 
   .checkpoint-pin {
-    left: 44px !important;
+    left: 8px !important;
+    top: 1.15rem !important;
+    width: 12px;
+    height: 12px;
   }
 
   .checkpoint-pin__line {
     left: 100% !important;
     right: auto !important;
-    width: 16px !important;
+    width: 20px !important;
     margin: 0 0 0 4px !important;
+    transform-origin: left center !important;
   }
 
   .checkpoint-visual {
-    display: none;
+    display: none !important;
+  }
+
+  .checkpoint-row--right .checkpoint-editorial,
+  .checkpoint-row--left .checkpoint-editorial {
+    position: relative !important;
+    top: auto !important;
+    left: auto !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    transform: none !important;
+  }
+
+  .checkpoint-editorial__scroll {
+    gap: 0.45rem;
+  }
+
+  .checkpoint-editorial__meta {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.2rem;
+  }
+
+  .checkpoint-editorial__year {
+    font-size: clamp(2.1rem, 9.5vw, 2.65rem);
+  }
+
+  .checkpoint-editorial__badge {
+    font-size: 9.5px;
+    line-height: 1.35;
   }
 
   .checkpoint-editorial__mobile-media {
     display: block;
     width: 100%;
-    max-width: 260px;
-    margin: 0.25rem 0;
+    max-width: 100%;
+    margin: 0.4rem 0 0.25rem 0;
+    overflow: hidden;
   }
 
   .checkpoint-editorial__mobile-media img {
@@ -602,15 +713,70 @@
     object-fit: cover;
   }
 
-  .checkpoint-row--right .checkpoint-editorial,
-  .checkpoint-row--left .checkpoint-editorial {
-    left: 72px !important;
-    width: calc(100% - 84px) !important;
-    transform: translate(0, -50%) !important;
+  .checkpoint-editorial__title {
+    font-size: clamp(1.35rem, 6vw, 1.7rem);
+    line-height: 1.08;
+  }
+
+  .checkpoint-editorial__subtitle {
+    font-size: 10.5px;
+    line-height: 1.4;
+  }
+
+  .checkpoint-editorial__rule {
+    transform-origin: left center !important;
+    margin: 0.25rem 0;
+  }
+
+  .checkpoint-editorial__text {
+    font-size: 0.95rem;
+    line-height: 1.58;
+  }
+
+  .checkpoint-editorial__extended-p {
+    font-size: 0.9rem;
+    line-height: 1.54;
+  }
+
+  .checkpoint-editorial__quote {
+    font-size: 1rem;
+    line-height: 1.32;
+    padding-left: 0.75rem;
+  }
+
+  .checkpoint-editorial__tags {
+    gap: 0.45rem 0.6rem;
+  }
+
+  .journey-archive-toggle {
+    margin-top: 2.5rem;
+    padding: 0 1.25rem;
+  }
+
+  .journey-archive-toggle .a24-btn {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .journey-archive-toggle .btn__p {
+    font-size: 11px !important;
+    white-space: normal;
+    text-align: center;
+  }
+
+  .journey-full-ledger {
+    margin-top: 2rem;
+    padding: 1.75rem 1.25rem 0 1.25rem;
+  }
+
+  .journey-full-ledger__head {
+    flex-direction: column;
+    gap: 0.35rem;
   }
 
   .ledger-row {
     grid-template-columns: 1fr;
     gap: 0.35rem;
+    padding: 1rem 0.25rem;
   }
 }
