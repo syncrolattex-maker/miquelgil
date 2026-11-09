@@ -1,10 +1,8 @@
 /* ============================================================
    A24 EDITORIAL SPECIFICATION — CONTRACTACIÓ OFICIAL MIQUEL GIL
-   Tipografies oficials:
-   - Títols: PP Eiko Medium
-   - Subtítols / Kickers: PP Museum Regular
-   - Textos / Metadades / UI: PP Neue Montreal
-   Paleta estricta: Blancs, Negres i Grisos editorials (sense vermell)
+   Secció 100% informativa (sense fotografies), amb selector
+   numèric interactiu dels 5 formats i popup de sol·licitud
+   amb ampli padding lateral que encaixa completament en pantalla.
    ============================================================ */
 
 @font-face {
@@ -85,7 +83,7 @@
 .contract-a24-page .heading-s {
   font-family: var(--font-titles) !important;
   font-weight: 500 !important;
-  font-size: clamp(1.45rem, 2.4vw, 2.35rem);
+  font-size: clamp(1.45rem, 2.3vw, 2.25rem);
   line-height: 1.02;
   letter-spacing: -0.025em;
   text-transform: uppercase !important;
@@ -99,10 +97,6 @@
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: rgba(0, 0, 0, 0.55);
-}
-
-.contract-a24-page .theme-dark .subheading-xs {
-  color: rgba(255, 255, 255, 0.55);
 }
 
 .contract-a24-page .paragraph-m {
@@ -135,11 +129,6 @@
   height: 0.5px;
   transform-origin: left center;
   box-sizing: border-box;
-}
-
-.contract-a24-page .theme-dark .divider-horizontal {
-  background-color: #ffffff;
-  opacity: 0.18;
 }
 
 .contract-a24-page .divider-local {
@@ -181,10 +170,6 @@
   position: absolute;
 }
 
-.contract-a24-page .theme-dark .plus-stroke {
-  background-color: #ffffff;
-}
-
 .contract-a24-page .plus-stroke.is--hor {
   width: 100%;
   height: 1px;
@@ -222,11 +207,6 @@
   appearance: none;
 }
 
-.contract-a24-page .theme-dark .a24-btn,
-.contract-a24-page .theme-dark .btn {
-  color: #ffffff;
-}
-
 .contract-a24-page .btn__divider {
   background-color: #111111;
   width: 100%;
@@ -234,10 +214,6 @@
   display: block;
   transform-origin: left center;
   transition: background-color 0.3s ease, opacity 0.3s ease;
-}
-
-.contract-a24-page .theme-dark .btn__divider {
-  background-color: #ffffff;
 }
 
 .contract-a24-page .btn__p-mask {
@@ -290,41 +266,21 @@
   .contract-a24-page .btn:hover .btn__p {
     color: #111111;
   }
-  .contract-a24-page .theme-dark .btn:hover .btn__divider {
-    background-color: #ffffff;
-    opacity: 0.65;
-  }
-  .contract-a24-page .theme-dark .btn:hover .btn__p {
-    color: #ffffff;
-  }
 }
 
 /* ============================================================
-   1. SECCIÓ HERO (CORTINA SINCRONITZADA A24)
+   1. SECCIÓ HERO INFORMATIVA (SENSE FOTOS)
    ============================================================ */
-.contract-a24-page .reveal-track {
-  position: relative;
-  width: 100%;
-  --dissolve-apron: 0px;
-  --dissolve-overlap: 0px;
-  --dissolve-bleed: 0px;
-  --dissolve-rest: 0px;
-}
-
 .contract-hero {
   background-color: #ffffff;
   color: #111111;
   position: relative;
-  min-height: 100vh;
-  min-height: 100dvh;
   display: flex;
   flex-direction: column;
 }
 
 .contract-hero__content {
-  min-height: 100vh;
-  min-height: 100dvh;
-  padding: 6.5rem 2rem 3rem 2rem;
+  padding: 6.5rem 2rem 0 2rem;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -362,6 +318,7 @@
   grid-template-columns: repeat(4, 1fr);
   gap: 1.5rem;
   margin-top: 2rem;
+  margin-bottom: 3rem;
   width: 100%;
 }
 
@@ -387,7 +344,7 @@
   right: 50%;
   margin-left: -50vw;
   margin-right: -50vw;
-  padding: 4.2rem 0 3.2rem 0;
+  padding: 3.5rem 0;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -410,159 +367,19 @@
 }
 
 /* ============================================================
-   MOTOR DE DISSOLUCIÓ LÍQUIDA (DATA-DISSOLVE)
-   ============================================================ */
-.contract-a24-page [data-dissolve] {
-  --dissolve-reach: 0.4;
-  --dissolve-peek: 0.19;
-  --dissolve-wander: 0.13;
-  --dissolve-center: 0.13;
-  --dissolve-center-x: 0.5;
-  --dissolve-edge: 0.5;
-  --dissolve-below: 0.4;
-  --dissolve-scale: 230;
-  --dissolve-warp: 1.25;
-  --dissolve-detail: 0.16;
-  --dissolve-min-blob: 45;
-  --dissolve-smooth: 1;
-  --dissolve-grid: 16;
-  --dissolve-seed: 1;
-  --dissolve-intro: 1.5;
-  --dissolve-theme-at: 0.45;
-  --dissolve-life: 0.85;
-  --dissolve-life-speed: 0.15;
-  --dissolve-finish: 0.85;
-  --dissolve-idle-fps: 60;
-  --dissolve-surge: 0.55;
-  --dissolve-agitate: 2.2;
-  --dissolve-cursor: 1;
-  --dissolve-cursor-bite: 0.5;
-  --dissolve-cursor-drop: 90;
-  --dissolve-cursor-spread: 2.6;
-  --dissolve-cursor-wobble: 0.22;
-  --dissolve-cursor-wake: 0.15;
-  --dissolve-cursor-glide: 0.3;
-  --dissolve-cursor-turn: 0.3;
-  --dissolve-cursor-speed: 900;
-  --dissolve-cursor-rise: 0.05;
-  --dissolve-cursor-relax: 1.1;
-  --dissolve-cursor-guard: 110;
-  --dissolve-cursor-band: 120;
-  --dissolve-cursor-reserve: 0.35;
-}
-
-.contract-a24-page [data-dissolve][data-dissolve-ready] {
-  z-index: 1;
-  padding-bottom: var(--dissolve-apron);
-  contain: paint;
-}
-
-.contract-a24-page [data-dissolve][data-dissolve-ready] + * {
-  margin-top: calc(-1 * var(--dissolve-overlap));
-}
-
-.contract-a24-page [data-dissolve-bleed][data-dissolve-bleed] {
-  clip-path: inset(calc(-1 * var(--dissolve-bleed, 0px)) 0 0 0);
-  overflow: visible;
-}
-
-.contract-a24-page [data-dissolve-bleed] {
-  --bleed-cover: 130%;
-  --bleed-lead: 14%;
-}
-
-.contract-a24-page [data-dissolve-bleed] > img,
-.contract-a24-page [data-dissolve-bleed] > video,
-.contract-a24-page [data-dissolve-bleed] > picture,
-.contract-a24-page [data-dissolve-bleed] > canvas {
-  height: calc(var(--bleed-cover) + var(--bleed-lead) * 2) !important;
-  top: calc((100% - var(--bleed-cover)) / 2 - var(--bleed-lead)) !important;
-}
-
-/* ============================================================
-   2. SECCIÓ IMATGE DE FONS A PANTALLA COMPLETA (100VH BLEED)
-   ============================================================ */
-.contract-stage-bleed {
-  background-color: #050505;
-  color: #f2f2f2;
-  position: relative;
-  overflow: hidden;
-  width: 100%;
-}
-
-.contract-stage-bleed__vh {
-  position: relative;
-  min-height: calc(100vh + var(--dissolve-overlap, 350px));
-  min-height: calc(100dvh + var(--dissolve-overlap, 350px));
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: calc(var(--dissolve-overlap, 0px) + 6rem) 2rem 6rem 2rem;
-  box-sizing: border-box;
-}
-
-.contract-stage-bleed__bg {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center 30%;
-  opacity: 1;
-  filter: contrast(1.06) saturate(1.02);
-  pointer-events: none;
-}
-
-.contract-stage-bleed__overlay {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    to bottom,
-    rgba(5, 5, 5, 0.32) 0%,
-    rgba(5, 5, 5, 0.58) 55%,
-    rgba(5, 5, 5, 0.82) 100%
-  );
-  pointer-events: none;
-  z-index: 1;
-}
-
-.contract-stage-bleed__content {
-  position: relative;
-  z-index: 2;
-  max-width: 980px;
-  margin: 0 auto;
-  width: 100%;
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 2rem;
-  text-shadow: 0 2px 24px rgba(0, 0, 0, 0.78);
-}
-
-.contract-stage-quote {
-  font-family: var(--font-titles);
-  font-size: clamp(1.95rem, 4vw, 4rem);
-  line-height: 1.07;
-  letter-spacing: -0.03em;
-  color: #ffffff;
-  margin: 0;
-}
-
-/* ============================================================
-   3. CATÀLEG EDITORIAL OBERT DELS 5 FORMATS DE CONCERT
+   2. SELECTOR NUMÈRIC INTERACTIU DELS 5 FORMATS (01 — 05)
    ============================================================ */
 .contract-formats {
   background-color: #ffffff;
   color: #111111;
   position: relative;
-  padding-bottom: 4rem;
+  padding-bottom: 5rem;
 }
 
 .contract-formats__header {
   max-width: 1320px;
   margin: 0 auto;
-  padding: 5.5rem 2rem 3rem 2rem;
+  padding: 5rem 2rem 2.75rem 2rem;
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
@@ -570,7 +387,7 @@
   flex-wrap: wrap;
 }
 
-/* Barra d'índex tabular dels 5 formats */
+/* Barra d'índex interactiu amb els 5 números */
 .contract-formats__index {
   max-width: 1320px;
   margin: 0 auto;
@@ -580,12 +397,16 @@
 }
 
 .contract-index-cell {
-  padding: 1.35rem 1.15rem;
+  background: transparent;
+  border: none;
   border-right: 0.5px solid rgba(0, 0, 0, 0.16);
+  padding: 1.5rem 1.25rem;
   display: flex;
   flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
   gap: 0.45rem;
-  text-decoration: none;
+  cursor: pointer;
   color: #111111;
   transition: background-color 0.25s ease, color 0.25s ease;
 }
@@ -594,20 +415,33 @@
   border-left: 0.5px solid rgba(0, 0, 0, 0.16);
 }
 
-.contract-index-cell:hover {
+.contract-index-cell:hover,
+.contract-index-cell.is-active {
   background-color: #111111;
   color: #ffffff;
 }
 
-.contract-index-cell:hover .subheading-xs {
-  color: rgba(255, 255, 255, 0.65);
+.contract-index-cell:hover .subheading-xs,
+.contract-index-cell.is-active .subheading-xs,
+.contract-index-cell:hover .contract-index-cell__sub,
+.contract-index-cell.is-active .contract-index-cell__sub {
+  color: rgba(255, 255, 255, 0.68);
 }
 
 .contract-index-cell__top {
+  width: 100%;
   display: flex;
   justify-content: space-between;
   align-items: baseline;
   gap: 0.5rem;
+}
+
+.contract-index-cell__num {
+  font-family: var(--font-titles);
+  font-size: clamp(2rem, 3vw, 2.85rem);
+  line-height: 0.9;
+  letter-spacing: -0.03em;
+  color: inherit;
 }
 
 .contract-index-cell__name {
@@ -616,146 +450,104 @@
   line-height: 1.08;
   letter-spacing: -0.02em;
   text-transform: uppercase;
-  margin-top: 0.25rem;
+  margin-top: 0.35rem;
 }
 
-/* Desplegament editorial de cada format */
-.contract-formats__list {
+.contract-index-cell__sub {
+  font-family: var(--font-texts);
+  font-size: 12.5px;
+  line-height: 1.35;
+  color: rgba(17, 17, 17, 0.65);
+  transition: color 0.25s ease;
+}
+
+/* Panell que es desplega a sota quan es prem el número */
+.contract-formats__panel-wrap {
   max-width: 1320px;
   margin: 0 auto;
   padding: 0 2rem;
 }
 
-.contract-format-row {
-  padding: 4.5rem 0;
-  scroll-margin-top: 5rem;
-}
-
-.contract-format-row__rule {
-  width: 100%;
-  height: 0.5px;
-  background-color: rgba(17, 17, 17, 0.25);
-  margin-bottom: 3rem;
-  transform-origin: left center;
-}
-
-.contract-format-row:first-child .contract-format-row__rule {
-  display: none;
-}
-
-.contract-format-row__inner {
+.contract-format-panel {
+  padding: 4rem 0 1.5rem 0;
   display: flex;
   flex-direction: column;
-  gap: 2.75rem;
-}
-
-.contract-format-row__top {
-  display: grid;
-  grid-template-columns: auto 1fr auto;
-  align-items: baseline;
   gap: 2.25rem;
 }
 
-.contract-format-row__num {
+.contract-format-panel__top {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: baseline;
+  gap: 2.5rem;
+}
+
+.contract-format-panel__num {
   font-family: var(--font-titles);
-  font-size: clamp(2.8rem, 4.8vw, 5rem);
-  line-height: 0.85;
+  font-size: clamp(3.6rem, 6.5vw, 6.6rem);
+  line-height: 0.84;
   letter-spacing: -0.04em;
   color: #111111;
 }
 
-.contract-format-row__headings {
+.contract-format-panel__headings {
   display: flex;
   flex-direction: column;
-  gap: 0.35rem;
+  gap: 0.4rem;
 }
 
-.contract-format-row__title {
+.contract-format-panel__title {
   font-family: var(--font-titles);
-  font-size: clamp(1.75rem, 3vw, 3rem);
+  font-size: clamp(2rem, 3.6vw, 3.5rem);
   font-weight: 500;
-  line-height: 0.98;
-  letter-spacing: -0.028em;
+  line-height: 0.96;
+  letter-spacing: -0.03em;
   text-transform: uppercase;
   color: #111111;
   margin: 0.1rem 0 0 0;
 }
 
-.contract-format-row__subtitle {
+.contract-format-panel__subtitle {
   font-family: var(--font-subtitles);
-  font-size: 12px;
+  font-size: 12.5px;
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: rgba(0, 0, 0, 0.62);
   margin: 0;
 }
 
-.contract-format-row__duration {
+.contract-format-panel__duration {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  gap: 0.25rem;
+  gap: 0.3rem;
   text-align: right;
 }
 
-.contract-format-row__body {
+.contract-format-panel__rule {
+  width: 100%;
+  height: 0.5px;
+  background-color: rgba(17, 17, 17, 0.28);
+  transform-origin: left center;
+}
+
+.contract-format-panel__grid {
   display: grid;
-  grid-template-columns: 0.95fr 1.05fr;
+  grid-template-columns: 0.85fr 1.15fr;
   gap: 4.5rem;
   align-items: start;
 }
 
-.contract-format-row__figure {
-  margin: 0;
+.contract-format-panel__right {
   display: flex;
   flex-direction: column;
-}
-
-.contract-format-row__img-wrap {
-  width: 100%;
-  overflow: hidden;
-  background-color: #111111;
-}
-
-.contract-format-row__img-wrap img {
-  display: block;
-  width: 100%;
-  height: auto;
-  aspect-ratio: 16 / 10;
-  object-fit: cover;
-  filter: contrast(1.04) saturate(1.03);
-  transition: transform 0.7s cubic-bezier(0.19, 1, 0.22, 1);
-}
-
-.contract-format-row__figure:hover .contract-format-row__img-wrap img {
-  transform: scale(1.03);
-}
-
-.contract-format-row__caption {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  gap: 1rem;
-  padding-top: 0.6rem;
-  margin-top: 0.45rem;
-  border-top: 0.5px solid rgba(0, 0, 0, 0.2);
-  font-family: var(--font-subtitles);
-  font-size: 9.5px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: rgba(0, 0, 0, 0.55);
-}
-
-.contract-format-row__specs {
-  display: flex;
-  flex-direction: column;
-  gap: 1.6rem;
+  gap: 1.75rem;
 }
 
 .contract-spec-block {
   display: flex;
   flex-direction: column;
-  gap: 0.55rem;
+  gap: 0.6rem;
   padding-top: 0.9rem;
   border-top: 0.5px solid rgba(0, 0, 0, 0.16);
 }
@@ -772,12 +564,12 @@
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 0.35rem;
+  gap: 0.55rem;
 }
 
 .contract-musicians-list li {
   position: relative;
-  padding-left: 1rem;
+  padding-left: 1.15rem;
   color: #111111;
 }
 
@@ -788,21 +580,21 @@
   color: rgba(0, 0, 0, 0.45);
 }
 
-.contract-format-row__actions {
+.contract-format-panel__actions {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 2rem;
-  padding-top: 0.75rem;
+  gap: 2.25rem;
+  padding-top: 0.85rem;
 }
 
 /* ============================================================
-   4. TAULA EDITORIAL DE DOSSIERS I RIDERS OFICIALS
+   3. TAULA EDITORIAL DE DOSSIERS I RIDERS OFICIALS
    ============================================================ */
 .contract-docs {
   background-color: #ffffff;
   color: #111111;
-  padding: 6.5rem 0;
+  padding: 6rem 0;
   position: relative;
 }
 
@@ -914,7 +706,7 @@
 }
 
 /* ============================================================
-   5. OFICINA DE MANAGEMENT & CONTRACTACIÓ PÚBLICA
+   4. OFICINA DE MANAGEMENT & CONTRACTACIÓ PÚBLICA
    ============================================================ */
 .contract-management {
   background-color: #ffffff;
@@ -959,7 +751,7 @@
 }
 
 /* ============================================================
-   6. PEU DE PÀGINA A24 NEXT
+   5. PEU DE PÀGINA A24 NEXT
    ============================================================ */
 .contract-next-footer {
   background-color: #ffffff;
@@ -980,7 +772,9 @@
 }
 
 /* ============================================================
-   7. MODAL EDITORIAL A24 DE SOL·LICITUD DE DISPONIBILITAT
+   6. POPUP MODAL EDITORIAL A24
+      Major padding lateral i dissenyat perquè càpiga tot el
+      formulari dins de la finestra sense scroll intern en desktop.
    ============================================================ */
 .contract-modal-backdrop {
   position: fixed;
@@ -992,20 +786,21 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 1.5rem;
-  overflow-y: auto;
+  padding: 1.25rem;
+  box-sizing: border-box;
 }
 
 .contract-modal {
   position: relative;
   width: 100%;
-  max-width: 720px;
-  max-height: 90vh;
+  max-width: 880px;
+  max-height: calc(100vh - 2.5rem);
+  max-height: calc(100dvh - 2.5rem);
   overflow-y: auto;
   background-color: #ffffff;
   color: #111111;
-  border: 0.5px solid rgba(17, 17, 17, 0.35);
-  padding: 2.75rem 2.5rem;
+  border: 0.5px solid rgba(17, 17, 17, 0.38);
+  padding: 2.2rem 4.25rem;
   box-sizing: border-box;
 }
 
@@ -1026,6 +821,7 @@
   text-transform: uppercase;
   color: #111111;
   cursor: pointer;
+  white-space: nowrap;
   transition: background-color 0.2s ease, color 0.2s ease;
 }
 
@@ -1037,19 +833,23 @@
 .contract-form {
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
+  gap: 0.9rem;
 }
 
 .contract-fields-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 1.25rem;
+  gap: 1.35rem;
+}
+
+.contract-fields-row--3 {
+  grid-template-columns: repeat(3, 1fr);
 }
 
 .contract-field-group {
   display: flex;
   flex-direction: column;
-  gap: 0.45rem;
+  gap: 0.3rem;
 }
 
 .contract-input,
@@ -1059,14 +859,18 @@
   box-sizing: border-box;
   background-color: transparent;
   border: none;
-  border-bottom: 1px solid rgba(17, 17, 17, 0.3);
+  border-bottom: 1px solid rgba(17, 17, 17, 0.28);
   border-radius: 0;
-  padding: 0.65rem 0;
+  padding: 0.45rem 0;
   font-family: var(--font-texts);
-  font-size: 14px;
+  font-size: 13.5px;
   color: #111111;
   outline: none;
   transition: border-color 0.25s ease;
+}
+
+.contract-textarea {
+  resize: none;
 }
 
 .contract-input:focus,
@@ -1081,17 +885,16 @@
 }
 
 .contract-modal__submit-wrap {
-  margin-top: 0.75rem;
+  margin-top: 0.45rem;
 }
 
 /* ============================================================
-   8. RESPONSIVE MÒBIL I TAULETA (<= 991px i <= 640px)
+   7. RESPONSIVE MÒBIL I TAULETA (<= 991px i <= 640px)
    ============================================================ */
 @media (max-width: 991px) {
   .contract-hero__content {
-    padding: 5.25rem 1.25rem 2.75rem 1.25rem;
-    min-height: auto;
-    gap: 2rem;
+    padding: 5.25rem 1.25rem 0 1.25rem;
+    gap: 1.75rem;
   }
 
   .contract-hero__credits {
@@ -1107,10 +910,11 @@
     grid-template-columns: repeat(2, 1fr);
     gap: 1.25rem;
     margin-top: 1.5rem;
+    margin-bottom: 2rem;
   }
 
   .contract-hero__cta-wrap {
-    padding: 2.75rem 0 2.5rem 0;
+    padding: 2.5rem 0;
   }
 
   .contract-hero__cta {
@@ -1126,15 +930,6 @@
     min-width: 0;
   }
 
-  .contract-stage-bleed__vh {
-    padding: calc(var(--dissolve-overlap, 0px) + 3.5rem) 1.25rem 4.5rem 1.25rem;
-  }
-
-  .contract-stage-quote {
-    font-size: clamp(1.65rem, 6.2vw, 2.6rem);
-    line-height: 1.12;
-  }
-
   .contract-formats__header {
     padding: 4rem 1.25rem 2rem 1.25rem;
   }
@@ -1144,25 +939,25 @@
     padding: 0 1.25rem;
   }
 
-  .contract-formats__list {
+  .contract-formats__panel-wrap {
     padding: 0 1.25rem;
   }
 
-  .contract-format-row {
-    padding: 3.25rem 0;
+  .contract-format-panel {
+    padding: 3rem 0 1rem 0;
   }
 
-  .contract-format-row__top {
+  .contract-format-panel__top {
     grid-template-columns: 1fr;
     gap: 0.75rem;
   }
 
-  .contract-format-row__duration {
+  .contract-format-panel__duration {
     align-items: flex-start;
     text-align: left;
   }
 
-  .contract-format-row__body {
+  .contract-format-panel__grid {
     grid-template-columns: 1fr;
     gap: 2.25rem;
   }
@@ -1215,11 +1010,13 @@
   }
 
   .contract-modal {
-    padding: 2rem 1.25rem;
+    padding: 1.85rem 2rem;
   }
 
-  .contract-fields-row {
+  .contract-fields-row,
+  .contract-fields-row--3 {
     grid-template-columns: 1fr;
+    gap: 0.85rem;
   }
 }
 
@@ -1253,9 +1050,13 @@
     border-bottom: 0.5px solid rgba(0, 0, 0, 0.12);
   }
 
-  .contract-format-row__actions {
+  .contract-format-panel__actions {
     flex-direction: column;
     align-items: stretch;
     gap: 1rem;
+  }
+
+  .contract-modal {
+    padding: 1.5rem 1.35rem;
   }
 }

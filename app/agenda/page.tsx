@@ -1,19 +1,12 @@
-import React from "react";
-import Footer from "@/components/Footer";
+import { Metadata } from "next";
 import AgendaClient from "./AgendaClient";
-import "./agenda.css";
 
-export const metadata = {
-  title: "Agenda de Concerts — Miquel Gil",
+export const metadata: Metadata = {
+  title: "Directes · Agenda de Concerts | Miquel Gil — Oficial",
   description:
-    "Properes dates de concerts i actuacions en directe de Miquel Gil: de la intimitat del duo amb Eduard Navarro a la força de la banda completa.",
+    "Agenda interactiva de concerts i actuacions en directe de Miquel Gil: desplega cada data de gira amb l'experiència Paper Crumble 3D.",
 };
 
 export default function AgendaPage() {
-  return (
-    <main className="agenda-page-container">
-      <AgendaClient />
-      <Footer />
-    </main>
-  );
+  return <AgendaClient />;
 }

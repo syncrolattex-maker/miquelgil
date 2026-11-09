@@ -1,34 +1,96 @@
 "use client";
 
-import React, { useState, useRef, useEffect, useCallback } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import gsap from "gsap";
-import { bookingInfo } from "@/lib/site";
+import * as THREE from "three";
+import * as CANNON from "cannon-es";
+import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer.js";
+import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass.js";
+import { SSAOPass } from "three/examples/jsm/postprocessing/SSAOPass.js";
+import { OutputPass } from "three/examples/jsm/postprocessing/OutputPass.js";
+import A24Nav from "@/components/A24Nav";
 import { Concert, DEFAULT_CONCERTS } from "@/types/concert";
 import { getConcerts, subscribeToConcerts } from "@/lib/concertsService";
+import { loadVATData, VATData } from "./paperVat";
+import {
+  createConcertPaperMesh,
+  updatePaperFrame,
+  PaperMeshInstance,
+} from "./paperTexture";
+import "./agenda.css";
 
-// Resting fan geometry constants (Tutorial 025 baseline)
-const RESTING_ROTATIONS = [-3.8, 1.9, -2.4, 2.7, -1.8, 3.1];
-const RESTING_Y_OFFSETS = [-6, 8, -4, 10, -3, 6];
+interface PaperTransformSnapshot {
+  position: THREE.Vector3;
+  quaternion: THREE.Quaternion;
+  scale: number;
+  frameIdx: number;
+}
+
+interface PaperEntity extends PaperMeshInstance {
+  body: CANNON.Body;
+  frameIdx: number;
+  state: "closed" | "opening" | "open" | "discarding" | "grabbed" | "rolling";
+  time: number;
+  homePosition: THREE.Vector3;
+  homeRotation: THREE.Euler;
+  start: PaperTransformSnapshot | null;
+  target: PaperTransformSnapshot | null;
+  throw: { settleTimer: number } | null;
+  grab?: { target: THREE.Vector3 };
+}
+
+function clamp01(value: number) {
+  return Math.min(Math.max(value, 0), 1);
+}
+
+function easeOutCubic(t: number) {
+  return 1 - Math.pow(1 - t, 3);
+}
+
+function easeInCubic(t: number) {
+  return t * t * t;
+}
+
+function lerp(a: number, b: number, t: number) {
+  return a + (b - a) * t;
+}
+
+function randomRange(min: number, max: number) {
+  return min + Math.random() * (max - min);
+}
+
+const INITIAL_OFFSETS: [number, number, number][] = [
+  [-1.35, 0.02, -0.15],
+  [-0.45, 0.02, 0.22],
+  [0.45, 0.02, -0.12],
+  [1.35, 0.02, 0.18],
+  [-0.9, 0.02, 0.58],
+  [0.9, 0.02, 0.52],
+];
 
 export default function AgendaClient() {
+  const mountRef = useRef<HTMLDivElement>(null);
   const [concertsList, setConcertsList] = useState<Concert[]>(DEFAULT_CONCERTS);
-  const [activeFilter, setActiveFilter] = useState<"all" | "upcoming" | "past">("all");
-  const [exposedIndex, setExposedIndex] = useState<number | null>(null);
-  const [focusedIndex, setFocusedIndex] = useState<number | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [activeConcert, setActiveConcert] = useState<Concert | null>(null);
+  const [activeIndex, setActiveIndex] = useState<number | null>(null);
 
-  const deckRef = useRef<HTMLDivElement>(null);
-  const cardRefs = useRef<(HTMLElement | null)[]>([]);
+  const openConcertByIndexRef = useRef<((index: number) => void) | null>(null);
+  const closeActivePaperRef = useRef<(() => void) | null>(null);
 
-  // Carrega reactiva de concerts des de Supabase o memòria cau local
+  // Load concerts from Supabase / local cache
   useEffect(() => {
     let isMounted = true;
     getConcerts().then((data) => {
-      if (isMounted) setConcertsList(data);
+      if (isMounted && data && data.length > 0) {
+        setConcertsList(data);
+      }
     });
 
     const unsubscribe = subscribeToConcerts((updated) => {
-      if (isMounted) setConcertsList(updated);
+      if (isMounted && updated && updated.length > 0) {
+        setConcertsList(updated);
+      }
     });
 
     return () => {
@@ -37,537 +99,987 @@ export default function AgendaClient() {
     };
   }, []);
 
-  const filteredConcerts = concertsList.filter((c) => {
-    if (activeFilter === "upcoming") return c.status === "upcoming" || c.status === "postponed";
-    if (activeFilter === "past") return c.status === "past";
-    return true;
-  });
-
-  // Reset resting fanned state
-  const resetRestingState = useCallback(() => {
-    const cards = cardRefs.current.filter(Boolean) as HTMLElement[];
-    cards.forEach((card, i) => {
-      card.classList.remove("is-focused", "is-exposed", "is-dimmed");
-      gsap.to(card, {
-        x: 0,
-        y: RESTING_Y_OFFSETS[i % RESTING_Y_OFFSETS.length] || 0,
-        rotation: RESTING_ROTATIONS[i % RESTING_ROTATIONS.length] || 0,
-        scale: 1,
-        opacity: 1,
-        filter: "blur(0px)",
-        duration: 0.55,
-        ease: "power3.out",
-        overwrite: "auto",
-      });
-      card.style.zIndex = (i + 1).toString();
-    });
-  }, []);
-
-  // Update resting positions whenever filtered concerts change
+  // Initialize Three.js + Houdini VAT + cannon-es Paper Crumble scene
   useEffect(() => {
-    setExposedIndex(null);
-    setFocusedIndex(null);
-    resetRestingState();
-  }, [filteredConcerts.length, resetRestingState]);
+    const container = mountRef.current;
+    if (!container) return;
 
-  // Expose a card directly in the foreground (primer pla) without a popup
-  const handleExposeCard = useCallback((index: number) => {
-    setExposedIndex(index);
-    setFocusedIndex(index);
-    const cards = cardRefs.current.filter(Boolean) as HTMLElement[];
-    const deck = deckRef.current;
-    if (!deck || cards.length === 0) return;
+    let disposed = false;
+    const timeouts: number[] = [];
 
-    const total = cards.length;
-    const isMobile = window.innerWidth <= 900;
+    // 1. Scene & A24 Editorial Palette (Black / Warm Editorial Grey / Off-White)
+    const scene = new THREE.Scene();
+    const bgColor = "#141413";
+    const floorColor = "#dedbd2";
+    scene.background = new THREE.Color(bgColor);
 
-    if (isMobile) {
-      const viewport = deck.parentElement;
-      if (viewport) {
-        const card = cards[index];
-        const targetScrollLeft = card.offsetLeft - (viewport.clientWidth - card.offsetWidth) / 2;
-        viewport.scrollTo({ left: Math.max(0, targetScrollLeft), behavior: "smooth" });
+    const cameraSettings = { x: 0, y: 2.2, z: 3.6, targetY: 0.35 };
+    const camera = new THREE.PerspectiveCamera(
+      40,
+      window.innerWidth / window.innerHeight,
+      0.01,
+      100
+    );
+    camera.position.set(cameraSettings.x, cameraSettings.y, cameraSettings.z);
+    camera.lookAt(0, cameraSettings.targetY, 0);
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.outputColorSpace = THREE.SRGBColorSpace;
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    renderer.domElement.style.touchAction = "none";
+    container.innerHTML = "";
+    container.appendChild(renderer.domElement);
+
+    // 2. Stage Floor & Backdrop Wall
+    const FLOOR_VISUAL_Y = -0.1;
+    const WALL_Z = -1.1;
+
+    const floorMat = new THREE.MeshStandardMaterial({
+      color: floorColor,
+      roughness: 0.92,
+      metalness: 0.0,
+    });
+    const floor = new THREE.Mesh(new THREE.PlaneGeometry(16, 12), floorMat);
+    floor.rotation.x = -Math.PI / 2;
+    floor.position.set(0, FLOOR_VISUAL_Y, 1);
+    floor.receiveShadow = true;
+    scene.add(floor);
+
+    const wallMat = new THREE.MeshStandardMaterial({
+      color: bgColor,
+      roughness: 0.95,
+      metalness: 0.0,
+    });
+    const wall = new THREE.Mesh(new THREE.PlaneGeometry(16, 6), wallMat);
+    wall.position.set(0, FLOOR_VISUAL_Y + 3, WALL_Z);
+    wall.receiveShadow = true;
+    scene.add(wall);
+
+    // 3. Studio Lighting
+    const ambient = new THREE.AmbientLight(0xffffff, 1.25);
+    scene.add(ambient);
+
+    const dirLight = new THREE.DirectionalLight(0xffffff, 1.18);
+    dirLight.position.set(-2, 2.6, 1.4);
+    dirLight.castShadow = true;
+    dirLight.shadow.mapSize.set(2048, 2048);
+    dirLight.shadow.camera.left = -4;
+    dirLight.shadow.camera.right = 4;
+    dirLight.shadow.camera.top = 4;
+    dirLight.shadow.camera.bottom = -3;
+    dirLight.shadow.camera.near = 0.1;
+    dirLight.shadow.camera.far = 12;
+    dirLight.shadow.bias = -0.001;
+    scene.add(dirLight);
+
+    // 4. Post-processing (SSAO creases + OutputPass)
+    const composer = new EffectComposer(renderer);
+    composer.addPass(new RenderPass(scene, camera));
+
+    const ssaoPass = new SSAOPass(
+      scene,
+      camera,
+      window.innerWidth,
+      window.innerHeight
+    );
+    ssaoPass.kernelRadius = 0.01;
+    ssaoPass.minDistance = 0.0001;
+    ssaoPass.maxDistance = 0.08;
+    composer.addPass(ssaoPass);
+    composer.addPass(new OutputPass());
+
+    // 5. Physics Constants & World
+    const OPEN_SCREEN_RATIO = 0.84;
+    const OPEN_DISTANCE = 1.5;
+    const CLOSED_SCALE = 0.82;
+    const STAGE_BOUNDS = { minX: -2.35, maxX: 2.35, minZ: WALL_Z + 0.15, maxZ: 1.65 };
+    const OPEN_DURATION = 1.15;
+    const DISCARD_DURATION = 1.25;
+    const ANIM_SPEED = 1.5;
+    const OPEN_FRAME = 4;
+    const ROLL_LINEAR_RESISTANCE = 2.6;
+    const ROLL_ANGULAR_RESISTANCE = 4.5;
+    const ROLL_SETTLE_SPEED = 0.018;
+    const PHYSICS_STEP = 1 / 60;
+    const PAPER_MASS = 0.16;
+    const GRAB_LIFT = 0.5;
+    const GRAB_STIFFNESS = 14;
+    const GRAB_MAX_SPEED = 4.5;
+    const THROW_MAX_SPEED = 3.2;
+    const CLICK_DRAG_THRESHOLD_PX = 6;
+    const BOUNDS_PULL = 3.0;
+
+    const flatSize = { width: 1, depth: 1.4 };
+    let collisionRadius = 0.25;
+    let restCenterY = FLOOR_VISUAL_Y + 0.25;
+    let restMeshY = 0.02;
+    const crumpleCenter = new THREE.Vector3(0, 0.2, 0);
+
+    const physicsWorld = new CANNON.World({
+      gravity: new CANNON.Vec3(0, -7.0, 0),
+    });
+    physicsWorld.allowSleep = false;
+    physicsWorld.defaultContactMaterial.friction = 0.8;
+    physicsWorld.defaultContactMaterial.restitution = 0.15;
+
+    const paperMaterial = new CANNON.Material("paper");
+    const floorPhysicsMaterial = new CANNON.Material("floor");
+    physicsWorld.addContactMaterial(
+      new CANNON.ContactMaterial(paperMaterial, floorPhysicsMaterial, {
+        friction: 1.0,
+        restitution: 0.12,
+      })
+    );
+    physicsWorld.addContactMaterial(
+      new CANNON.ContactMaterial(paperMaterial, paperMaterial, {
+        friction: 0.6,
+        restitution: 0.3,
+      })
+    );
+
+    const floorBody = new CANNON.Body({
+      mass: 0,
+      material: floorPhysicsMaterial,
+      shape: new CANNON.Plane(),
+      position: new CANNON.Vec3(0, FLOOR_VISUAL_Y, 0),
+      quaternion: new CANNON.Quaternion().setFromEuler(-Math.PI / 2, 0, 0),
+    });
+    physicsWorld.addBody(floorBody);
+
+    const papers: PaperEntity[] = [];
+    let animData: VATData | null = null;
+    let activePaper: PaperEntity | null = null;
+
+    const _crumpleOffset = new THREE.Vector3();
+    function crumpleWorldOffset(scale: number, quaternion: THREE.Quaternion) {
+      return _crumpleOffset
+        .copy(crumpleCenter)
+        .multiplyScalar(scale)
+        .applyQuaternion(quaternion);
+    }
+
+    function createPaperBody(baseMesh: THREE.Mesh) {
+      const off = crumpleWorldOffset(CLOSED_SCALE, baseMesh.quaternion);
+      const body = new CANNON.Body({
+        mass: PAPER_MASS,
+        material: paperMaterial,
+        shape: new CANNON.Sphere(collisionRadius),
+        linearDamping: 0.15,
+        angularDamping: 0.35,
+        position: new CANNON.Vec3(
+          baseMesh.position.x + off.x,
+          baseMesh.position.y + off.y,
+          baseMesh.position.z + off.z
+        ),
+      });
+      body.quaternion.set(
+        baseMesh.quaternion.x,
+        baseMesh.quaternion.y,
+        baseMesh.quaternion.z,
+        baseMesh.quaternion.w
+      );
+      physicsWorld.addBody(body);
+      return body;
+    }
+
+    function setPaperBodyDynamic(paper: PaperEntity, enabled: boolean) {
+      const body = paper.body;
+      body.type = enabled ? CANNON.Body.DYNAMIC : CANNON.Body.KINEMATIC;
+      body.mass = enabled ? PAPER_MASS : 0;
+      body.collisionFilterGroup = enabled ? 1 : 0;
+      body.collisionFilterMask = enabled ? 1 : 0;
+      if (!enabled) {
+        body.velocity.set(0, 0, 0);
+        body.angularVelocity.set(0, 0, 0);
+        body.force.set(0, 0, 0);
+        body.torque.set(0, 0, 0);
+      }
+      body.updateMassProperties();
+      body.wakeUp();
+    }
+
+    function syncBodyToMesh(paper: PaperEntity) {
+      const off = crumpleWorldOffset(paper.mesh.scale.x, paper.mesh.quaternion);
+      paper.body.position.set(
+        paper.mesh.position.x + off.x,
+        paper.mesh.position.y + off.y,
+        paper.mesh.position.z + off.z
+      );
+      paper.body.quaternion.set(
+        paper.mesh.quaternion.x,
+        paper.mesh.quaternion.y,
+        paper.mesh.quaternion.z,
+        paper.mesh.quaternion.w
+      );
+    }
+
+    function syncMeshToBody(paper: PaperEntity, scale = CLOSED_SCALE) {
+      paper.mesh.quaternion.set(
+        paper.body.quaternion.x,
+        paper.body.quaternion.y,
+        paper.body.quaternion.z,
+        paper.body.quaternion.w
+      );
+      const off = crumpleWorldOffset(scale, paper.mesh.quaternion);
+      paper.mesh.position.set(
+        paper.body.position.x - off.x,
+        paper.body.position.y - off.y,
+        paper.body.position.z - off.z
+      );
+      paper.mesh.scale.setScalar(scale);
+    }
+
+    function isOnGround(body: CANNON.Body) {
+      return body.position.y <= restCenterY + 0.05;
+    }
+
+    function applyRollingResistance(body: CANNON.Body, dt: number) {
+      const linearDecay = Math.exp(-ROLL_LINEAR_RESISTANCE * dt);
+      const angularDecay = Math.exp(-ROLL_ANGULAR_RESISTANCE * dt);
+      body.velocity.x *= linearDecay;
+      body.velocity.z *= linearDecay;
+      body.angularVelocity.x *= angularDecay;
+      body.angularVelocity.y *= angularDecay;
+      body.angularVelocity.z *= angularDecay;
+    }
+
+    function finishRollingPaper(paper: PaperEntity, maxFrame: number) {
+      if (!animData) return;
+      paper.state = "closed";
+      paper.time = 0;
+      paper.homePosition.copy(paper.mesh.position);
+      paper.homeRotation.copy(paper.mesh.rotation);
+      paper.frameIdx = maxFrame;
+      updatePaperFrame(paper, animData, paper.frameIdx);
+      syncBodyToMesh(paper);
+      syncMeshToBody(paper);
+    }
+
+    function applyPhysicsBounds(dt: number) {
+      const minX = STAGE_BOUNDS.minX + collisionRadius;
+      const maxX = STAGE_BOUNDS.maxX - collisionRadius;
+      const minZ = STAGE_BOUNDS.minZ + collisionRadius;
+      const maxZ = STAGE_BOUNDS.maxZ - collisionRadius;
+
+      for (const paper of papers) {
+        if (!paper.body || paper.body.type !== CANNON.Body.DYNAMIC) continue;
+        const body = paper.body;
+        if (body.position.x < minX) {
+          if (body.velocity.x < 0) body.velocity.x = Math.abs(body.velocity.x) * 0.42;
+          body.velocity.x += BOUNDS_PULL * dt;
+        } else if (body.position.x > maxX) {
+          if (body.velocity.x > 0) body.velocity.x = -Math.abs(body.velocity.x) * 0.42;
+          body.velocity.x -= BOUNDS_PULL * dt;
+        }
+
+        if (body.position.z < minZ) {
+          if (body.velocity.z < 0) body.velocity.z = Math.abs(body.velocity.z) * 0.42;
+          body.velocity.z += BOUNDS_PULL * dt;
+        } else if (body.position.z > maxZ) {
+          if (body.velocity.z > 0) body.velocity.z = -Math.abs(body.velocity.z) * 0.42;
+          body.velocity.z -= BOUNDS_PULL * dt;
+        }
       }
     }
 
-    const deckCenter = deck.clientWidth / 2;
+    function captureTransform(paper: PaperEntity): PaperTransformSnapshot {
+      return {
+        position: paper.mesh.position.clone(),
+        quaternion: paper.mesh.quaternion.clone(),
+        scale: paper.mesh.scale.x,
+        frameIdx: paper.frameIdx,
+      };
+    }
 
-    cards.forEach((card, i) => {
-      const naturalCenter = card.offsetLeft + card.offsetWidth / 2;
+    const _viewDir = new THREE.Vector3();
+    function computeOpenPose() {
+      camera.getWorldDirection(_viewDir);
+      const position = camera.position
+        .clone()
+        .addScaledVector(_viewDir, OPEN_DISTANCE);
 
-      if (i === index) {
-        card.classList.add("is-exposed");
-        card.classList.remove("is-dimmed", "is-focused");
-        card.style.zIndex = "120";
+      const yAxis = _viewDir.clone().negate();
+      const zAxis = new THREE.Vector3(0, 1, 0).applyQuaternion(camera.quaternion);
+      const xAxis = new THREE.Vector3().crossVectors(yAxis, zAxis);
+      const quaternion = new THREE.Quaternion().setFromRotationMatrix(
+        new THREE.Matrix4().makeBasis(xAxis, yAxis, zAxis)
+      );
 
-        const targetX = isMobile ? 0 : deckCenter - naturalCenter;
+      const viewH =
+        2 * Math.tan(THREE.MathUtils.degToRad(camera.fov * 0.5)) * OPEN_DISTANCE;
+      const viewW = viewH * camera.aspect;
+      const scale = Math.min(
+        (viewH * OPEN_SCREEN_RATIO) / flatSize.depth,
+        (viewW * OPEN_SCREEN_RATIO) / flatSize.width
+      );
 
-        gsap.to(card, {
-          x: targetX,
-          y: -28,
-          rotation: 0,
-          scale: isMobile ? 1.05 : 1.15,
-          opacity: 1,
-          filter: "blur(0px)",
-          duration: 0.52,
-          ease: "power3.out",
-          overwrite: "auto",
-        });
-      } else {
-        card.classList.remove("is-exposed", "is-focused");
-        card.classList.add("is-dimmed");
+      return { position, quaternion, scale };
+    }
 
-        const isLeft = i < index;
-        const dist = Math.abs(index - i);
-
-        let targetX = 0;
-        if (isMobile) {
-          targetX = isLeft ? -90 - (dist - 1) * 20 : 90 + (dist - 1) * 20;
-        } else {
-          const desiredCenter = isLeft
-            ? deckCenter - 210 - (dist - 1) * 44
-            : deckCenter + 210 + (dist - 1) * 44;
-          targetX = desiredCenter - naturalCenter;
-        }
-
-        const shiftRot = isLeft ? -8 - (dist - 1) * 1.5 : 8 + (dist - 1) * 1.5;
-
-        gsap.to(card, {
-          x: targetX,
-          y: (RESTING_Y_OFFSETS[i % RESTING_Y_OFFSETS.length] || 0) + 14,
-          rotation: shiftRot,
-          scale: 0.9,
-          opacity: 0.22,
-          filter: "blur(1.5px)",
-          duration: 0.52,
-          ease: "power3.out",
-          overwrite: "auto",
-        });
-        card.style.zIndex = (isLeft ? i + 1 : total - i).toString();
+    function updateOpenPose() {
+      if (!activePaper) return;
+      if (activePaper.state === "opening" && activePaper.target) {
+        const pose = computeOpenPose();
+        activePaper.target.position.copy(pose.position);
+        activePaper.target.quaternion.copy(pose.quaternion);
+        activePaper.target.scale = pose.scale;
+      } else if (activePaper.state === "open") {
+        const pose = computeOpenPose();
+        activePaper.mesh.position.copy(pose.position);
+        activePaper.mesh.quaternion.copy(pose.quaternion);
+        activePaper.mesh.scale.setScalar(pose.scale);
       }
-    });
-  }, []);
+    }
 
-  // Return card to resting fan
-  const handleCloseExposed = useCallback(() => {
-    setExposedIndex(null);
-    setFocusedIndex(null);
-    resetRestingState();
-  }, [resetRestingState]);
-
-  // Cursor movement over the card deck (Tutorial 025: Randomize & Focus)
-  const handleDeckMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    // If a card is already exposed in primer pla, don't disrupt with hover
-    if (exposedIndex !== null) return;
-
-    const deck = deckRef.current;
-    if (!deck) return;
-    const cards = cardRefs.current.filter(Boolean) as HTMLElement[];
-    if (cards.length === 0) return;
-
-    const mouseX = e.clientX;
-    let closestIdx = 0;
-    let minDistance = Infinity;
-
-    cards.forEach((card, i) => {
-      const rect = card.getBoundingClientRect();
-      const cardCenter = rect.left + rect.width / 2;
-      const dist = Math.abs(mouseX - cardCenter);
-      if (dist < minDistance) {
-        minDistance = dist;
-        closestIdx = i;
+    function initialPaperPosition(i: number) {
+      if (i < INITIAL_OFFSETS.length) {
+        return new THREE.Vector3(
+          INITIAL_OFFSETS[i][0] + randomRange(-0.12, 0.12),
+          restMeshY,
+          INITIAL_OFFSETS[i][2] + randomRange(-0.1, 0.1)
+        );
       }
-    });
+      const margin = collisionRadius * 1.3;
+      return new THREE.Vector3(
+        randomRange(STAGE_BOUNDS.minX + margin, STAGE_BOUNDS.maxX - margin),
+        restMeshY,
+        randomRange(STAGE_BOUNDS.minZ + margin, STAGE_BOUNDS.maxZ - margin)
+      );
+    }
 
-    setFocusedIndex(closestIdx);
+    function spawnPaper(
+      concert: Concert,
+      idx: number,
+      total: number,
+      position: THREE.Vector3,
+      dropIn: boolean,
+      dropHeight = randomRange(3.2, 6.4)
+    ) {
+      if (!animData) return;
+      const maxFrame = animData.frameCount - 1;
+      const base = createConcertPaperMesh(animData, concert, idx, total);
+      base.mesh.castShadow = true;
+      base.mesh.rotation.set(
+        0,
+        Math.PI + randomRange(-0.28, 0.28),
+        randomRange(-0.2, 0.2)
+      );
+      base.mesh.position.copy(position);
+      base.mesh.scale.setScalar(CLOSED_SCALE);
+      scene.add(base.mesh);
+      const body = createPaperBody(base.mesh);
 
-    const total = cards.length;
-    cards.forEach((card, i) => {
-      if (i === closestIdx) {
-        card.classList.add("is-focused");
-        gsap.to(card, {
-          x: 0,
-          y: -26,
-          rotation: 0,
-          scale: 1.05,
-          duration: 0.38,
-          ease: "power2.out",
-          overwrite: "auto",
-        });
-        card.style.zIndex = "50";
-      } else if (i < closestIdx) {
-        card.classList.remove("is-focused");
-        const dist = closestIdx - i;
-        const shiftX = -110 - (dist - 1) * 22;
-        const rot = -6 - (dist - 1) * 1.5;
-        gsap.to(card, {
-          x: shiftX,
-          y: (RESTING_Y_OFFSETS[i % RESTING_Y_OFFSETS.length] || 0) + 4,
-          rotation: rot,
-          scale: 0.97,
-          duration: 0.38,
-          ease: "power2.out",
-          overwrite: "auto",
-        });
-        card.style.zIndex = (i + 1).toString();
-      } else {
-        card.classList.remove("is-focused");
-        const dist = i - closestIdx;
-        const shiftX = 110 + (dist - 1) * 22;
-        const rot = 6 + (dist - 1) * 1.5;
-        gsap.to(card, {
-          x: shiftX,
-          y: (RESTING_Y_OFFSETS[i % RESTING_Y_OFFSETS.length] || 0) + 4,
-          rotation: rot,
-          scale: 0.97,
-          duration: 0.38,
-          ease: "power2.out",
-          overwrite: "auto",
-        });
-        card.style.zIndex = (total - i).toString();
+      const paper: PaperEntity = {
+        ...base,
+        body,
+        frameIdx: maxFrame,
+        state: "closed",
+        time: 0,
+        homePosition: base.mesh.position.clone(),
+        homeRotation: base.mesh.rotation.clone(),
+        start: null,
+        target: null,
+        throw: null,
+      };
+      updatePaperFrame(paper, animData, maxFrame);
+      papers.push(paper);
+
+      if (dropIn) {
+        paper.state = "rolling";
+        paper.throw = { settleTimer: 0 };
+        body.position.y += dropHeight;
+        body.angularVelocity.set(
+          randomRange(-1.6, 1.6),
+          randomRange(-0.6, 0.6),
+          randomRange(-1.6, 1.6)
+        );
+        syncMeshToBody(paper);
       }
-    });
-  };
+      return paper;
+    }
 
-  const handleDeckMouseLeave = () => {
-    if (exposedIndex !== null) return;
-    setFocusedIndex(null);
-    resetRestingState();
-  };
+    function startOpen(paper: PaperEntity) {
+      setPaperBodyDynamic(paper, false);
+      syncMeshToBody(paper);
+      paper.state = "opening";
+      paper.time = 0;
+      paper.start = captureTransform(paper);
+      const pose = computeOpenPose();
+      paper.target = {
+        position: pose.position,
+        quaternion: pose.quaternion,
+        scale: pose.scale,
+        frameIdx: OPEN_FRAME,
+      };
+      setActiveConcert(paper.concert);
+      setActiveIndex(paper.index);
+    }
 
-  // Keyboard shortcut: Escape to close exposed card
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && exposedIndex !== null) {
-        handleCloseExposed();
+    function startDiscard(paper: PaperEntity) {
+      if (paper.state === "discarding" || paper.state === "rolling") return;
+
+      const dir = new THREE.Vector3(
+        randomRange(-1, 1),
+        0,
+        randomRange(-1.3, -0.45)
+      ).normalize();
+
+      paper.state = "discarding";
+      paper.time = 0;
+      paper.start = captureTransform(paper);
+      setPaperBodyDynamic(paper, true);
+      syncBodyToMesh(paper);
+      paper.body.velocity.set(
+        dir.x * randomRange(1.4, 2.0),
+        randomRange(0.5, 0.9),
+        dir.z * randomRange(1.4, 2.0)
+      );
+      paper.body.angularVelocity.set(
+        randomRange(-2.4, 2.4),
+        randomRange(-0.8, 0.8),
+        randomRange(-2.4, 2.4)
+      );
+      paper.throw = { settleTimer: 0 };
+    }
+
+    openConcertByIndexRef.current = (idx: number) => {
+      const targetPaper = papers.find((p) => p.index === idx);
+      if (!targetPaper) return;
+
+      if (activePaper && activePaper !== targetPaper) {
+        startDiscard(activePaper);
+        activePaper = null;
+      }
+
+      if (activePaper === targetPaper) {
+        startDiscard(targetPaper);
+        activePaper = null;
+        setActiveConcert(null);
+        setActiveIndex(null);
+        return;
+      }
+
+      startOpen(targetPaper);
+      activePaper = targetPaper;
+    };
+
+    closeActivePaperRef.current = () => {
+      if (activePaper) {
+        startDiscard(activePaper);
+        activePaper = null;
+        setActiveConcert(null);
+        setActiveIndex(null);
       }
     };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [exposedIndex, handleCloseExposed]);
+
+    // 6. Raycasting & Pointer Interactions (Click to unfold/crumple, Drag to throw)
+    const raycaster = new THREE.Raycaster();
+    const pointer = new THREE.Vector2();
+    const grabPlane = new THREE.Plane();
+    const grabHitPoint = new THREE.Vector3();
+    let pointerState: {
+      paper: PaperEntity | null;
+      pointerId: number;
+      startX: number;
+      startY: number;
+      grabbing: boolean;
+    } | null = null;
+
+    function updatePointer(e: PointerEvent) {
+      pointer.x = (e.clientX / window.innerWidth) * 2 - 1;
+      pointer.y = -(e.clientY / window.innerHeight) * 2 + 1;
+    }
+
+    function pickPaper(e: PointerEvent): PaperEntity | null {
+      updatePointer(e);
+      raycaster.setFromCamera(pointer, camera);
+      const hit = raycaster.intersectObjects(papers.map((p) => p.mesh));
+      if (hit.length === 0) return null;
+      return papers.find((p) => p.mesh === hit[0].object) || null;
+    }
+
+    function isGrabbable(paper: PaperEntity) {
+      return paper.state === "closed" || paper.state === "rolling";
+    }
+
+    function beginGrab(paper: PaperEntity, e: PointerEvent) {
+      if (!pointerState) return;
+      pointerState.grabbing = true;
+      paper.state = "grabbed";
+      paper.time = 0;
+
+      const body = paper.body;
+      body.type = CANNON.Body.KINEMATIC;
+      body.mass = 0;
+      body.updateMassProperties();
+      body.velocity.set(0, 0, 0);
+      body.angularVelocity.set(0, 0, 0);
+      body.collisionFilterGroup = 1;
+      body.collisionFilterMask = 1;
+      body.wakeUp();
+
+      paper.grab = {
+        target: new THREE.Vector3(
+          body.position.x,
+          restCenterY + GRAB_LIFT,
+          body.position.z
+        ),
+      };
+      updateGrabTarget(paper, e);
+      renderer.domElement.style.cursor = "grabbing";
+    }
+
+    function updateGrabTarget(paper: PaperEntity, e: PointerEvent) {
+      if (!paper.grab) return;
+      updatePointer(e);
+      raycaster.setFromCamera(pointer, camera);
+      grabPlane.normal.set(0, 1, 0);
+      grabPlane.constant = -(restCenterY + GRAB_LIFT);
+      if (!raycaster.ray.intersectPlane(grabPlane, grabHitPoint)) return;
+
+      paper.grab.target.set(
+        Math.min(
+          Math.max(grabHitPoint.x, STAGE_BOUNDS.minX + collisionRadius),
+          STAGE_BOUNDS.maxX - collisionRadius
+        ),
+        restCenterY + GRAB_LIFT,
+        Math.min(
+          Math.max(grabHitPoint.z, STAGE_BOUNDS.minZ + collisionRadius),
+          STAGE_BOUNDS.maxZ - collisionRadius
+        )
+      );
+    }
+
+    function releaseGrab(paper: PaperEntity, withThrow: boolean) {
+      const body = paper.body;
+      let vx = withThrow ? body.velocity.x : 0;
+      let vz = withThrow ? body.velocity.z : 0;
+      const speed = Math.hypot(vx, vz);
+      if (speed > THROW_MAX_SPEED) {
+        const k = THROW_MAX_SPEED / speed;
+        vx *= k;
+        vz *= k;
+      }
+
+      body.type = CANNON.Body.DYNAMIC;
+      body.mass = PAPER_MASS;
+      body.updateMassProperties();
+      body.velocity.set(vx, 0, vz);
+      body.angularVelocity.set(
+        (vz / collisionRadius) * 0.6,
+        0,
+        (-vx / collisionRadius) * 0.6
+      );
+      body.wakeUp();
+
+      paper.state = "rolling";
+      paper.time = 0;
+      paper.throw = { settleTimer: 0 };
+      renderer.domElement.style.cursor = "grab";
+    }
+
+    function handleClick(e: PointerEvent) {
+      const p = pickPaper(e);
+      if (!p) {
+        if (activePaper) {
+          startDiscard(activePaper);
+          activePaper = null;
+          setActiveConcert(null);
+          setActiveIndex(null);
+        }
+        return;
+      }
+
+      const previousActive = activePaper;
+      if (previousActive) {
+        startDiscard(previousActive);
+        activePaper = null;
+        setActiveConcert(null);
+        setActiveIndex(null);
+      }
+
+      if (previousActive === p || p.state !== "closed") return;
+
+      startOpen(p);
+      activePaper = p;
+    }
+
+    const onPointerDown = (e: PointerEvent) => {
+      if (!animData || pointerState) return;
+      const p = pickPaper(e);
+      pointerState = {
+        paper: p,
+        pointerId: e.pointerId,
+        startX: e.clientX,
+        startY: e.clientY,
+        grabbing: false,
+      };
+      try {
+        renderer.domElement.setPointerCapture(e.pointerId);
+      } catch {
+        // ignore synthetic events
+      }
+
+      if (p && p.state === "rolling") beginGrab(p, e);
+    };
+
+    const onPointerMove = (e: PointerEvent) => {
+      if (!pointerState) {
+        if (!animData) return;
+        const p = pickPaper(e);
+        renderer.domElement.style.cursor = p
+          ? isGrabbable(p)
+            ? "grab"
+            : "pointer"
+          : "";
+        return;
+      }
+      if (e.pointerId !== pointerState.pointerId) return;
+
+      if (!pointerState.grabbing) {
+        const p = pointerState.paper;
+        const moved = Math.hypot(
+          e.clientX - pointerState.startX,
+          e.clientY - pointerState.startY
+        );
+        if (p && isGrabbable(p) && moved > CLICK_DRAG_THRESHOLD_PX) {
+          beginGrab(p, e);
+        }
+      }
+      if (pointerState.grabbing && pointerState.paper) {
+        updateGrabTarget(pointerState.paper, e);
+      }
+    };
+
+    const onPointerUp = (e: PointerEvent) => {
+      if (!pointerState || e.pointerId !== pointerState.pointerId) return;
+      if (pointerState.grabbing && pointerState.paper) {
+        releaseGrab(pointerState.paper, true);
+      } else {
+        handleClick(e);
+      }
+      pointerState = null;
+    };
+
+    const onPointerCancel = (e: PointerEvent) => {
+      if (!pointerState || e.pointerId !== pointerState.pointerId) return;
+      if (pointerState.grabbing && pointerState.paper) {
+        releaseGrab(pointerState.paper, false);
+      }
+      pointerState = null;
+    };
+
+    renderer.domElement.addEventListener("pointerdown", onPointerDown);
+    renderer.domElement.addEventListener("pointermove", onPointerMove);
+    renderer.domElement.addEventListener("pointerup", onPointerUp);
+    renderer.domElement.addEventListener("pointercancel", onPointerCancel);
+
+    // 7. Animation Loop
+    let prevTime = performance.now() / 1000;
+
+    function updatePaperMotion(paper: PaperEntity, dt: number) {
+      if (!animData) return;
+      const maxFrame = animData.frameCount - 1;
+
+      if (paper.state === "opening" && paper.start && paper.target) {
+        paper.time += dt * ANIM_SPEED;
+        const t = clamp01(paper.time / OPEN_DURATION);
+        const e = easeOutCubic(t);
+        const openEase = easeInCubic(t);
+
+        paper.mesh.position.lerpVectors(
+          paper.start.position,
+          paper.target.position,
+          e
+        );
+        paper.mesh.quaternion.slerpQuaternions(
+          paper.start.quaternion,
+          paper.target.quaternion,
+          e
+        );
+        paper.mesh.scale.setScalar(lerp(paper.start.scale, paper.target.scale, e));
+
+        paper.frameIdx = lerp(
+          paper.start.frameIdx,
+          paper.target.frameIdx,
+          openEase
+        );
+        updatePaperFrame(paper, animData, paper.frameIdx);
+
+        if (t >= 1) {
+          paper.state = "open";
+          paper.frameIdx = paper.target.frameIdx;
+          paper.mesh.position.copy(paper.target.position);
+          paper.mesh.quaternion.copy(paper.target.quaternion);
+          paper.mesh.scale.setScalar(paper.target.scale);
+          syncBodyToMesh(paper);
+          updatePaperFrame(paper, animData, paper.frameIdx);
+        }
+        return;
+      }
+
+      if (paper.state === "discarding" && paper.start) {
+        paper.time += dt * ANIM_SPEED;
+        const t = clamp01(paper.time / DISCARD_DURATION);
+        const closeEase = easeOutCubic(t);
+        const scale = lerp(paper.start.scale, CLOSED_SCALE, closeEase);
+
+        paper.frameIdx = lerp(paper.start.frameIdx, maxFrame, closeEase);
+        syncMeshToBody(paper, scale);
+        updatePaperFrame(paper, animData, paper.frameIdx);
+
+        if (t >= 1) {
+          paper.state = "rolling";
+          paper.time = 0;
+          paper.frameIdx = maxFrame;
+          updatePaperFrame(paper, animData, paper.frameIdx);
+        }
+        return;
+      }
+
+      if (paper.state === "grabbed" && paper.grab) {
+        const body = paper.body;
+        const target = paper.grab.target;
+        let vx = (target.x - body.position.x) * GRAB_STIFFNESS;
+        let vy = (target.y - body.position.y) * GRAB_STIFFNESS;
+        let vz = (target.z - body.position.z) * GRAB_STIFFNESS;
+        const speed = Math.hypot(vx, vy, vz);
+        if (speed > GRAB_MAX_SPEED) {
+          const k = GRAB_MAX_SPEED / speed;
+          vx *= k;
+          vy *= k;
+          vz *= k;
+        }
+        body.velocity.set(vx, vy, vz);
+        syncMeshToBody(paper);
+        return;
+      }
+
+      if (paper.state === "rolling") {
+        paper.time += dt;
+        const grounded = isOnGround(paper.body);
+        if (grounded) applyRollingResistance(paper.body, dt);
+        syncMeshToBody(paper);
+        const speed =
+          paper.body.velocity.lengthSquared() +
+          paper.body.angularVelocity.lengthSquared() * 0.02;
+        if (paper.throw) {
+          paper.throw.settleTimer =
+            grounded && speed < ROLL_SETTLE_SPEED
+              ? paper.throw.settleTimer + dt
+              : 0;
+          if (paper.throw.settleTimer > 0.35) {
+            finishRollingPaper(paper, maxFrame);
+          }
+        }
+        return;
+      }
+
+      if (paper.state === "closed") {
+        if (isOnGround(paper.body)) applyRollingResistance(paper.body, dt);
+        syncMeshToBody(paper);
+      }
+    }
+
+    function tick() {
+      if (disposed) return;
+      const now = performance.now() / 1000;
+      const dt = now - prevTime;
+      prevTime = now;
+
+      if (animData) {
+        physicsWorld.step(PHYSICS_STEP, Math.min(dt, 0.05), 3);
+        applyPhysicsBounds(dt);
+        for (const p of papers) {
+          updatePaperMotion(p, dt);
+        }
+      }
+
+      composer.render();
+    }
+
+    renderer.setAnimationLoop(tick);
+
+    // 8. Load VAT data & drop crumpled concert papers onto the stage
+    loadVATData("/vat/")
+      .then((loaded) => {
+        if (disposed) return;
+        animData = loaded;
+        flatSize.width = animData.flat.width;
+        flatSize.depth = animData.flat.depth;
+
+        crumpleCenter.fromArray(animData.crumple.center);
+        collisionRadius = animData.crumple.radius * CLOSED_SCALE;
+        restCenterY = FLOOR_VISUAL_Y + collisionRadius * 1.08;
+        restMeshY = restCenterY - crumpleCenter.y * CLOSED_SCALE;
+        floorBody.position.y = restCenterY - collisionRadius;
+
+        setIsLoading(false);
+
+        // Spawn 18 crumpled papers (repeating the concert dates across the floor like the original demo)
+        const totalBalls = Math.max(concertsList.length * 3, 18);
+        for (let i = 0; i < totalBalls; i++) {
+          const concert = concertsList[i % concertsList.length];
+          const concertIdx = i % concertsList.length;
+          const delay = i * 55 + randomRange(0, 80);
+          const tid = window.setTimeout(() => {
+            if (disposed) return;
+            spawnPaper(
+              concert,
+              concertIdx,
+              concertsList.length,
+              initialPaperPosition(i),
+              true,
+              randomRange(3.8, 7.6)
+            );
+          }, delay);
+          timeouts.push(tid);
+        }
+      })
+      .catch((err) => {
+        console.error("[PaperCrumble] Error loading VAT:", err);
+        setIsLoading(false);
+      });
+
+    // 9. Resize & Keyboard Escape handler
+    const onResize = () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      composer.setSize(window.innerWidth, window.innerHeight);
+      updateOpenPose();
+    };
+
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && activePaper) {
+        startDiscard(activePaper);
+        activePaper = null;
+        setActiveConcert(null);
+        setActiveIndex(null);
+      }
+    };
+
+    window.addEventListener("resize", onResize);
+    window.addEventListener("keydown", onKeyDown);
+
+    return () => {
+      disposed = true;
+      timeouts.forEach((t) => clearTimeout(t));
+      window.removeEventListener("resize", onResize);
+      window.removeEventListener("keydown", onKeyDown);
+      renderer.setAnimationLoop(null);
+      renderer.domElement.removeEventListener("pointerdown", onPointerDown);
+      renderer.domElement.removeEventListener("pointermove", onPointerMove);
+      renderer.domElement.removeEventListener("pointerup", onPointerUp);
+      renderer.domElement.removeEventListener("pointercancel", onPointerCancel);
+      renderer.dispose();
+    };
+  }, [concertsList]);
 
   return (
-    <div className="agenda-page">
-      {/* ============================================================
-          HERO EDITORIAL
-          ============================================================ */}
-      <header className="agenda-hero">
-        <div className="agenda-hero-inner">
-          <span className="agenda-hero-eyebrow">Directes // Gira 2026 — 2027</span>
-          <h1 className="agenda-hero-title">Agenda de Concerts</h1>
-          <p className="agenda-hero-lead">
-            Cinquanta anys de carrera dalt dels escenaris sense repetir fórmules. De la
-            intimitat del duo a la potència de la banda completa, Miquel Gil continua
-            recorrent teatres, auditoris i festivals mediterranis.
-          </p>
+    <div className="agenda-crumble-page">
+      {/* MENÚ DE NAVEGACIÓ A24 INTEGRAT */}
+      <A24Nav currentSection="/agenda/" theme="base" />
 
-          <div className="agenda-hero-stats">
-            <div className="agenda-stat-item">
-              <span className="agenda-stat-num">5 Formats</span>
-              <span className="agenda-stat-lbl">De Duo a Banda Completa</span>
-            </div>
-            <div className="agenda-stat-item">
-              <span className="agenda-stat-num">50 Anys</span>
-              <span className="agenda-stat-lbl">De música en directe</span>
-            </div>
-            <div className="agenda-stat-item">
-              <span className="agenda-stat-num">100% Arrel</span>
-              <span className="agenda-stat-lbl">Tradició que camina cap endavant</span>
-            </div>
-          </div>
+      {/* LLENÇ 3D PAPER CRUMBLE A PANTALLA COMPLETA (100VW x 100VH) */}
+      <div
+        ref={mountRef}
+        className="agenda-crumble-canvas"
+        aria-label="Agenda interactiva de concerts en 3D"
+      />
+
+      {/* CAPÇALERA EDITORIAL DISCRETA A24 */}
+      <header className="agenda-crumble-hud-top">
+        <div className="agenda-crumble-hud-top__left">
+          <span className="agenda-crumble-kicker">
+            MIQUEL GIL · AGENDA INTERACTIVA DE DIRECTES (2026 — 2027)
+          </span>
+          <h1 className="agenda-crumble-title">DIRECTES</h1>
+        </div>
+
+        <div className="agenda-crumble-hud-top__right">
+          <span className="agenda-crumble-instruction">
+            CLICA UNA BOLA DE PAPER PER DESPLEGAR EL CONCERT · ARROSSEGA PER LLANÇAR
+          </span>
         </div>
       </header>
 
-      {/* ============================================================
-          BARRA DE FILTRES I ACCÉS A CONTRACTACIÓ
-          ============================================================ */}
-      <div className="agenda-filter-bar">
-        <div className="agenda-filter-inner">
-          <div className="agenda-filter-pills" role="tablist">
-            <button
-              type="button"
-              className={`agenda-pill ${activeFilter === "all" ? "is-active" : ""}`}
-              onClick={() => setActiveFilter("all")}
-            >
-              Totes les dates ({concertsList.length})
-            </button>
-            <button
-              type="button"
-              className={`agenda-pill ${activeFilter === "upcoming" ? "is-active" : ""}`}
-              onClick={() => setActiveFilter("upcoming")}
-            >
-              Propers / En curs
-            </button>
-            <button
-              type="button"
-              className={`agenda-pill ${activeFilter === "past" ? "is-active" : ""}`}
-              onClick={() => setActiveFilter("past")}
-            >
-              Històric destacat
-            </button>
-          </div>
-
-          <Link href="/contractacio" className="agenda-cta-contract-link">
-            <span>Dossier i Contractació</span>
-            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M5 12h14M12 5l7 7-7 7" />
-            </svg>
-          </Link>
+      {/* INDICADOR DE CÀRREGA */}
+      {isLoading && (
+        <div className="agenda-crumble-loader">
+          <span className="agenda-crumble-kicker">
+            CARREGANT SIMULACIÓ D&apos;AGENDA EN DIRECTE...
+          </span>
         </div>
-      </div>
+      )}
 
-      {/* ============================================================
-          SHOWCASE TUTORIAL 025: RANDOMIZE & FOCUS CARD DECK
-          Referència: https://madewithgsap.com/effects/tutorial025
-          ============================================================ */}
-      <section
-        className={`agenda-showcase-section ${exposedIndex !== null ? "has-exposed-card" : ""}`}
-        aria-label="Baralla interactiva de concerts"
-        onClick={(e) => {
-          if (exposedIndex !== null && !(e.target as HTMLElement).closest(".agenda-deck-card")) {
-            handleCloseExposed();
-          }
-        }}
-      >
-        <div className="agenda-showcase-inner">
-          <div className="agenda-deck-header">
-            <h2 className="agenda-deck-title">Cartell de Concerts</h2>
-            <p className="agenda-deck-subtitle">
-              Passa el cursor per sobre de la baralla per separar les cartes. Fes clic a qualsevol concert per exposar la fitxa en primer pla amb tota la informació.
-            </p>
+      {/* ACCIONS RÀPIDES QUAN UN CONCERT ESTÀ DESPLEGAT EN PRIMER PLA */}
+      {activeConcert && (
+        <div className="agenda-crumble-active-bar">
+          <div className="agenda-crumble-active-bar__info">
+            <span className="agenda-crumble-kicker">
+              {activeConcert.year} · {activeConcert.city.toUpperCase()}
+            </span>
+            <span className="agenda-crumble-active-bar__name">
+              {activeConcert.title} — {activeConcert.venue}
+            </span>
           </div>
 
-          {/* Viewport for the overlapping GSAP fan deck */}
-          <div className="agenda-deck-viewport">
-            <div
-              ref={deckRef}
-              className="agenda-deck-container"
-              onMouseMove={handleDeckMouseMove}
-              onMouseLeave={handleDeckMouseLeave}
-            >
-              {filteredConcerts.map((concert, idx) => {
-                const isExposed = exposedIndex === idx;
-                const isFocused = focusedIndex === idx;
-
-                return (
-                  <article
-                    key={concert.id}
-                    ref={(el) => {
-                      cardRefs.current[idx] = el;
-                    }}
-                    data-index={idx}
-                    className={`agenda-deck-card ${concert.isFeatured ? "is-featured" : ""} ${
-                      isFocused ? "is-focused" : ""
-                    } ${isExposed ? "is-exposed" : ""}`}
-                    style={{
-                      backgroundColor: concert.bg,
-                      color: concert.fg,
-                    }}
-                    onClick={() => {
-                      if (isExposed) {
-                        handleCloseExposed();
-                      } else {
-                        handleExposeCard(idx);
-                      }
-                    }}
-                  >
-                    {/* Top: format tag & year badge & in-card close icon */}
-                    <div className="deck-card-top">
-                      <div className="deck-card-top-left">
-                        <span className="deck-card-format">{concert.badge || concert.format}</span>
-                        <span className="deck-card-year">{concert.year}</span>
-                      </div>
-
-                      <button
-                        type="button"
-                        className="deck-card-close-btn"
-                        aria-label="Tancar primer pla"
-                        title="Tancar primer pla"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleCloseExposed();
-                        }}
-                      >
-                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-                          <line x1="18" y1="6" x2="6" y2="18" />
-                          <line x1="6" y1="6" x2="18" y2="18" />
-                        </svg>
-                      </button>
-                    </div>
-
-                    {/* Body: Title in Grifinito L, Venue, Date & Full Desc */}
-                    <div className="deck-card-body">
-                      <h3 className="deck-card-title">{concert.title}</h3>
-
-                      <div className="deck-card-meta">
-                        <div className="deck-card-meta-row">
-                          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2">
-                            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
-                            <circle cx="12" cy="10" r="3" />
-                          </svg>
-                          <span>
-                            <strong>{concert.venue}</strong>
-                            {concert.city ? ` · ${concert.city}` : ""}
-                          </span>
-                        </div>
-
-                        <div className="deck-card-meta-row">
-                          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2">
-                            <circle cx="12" cy="12" r="10" />
-                            <polyline points="12 6 12 12 16 14" />
-                          </svg>
-                          <span>{concert.dateStr}</span>
-                        </div>
-
-                        {concert.format && (
-                          <div className="deck-card-meta-row deck-card-meta-format">
-                            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2">
-                              <path d="M9 18V5l12-2v13" />
-                              <circle cx="6" cy="18" r="3" />
-                              <circle cx="18" cy="16" r="3" />
-                            </svg>
-                            <span>Format: {concert.format}</span>
-                          </div>
-                        )}
-                      </div>
-
-                      <p className="deck-card-desc">{concert.description}</p>
-                    </div>
-
-                    {/* Dotted divider matching Tutorial 025 */}
-                    <hr className="deck-card-divider" />
-
-                    {/* Footer: status pill & action arrow button */}
-                    <div className="deck-card-footer">
-                      <span className="deck-card-status">{concert.statusText}</span>
-
-                      {/* Resting view arrow button */}
-                      <button
-                        type="button"
-                        className="deck-card-action-btn"
-                        aria-label={`Exposar ${concert.title} en primer pla`}
-                        title="Exposar en primer pla"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          if (isExposed) {
-                            handleCloseExposed();
-                          } else {
-                            handleExposeCard(idx);
-                          }
-                        }}
-                      >
-                        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2.2">
-                          <path d="M5 12h14M12 5l7 7-7 7" />
-                        </svg>
-                      </button>
-
-                      {/* In-card action links revealed when exposed in foreground */}
-                      <div className="deck-card-expanded-actions">
-                        {concert.infoUrl && (
-                          <a
-                            href={concert.infoUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="deck-card-btn deck-card-btn--primary"
-                            onClick={(e) => e.stopPropagation()}
-                          >
-                            <span>Web / Entrades</span>
-                            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2.4">
-                              <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3" />
-                            </svg>
-                          </a>
-                        )}
-                        {concert.ticketUrl && concert.ticketUrl !== concert.infoUrl && (
-                          <a
-                            href={concert.ticketUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="deck-card-btn deck-card-btn--primary"
-                            onClick={(e) => e.stopPropagation()}
-                          >
-                            <span>Comprar</span>
-                            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2.4">
-                              <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3" />
-                            </svg>
-                          </a>
-                        )}
-                        <Link
-                          href="/contractacio"
-                          className="deck-card-btn deck-card-btn--secondary"
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          <span>Dossier</span>
-                          <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2.4">
-                            <line x1="5" y1="12" x2="19" y2="12" />
-                            <polyline points="12 5 19 12 12 19" />
-                          </svg>
-                        </Link>
-                      </div>
-                    </div>
-                  </article>
-                );
-              })}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ============================================================
-          BANNER DE CONTRACTACIÓ PER A PROGRAMADORS
-          ============================================================ */}
-      <section className="agenda-booking-callout">
-        <div className="agenda-callout-inner">
-          <div className="agenda-callout-content">
-            <span className="agenda-callout-kicker">Programadors i Festivals</span>
-            <h2 className="agenda-callout-title">
-              Vols programar Miquel Gil a la teua ciutat o festival?
-            </h2>
-            <p className="agenda-callout-desc">
-              Disposem de 5 formats escènics adaptables a tota mena d&apos;espais: des de
-              l&apos;acústica d&apos;un claustre patrimonial en format Duo fins a la màxima
-              potència per a grans auditoris i festivals a l&apos;aire lliure amb Banda Completa.
-            </p>
-            <div className="agenda-callout-actions">
-              <Link href="/contractacio" className="agenda-callout-btn agenda-callout-btn--main">
-                Veure formats i descarregar riders
-              </Link>
+          <div className="agenda-crumble-active-bar__actions">
+            {(activeConcert.ticketUrl || activeConcert.infoUrl) && (
               <a
-                href={`mailto:${bookingInfo.managementEmail}?subject=${encodeURIComponent(
-                  "Sol·licitud de disponibilitat de concert — Miquel Gil"
-                )}`}
-                className="agenda-callout-btn agenda-callout-btn--alt"
+                href={activeConcert.ticketUrl || activeConcert.infoUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="agenda-crumble-btn"
               >
-                Contacte ràpid amb Management
+                <span>MÉS INFORMACIÓ / ENTRADES ↗</span>
               </a>
-            </div>
+            )}
+
+            <Link href="/contractacio/" className="agenda-crumble-btn">
+              <span>CONTRACTACIÓ ↗</span>
+            </Link>
+
+            <button
+              type="button"
+              onClick={() => closeActivePaperRef.current?.()}
+              className="agenda-crumble-btn"
+            >
+              <span>ARRUGAR I TORNAR [ESC]</span>
+            </button>
           </div>
         </div>
-      </section>
+      )}
 
-      {/* ============================================================
-          ESPAIS I FESTIVALS HISTÒRICS DE REFERÈNCIA
-          ============================================================ */}
-      <section className="agenda-venues-section">
-        <div className="agenda-venues-inner">
-          <div className="agenda-venues-header">
-            <span className="agenda-venues-kicker">Trajectòria escènica</span>
-            <h2 className="agenda-venues-title">Escenaris i festivals de referència</h2>
-            <p className="agenda-venues-subtitle">
-              Miquel Gil ha actuat en alguns dels teatres i festivals de músiques del món més
-              prestigiosos d&apos;Europa i Amèrica.
-            </p>
-          </div>
-
-          <div className="agenda-venues-grid">
-            {bookingInfo.featuredVenues.map((venue, idx) => (
-              <div key={idx} className="agenda-venue-chip">
-                <span className="agenda-venue-dot" />
-                <span className="agenda-venue-name">{venue}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+      {/* BARRA INFERIOR D'ÍNDEX RÀPID DE DATES (PER OBRIR QUALSEVOL DATA AMB UN CLIC) */}
+      <nav
+        className="agenda-crumble-dock"
+        aria-label="Índex ràpid de concerts de l'agenda"
+      >
+        {concertsList.map((c, idx) => {
+          const isSelected = activeIndex === idx;
+          const num = idx + 1 < 10 ? `0${idx + 1}` : `${idx + 1}`;
+          return (
+            <button
+              key={c.id}
+              type="button"
+              onClick={() => openConcertByIndexRef.current?.(idx)}
+              className={`agenda-crumble-dock__item ${
+                isSelected ? "is-active" : ""
+              }`}
+            >
+              <span className="agenda-crumble-dock__num">
+                {num} · {c.year}
+              </span>
+              <span className="agenda-crumble-dock__city">{c.city}</span>
+            </button>
+          );
+        })}
+      </nav>
     </div>
   );
 }
