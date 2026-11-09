@@ -453,20 +453,23 @@
 .checkpoint-pin__line {
   position: absolute;
   top: 50%;
-  width: 34px;
+  width: 38px;
   height: 0.5px;
   background: rgba(17, 17, 17, 0.35);
-  transition: background-color 0.35s ease, width 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: background-color 0.35s ease;
+  will-change: transform, opacity;
 }
 
 .checkpoint-row--right .checkpoint-pin__line {
   left: 100%;
   margin-left: 4px;
+  transform-origin: left center;
 }
 
 .checkpoint-row--left .checkpoint-pin__line {
   right: 100%;
   margin-right: 4px;
+  transform-origin: right center;
 }
 
 .checkpoint-row.is-active .checkpoint-pin__line,
@@ -475,8 +478,9 @@
 }
 
 /* ------------------------------------------------------------
-   ELEMENT VISUAL FLOTANT (.checkpoint-visual)
-   Apareix des del marge lateral oposat al text, sense cap caixa
+   ELEMENT VISUAL FLOTANT I MOVIBLE (.checkpoint-visual)
+   Apareix dinàmicament des del marge lateral oposat al text
+   amb scroll-scrub, fade-in, blur-to-sharp, clip-path i arrossegament lliure
    ------------------------------------------------------------ */
 .checkpoint-visual {
   position: absolute;
@@ -486,11 +490,7 @@
   background: transparent;
   border: none;
   box-shadow: none;
-  cursor: pointer;
   pointer-events: auto;
-  transition:
-    opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1),
-    transform 0.85s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 /* Quan el vèrtex és a l'esquerra (27%), la fotografia apareix pel lateral esquerre (0% -> 24%) */
@@ -507,27 +507,48 @@
   transform: translate(0, -50%);
 }
 
-/* Estat abans que el punter arribi al pas: desplaçat cap a l'exterior lateral */
-.checkpoint-row--right:not(.is-revealed) .checkpoint-visual {
-  opacity: 0;
-  transform: translate(-64px, -50%);
+.checkpoint-visual__scroll {
+  will-change: transform, opacity, filter;
 }
 
-.checkpoint-row--left:not(.is-revealed) .checkpoint-visual {
-  opacity: 0;
-  transform: translate(64px, -50%);
+.checkpoint-visual__movable {
+  cursor: grab;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: pan-y;
+  will-change: transform;
 }
 
-/* Estat quan el punter arriba: apareix des del lateral al seu lloc */
-.checkpoint-row.is-revealed .checkpoint-visual {
+.checkpoint-visual__movable.is-dragging {
+  cursor: grabbing;
+  z-index: 35;
+}
+
+.checkpoint-visual__drag-hint {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 0.35rem;
+  font-family: var(--font-subtitles, 'PP Museum', serif);
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(17, 17, 17, 0.42);
+  opacity: 0.65;
+  transition: opacity 0.25s ease, color 0.25s ease;
+}
+
+.checkpoint-visual__movable:hover .checkpoint-visual__drag-hint,
+.checkpoint-visual__movable.is-dragging .checkpoint-visual__drag-hint {
   opacity: 1;
-  transform: translate(0, -50%);
+  color: #891a20;
 }
 
 .checkpoint-visual__img-wrap {
   width: 100%;
   overflow: hidden;
   background: transparent;
+  will-change: clip-path;
 }
 
 .checkpoint-visual__img-wrap img {
@@ -537,12 +558,8 @@
   aspect-ratio: 4 / 3;
   object-fit: cover;
   filter: contrast(1.03) saturate(1.04);
-  transition: transform 0.9s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.checkpoint-row.is-active .checkpoint-visual__img-wrap img,
-.checkpoint-visual:hover .checkpoint-visual__img-wrap img {
-  transform: scale(1.04);
+  will-change: transform;
+  pointer-events: none;
 }
 
 .checkpoint-visual__caption {
@@ -562,8 +579,9 @@
 }
 
 /* ------------------------------------------------------------
-   ELEMENT DE TEXT EDITORIAL OBERT (.checkpoint-editorial)
-   Apareix des de l'altre lateral sense marc, vora ni fons de card
+   ELEMENT DE TEXT EDITORIAL OBERT I MOVIBLE (.checkpoint-editorial)
+   Apareix dinàmicament des de l'altre lateral sense marc de card
+   amb animació contínua lligada al scroll i física movible
    ------------------------------------------------------------ */
 .checkpoint-editorial {
   position: absolute;
@@ -573,14 +591,7 @@
   background: transparent;
   border: none;
   box-shadow: none;
-  cursor: pointer;
   pointer-events: auto;
-  display: flex;
-  flex-direction: column;
-  gap: 0.38rem;
-  transition:
-    opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.06s,
-    transform 0.85s cubic-bezier(0.16, 1, 0.3, 1) 0.06s;
 }
 
 /* Quan el vèrtex és a l'esquerra (27%), el bloc de text s'obre a la dreta del pin (31% -> 76%) */
@@ -599,29 +610,27 @@
   transform: translate(-100%, -50%);
 }
 
-/* Estat abans que arribi el punter: llisca des del lateral */
-.checkpoint-row--right:not(.is-revealed) .checkpoint-editorial {
-  opacity: 0;
-  transform: translate(64px, -50%);
+.checkpoint-editorial__scroll {
+  will-change: transform, opacity, filter;
 }
 
-.checkpoint-row--left:not(.is-revealed) .checkpoint-editorial {
-  opacity: 0;
-  transform: translate(calc(-100% - 64px), -50%);
+.checkpoint-editorial__movable {
+  display: flex;
+  flex-direction: column;
+  gap: 0.38rem;
+  cursor: grab;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: pan-y;
+  will-change: transform;
 }
 
-/* Quan arriba el punter: es posa al seu lloc amb nitidesa */
-.checkpoint-row--right.is-revealed .checkpoint-editorial {
-  opacity: 1;
-  transform: translate(0, -50%);
+.checkpoint-editorial__movable.is-dragging {
+  cursor: grabbing;
+  z-index: 35;
 }
 
-.checkpoint-row--left.is-revealed .checkpoint-editorial {
-  opacity: 1;
-  transform: translate(-100%, -50%);
-}
-
-/* Tipografia Editorial Oberta (inspirada en l'anterior disseny editorial) */
+/* Tipografia Editorial Oberta amb subelements animats pel scroll */
 .checkpoint-editorial__meta {
   display: flex;
   flex-wrap: wrap;
@@ -631,11 +640,13 @@
 
 .checkpoint-editorial__year {
   font-family: var(--font-titles, 'PP Eiko', serif);
-  font-size: clamp(1.85rem, 2.7vw, 2.75rem);
+  font-size: clamp(1.95rem, 2.85vw, 2.95rem);
   font-weight: 500;
   line-height: 0.92;
   letter-spacing: -0.03em;
   color: #891a20;
+  display: inline-block;
+  will-change: transform, opacity, filter;
 }
 
 .checkpoint-editorial__badge {
@@ -644,6 +655,23 @@
   letter-spacing: 0.09em;
   text-transform: uppercase;
   color: rgba(0, 0, 0, 0.55);
+  display: inline-block;
+  will-change: transform, opacity;
+}
+
+.checkpoint-editorial__drag-pill {
+  margin-left: auto;
+  font-family: var(--font-subtitles, 'PP Museum', serif);
+  font-size: 8.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(17, 17, 17, 0.38);
+  transition: color 0.25s ease;
+}
+
+.checkpoint-editorial__movable:hover .checkpoint-editorial__drag-pill,
+.checkpoint-editorial__movable.is-dragging .checkpoint-editorial__drag-pill {
+  color: #891a20;
 }
 
 .checkpoint-editorial__mobile-media {
@@ -659,6 +687,7 @@
   text-transform: uppercase;
   color: #111111;
   margin: 0.1rem 0 0 0;
+  will-change: transform, opacity, filter;
 }
 
 .checkpoint-editorial__subtitle {
@@ -668,6 +697,7 @@
   text-transform: uppercase;
   color: rgba(0, 0, 0, 0.62);
   margin: 0;
+  will-change: transform, opacity;
 }
 
 .checkpoint-editorial__rule {
@@ -677,6 +707,11 @@
   margin: 0.35rem 0;
   transform-origin: left center;
   transition: background-color 0.35s ease;
+  will-change: transform, opacity;
+}
+
+.checkpoint-row--left .checkpoint-editorial__rule {
+  transform-origin: right center;
 }
 
 .checkpoint-row.is-active .checkpoint-editorial__rule {
@@ -689,6 +724,7 @@
   line-height: 1.62;
   color: rgba(17, 17, 17, 0.88);
   margin: 0;
+  will-change: transform, opacity, filter;
 }
 
 .checkpoint-editorial__extended {
@@ -696,6 +732,7 @@
   flex-direction: column;
   gap: 0.45rem;
   margin-top: 0.25rem;
+  will-change: transform, opacity;
 }
 
 .checkpoint-editorial__extended-p {

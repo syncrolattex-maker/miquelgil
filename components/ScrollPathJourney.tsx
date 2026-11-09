@@ -36,7 +36,7 @@ interface CheckpointData {
   side: "left" | "right";
 }
 
-// 18 passos al llarg del Railway on a cada vèrtex els elements (imatges a una banda, textos a l'altra) apareixen de forma orgànica pels dos laterals
+// 18 passos al llarg del Railway on a cada vèrtex els elements (imatges a una banda, textos a l'altra) apareixen de forma orgànica i dinàmica pels dos laterals
 const CHECKPOINTS: CheckpointData[] = [
   {
     id: "step-01-1956",
@@ -450,6 +450,8 @@ export default function ScrollPathJourney() {
   useEffect(() => {
     if (!containerRef.current) return;
 
+    const cleanupFns: Array<() => void> = [];
+
     const ctx = gsap.context(() => {
       const isMobile = window.innerWidth <= 768;
       const pathSelector = isMobile
@@ -487,6 +489,197 @@ export default function ScrollPathJourney() {
         0
       );
 
+      // ============================================================
+      // MOTOR D'ANIMACIÓ CONTÍNUA AMB EL SCROLL + ELEMENTS MOVIBLES
+      // Inspirat en bleibtgleich.dev:
+      // 1. Entrada lateral contínua lligada al scroll (x, y, rotation, scale)
+      // 2. Blur-to-sharp fade-in (filter: blur(18px) -> blur(0px), opacity: 0 -> 1)
+      // 3. Clip-path uncurtaining per a les fotografies i línies divisòries
+      // 4. Física interactiva: arrossegament lliure amb el punter (draggable) + inclinació 3D
+      // ============================================================
+      interface StepAnimator {
+        cp: HTMLElement;
+        targetP: number;
+        side: "left" | "right";
+        visualScroll: HTMLElement | null;
+        editorialScroll: HTMLElement | null;
+        imgWrap: HTMLElement | null;
+        imgEl: HTMLElement | null;
+        yearEl: HTMLElement | null;
+        badgeEl: HTMLElement | null;
+        titleEl: HTMLElement | null;
+        subEl: HTMLElement | null;
+        ruleEl: HTMLElement | null;
+        textEl: HTMLElement | null;
+        extEl: HTMLElement | null;
+        tagsEl: HTMLElement | null;
+        actionsEl: HTMLElement | null;
+        pinLine: HTMLElement | null;
+      }
+
+      const stepAnimators: StepAnimator[] = [];
+
+      checkpointElements?.forEach((cp) => {
+        const targetP = parseFloat(cp.dataset.progress || "0");
+        const side = (cp.dataset.side as "left" | "right") || "right";
+
+        stepAnimators.push({
+          cp,
+          targetP,
+          side,
+          visualScroll: cp.querySelector<HTMLElement>("[data-visual-scroll]"),
+          editorialScroll: cp.querySelector<HTMLElement>("[data-editorial-scroll]"),
+          imgWrap: cp.querySelector<HTMLElement>(".checkpoint-visual__img-wrap"),
+          imgEl: cp.querySelector<HTMLElement>(".checkpoint-visual__img-wrap img"),
+          yearEl: cp.querySelector<HTMLElement>(".checkpoint-editorial__year"),
+          badgeEl: cp.querySelector<HTMLElement>(".checkpoint-editorial__badge"),
+          titleEl: cp.querySelector<HTMLElement>(".checkpoint-editorial__title"),
+          subEl: cp.querySelector<HTMLElement>(".checkpoint-editorial__subtitle"),
+          ruleEl: cp.querySelector<HTMLElement>(".checkpoint-editorial__rule"),
+          textEl: cp.querySelector<HTMLElement>(".checkpoint-editorial__text"),
+          extEl: cp.querySelector<HTMLElement>(".checkpoint-editorial__extended"),
+          tagsEl: cp.querySelector<HTMLElement>(".checkpoint-editorial__tags"),
+          actionsEl: cp.querySelector<HTMLElement>(".checkpoint-editorial__actions"),
+          pinLine: cp.querySelector<HTMLElement>(".checkpoint-pin__line"),
+        });
+
+        // Inicialitzar física interactiva movible (Draggable + 3D Magnetic Tilt) en els blocs movibles
+        const movableNodes = cp.querySelectorAll<HTMLElement>("[data-movable-node]");
+        movableNodes.forEach((node) => {
+          gsap.set(node, { transformPerspective: 1000, transformStyle: "preserve-3d" });
+
+          const xTo = gsap.quickTo(node, "x", { duration: 0.45, ease: "power3.out" });
+          const yTo = gsap.quickTo(node, "y", { duration: 0.45, ease: "power3.out" });
+          const rotXTo = gsap.quickTo(node, "rotationX", { duration: 0.55, ease: "power3.out" });
+          const rotYTo = gsap.quickTo(node, "rotationY", { duration: 0.55, ease: "power3.out" });
+          const scaleTo = gsap.quickTo(node, "scale", { duration: 0.4, ease: "power3.out" });
+
+          let isDragging = false;
+          let dragMoved = false;
+          let startPointerX = 0;
+          let startPointerY = 0;
+          let baseOffsetX = 0;
+          let baseOffsetY = 0;
+          let currentOffsetX = 0;
+          let currentOffsetY = 0;
+
+          const onPointerDown = (e: PointerEvent) => {
+            // No iniciar drag si es fa clic en un botó o enllaç d'acció
+            const target = e.target as HTMLElement;
+            if (target.closest("button, a")) return;
+
+            isDragging = true;
+            dragMoved = false;
+            startPointerX = e.clientX;
+            startPointerY = e.clientY;
+            node.classList.add("is-dragging");
+            scaleTo(1.035);
+            try {
+              node.setPointerCapture(e.pointerId);
+            } catch {}
+          };
+
+          const onPointerMove = (e: PointerEvent) => {
+            const rect = node.getBoundingClientRect();
+            if (isDragging) {
+              const dx = e.clientX - startPointerX;
+              const dy = e.clientY - startPointerY;
+              if (Math.abs(dx) > 4 || Math.abs(dy) > 4) {
+                dragMoved = true;
+                node.dataset.justDragged = "true";
+              }
+              currentOffsetX = gsap.utils.clamp(-240, 240, baseOffsetX + dx);
+              currentOffsetY = gsap.utils.clamp(-160, 160, baseOffsetY + dy);
+              xTo(currentOffsetX);
+              yTo(currentOffsetY);
+              rotYTo(gsap.utils.clamp(-14, 14, dx * 0.08));
+              rotXTo(gsap.utils.clamp(-14, 14, -dy * 0.08));
+              return;
+            }
+
+            if (isMobile || !rect.width || !rect.height) return;
+            // Efecte magnètic i tilt 3D reactiu al cursor (com bleibtgleich.dev initTiltCursor)
+            const relX = (e.clientX - rect.left) / rect.width - 0.5;
+            const relY = (e.clientY - rect.top) / rect.height - 0.5;
+            xTo(baseOffsetX + relX * 22);
+            yTo(baseOffsetY + relY * 18);
+            rotYTo(relX * 14);
+            rotXTo(-relY * 12);
+          };
+
+          const finishDrag = (e: PointerEvent) => {
+            if (!isDragging) return;
+            isDragging = false;
+            node.classList.remove("is-dragging");
+            scaleTo(1);
+            // Conservem l'offset mogut per l'usuari perquè l'element siga realment movible a la pàgina,
+            // i amb doble clic torna al seu lloc original amb efecte elàstic.
+            baseOffsetX = currentOffsetX;
+            baseOffsetY = currentOffsetY;
+            rotXTo(0);
+            rotYTo(0);
+            try {
+              if (node.hasPointerCapture(e.pointerId)) {
+                node.releasePointerCapture(e.pointerId);
+              }
+            } catch {}
+            if (dragMoved) {
+              setTimeout(() => {
+                delete node.dataset.justDragged;
+              }, 120);
+            }
+          };
+
+          const onMouseLeave = () => {
+            if (isDragging) return;
+            xTo(baseOffsetX);
+            yTo(baseOffsetY);
+            rotXTo(0);
+            rotYTo(0);
+            scaleTo(1);
+          };
+
+          const onDoubleClick = (e: MouseEvent) => {
+            e.stopPropagation();
+            baseOffsetX = 0;
+            baseOffsetY = 0;
+            currentOffsetX = 0;
+            currentOffsetY = 0;
+            gsap.to(node, {
+              x: 0,
+              y: 0,
+              rotationX: 0,
+              rotationY: 0,
+              scale: 1,
+              duration: 0.75,
+              ease: "elastic.out(1, 0.55)",
+              overwrite: "auto",
+            });
+          };
+
+          node.addEventListener("pointerdown", onPointerDown);
+          node.addEventListener("pointermove", onPointerMove);
+          node.addEventListener("pointerup", finishDrag);
+          node.addEventListener("pointercancel", finishDrag);
+          node.addEventListener("mouseleave", onMouseLeave);
+          node.addEventListener("dblclick", onDoubleClick);
+
+          cleanupFns.push(() => {
+            node.removeEventListener("pointerdown", onPointerDown);
+            node.removeEventListener("pointermove", onPointerMove);
+            node.removeEventListener("pointerup", finishDrag);
+            node.removeEventListener("pointercancel", finishDrag);
+            node.removeEventListener("mouseleave", onMouseLeave);
+            node.removeEventListener("dblclick", onDoubleClick);
+          });
+        });
+      });
+
+      const smoothstep = (edge0: number, edge1: number, x: number) => {
+        const t = gsap.utils.clamp(0, 1, (x - edge0) / (edge1 - edge0));
+        return t * t * (3 - 2 * t);
+      };
+
       const updateCheckpoints = (p: number) => {
         if (progressText) {
           progressText.textContent = `${Math.round(p * 100)}%`;
@@ -504,28 +697,218 @@ export default function ScrollPathJourney() {
           setActiveStageId("kata-projeccio");
         }
 
-        if (!checkpointElements) return;
+        const entryWindow = 0.068; // Finestra de scroll on els elements entren progressivament des dels laterals
 
-        checkpointElements.forEach((cp) => {
-          const targetP = parseFloat(cp.dataset.progress || "0");
-          const isActive = Math.abs(p - targetP) < 0.038;
-          // Es revela quan el punter s'acosta a la coordenada de la fita
-          const isRevealed = p >= targetP - 0.048;
-          const isPassed = p >= targetP - 0.01;
+        stepAnimators.forEach((item, index) => {
+          const {
+            cp,
+            targetP,
+            side,
+            visualScroll,
+            editorialScroll,
+            imgWrap,
+            imgEl,
+            yearEl,
+            badgeEl,
+            titleEl,
+            subEl,
+            ruleEl,
+            textEl,
+            extEl,
+            tagsEl,
+            actionsEl,
+            pinLine,
+          } = item;
+
+          const delta = p - targetP;
+          const isActive = Math.abs(delta) < 0.036;
+          const isPassed = p >= targetP - 0.008;
+
+          // Progrés continu d'entrada (0 -> 1) lligat al scroll mentre el punter s'acosta al vèrtex
+          // El primer pas comença ja visible però amb parallax viu
+          const rawEntry =
+            index === 0
+              ? smoothstep(-0.02, 0.022, p)
+              : smoothstep(targetP - entryWindow, targetP - 0.004, p);
+
+          const isRevealed = rawEntry > 0.15;
           cp.classList.toggle("is-active", isActive);
           cp.classList.toggle("is-revealed", isRevealed);
           cp.classList.toggle("is-passed", isPassed);
+
+          // 1. Parallax vertical continu mentre es fa scroll per la pàgina
+          const parallaxY = isMobile ? 0 : gsap.utils.clamp(-55, 75, -delta * 420);
+
+          // 2. Moviment lateral continu des dels dos costats de la pantalla + Fade-in + Blur-to-sharp
+          // Quan side === 'right', la foto entra des de l'esquerra (-190px -> 0) i el text entra des de la dreta (+190px -> 0)
+          // Quan side === 'left', la foto entra des de la dreta (+190px -> 0) i el text entra des de l'esquerra (-190px -> 0)
+          const visualLateralSign = side === "right" ? -1 : 1;
+          const editorialLateralSign = side === "right" ? 1 : -1;
+
+          const visualStartShift = isMobile ? 45 : 185;
+          const editorialStartShift = isMobile ? 55 : 175;
+
+          const visualX = (1 - rawEntry) * visualStartShift * visualLateralSign;
+          const visualY = (1 - rawEntry) * 52 + parallaxY * 0.85;
+          const visualRot = (1 - rawEntry) * 6.5 * visualLateralSign;
+          const visualScale = 0.86 + 0.14 * rawEntry;
+          const visualBlur = (1 - rawEntry) * 16;
+
+          if (visualScroll && !isMobile) {
+            visualScroll.style.opacity = `${rawEntry}`;
+            visualScroll.style.transform = `translate3d(${visualX.toFixed(1)}px, ${visualY.toFixed(
+              1
+            )}px, 0) rotate(${visualRot.toFixed(2)}deg) scale(${visualScale.toFixed(3)})`;
+            visualScroll.style.filter =
+              visualBlur > 0.25 ? `blur(${visualBlur.toFixed(1)}px)` : "none";
+          }
+
+          // Clip-path d'obertura lateral en la fotografia (estil bleibtgleich animateClipReveal)
+          if (imgWrap && !isMobile) {
+            const clipPct = Math.round((1 - rawEntry) * 100);
+            imgWrap.style.clipPath =
+              side === "right"
+                ? `inset(0% ${clipPct}% 0% 0%)`
+                : `inset(0% 0% 0% ${clipPct}%)`;
+          }
+
+          if (imgEl && !isMobile) {
+            const imgScale = 1.24 - 0.24 * rawEntry + (isActive ? 0.04 : 0);
+            imgEl.style.transform = `scale(${imgScale.toFixed(3)})`;
+          }
+
+          // 3. Bloc Editorial Obert: entra des del lateral oposat amb revelat esglaonat (staggered) per cada subelement
+          const edEntry =
+            index === 0
+              ? smoothstep(-0.02, 0.025, p)
+              : smoothstep(targetP - entryWindow * 0.95, targetP, p);
+
+          const edX = (1 - edEntry) * editorialStartShift * editorialLateralSign;
+          const edY = (1 - edEntry) * 44 + parallaxY * 0.55;
+          const edBlur = (1 - edEntry) * 14;
+
+          if (editorialScroll) {
+            editorialScroll.style.opacity = `${edEntry}`;
+            editorialScroll.style.transform = `translate3d(${edX.toFixed(1)}px, ${edY.toFixed(
+              1
+            )}px, 0)`;
+            editorialScroll.style.filter =
+              edBlur > 0.25 ? `blur(${edBlur.toFixed(1)}px)` : "none";
+          }
+
+          // Línia del pin que es dibuixa cap al text
+          if (pinLine) {
+            pinLine.style.transform = `scaleX(${edEntry.toFixed(3)})`;
+            pinLine.style.opacity = `${0.25 + 0.75 * edEntry}`;
+          }
+
+          // Sub-elements esglaonats (Any gegant, Títol, Línia divisòria, Cos de text, Tags, Accions)
+          const subStagger = (offset: number) =>
+            index === 0
+              ? 1
+              : smoothstep(
+                  targetP - entryWindow * (0.92 - offset),
+                  targetP - entryWindow * (0.12 - offset * 0.15),
+                  p
+                );
+
+          const yProg = subStagger(0.0);
+          if (yearEl) {
+            const yShift = (1 - yProg) * 55 * editorialLateralSign;
+            const yBlur = (1 - yProg) * 18;
+            yearEl.style.opacity = `${yProg}`;
+            yearEl.style.transform = `translate3d(${yShift.toFixed(1)}px, ${(
+              (1 - yProg) *
+              18
+            ).toFixed(1)}px, 0)`;
+            yearEl.style.filter = yBlur > 0.3 ? `blur(${yBlur.toFixed(1)}px)` : "none";
+          }
+
+          if (badgeEl) {
+            badgeEl.style.opacity = `${yProg}`;
+            badgeEl.style.transform = `translate3d(${((1 - yProg) * 32 * editorialLateralSign).toFixed(
+              1
+            )}px, 0, 0)`;
+          }
+
+          const titleProg = subStagger(0.14);
+          if (titleEl) {
+            const tBlur = (1 - titleProg) * 12;
+            titleEl.style.opacity = `${titleProg}`;
+            titleEl.style.transform = `translate3d(${(
+              (1 - titleProg) *
+              48 *
+              editorialLateralSign
+            ).toFixed(1)}px, ${((1 - titleProg) * 20).toFixed(1)}px, 0)`;
+            titleEl.style.filter = tBlur > 0.3 ? `blur(${tBlur.toFixed(1)}px)` : "none";
+          }
+
+          const subProg = subStagger(0.22);
+          if (subEl) {
+            subEl.style.opacity = `${subProg}`;
+            subEl.style.transform = `translate3d(${(
+              (1 - subProg) *
+              36 *
+              editorialLateralSign
+            ).toFixed(1)}px, ${((1 - subProg) * 14).toFixed(1)}px, 0)`;
+          }
+
+          const ruleProg = subStagger(0.28);
+          if (ruleEl) {
+            ruleEl.style.transform = `scaleX(${ruleProg.toFixed(3)})`;
+            ruleEl.style.opacity = `${ruleProg}`;
+          }
+
+          const textProg = subStagger(0.35);
+          if (textEl) {
+            const pBlur = (1 - textProg) * 10;
+            textEl.style.opacity = `${textProg}`;
+            textEl.style.transform = `translate3d(${(
+              (1 - textProg) *
+              42 *
+              editorialLateralSign
+            ).toFixed(1)}px, ${((1 - textProg) * 22).toFixed(1)}px, 0)`;
+            textEl.style.filter = pBlur > 0.3 ? `blur(${pBlur.toFixed(1)}px)` : "none";
+          }
+
+          const extProg = subStagger(0.42);
+          if (extEl) {
+            extEl.style.opacity = `${extProg}`;
+            extEl.style.transform = `translate3d(${(
+              (1 - extProg) *
+              36 *
+              editorialLateralSign
+            ).toFixed(1)}px, ${((1 - extProg) * 18).toFixed(1)}px, 0)`;
+          }
+
+          const footerProg = subStagger(0.48);
+          if (tagsEl) {
+            tagsEl.style.opacity = `${footerProg}`;
+            tagsEl.style.transform = `translate3d(${(
+              (1 - footerProg) *
+              28 *
+              editorialLateralSign
+            ).toFixed(1)}px, ${((1 - footerProg) * 12).toFixed(1)}px, 0)`;
+          }
+          if (actionsEl) {
+            actionsEl.style.opacity = `${footerProg}`;
+            actionsEl.style.transform = `translate3d(${(
+              (1 - footerProg) *
+              24 *
+              editorialLateralSign
+            ).toFixed(1)}px, ${((1 - footerProg) * 12).toFixed(1)}px, 0)`;
+          }
         });
       };
 
-      // Revelar el primer pas des de l'inici
+      // Revelar l'estat inicial al carregar
       updateCheckpoints(0.025);
 
       const st = ScrollTrigger.create({
         trigger: containerRef.current,
         start: "top top",
         end: "bottom bottom",
-        scrub: 0.65,
+        scrub: 0.5,
         animation: tl,
         invalidateOnRefresh: true,
         onUpdate: (self) => {
@@ -536,7 +919,10 @@ export default function ScrollPathJourney() {
       stRef.current = st;
     }, containerRef);
 
-    return () => ctx.revert();
+    return () => {
+      cleanupFns.forEach((fn) => fn());
+      ctx.revert();
+    };
   }, []);
 
   // Tancar el modal amb Escape
@@ -549,7 +935,19 @@ export default function ScrollPathJourney() {
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [modalSection]);
 
-  const jumpToProgress = (targetP: number) => {
+  const jumpToProgress = (targetP: number, e?: React.MouseEvent<HTMLElement>) => {
+    if (e) {
+      const movable = (e.currentTarget as HTMLElement).querySelector<HTMLElement>(
+        "[data-movable-node]"
+      );
+      if (
+        movable?.dataset.justDragged === "true" ||
+        (e.target as HTMLElement)?.closest("[data-movable-node]")?.getAttribute("data-just-dragged") ===
+          "true"
+      ) {
+        return;
+      }
+    }
     const st = stRef.current;
     if (!st) return;
     const targetScroll = st.start + (st.end - st.start) * targetP;
@@ -579,7 +977,7 @@ export default function ScrollPathJourney() {
       {/* Barra superior sticky A24 en tema clar editorial */}
       <div className="journey-bar">
         <div className="journey-bar__left">
-          <span className="journey-bar__kicker">GUIA INTERACTIVA · 18 PASSOS</span>
+          <span className="journey-bar__kicker">GUIA INTERACTIVA · 18 PASSOS EN MOVIMENT</span>
           <span className="journey-bar__sep">—</span>
           <span className="journey-bar__stage">
             ETAPA {activeStageObj.num}: {activeStageObj.title.toUpperCase()} ({activeStageObj.period})
@@ -614,12 +1012,12 @@ export default function ScrollPathJourney() {
         </div>
         <div className="journey-head__intro">
           <p className="journey-lede">
-            De la fundació d&apos;Al Tall el 1975 a la revolució d&apos;<em>Orgànic</em>, l&apos;èxit europeu de <em>Katà</em> i l&apos;estrena de <em>Viatger</em>: a mesura que el punter baixa per la guia central, les imatges i els textos de cada fita apareixen de forma oberta pels dos laterals.
+            De la fundació d&apos;Al Tall el 1975 a la revolució d&apos;<em>Orgànic</em>, l&apos;èxit europeu de <em>Katà</em> i l&apos;estrena de <em>Viatger</em>: a mesura que el punter baixa per la guia central, els elements apareixen dinàmicament dels laterals i responen al teu moviment.
           </p>
           <p className="journey-prompt">
             <span className="journey-prompt__dot" aria-hidden="true"></span>
-            <strong>FES SCROLL PER BAIXAR PEL RECORREGUT (18 PASSOS INTERACTIUS)</strong>
-            <span>O SELECCIONA UNA ETAPA PER SALTAR-HI I LLEGIR EL DOSSIER COMPLET</span>
+            <strong>FES SCROLL PER VEURE APARÈIXER ELS ELEMENTS DELS COSTATS</strong>
+            <span>· POTS ARROSSEGAR I MOURE LLIUREMENT LES IMATGES I TEXTOS (DOBLE CLIC PER CENTRAR)</span>
           </p>
         </div>
       </header>
@@ -668,7 +1066,7 @@ export default function ScrollPathJourney() {
 
       <div className="divider-horizontal" />
 
-      {/* Escenari del Railway amb Punter Guia i Elements Laterals Oberts (NO cards) */}
+      {/* Escenari del Railway amb Punter Guia i Elements Laterals Dinàmics i Movibles */}
       <div className="journey-stage">
         {/* Ruta Sinuosa Desktop SVG (18 passos / 9400px viewBox) */}
         <svg
@@ -707,7 +1105,7 @@ export default function ScrollPathJourney() {
           <span className="journey-marker__nose"></span>
         </span>
 
-        {/* 18 Passos Oberts sobre el llenç: a cada parada del Railway la imatge i el text apareixen pels laterals */}
+        {/* 18 Passos Dinàmics i Movibles: a cada vèrtex del Railway la imatge i el text entren dels laterals amb fade-in, blur i clip-path */}
         <ol className="checkpoint-list">
           {CHECKPOINTS.map((cp) => {
             const isNoteExpanded = !!expandedStepIds[cp.id];
@@ -719,6 +1117,7 @@ export default function ScrollPathJourney() {
                 }`}
                 data-journey-checkpoint
                 data-progress={cp.progress}
+                data-side={cp.side}
                 style={
                   {
                     "--pin-x": cp.pinX,
@@ -738,102 +1137,127 @@ export default function ScrollPathJourney() {
                   <span className="checkpoint-pin__line" aria-hidden="true" />
                 </button>
 
-                {/* ELEMENT VISUAL FLOTANT (Apareix des del lateral corresponent) */}
+                {/* ELEMENT VISUAL FLOTANT I MOVIBLE (Entra des del lateral amb clip-path, blur i parallax; es pot arrossegar i moure) */}
                 <figure
                   className="checkpoint-visual"
-                  onClick={() => jumpToProgress(cp.progress)}
+                  onClick={(e) => jumpToProgress(cp.progress, e)}
                 >
-                  <div className="checkpoint-visual__img-wrap">
-                    <img
-                      src={cp.media}
-                      alt={cp.title}
-                      width={520}
-                      height={340}
-                      loading="lazy"
-                      decoding="async"
-                    />
+                  <div className="checkpoint-visual__scroll" data-visual-scroll>
+                    <div
+                      className="checkpoint-visual__movable"
+                      data-movable-node
+                      title="Arrossega per moure la imatge · Doble clic per centrar"
+                    >
+                      <div className="checkpoint-visual__drag-hint" aria-hidden="true">
+                        <span>✥ MOURE</span>
+                        <span>{cp.year}</span>
+                      </div>
+                      <div className="checkpoint-visual__img-wrap">
+                        <img
+                          src={cp.media}
+                          alt={cp.title}
+                          width={520}
+                          height={340}
+                          loading="lazy"
+                          decoding="async"
+                          draggable={false}
+                        />
+                      </div>
+                      <figcaption className="checkpoint-visual__caption">
+                        <span>{cp.mediaCaption}</span>
+                        <span>PAS {cp.stepNum}</span>
+                      </figcaption>
+                    </div>
                   </div>
-                  <figcaption className="checkpoint-visual__caption">
-                    <span>{cp.mediaCaption}</span>
-                    <span>PAS {cp.stepNum}</span>
-                  </figcaption>
                 </figure>
 
-                {/* ELEMENT EDITORIAL DE TEXT OBERT (Apareix des de l'altre lateral sense marc de card) */}
+                {/* ELEMENT EDITORIAL DE TEXT OBERT I MOVIBLE (Entra des del lateral oposat amb fade-in i revelat per capes) */}
                 <div
                   className="checkpoint-editorial"
-                  onClick={() => jumpToProgress(cp.progress)}
+                  onClick={(e) => jumpToProgress(cp.progress, e)}
                 >
-                  <div className="checkpoint-editorial__meta">
-                    <span className="checkpoint-editorial__year">{cp.year}</span>
-                    <span className="checkpoint-editorial__badge">{cp.badge}</span>
-                  </div>
-
-                  <div className="checkpoint-editorial__mobile-media">
-                    <img
-                      src={cp.media}
-                      alt={cp.title}
-                      width={420}
-                      height={270}
-                      loading="lazy"
-                      decoding="async"
-                    />
-                  </div>
-
-                  <h3 className="checkpoint-editorial__title">{cp.title}</h3>
-                  <p className="checkpoint-editorial__subtitle">{cp.subtitle}</p>
-
-                  <div className="checkpoint-editorial__rule" />
-
-                  <p className="checkpoint-editorial__text">{cp.text}</p>
-
-                  {(isNoteExpanded || cp.isMajorStage) && (
-                    <div className="checkpoint-editorial__extended">
-                      <p className="checkpoint-editorial__extended-p">{cp.extendedNote}</p>
-                      {cp.quote && (
-                        <blockquote className="checkpoint-editorial__quote">
-                          “{cp.quote}”
-                        </blockquote>
-                      )}
-                    </div>
-                  )}
-
-                  <div className="checkpoint-editorial__tags">
-                    {cp.tags.map((tag) => (
-                      <span key={tag} className="checkpoint-editorial__tag">
-                        #{tag}
-                      </span>
-                    ))}
-                  </div>
-
-                  <div className="checkpoint-editorial__actions">
-                    {!cp.isMajorStage && (
-                      <button
-                        type="button"
-                        className="checkpoint-editorial__btn"
-                        onClick={(e) => toggleStepNote(cp.id, e)}
-                      >
-                        {isNoteExpanded ? "MENYS DETALL −" : "AMPLIAR HISTÒRIA +"}
-                      </button>
-                    )}
-
-                    <button
-                      type="button"
-                      className="checkpoint-editorial__link"
-                      onClick={(e) => openStageModal(cp.stageId, e)}
+                  <div className="checkpoint-editorial__scroll" data-editorial-scroll>
+                    <div
+                      className="checkpoint-editorial__movable"
+                      data-movable-node
+                      title="Arrossega per moure el bloc · Doble clic per centrar"
                     >
-                      LLEGIR CAPÍTOL {cp.stageNum} COMPLET ↗
-                    </button>
+                      <div className="checkpoint-editorial__meta">
+                        <span className="checkpoint-editorial__year">{cp.year}</span>
+                        <span className="checkpoint-editorial__badge">{cp.badge}</span>
+                        <span className="checkpoint-editorial__drag-pill" aria-hidden="true">
+                          ✥ MOVIBLE
+                        </span>
+                      </div>
 
-                    {cp.albumLink && (
-                      <Link
-                        href={cp.albumLink.href}
-                        className="checkpoint-editorial__album"
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        {cp.albumLink.label}
-                      </Link>
-                    )}
+                      <div className="checkpoint-editorial__mobile-media">
+                        <img
+                          src={cp.media}
+                          alt={cp.title}
+                          width={420}
+                          height={270}
+                          loading="lazy"
+                          decoding="async"
+                          draggable={false}
+                        />
+                      </div>
+
+                      <h3 className="checkpoint-editorial__title">{cp.title}</h3>
+                      <p className="checkpoint-editorial__subtitle">{cp.subtitle}</p>
+
+                      <div className="checkpoint-editorial__rule" />
+
+                      <p className="checkpoint-editorial__text">{cp.text}</p>
+
+                      {(isNoteExpanded || cp.isMajorStage) && (
+                        <div className="checkpoint-editorial__extended">
+                          <p className="checkpoint-editorial__extended-p">{cp.extendedNote}</p>
+                          {cp.quote && (
+                            <blockquote className="checkpoint-editorial__quote">
+                              “{cp.quote}”
+                            </blockquote>
+                          )}
+                        </div>
+                      )}
+
+                      <div className="checkpoint-editorial__tags">
+                        {cp.tags.map((tag) => (
+                          <span key={tag} className="checkpoint-editorial__tag">
+                            #{tag}
+                          </span>
+                        ))}
+                      </div>
+
+                      <div className="checkpoint-editorial__actions">
+                        {!cp.isMajorStage && (
+                          <button
+                            type="button"
+                            className="checkpoint-editorial__btn"
+                            onClick={(e) => toggleStepNote(cp.id, e)}
+                          >
+                            {isNoteExpanded ? "MENYS DETALL −" : "AMPLIAR HISTÒRIA +"}
+                          </button>
+                        )}
+
+                        <button
+                          type="button"
+                          className="checkpoint-editorial__link"
+                          onClick={(e) => openStageModal(cp.stageId, e)}
+                        >
+                          LLEGIR CAPÍTOL {cp.stageNum} COMPLET ↗
+                        </button>
+
+                        {cp.albumLink && (
+                          <Link
+                            href={cp.albumLink.href}
+                            className="checkpoint-editorial__album"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            {cp.albumLink.label}
+                          </Link>
+                        )}
+                      </div>
+                    </div>
                   </div>
                 </div>
               </li>
