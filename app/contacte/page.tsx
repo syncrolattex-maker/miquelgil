@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import Link from "next/link";
 import A24Nav from "@/components/A24Nav";
 import SandReveal from "@/components/SandReveal";
@@ -8,33 +8,16 @@ import { bookingInfo, socials } from "@/lib/site";
 import "./contacte.css";
 
 export default function ContactePage() {
-  const [resetCount, setResetCount] = useState(0);
-
   return (
     <main className="contacte-a24-page">
       {/* MENÚ DE NAVEGACIÓ A24 UNIFICAT */}
       <A24Nav currentSection="/contacte/" theme="dark" />
-
-      {/* BOTÓ FLOTANT EDITORIAL PER RESTAURAR LA DUNA D'ARENA */}
-      <div className="contacte-sand-controls">
-        <span className="contacte-sand-cue">
-          ARROSSEGA EL CURSOR PER APARTAR L&apos;ARENA
-        </span>
-        <button
-          type="button"
-          onClick={() => setResetCount((c) => c + 1)}
-          className="contacte-sand-reset-btn"
-        >
-          RESTAURAR DUNA ↺
-        </button>
-      </div>
 
       {/* MANTELL D'ARENA INTERACTIU A PANTALLA COMPLETA (SAND REVEAL) */}
       <SandReveal
         className="contacte-sand-fullscreen"
         starterCue={true}
         brushSize={85}
-        resetTrigger={resetCount}
       >
         <div className="contacte-main-wrapper">
           {/* COLUMNA ESQUERRA: DOSSIER EDITORIAL DE CONTACTE A24 (SOTA L'ARENA) */}

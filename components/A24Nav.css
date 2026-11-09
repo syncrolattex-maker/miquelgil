@@ -21,12 +21,29 @@
   pointer-events: none;
 }
 
-/* En escritorio con fondo oscuro (p.ej. /directes), mantenemos una placa blanca compacta para que el menú sea siempre visible e idéntico */
+.nav,
+.nav *,
+.nav *::before,
+.nav *::after {
+  box-sizing: border-box;
+}
+
+/* En escritorio con fondo oscuro (p.ej. /directes), el logo y el botón Index se muestran en blanco cuando el menú está cerrado, y pasan a negro cuando se despliega la placa blanca (.nav-bg) */
 @media (min-width: 992px) {
-  .nav.theme-base .nav-bg {
-    height: 4.15em;
-    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.18);
-    border: 1px solid rgba(0, 0, 0, 0.08);
+  .nav.theme-base[data-nav-dropdown='closed'] .miquel-handwritten-logo {
+    filter: none;
+  }
+
+  .nav.theme-base[data-nav-dropdown='closed'] .nav-link {
+    color: #ffffff;
+  }
+
+  .nav.theme-base[data-nav-dropdown='open'] .miquel-handwritten-logo {
+    filter: invert(1) brightness(0);
+  }
+
+  .nav.theme-base[data-nav-dropdown='open'] .nav-link {
+    color: #000000;
   }
 }
 
@@ -111,11 +128,17 @@
 .nav-center__list {
   justify-content: center;
   align-items: center;
+  margin-top: 0;
   margin-bottom: 0;
   padding-left: 0;
   list-style: none;
   display: flex;
   position: relative;
+}
+
+.nav-center__list > li {
+  margin: 0;
+  padding: 0;
 }
 
 .nav-logo {
@@ -133,7 +156,7 @@
   display: block;
   filter: invert(1) brightness(0);
   object-fit: contain;
-  transition: transform 0.3s var(--nav-ease);
+  transition: transform 0.3s var(--nav-ease), filter 0.3s var(--nav-ease);
 }
 
 .nav-logo:hover .miquel-handwritten-logo {
@@ -155,6 +178,7 @@
   color: #000000;
   cursor: pointer;
   text-decoration: none;
+  transition: color 0.3s var(--nav-ease);
 }
 
 .nav-link__label {

@@ -76,7 +76,6 @@
   align-items: flex-start;
   gap: 2rem;
   pointer-events: none;
-  border-bottom: 0.5px solid rgba(255, 255, 255, 0.16);
 }
 
 .agenda-crumble-hud-top__left {

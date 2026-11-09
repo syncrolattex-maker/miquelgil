@@ -556,9 +556,10 @@ export default function SandReveal({
     s.settleTime = 0;
     s.needsRedraw = true;
 
-    // Traç inicial subtil i orgànic sobre "Si vols" per convidar a apartar l'arena
+    // Traç inicial subtil i orgànic sobre el subtítol i les xarxes socials per convidar a apartar l'arena i deixar visibles els enllaços
     if (starterCue) {
       const subtitle = container.querySelector(".contacte-subtitle");
+      const socialsEl = container.querySelector(".contacte-socials-grid");
 
       let startX = isMobile ? 0.14 : 0.10;
       let startY = isMobile ? 0.46 : 0.28;
@@ -577,6 +578,22 @@ export default function SandReveal({
       const p3: StrokePoint = { x: startX + (isMobile ? 0.32 : 0.22), y: startY - 0.01, time: 200 };
 
       sweep([p1, p2, p3]);
+
+      if (socialsEl) {
+        const cRect = container.getBoundingClientRect();
+        const socRect = socialsEl.getBoundingClientRect();
+        if (cRect.width > 0 && cRect.height > 0) {
+          const sx1 = clamp((socRect.left - cRect.left + 20) / cRect.width, 0.05, 0.45);
+          const sy1 = clamp((socRect.top - cRect.top + socRect.height * 0.5) / cRect.height, 0.20, 0.92);
+          const sx2 = clamp((socRect.right - cRect.left - 20) / cRect.width, 0.15, 0.55);
+          sweep([
+            { x: sx1, y: sy1, time: 0 },
+            { x: (sx1 + sx2) * 0.5, y: sy1 - 0.015, time: 90 },
+            { x: sx2, y: sy1 + 0.01, time: 180 },
+          ]);
+        }
+      }
+
       for (let i = 0; i < 4; i++) {
         flowSand();
       }
@@ -585,7 +602,7 @@ export default function SandReveal({
     draw();
   }, [draw, fillDunes, flowSand, starterCue, sweep]);
 
-  // Pointer event helpers
+  // Pointer event helpers (attached to container while canvas has pointer-events: none so all links/buttons remain 100% natively clickable)
   const getCanvasCoords = useCallback((e: React.PointerEvent): StrokePoint => {
     const canvas = canvasRef.current;
     if (!canvas) return { x: 0, y: 0 };
@@ -597,102 +614,47 @@ export default function SandReveal({
     };
   }, []);
 
-  const handlePointerDown = (e: React.PointerEvent<HTMLCanvasElement>) => {
-    if (e.button !== 0) return;
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-
-    canvas.setPointerCapture(e.pointerId);
-    stateRef.current.pointerId = e.pointerId;
-    stateRef.current.dragStart = { x: e.clientX, y: e.clientY };
+  const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (e.button !== 0 && e.pointerType === "mouse") return;
+    const s = stateRef.current;
+    s.pointerId = e.pointerId;
+    s.dragStart = { x: e.clientX, y: e.clientY };
     const pt = getCanvasCoords(e);
-    stateRef.current.lastPointer = pt;
+    // Immediate gentle brush stroke at tap/click point
+    sweep([
+      { x: pt.x - 0.015, y: pt.y, time: (pt.time ?? 0) - 16 },
+      { x: pt.x + 0.015, y: pt.y, time: pt.time ?? 16 },
+    ]);
+    s.lastPointer = pt;
     setIsBrushing(true);
   };
 
-  const handlePointerMove = (e: React.PointerEvent<HTMLCanvasElement>) => {
+  const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
     const s = stateRef.current;
-    const canvas = canvasRef.current;
-    if (!canvas) return;
+    const currentPt = getCanvasCoords(e);
 
-    if (e.pointerId === s.pointerId && s.lastPointer) {
-      // Actively brushing/dragging sand
-      const currentPt = getCanvasCoords(e);
-      sweep([s.lastPointer, currentPt]);
-      s.lastPointer = currentPt;
-    } else if (s.pointerId === null) {
-      // Hovering: check if cursor is over a cleared link/button area or empty area
-      const pt = getCanvasCoords(e);
-      const sandAmount = sample(pt.x * s.gridW, pt.y * s.gridH);
-      if (sandAmount < 0.25) {
-        const elements = document.elementsFromPoint(e.clientX, e.clientY);
-        const interactive = elements.find(
-          (el) =>
-            el.tagName === "A" ||
-            el.closest("a") ||
-            el.tagName === "BUTTON" ||
-            el.closest("button")
-        );
-        if (interactive) {
-          canvas.style.cursor = "pointer";
-          return;
-        }
-        // If there is no sand at all under cursor (e.g. over the photo on the right)
-        if (sandAmount < 0.05) {
-          canvas.style.cursor = "default";
-          return;
+    // Sweep sand organically both on mouse hover movement and when dragging/touching
+    if (e.pointerType === "mouse" || e.pointerId === s.pointerId) {
+      if (s.lastPointer) {
+        const dt = (currentPt.time ?? 0) - (s.lastPointer.time ?? 0);
+        if (dt < 180) {
+          sweep([s.lastPointer, currentPt]);
         }
       }
-      canvas.style.cursor = "crosshair";
+      s.lastPointer = currentPt;
     }
   };
 
-  const handlePointerUp = (e: React.PointerEvent<HTMLCanvasElement>) => {
+  const handlePointerUp = () => {
     const s = stateRef.current;
-    const canvas = canvasRef.current;
+    s.pointerId = null;
+    s.lastPointer = null;
+    s.dragStart = null;
+    setIsBrushing(false);
+  };
 
-    // Check if it was a quick tap/click rather than a drag stroke
-    if (s.dragStart) {
-      const dist = Math.hypot(e.clientX - s.dragStart.x, e.clientY - s.dragStart.y);
-      if (dist < 10) {
-        const pt = getCanvasCoords(e);
-        const sandAmount = sample(pt.x * s.gridW, pt.y * s.gridH);
-        // Trigger underlying link or button if sand has been cleared over that spot
-        if (sandAmount < 0.45) {
-          const elements = document.elementsFromPoint(e.clientX, e.clientY);
-          const interactive = elements.find(
-            (el) =>
-              el.tagName === "A" ||
-              el.closest("a") ||
-              el.tagName === "BUTTON" ||
-              el.closest("button")
-          ) as HTMLElement | undefined;
-
-          const targetAnchor =
-            interactive?.tagName === "A"
-              ? (interactive as HTMLAnchorElement)
-              : (interactive?.closest("a") as HTMLAnchorElement | null);
-          const targetButton =
-            interactive?.tagName === "BUTTON"
-              ? (interactive as HTMLButtonElement)
-              : (interactive?.closest("button") as HTMLButtonElement | null);
-
-          if (targetAnchor && targetAnchor.href) {
-            if (targetAnchor.target === "_blank") {
-              window.open(targetAnchor.href, "_blank", "noopener,noreferrer");
-            } else {
-              targetAnchor.click();
-            }
-          } else if (targetButton) {
-            targetButton.click();
-          }
-        }
-      }
-    }
-
-    if (canvas && s.pointerId !== null && canvas.hasPointerCapture(s.pointerId)) {
-      canvas.releasePointerCapture(s.pointerId);
-    }
+  const handlePointerLeave = () => {
+    const s = stateRef.current;
     s.pointerId = null;
     s.lastPointer = null;
     s.dragStart = null;
@@ -730,21 +692,22 @@ export default function SandReveal({
     <div
       ref={containerRef}
       className={`sand-reveal-container ${isBrushing ? "is-brushing" : ""} ${className}`}
+      onPointerDown={handlePointerDown}
+      onPointerMove={handlePointerMove}
+      onPointerUp={handlePointerUp}
+      onPointerCancel={handlePointerUp}
+      onPointerLeave={handlePointerLeave}
     >
       {/* The original content: black text on white background */}
       <div className="sand-reveal-content">
         {children}
       </div>
 
-      {/* The interactive physical sand canvas placed directly over the text */}
+      {/* The interactive physical sand canvas placed over the text with pointer-events: none so all links remain directly clickable */}
       <canvas
         ref={canvasRef}
         className={`sand-reveal-canvas ${isBrushing ? "is-brushing" : ""}`}
-        onPointerDown={handlePointerDown}
-        onPointerMove={handlePointerMove}
-        onPointerUp={handlePointerUp}
-        onPointerCancel={handlePointerUp}
-        aria-label="Efecte interactiu d'arena. Arrossega el cursor per apartar l'arena i descobrir el text."
+        aria-hidden="true"
       />
     </div>
   );
