@@ -1,14 +1,13 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef } from "react";
 import Link from "next/link";
 import gsap from "gsap";
 import A24Nav from "@/components/A24Nav";
-import { BIO_SECTIONS } from "./bioData";
+import ScrollPathJourney from "@/components/ScrollPathJourney";
 import {
   siteKeyMessage,
   biographyIntro,
-  chronologyFites,
   liveFormats,
 } from "@/lib/site";
 import { initDissolve } from "../discografia/[slug]/dissolveEngine";
@@ -91,9 +90,7 @@ const ARTISTIC_PILLARS = [
 export default function BiografiaClient() {
   const containerRef = useRef<HTMLDivElement>(null);
   const heroRef = useRef<HTMLElement>(null);
-  const chaptersRef = useRef<HTMLElement>(null);
-  const chronoRef = useRef<HTMLElement>(null);
-  const [activeChapterId, setActiveChapterId] = useState<string>(BIO_SECTIONS[0].id);
+  const journeyWrapRef = useRef<HTMLElement>(null);
 
   // ============================================================================
   // 1. ANIMACIÓ D'ENTRADA EN CORTINA SINCRONITZADA (DE DALT A BAIX)
@@ -239,20 +236,12 @@ export default function BiografiaClient() {
     initDissolve(containerRef.current);
   }, []);
 
-  const scrollToElement = (id: string) => {
-    setActiveChapterId(id);
-    const el = document.getElementById(id);
-    if (el) {
-      el.scrollIntoView({ behavior: "smooth", block: "start" });
-    }
-  };
-
   const scrollToChapters = () => {
-    chaptersRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    journeyWrapRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
   const scrollToChrono = () => {
-    chronoRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    journeyWrapRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
   const bioParagraphs = siteKeyMessage.shortBio250.split("\n\n");
@@ -526,157 +515,10 @@ export default function BiografiaClient() {
       </section>
 
       {/* ============================================================
-          4. LES CINC GRANS ETAPES BIOGRÀFIQUES (01 — 05)
+          4. GUIA INTERACTIVA D'ETAPES I CRONOLOGIA AMB PUNTER (1956 — 2026)
          ============================================================ */}
-      <section ref={chaptersRef} className="bio-chapters" aria-label="Les cinc etapes biogràfiques">
-        <div className="divider-horizontal" />
-
-        <div className="bio-chapters__header">
-          <div>
-            <span className="subheading-xs block mb-2">RECORREGUT EN CINC MOVIMENTS</span>
-            <h2 className="heading-m">CINC ETAPES, UNA VIDA DE MÚSICA</h2>
-          </div>
-          <p className="paragraph-m" style={{ maxWidth: "42ch", margin: 0 }}>
-            Des de la fundació d&apos;Al Tall el 1975 fins a l&apos;estrena de Viatger (2024): cinc capítols que defineixen l&apos;evolució de la música d&apos;arrel al País Valencià i la Mediterrània.
-          </p>
-        </div>
-
-        <div className="divider-horizontal" />
-
-        {/* Navegador tabular de les 5 etapes */}
-        <div className="bio-chapters__nav" role="tablist" aria-label="Índex d'etapes">
-          {BIO_SECTIONS.map((sec) => (
-            <button
-              key={sec.id}
-              type="button"
-              onClick={() => scrollToElement(sec.id)}
-              className={`bio-chapter-tab ${activeChapterId === sec.id ? "is-active" : ""}`}
-            >
-              <span className="subheading-xs">
-                ETAPA {sec.num} · {sec.period}
-              </span>
-              <span className="bio-chapter-tab__title">{sec.title}</span>
-            </button>
-          ))}
-        </div>
-
-        <div className="divider-horizontal" />
-
-        {/* Capítols desplegats d'extrem a extrem */}
-        {BIO_SECTIONS.map((sec, index) => (
-          <React.Fragment key={sec.id}>
-            <article id={sec.id} className="bio-chapter-block">
-              <div className="bio-chapter-block__inner">
-                {/* Capçalera del capítol */}
-                <div className="bio-chapter-block__top">
-                  <span className="bio-chapter-block__num">{sec.num}</span>
-                  <div className="bio-chapter-block__headings">
-                    <span className="subheading-xs">{sec.subtitle}</span>
-                    <h3 className="heading-m">{sec.title}</h3>
-                  </div>
-                  <span className="subheading-xs" style={{ fontSize: "12px" }}>
-                    PERÍODE: {sec.period}
-                  </span>
-                </div>
-
-                <div className="divider-local" />
-
-                {/* Cos del capítol: Fotografia + Citació vs Narrativa + Fites */}
-                <div className="bio-chapter-block__body">
-                  <div className="bio-chapter-block__media-col">
-                    <figure className="bio-chapter-block__figure">
-                      <img
-                        src={sec.image}
-                        alt={sec.imageAlt}
-                        className="bio-chapter-block__img"
-                      />
-                    </figure>
-                    <div className="bio-chapter-block__figcaption">
-                      <span className="subheading-xs">{sec.imageAlt}</span>
-                      <span className="subheading-xs">{sec.period}</span>
-                    </div>
-
-                    <div className="bio-chapter-block__quote-box">
-                      <span className="subheading-xs">CITACIÓ DESTACADA</span>
-                      <blockquote className="bio-chapter-block__quote">
-                        “{sec.quote}”
-                      </blockquote>
-                    </div>
-
-                    <div className="bio-chapter-block__tags">
-                      {sec.tags.map((tag) => (
-                        <span key={tag} className="bio-tag">
-                          {tag}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="bio-chapter-block__text-col">
-                    <div>
-                      <span className="subheading-xs block mb-2">RESUM DE L&apos;ETAPA</span>
-                      <p className="paragraph-xl" style={{ margin: 0 }}>
-                        {sec.summary}
-                      </p>
-                    </div>
-
-                    <div className="divider-local" />
-
-                    <div className="bio-chapter-block__paragraphs">
-                      {sec.paragraphs.map((p, pIdx) => (
-                        <p key={pIdx} className="paragraph-l" style={{ margin: 0 }}>
-                          {p}
-                        </p>
-                      ))}
-                    </div>
-
-                    <div className="bio-chapter-block__milestones">
-                      <span className="subheading-xs">FITES CLAU DEL PERÍODE ({sec.period})</span>
-                      {sec.keyMilestones.map((m, mIdx) => (
-                        <div key={mIdx} className="bio-milestone-row">
-                          <span className="bio-milestone-row__year">{m.year}</span>
-                          <span className="paragraph-m font-medium" style={{ textAlign: "right" }}>
-                            {m.title}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </article>
-            {index < BIO_SECTIONS.length - 1 && <div className="divider-horizontal" />}
-          </React.Fragment>
-        ))}
-      </section>
-
-      {/* ============================================================
-          5. CRONOLOGIA HISTÒRICA (18 FITES CAPITALS EN TEMA DARK)
-         ============================================================ */}
-      <section ref={chronoRef} className="bio-chronology theme-dark" aria-label="Cronologia històrica">
-        <div className="bio-chronology__inner">
-          <div className="bio-chronology__header">
-            <div>
-              <span className="subheading-xs block mb-2">ARXIU CRONOLÒGIC OFICIAL</span>
-              <h2 className="heading-m" style={{ color: "#ffffff" }}>
-                CRONOLOGIA (1956 — 2026)
-              </h2>
-            </div>
-            <span className="subheading-xs">18 FITES HISTÒRIQUES VERIFICADES</span>
-          </div>
-
-          <div className="bio-chronology__table">
-            {chronologyFites.map((item, idx) => (
-              <div key={idx} className="bio-chrono-item">
-                <span className="bio-chrono-item__idx">
-                  {idx + 1 < 10 ? `0${idx + 1}` : idx + 1} / {chronologyFites.length}
-                </span>
-                <span className="bio-chrono-item__year">{item.year}</span>
-                <p className="bio-chrono-item__text">{item.text}</p>
-              </div>
-            ))}
-          </div>
-        </div>
+      <section ref={journeyWrapRef} aria-label="Guia interactiva d'etapes i cronologia">
+        <ScrollPathJourney />
       </section>
 
       {/* ============================================================
