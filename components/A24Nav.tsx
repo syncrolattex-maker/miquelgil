@@ -11,21 +11,22 @@ interface A24NavProps {
 }
 
 export const NAV_SECTIONS = [
-  { title: "Inici", url: "/start", year: "01" },
-  { title: "Discografia", url: "/discografia", year: "02" },
-  { title: "Directes", url: "/agenda", year: "03" },
-  { title: "Biografia", url: "/biografia", year: "04" },
-  { title: "Contractació", url: "/contractacio", year: "05" },
-  { title: "Cronologia", url: "/cronologia", year: "06" },
-  { title: "Contacte", url: "/contacte", year: "07" }
+  { title: "Inici", url: "/start/", year: "01" },
+  { title: "Discografia", url: "/discografia/", year: "02" },
+  { title: "Directes", url: "/agenda/", year: "03" },
+  { title: "Biografia", url: "/biografia/", year: "04" },
+  { title: "Contractació", url: "/contractacio/", year: "05" },
+  { title: "Cronologia", url: "/cronologia/", year: "06" },
+  { title: "Contacte", url: "/contacte/", year: "07" }
 ];
 
-export default function A24Nav({ currentSection = "/discografia", theme = "dark" }: A24NavProps) {
+export default function A24Nav({ currentSection = "/discografia/", theme = "dark" }: A24NavProps) {
   const [menuStatus, setMenuStatus] = useState<"open" | "closed">("closed");
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [labelMode, setLabelMode] = useState<"word" | "count">("word");
 
   const navRef = useRef<HTMLElement>(null);
+  const listRef = useRef<HTMLUListElement>(null);
   const toggleBtnRef = useRef<HTMLButtonElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const scrollerRef = useRef<HTMLDivElement>(null);
@@ -35,9 +36,50 @@ export default function A24Nav({ currentSection = "/discografia", theme = "dark"
   const wordSpanRef = useRef<HTMLSpanElement>(null);
   const countSpanRef = useRef<HTMLSpanElement>(null);
 
+  const hoverTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const lastHoverOpenTimeRef = useRef<number>(0);
   const draggingRef = useRef(false);
   const grabOffsetRef = useRef(0);
   const pointerIdRef = useRef<number | null>(null);
+
+  const canHover = () => {
+    return (
+      typeof window !== "undefined" &&
+      window.matchMedia("(hover: hover) and (pointer: fine)").matches &&
+      window.innerWidth > 991
+    );
+  };
+
+  // Compute mobile dock width for elegant pill appearance
+  const updateMobileDockWidth = useCallback(() => {
+    const nav = navRef.current;
+    const list = listRef.current;
+    if (!nav || !list) return;
+
+    if (window.innerWidth > 991) {
+      nav.style.removeProperty("--nav-dock-width");
+      return;
+    }
+    if (nav.getAttribute("data-nav-dropdown") === "open") return;
+
+    const items = Array.from(list.children).filter((c) => c.tagName === "LI") as HTMLElement[];
+    if (!items.length) return;
+
+    const gap = Number.parseFloat(getComputedStyle(list).columnGap) || 0;
+    const widths = items.map((li) => ((li.firstElementChild as HTMLElement) || li).getBoundingClientRect().width);
+    const validCount = widths.filter((w) => w > 0).length;
+    const sum = widths.reduce((a, b) => a + b, 0) + gap * Math.max(0, validCount - 1);
+    if (!sum) return;
+
+    const pad = Number.parseFloat(getComputedStyle(nav).fontSize) || 14;
+    nav.style.setProperty("--nav-dock-width", `${Math.ceil(sum + pad * 1.5)}px`);
+  }, []);
+
+  useEffect(() => {
+    updateMobileDockWidth();
+    window.addEventListener("resize", updateMobileDockWidth);
+    return () => window.removeEventListener("resize", updateMobileDockWidth);
+  }, [updateMobileDockWidth]);
 
   // Focus trap / escape key listener
   useEffect(() => {
@@ -104,16 +146,16 @@ export default function A24Nav({ currentSection = "/discografia", theme = "dark"
     if (dropdownOpen) {
       setLabelMode("count");
       requestAnimationFrame(updateScrollbar);
-      // Lock scroll while dropdown is open
       document.documentElement.style.overflow = "hidden";
     } else {
       setLabelMode("word");
       document.documentElement.style.overflow = "";
+      updateMobileDockWidth();
     }
     return () => {
       document.documentElement.style.overflow = "";
     };
-  }, [dropdownOpen, updateScrollbar]);
+  }, [dropdownOpen, updateScrollbar, updateMobileDockWidth]);
 
   // Animate word <-> count morph
   useEffect(() => {
@@ -197,6 +239,40 @@ export default function A24Nav({ currentSection = "/discografia", theme = "dark"
     } catch (_) {}
   };
 
+  const handleNavMouseEnter = () => {
+    if (hoverTimerRef.current) {
+      clearTimeout(hoverTimerRef.current);
+      hoverTimerRef.current = null;
+    }
+    if (canHover()) {
+      lastHoverOpenTimeRef.current = Date.now();
+      setDropdownOpen(true);
+    }
+  };
+
+  const handleNavMouseLeave = () => {
+    if (canHover()) {
+      hoverTimerRef.current = setTimeout(() => {
+        setDropdownOpen(false);
+      }, 200);
+    }
+  };
+
+  const handleToggleClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (hoverTimerRef.current) {
+      clearTimeout(hoverTimerRef.current);
+      hoverTimerRef.current = null;
+    }
+    const justHovered = Date.now() - lastHoverOpenTimeRef.current < 500;
+    if (justHovered) {
+      setDropdownOpen(true);
+    } else {
+      setDropdownOpen((prev) => !prev);
+    }
+  };
+
   return (
     <nav
       ref={navRef}
@@ -211,9 +287,9 @@ export default function A24Nav({ currentSection = "/discografia", theme = "dark"
         <div className="nav-bg" />
         <div className="nav-inner">
           <div className="nav-center">
-            <ul className="nav-center__list">
+            <ul ref={listRef} className="nav-center__list">
               <li>
-                <Link href="/start" className="nav-logo" aria-label="Miquel Gil Inici">
+                <Link href="/start/" className="nav-logo" aria-label="Miquel Gil Inici">
                   <img
                     src="/images/logo-W.png"
                     alt="Miquel Gil"
@@ -221,7 +297,10 @@ export default function A24Nav({ currentSection = "/discografia", theme = "dark"
                   />
                 </Link>
               </li>
-              <li>
+              <li
+                onMouseEnter={handleNavMouseEnter}
+                onMouseLeave={handleNavMouseLeave}
+              >
                 <button
                   ref={toggleBtnRef}
                   type="button"
@@ -231,18 +310,9 @@ export default function A24Nav({ currentSection = "/discografia", theme = "dark"
                   aria-haspopup="true"
                   aria-controls="nav-index-dropdown"
                   id="nav-dropdown-toggle-btn"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    setDropdownOpen((prev) => !prev);
-                  }}
+                  onClick={handleToggleClick}
                   onPointerDown={(e) => {
                     e.stopPropagation();
-                  }}
-                  onMouseEnter={() => {
-                    if (window.matchMedia("(hover: hover) and (pointer: fine)").matches && window.innerWidth > 991) {
-                      setDropdownOpen(true);
-                    }
                   }}
                 >
                   <span className="nav-link__label" data-nav-label="">
@@ -279,11 +349,6 @@ export default function A24Nav({ currentSection = "/discografia", theme = "dark"
                   className="nav-dropdown"
                   id="nav-index-dropdown"
                   aria-hidden={!dropdownOpen}
-                  onMouseLeave={() => {
-                    if (window.matchMedia("(hover: hover) and (pointer: fine)").matches && window.innerWidth > 991) {
-                      setDropdownOpen(false);
-                    }
-                  }}
                 >
                   <div className="nav-dropdown__overflow">
                     <div className="nav-dropdown__overflow-inner">
@@ -294,7 +359,9 @@ export default function A24Nav({ currentSection = "/discografia", theme = "dark"
                       >
                         <div role="list" className="nav-dropdown__content-li">
                           {NAV_SECTIONS.map((sec) => {
-                            const isCurrent = currentSection === sec.url || (sec.url === "/discografia" && currentSection.startsWith("/discografia"));
+                            const isCurrent =
+                              currentSection === sec.url ||
+                              (sec.url.startsWith("/discografia") && currentSection.startsWith("/discografia"));
                             return (
                               <div key={sec.url} role="listitem" className="w-dyn-item">
                                 <Link
