@@ -36,7 +36,7 @@ interface CheckpointData {
   side: "left" | "right";
 }
 
-// 18 passos enriquits al llarg del Railway (coordenades exactes amb els 18 vèrtexs de la corba SVG d'altura 9400)
+// 18 passos al llarg del Railway on a cada vèrtex els elements (imatges a una banda, textos a l'altra) apareixen de forma orgànica pels dos laterals
 const CHECKPOINTS: CheckpointData[] = [
   {
     id: "step-01-1956",
@@ -70,7 +70,7 @@ const CHECKPOINTS: CheckpointData[] = [
     extendedNote: "Torrent li proposa sumar la seua jove i potent veu a un projecte que buscava dignificar la música tradicional valenciana i portar-la al segle XX amb consciència crítica.",
     media: "/images/trobada-vicent-torrent.png",
     mediaCaption: "Trobada fundacional amb Vicent Torrent (h. 1971)",
-    tags: ["Prada de Conflent", "Vicent Torrent", "Nova Cançó", "Genesi"],
+    tags: ["Prada de Conflent", "Vicent Torrent", "Nova Cançó", "Gènesi"],
     progress: 0.0778,
     pinX: "73%",
     pinY: "9.57%",
@@ -492,7 +492,6 @@ export default function ScrollPathJourney() {
           progressText.textContent = `${Math.round(p * 100)}%`;
         }
 
-        // Actualitzar l'etapa activa segons l'avanç del punter en el railway
         if (p < 0.21) {
           setActiveStageId("comencar-comencant");
         } else if (p < 0.28) {
@@ -509,9 +508,9 @@ export default function ScrollPathJourney() {
 
         checkpointElements.forEach((cp) => {
           const targetP = parseFloat(cp.dataset.progress || "0");
-          const isActive = Math.abs(p - targetP) < 0.036;
-          // Es revela lateralment quan el punter s'acosta o ja ha passat per la fita
-          const isRevealed = p >= targetP - 0.045;
+          const isActive = Math.abs(p - targetP) < 0.038;
+          // Es revela quan el punter s'acosta a la coordenada de la fita
+          const isRevealed = p >= targetP - 0.048;
           const isPassed = p >= targetP - 0.01;
           cp.classList.toggle("is-active", isActive);
           cp.classList.toggle("is-revealed", isRevealed);
@@ -615,26 +614,26 @@ export default function ScrollPathJourney() {
         </div>
         <div className="journey-head__intro">
           <p className="journey-lede">
-            De la fundació d&apos;Al Tall el 1975 a la revolució d&apos;<em>Orgànic</em>, l&apos;èxit europeu de <em>Katà</em> i l&apos;estrena de <em>Viatger</em>: a mesura que baixes pel recorregut, el punter guia desplega pels laterals les imatges d&apos;arxiu, la història de cada etapa i les 18 fites capitals.
+            De la fundació d&apos;Al Tall el 1975 a la revolució d&apos;<em>Orgànic</em>, l&apos;èxit europeu de <em>Katà</em> i l&apos;estrena de <em>Viatger</em>: a mesura que el punter baixa per la guia central, les imatges i els textos de cada fita apareixen de forma oberta pels dos laterals.
           </p>
           <p className="journey-prompt">
             <span className="journey-prompt__dot" aria-hidden="true"></span>
             <strong>FES SCROLL PER BAIXAR PEL RECORREGUT (18 PASSOS INTERACTIUS)</strong>
-            <span>O SELECCIONA UNA ETAPA PER SALTAR-HI I OBRIR EL DOSSIER COMPLET</span>
+            <span>O SELECCIONA UNA ETAPA PER SALTAR-HI I LLEGIR EL DOSSIER COMPLET</span>
           </p>
         </div>
       </header>
 
       <div className="divider-horizontal" />
 
-      {/* Navegador de les 5 Grans Etapes amb descripció i valor afegit */}
-      <div className="journey-stages-index">
+      {/* Índex de les 5 Grans Etapes com a línia editorial oberta (sense caixes tancades) */}
+      <div className="journey-stages-index" role="tablist" aria-label="Les 5 etapes">
         {BIO_SECTIONS.map((sec) => {
           const isCurrent = activeStageId === sec.id;
           return (
             <div
               key={sec.id}
-              className={`journey-stage-card ${isCurrent ? "is-active" : ""}`}
+              className={`journey-stage-item ${isCurrent ? "is-active" : ""}`}
               onClick={() => handleStageTabClick(sec)}
               role="button"
               tabIndex={0}
@@ -645,21 +644,21 @@ export default function ScrollPathJourney() {
                 }
               }}
             >
-              <div className="journey-stage-card__top">
-                <span className="journey-stage-card__num">ETAPA {sec.num}</span>
-                <span className="journey-stage-card__period">{sec.period}</span>
+              <div className="journey-stage-item__top">
+                <span className="journey-stage-item__num">ETAPA {sec.num}</span>
+                <span className="journey-stage-item__period">{sec.period}</span>
               </div>
-              <h3 className="journey-stage-card__title">{sec.title}</h3>
-              <p className="journey-stage-card__sub">{sec.subtitle}</p>
-              <p className="journey-stage-card__summary">{sec.summary}</p>
-              <div className="journey-stage-card__actions">
-                <span className="journey-stage-card__goto">ANAR AL PUNT DE LA GUIA ↓</span>
+              <h3 className="journey-stage-item__title">{sec.title}</h3>
+              <p className="journey-stage-item__sub">{sec.subtitle}</p>
+              <p className="journey-stage-item__summary">{sec.summary}</p>
+              <div className="journey-stage-item__actions">
+                <span className="journey-stage-item__goto">BAIXAR AL PAS ↓</span>
                 <button
                   type="button"
-                  className="journey-stage-card__read"
+                  className="journey-stage-item__read"
                   onClick={(e) => openStageModal(sec.id, e)}
                 >
-                  DOSSIER DE L&apos;ETAPA ↗
+                  DOSSIER ↗
                 </button>
               </div>
             </div>
@@ -669,7 +668,7 @@ export default function ScrollPathJourney() {
 
       <div className="divider-horizontal" />
 
-      {/* Escenari del Railway amb Punter Guia i 18 Passos Laterals */}
+      {/* Escenari del Railway amb Punter Guia i Elements Laterals Oberts (NO cards) */}
       <div className="journey-stage">
         {/* Ruta Sinuosa Desktop SVG (18 passos / 9400px viewBox) */}
         <svg
@@ -708,121 +707,133 @@ export default function ScrollPathJourney() {
           <span className="journey-marker__nose"></span>
         </span>
 
-        {/* Llista dels 18 Passos Laterals que apareixen amb l'avanç del Railway */}
+        {/* 18 Passos Oberts sobre el llenç: a cada parada del Railway la imatge i el text apareixen pels laterals */}
         <ol className="checkpoint-list">
           {CHECKPOINTS.map((cp) => {
             const isNoteExpanded = !!expandedStepIds[cp.id];
             return (
-              <li key={cp.id}>
-                <div
-                  role="button"
-                  tabIndex={0}
-                  className={`checkpoint checkpoint--${cp.side} ${
-                    cp.isMajorStage ? "checkpoint--stage" : ""
-                  }`}
-                  data-journey-checkpoint
-                  data-progress={cp.progress}
+              <li
+                key={cp.id}
+                className={`checkpoint-row checkpoint-row--${cp.side} ${
+                  cp.isMajorStage ? "checkpoint-row--major" : ""
+                }`}
+                data-journey-checkpoint
+                data-progress={cp.progress}
+                style={
+                  {
+                    "--pin-x": cp.pinX,
+                    "--pin-y": cp.pinY,
+                    "--pin-x-m": "44px",
+                    "--pin-y-m": cp.pinY,
+                  } as React.CSSProperties
+                }
+              >
+                {/* Punt de connexió sobre la guia del Railway */}
+                <button
+                  type="button"
+                  className="checkpoint-pin"
                   onClick={() => jumpToProgress(cp.progress)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" || e.key === " ") {
-                      e.preventDefault();
-                      jumpToProgress(cp.progress);
-                    }
-                  }}
-                  style={
-                    {
-                      "--pin-x": cp.pinX,
-                      "--pin-y": cp.pinY,
-                      "--pin-x-m": "44px",
-                      "--pin-y-m": cp.pinY,
-                    } as React.CSSProperties
-                  }
+                  aria-label={`Saltar a ${cp.year}: ${cp.title}`}
                 >
-                  {/* Pin sobre la guia i braç connector */}
-                  <span className="checkpoint-pin" aria-hidden="true"></span>
+                  <span className="checkpoint-pin__line" aria-hidden="true" />
+                </button>
 
-                  {/* Targeta editorial que entra des del lateral */}
-                  <div className="checkpoint-card-inner">
-                    <span className="checkpoint-media">
-                      <img
-                        src={cp.media}
-                        alt={cp.title}
-                        width={460}
-                        height={290}
-                        loading="lazy"
-                        decoding="async"
-                      />
-                      <span className="checkpoint-step-badge">PAS {cp.stepNum}</span>
-                      {cp.isMajorStage && (
-                        <span className="checkpoint-stage-pill">
-                          CAPÍTOL CLAU · ETAPA {cp.stageNum}
-                        </span>
+                {/* ELEMENT VISUAL FLOTANT (Apareix des del lateral corresponent) */}
+                <figure
+                  className="checkpoint-visual"
+                  onClick={() => jumpToProgress(cp.progress)}
+                >
+                  <div className="checkpoint-visual__img-wrap">
+                    <img
+                      src={cp.media}
+                      alt={cp.title}
+                      width={520}
+                      height={340}
+                      loading="lazy"
+                      decoding="async"
+                    />
+                  </div>
+                  <figcaption className="checkpoint-visual__caption">
+                    <span>{cp.mediaCaption}</span>
+                    <span>PAS {cp.stepNum}</span>
+                  </figcaption>
+                </figure>
+
+                {/* ELEMENT EDITORIAL DE TEXT OBERT (Apareix des de l'altre lateral sense marc de card) */}
+                <div
+                  className="checkpoint-editorial"
+                  onClick={() => jumpToProgress(cp.progress)}
+                >
+                  <div className="checkpoint-editorial__meta">
+                    <span className="checkpoint-editorial__year">{cp.year}</span>
+                    <span className="checkpoint-editorial__badge">{cp.badge}</span>
+                  </div>
+
+                  <div className="checkpoint-editorial__mobile-media">
+                    <img
+                      src={cp.media}
+                      alt={cp.title}
+                      width={420}
+                      height={270}
+                      loading="lazy"
+                      decoding="async"
+                    />
+                  </div>
+
+                  <h3 className="checkpoint-editorial__title">{cp.title}</h3>
+                  <p className="checkpoint-editorial__subtitle">{cp.subtitle}</p>
+
+                  <div className="checkpoint-editorial__rule" />
+
+                  <p className="checkpoint-editorial__text">{cp.text}</p>
+
+                  {(isNoteExpanded || cp.isMajorStage) && (
+                    <div className="checkpoint-editorial__extended">
+                      <p className="checkpoint-editorial__extended-p">{cp.extendedNote}</p>
+                      {cp.quote && (
+                        <blockquote className="checkpoint-editorial__quote">
+                          “{cp.quote}”
+                        </blockquote>
                       )}
-                    </span>
-
-                    <div className="checkpoint-caption-bar">
-                      <span>{cp.mediaCaption}</span>
-                      <span>{cp.year}</span>
                     </div>
+                  )}
 
-                    <div className="checkpoint-copy">
-                      <span className="checkpoint-day">{cp.badge}</span>
-                      <strong className="checkpoint-title">{cp.title}</strong>
-                      <span className="checkpoint-subtitle">{cp.subtitle}</span>
-                      <span className="checkpoint-note">{cp.text}</span>
+                  <div className="checkpoint-editorial__tags">
+                    {cp.tags.map((tag) => (
+                      <span key={tag} className="checkpoint-editorial__tag">
+                        #{tag}
+                      </span>
+                    ))}
+                  </div>
 
-                      {/* Valor afegit desplegable in-place */}
-                      {(isNoteExpanded || cp.isMajorStage) && (
-                        <div className="checkpoint-extended">
-                          <p className="checkpoint-extended__p">{cp.extendedNote}</p>
-                          {cp.quote && (
-                            <blockquote className="checkpoint-quote">
-                              “{cp.quote}”
-                            </blockquote>
-                          )}
-                        </div>
-                      )}
+                  <div className="checkpoint-editorial__actions">
+                    {!cp.isMajorStage && (
+                      <button
+                        type="button"
+                        className="checkpoint-editorial__btn"
+                        onClick={(e) => toggleStepNote(cp.id, e)}
+                      >
+                        {isNoteExpanded ? "MENYS DETALL −" : "AMPLIAR HISTÒRIA +"}
+                      </button>
+                    )}
 
-                      {/* Etiquetes temàtiques de la fita */}
-                      <div className="checkpoint-tags">
-                        {cp.tags.map((tag) => (
-                          <span key={tag} className="checkpoint-tag">
-                            {tag}
-                          </span>
-                        ))}
-                      </div>
+                    <button
+                      type="button"
+                      className="checkpoint-editorial__link"
+                      onClick={(e) => openStageModal(cp.stageId, e)}
+                    >
+                      LLEGIR CAPÍTOL {cp.stageNum} COMPLET ↗
+                    </button>
 
-                      {/* Botons interactius de cada pas */}
-                      <div className="checkpoint-actions">
-                        {!cp.isMajorStage && (
-                          <button
-                            type="button"
-                            className="checkpoint-expand-btn"
-                            onClick={(e) => toggleStepNote(cp.id, e)}
-                          >
-                            {isNoteExpanded ? "MENYS DETALL −" : "MÉS CONTEXT +"}
-                          </button>
-                        )}
-
-                        <button
-                          type="button"
-                          className="checkpoint-read-btn"
-                          onClick={(e) => openStageModal(cp.stageId, e)}
-                        >
-                          <span>CRÒNICA ETAPA {cp.stageNum} ↗</span>
-                        </button>
-
-                        {cp.albumLink && (
-                          <Link
-                            href={cp.albumLink.href}
-                            className="checkpoint-album-link"
-                            onClick={(e) => e.stopPropagation()}
-                          >
-                            {cp.albumLink.label}
-                          </Link>
-                        )}
-                      </div>
-                    </div>
+                    {cp.albumLink && (
+                      <Link
+                        href={cp.albumLink.href}
+                        className="checkpoint-editorial__album"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        {cp.albumLink.label}
+                      </Link>
+                    )}
                   </div>
                 </div>
               </li>
@@ -862,7 +873,7 @@ export default function ScrollPathJourney() {
         </button>
       </div>
 
-      {/* Quadre Editorial Complet de les 18 Fites (Desplegable en tema clar) */}
+      {/* Quadre Editorial Complet de les 18 Fites */}
       {showFullArchive && (
         <div className="journey-full-ledger">
           <div className="journey-full-ledger__head">
@@ -891,7 +902,7 @@ export default function ScrollPathJourney() {
         </div>
       )}
 
-      {/* MODAL EDITORIAL A24 DE CRÒNICA COMPLETA DE L'ETAPA (FONS CLAR) */}
+      {/* MODAL EDITORIAL A24 DE CRÒNICA COMPLETA DE L'ETAPA */}
       {modalSection && (
         <div
           className="journey-modal-backdrop"
@@ -988,7 +999,6 @@ export default function ScrollPathJourney() {
                 </div>
               </div>
 
-              {/* Navegació entre les 5 etapes dins del modal */}
               <div className="journey-modal__footer">
                 {BIO_SECTIONS.map((sec) => (
                   <button

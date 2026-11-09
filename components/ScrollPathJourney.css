@@ -1,7 +1,8 @@
 /* ============================================================
-   ScrollPathJourney.css — A24 Editorial Interactive Railway Guide
-   Estil editorial sobre fons clar (#ffffff) amb aparició lateral
-   progressiva d'imatges, textos i fites a mesura que baixa el punter.
+   ScrollPathJourney.css — A24 Editorial Open Lateral Railway
+   Sense caixes ni 'cards': a mesura que es baixa pel Railway,
+   les fotografies i els textos apareixen de forma orgànica i oberta
+   pels dos laterals de la web al voltant de la guia central.
    ============================================================ */
 
 .journey-scroll {
@@ -65,14 +66,15 @@
 .journey-bar__stages-pills {
   display: flex;
   align-items: center;
-  gap: 0.35rem;
+  gap: 0.9rem;
 }
 
 .journey-bar__pill {
   background: transparent;
-  border: 0.5px solid rgba(0, 0, 0, 0.2);
-  color: rgba(0, 0, 0, 0.68);
-  padding: 0.32rem 0.65rem;
+  border: none;
+  border-bottom: 1.5px solid transparent;
+  color: rgba(0, 0, 0, 0.55);
+  padding: 0.25rem 0;
   font-family: var(--font-subtitles, 'PP Museum', serif);
   font-size: 10px;
   letter-spacing: 0.08em;
@@ -81,7 +83,7 @@
   display: inline-flex;
   align-items: center;
   gap: 0.3rem;
-  transition: all 0.25s ease;
+  transition: color 0.25s ease, border-color 0.25s ease;
 }
 
 .journey-bar__pill-name {
@@ -96,9 +98,8 @@
 
 .journey-bar__pill:hover,
 .journey-bar__pill.is-active {
-  background: #111111;
-  color: #ffffff;
-  border-color: #111111;
+  color: #111111;
+  border-bottom-color: #891a20;
 }
 
 .journey-bar__progress {
@@ -195,44 +196,36 @@
 }
 
 /* ============================================================
-   3. ÍNDEX SUPERIOR DE LES 5 GRANS ETAPES (.journey-stages-index)
+   3. ÍNDEX EDITORIAL OBERT DE LES 5 ETAPES (SENSE CARDS)
    ============================================================ */
 .journey-stages-index {
   max-width: 1320px;
   margin: 0 auto;
-  padding: 0 2rem;
+  padding: 2.25rem 2rem;
   display: grid;
   grid-template-columns: repeat(5, 1fr);
+  gap: 2.25rem;
 }
 
-.journey-stage-card {
-  border-right: 0.5px solid rgba(0, 0, 0, 0.16);
-  padding: 1.65rem 1.25rem;
-  background: #ffffff;
+.journey-stage-item {
+  background: transparent;
+  border: none;
+  border-top: 1px solid rgba(0, 0, 0, 0.16);
+  padding: 1rem 0 0 0;
   color: #111111;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  gap: 0.65rem;
+  gap: 0.45rem;
   cursor: pointer;
-  transition: background-color 0.3s ease, color 0.3s ease;
+  transition: border-color 0.3s ease, opacity 0.3s ease;
 }
 
-.journey-stage-card:first-child {
-  border-left: 0.5px solid rgba(0, 0, 0, 0.16);
+.journey-stage-item:hover,
+.journey-stage-item.is-active {
+  border-top: 2px solid #891a20;
 }
 
-.journey-stage-card:hover {
-  background: #faf9f7;
-}
-
-.journey-stage-card.is-active {
-  background: #111111;
-  color: #ffffff;
-  box-shadow: inset 0 3px 0 #891a20;
-}
-
-.journey-stage-card__top {
+.journey-stage-item__top {
   display: flex;
   justify-content: space-between;
   align-items: baseline;
@@ -244,26 +237,22 @@
   color: rgba(0, 0, 0, 0.52);
 }
 
-.journey-stage-card.is-active .journey-stage-card__top {
-  color: rgba(255, 255, 255, 0.65);
+.journey-stage-item.is-active .journey-stage-item__num {
+  color: #891a20;
 }
 
-.journey-stage-card.is-active .journey-stage-card__num {
-  color: #ff4d5a;
-}
-
-.journey-stage-card__title {
+.journey-stage-item__title {
   font-family: var(--font-titles, 'PP Eiko', serif);
   font-size: 1.25rem;
   font-weight: 500;
-  line-height: 1.05;
+  line-height: 1.06;
   letter-spacing: -0.02em;
   text-transform: uppercase;
-  color: inherit;
-  margin: 0;
+  color: #111111;
+  margin: 0.15rem 0 0 0;
 }
 
-.journey-stage-card__sub {
+.journey-stage-item__sub {
   font-family: var(--font-subtitles, 'PP Museum', serif);
   font-size: 10px;
   letter-spacing: 0.05em;
@@ -272,49 +261,32 @@
   margin: 0;
 }
 
-.journey-stage-card.is-active .journey-stage-card__sub {
-  color: rgba(255, 255, 255, 0.8);
-}
-
-.journey-stage-card__summary {
+.journey-stage-item__summary {
   font-family: var(--font-texts, 'PP Neue Montreal', sans-serif);
   font-size: 12.5px;
   line-height: 1.48;
-  color: rgba(17, 17, 17, 0.74);
-  margin: 0;
+  color: rgba(17, 17, 17, 0.72);
+  margin: 0.15rem 0 0 0;
 }
 
-.journey-stage-card.is-active .journey-stage-card__summary {
-  color: rgba(255, 255, 255, 0.78);
-}
-
-.journey-stage-card__actions {
+.journey-stage-item__actions {
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: 0.5rem;
-  padding-top: 0.75rem;
-  border-top: 0.5px solid rgba(0, 0, 0, 0.14);
+  padding-top: 0.55rem;
   margin-top: auto;
 }
 
-.journey-stage-card.is-active .journey-stage-card__actions {
-  border-top-color: rgba(255, 255, 255, 0.2);
-}
-
-.journey-stage-card__goto {
+.journey-stage-item__goto {
   font-family: var(--font-subtitles, 'PP Museum', serif);
   font-size: 9.5px;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: rgba(0, 0, 0, 0.5);
+  color: rgba(0, 0, 0, 0.48);
 }
 
-.journey-stage-card.is-active .journey-stage-card__goto {
-  color: rgba(255, 255, 255, 0.6);
-}
-
-.journey-stage-card__read {
+.journey-stage-item__read {
   background: transparent;
   border: none;
   padding: 0;
@@ -322,18 +294,14 @@
   font-size: 11px;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: inherit;
+  color: #111111;
   cursor: pointer;
   text-decoration: underline;
   text-underline-offset: 3px;
 }
 
-.journey-stage-card__read:hover {
+.journey-stage-item__read:hover {
   color: #891a20;
-}
-
-.journey-stage-card.is-active .journey-stage-card__read:hover {
-  color: #ff4d5a;
 }
 
 /* ============================================================
@@ -341,7 +309,7 @@
    ============================================================ */
 .journey-stage {
   position: relative;
-  width: min(100% - 2 * clamp(20px, 4vw, 56px), 1240px);
+  width: min(100% - 2 * clamp(20px, 3vw, 48px), 1380px);
   margin: 0 auto;
   padding-top: 2rem;
   isolation: isolate;
@@ -374,8 +342,7 @@
 
 .route-progress {
   stroke: #891a20;
-  stroke-width: 3;
-  filter: drop-shadow(0 2px 8px rgba(137, 26, 32, 0.35));
+  stroke-width: 2.75;
 }
 
 .route-motion {
@@ -389,11 +356,11 @@
   z-index: 25;
   top: 0;
   left: 0;
-  width: 22px;
-  height: 22px;
+  width: 20px;
+  height: 20px;
   border-radius: 50%;
   background: #891a20;
-  box-shadow: 0 0 0 4px #ffffff, 0 0 0 5.5px #111111, 0 6px 18px rgba(137, 26, 32, 0.55);
+  box-shadow: 0 0 0 4px #ffffff, 0 0 0 5.5px #111111, 0 6px 18px rgba(137, 26, 32, 0.45);
   will-change: transform;
   pointer-events: none;
 }
@@ -401,16 +368,18 @@
 .journey-marker__nose {
   position: absolute;
   top: 50%;
-  right: -10px;
-  width: 9px;
-  height: 10px;
+  right: -9px;
+  width: 8px;
+  height: 9px;
   background: #111111;
   clip-path: polygon(0 0, 100% 50%, 0 100%);
   transform: translateY(-50%);
 }
 
 /* ============================================================
-   5. FITES I ETAPES AMB APARICIÓ LATERAL (.checkpoint)
+   5. COMPOSICIÓ EDITORIAL OBERTA ALS LATERALS (.checkpoint-row)
+      Sense caixes ni cards: a cada vèrtex del Railway (27% o 73%),
+      la imatge apareix per un lateral i el text apareix per l'altre.
    ============================================================ */
 .checkpoint-list {
   list-style: none;
@@ -418,370 +387,404 @@
   padding: 0;
 }
 
-.checkpoint {
+.checkpoint-row {
   position: absolute;
-  z-index: 10;
-  left: var(--pin-x);
+  left: 0;
+  right: 0;
   top: var(--pin-y);
-  width: clamp(290px, 37%, 430px);
-  padding: 0;
-  border: 0;
-  background: transparent;
-  text-align: left;
-  cursor: pointer;
+  height: 0;
+  z-index: 10;
+  pointer-events: none;
 }
 
-.checkpoint--right {
-  transform: translate(var(--pin-gap, 42px), -50%);
-}
-
-.checkpoint--left {
-  transform: translate(calc(-100% - var(--pin-gap, 42px)), -50%);
-}
-
-.checkpoint:hover {
+.checkpoint-row:hover,
+.checkpoint-row.is-active {
   z-index: 20;
 }
 
-.checkpoint:focus-visible {
-  outline: 1.5px solid #111111;
-  outline-offset: 6px;
-}
-
-/* Animació d'aparició lateral a mesura que baixa el punter */
-.checkpoint-card-inner {
-  background: #ffffff;
-  border: 0.5px solid rgba(0, 0, 0, 0.22);
-  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.06);
-  transition:
-    opacity 0.65s cubic-bezier(0.16, 1, 0.3, 1),
-    transform 0.7s cubic-bezier(0.16, 1, 0.3, 1),
-    border-color 0.35s ease,
-    box-shadow 0.35s ease;
-}
-
-/* Quan el punter encara no ha arribat al pas, s'insinua desplaçat cap al lateral */
-.checkpoint--right:not(.is-revealed) .checkpoint-card-inner {
-  opacity: 0.16;
-  transform: translateX(48px) scale(0.96);
-}
-
-.checkpoint--left:not(.is-revealed) .checkpoint-card-inner {
-  opacity: 0.16;
-  transform: translateX(-48px) scale(0.96);
-}
-
-/* Quan el punter arriba o passa per la fita, entra des del lateral amb nitidesa total */
-.checkpoint.is-revealed .checkpoint-card-inner,
-.checkpoint:hover .checkpoint-card-inner {
-  opacity: 1;
-  transform: translateX(0) scale(1);
-}
-
-.checkpoint.is-active .checkpoint-card-inner {
-  border-color: #111111;
-  box-shadow: 0 22px 54px rgba(0, 0, 0, 0.14);
-}
-
-.checkpoint--stage .checkpoint-card-inner {
-  border-top: 2.5px solid #111111;
-}
-
-.checkpoint--stage.is-active .checkpoint-card-inner {
-  border-top: 2.5px solid #891a20;
-}
-
-/* Pin sobre la Guia i Línia Connectora */
+/* Pin d'ancoratge sobre el Railway */
 .checkpoint-pin {
   position: absolute;
-  top: 50%;
+  left: var(--pin-x);
+  top: 0;
   width: 14px;
   height: 14px;
+  padding: 0;
   border: 1.5px solid #111111;
   border-radius: 50%;
   background: #ffffff;
   transform: translate(-50%, -50%);
+  cursor: pointer;
+  pointer-events: auto;
   transition: background-color 0.3s ease, border-color 0.3s ease, transform 0.3s ease;
-}
-
-.checkpoint-pin::before {
-  content: '';
-  position: absolute;
-  top: 50%;
-  width: calc(var(--pin-gap, 42px) - 8px);
-  height: 0.5px;
-  background: rgba(0, 0, 0, 0.28);
-  transition: background-color 0.3s ease, transform 0.5s ease;
 }
 
 .checkpoint-pin::after {
   content: '';
   position: absolute;
-  inset: -4px;
-  border: 1.5px solid #891a20;
+  inset: -5px;
+  border: 1px solid #891a20;
   border-radius: 50%;
   opacity: 0;
   transform: scale(1);
 }
 
-.checkpoint--right .checkpoint-pin {
-  left: calc(-1 * var(--pin-gap, 42px));
-}
-
-.checkpoint--right .checkpoint-pin::before {
-  left: 100%;
-  margin-left: 4px;
-}
-
-.checkpoint--left .checkpoint-pin {
-  left: calc(100% + var(--pin-gap, 42px));
-}
-
-.checkpoint--left .checkpoint-pin::before {
-  right: 100%;
-  margin-right: 4px;
-}
-
-/* Estats Actiu i Passat del Pin */
-.checkpoint.is-passed .checkpoint-pin {
+.checkpoint-row.is-passed .checkpoint-pin {
   background: #891a20;
   border-color: #891a20;
 }
 
-.checkpoint.is-active .checkpoint-pin {
+.checkpoint-row.is-active .checkpoint-pin {
   background: #111111;
   border-color: #891a20;
   transform: translate(-50%, -50%) scale(1.35);
 }
 
-.checkpoint.is-active .checkpoint-pin::before,
-.checkpoint.is-passed .checkpoint-pin::before {
-  background: #891a20;
-}
-
-.checkpoint.is-active .checkpoint-pin::after {
+.checkpoint-row.is-active .checkpoint-pin::after {
   animation: pin-ring 1.1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 @keyframes pin-ring {
   0% { opacity: 1; transform: scale(1); }
-  100% { opacity: 0; transform: scale(3.4); }
+  100% { opacity: 0; transform: scale(3.5); }
 }
 
-/* Fotografia d'arxiu a tot color dins de la targeta lateral */
-.checkpoint-media {
-  position: relative;
-  display: block;
-  aspect-ratio: 16 / 10;
-  overflow: hidden;
-  background: #f4f4f2;
-  border-bottom: 0.5px solid rgba(0, 0, 0, 0.14);
+/* Línia fina horitzontal que surt del pin cap al text editorial */
+.checkpoint-pin__line {
+  position: absolute;
+  top: 50%;
+  width: 34px;
+  height: 0.5px;
+  background: rgba(17, 17, 17, 0.35);
+  transition: background-color 0.35s ease, width 0.5s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.checkpoint-media img {
+.checkpoint-row--right .checkpoint-pin__line {
+  left: 100%;
+  margin-left: 4px;
+}
+
+.checkpoint-row--left .checkpoint-pin__line {
+  right: 100%;
+  margin-right: 4px;
+}
+
+.checkpoint-row.is-active .checkpoint-pin__line,
+.checkpoint-row.is-passed .checkpoint-pin__line {
+  background: #891a20;
+}
+
+/* ------------------------------------------------------------
+   ELEMENT VISUAL FLOTANT (.checkpoint-visual)
+   Apareix des del marge lateral oposat al text, sense cap caixa
+   ------------------------------------------------------------ */
+.checkpoint-visual {
+  position: absolute;
+  top: 0;
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  cursor: pointer;
+  pointer-events: auto;
+  transition:
+    opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.85s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Quan el vèrtex és a l'esquerra (27%), la fotografia apareix pel lateral esquerre (0% -> 24%) */
+.checkpoint-row--right .checkpoint-visual {
+  left: 0;
+  width: 23.5%;
+  transform: translate(0, -50%);
+}
+
+/* Quan el vèrtex és a la dreta (73%), la fotografia apareix pel lateral dret (76.5% -> 100%) */
+.checkpoint-row--left .checkpoint-visual {
+  right: 0;
+  width: 23.5%;
+  transform: translate(0, -50%);
+}
+
+/* Estat abans que el punter arribi al pas: desplaçat cap a l'exterior lateral */
+.checkpoint-row--right:not(.is-revealed) .checkpoint-visual {
+  opacity: 0;
+  transform: translate(-64px, -50%);
+}
+
+.checkpoint-row--left:not(.is-revealed) .checkpoint-visual {
+  opacity: 0;
+  transform: translate(64px, -50%);
+}
+
+/* Estat quan el punter arriba: apareix des del lateral al seu lloc */
+.checkpoint-row.is-revealed .checkpoint-visual {
+  opacity: 1;
+  transform: translate(0, -50%);
+}
+
+.checkpoint-visual__img-wrap {
   width: 100%;
-  height: 100%;
+  overflow: hidden;
+  background: transparent;
+}
+
+.checkpoint-visual__img-wrap img {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 4 / 3;
   object-fit: cover;
   filter: contrast(1.03) saturate(1.04);
-  transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: transform 0.9s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.checkpoint:hover .checkpoint-media img,
-.checkpoint.is-active .checkpoint-media img {
+.checkpoint-row.is-active .checkpoint-visual__img-wrap img,
+.checkpoint-visual:hover .checkpoint-visual__img-wrap img {
   transform: scale(1.04);
 }
 
-.checkpoint-step-badge {
-  position: absolute;
-  top: 0.65rem;
-  right: 0.65rem;
-  background: rgba(255, 255, 255, 0.94);
-  border: 0.5px solid rgba(0, 0, 0, 0.25);
-  color: #111111;
-  padding: 0.22rem 0.5rem;
-  font-family: var(--font-subtitles, 'PP Museum', serif);
-  font-size: 9.5px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
-.checkpoint-stage-pill {
-  position: absolute;
-  top: 0.65rem;
-  left: 0.65rem;
-  background: #111111;
-  color: #ffffff;
-  padding: 0.24rem 0.55rem;
-  font-family: var(--font-subtitles, 'PP Museum', serif);
-  font-size: 9.5px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
-.checkpoint-caption-bar {
+.checkpoint-visual__caption {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: baseline;
   gap: 0.75rem;
-  padding: 0.45rem 1rem;
-  border-bottom: 0.5px solid rgba(0, 0, 0, 0.12);
-  background: #faf9f7;
+  padding-top: 0.5rem;
+  margin-top: 0.45rem;
+  border-top: 0.5px solid rgba(0, 0, 0, 0.22);
   font-family: var(--font-subtitles, 'PP Museum', serif);
-  font-size: 10px;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: rgba(0, 0, 0, 0.58);
-}
-
-/* Contingut Editorial i Descriptiu de cada Pas */
-.checkpoint-copy {
-  display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
-  padding: 1rem 1.15rem 1.1rem 1.15rem;
-}
-
-.checkpoint-day {
-  display: block;
-  font-family: var(--font-subtitles, 'PP Museum', serif);
-  font-size: 10px;
+  font-size: 9.5px;
+  line-height: 1.3;
   letter-spacing: 0.08em;
   text-transform: uppercase;
+  color: rgba(0, 0, 0, 0.55);
+}
+
+/* ------------------------------------------------------------
+   ELEMENT DE TEXT EDITORIAL OBERT (.checkpoint-editorial)
+   Apareix des de l'altre lateral sense marc, vora ni fons de card
+   ------------------------------------------------------------ */
+.checkpoint-editorial {
+  position: absolute;
+  top: 0;
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  cursor: pointer;
+  pointer-events: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.38rem;
+  transition:
+    opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.06s,
+    transform 0.85s cubic-bezier(0.16, 1, 0.3, 1) 0.06s;
+}
+
+/* Quan el vèrtex és a l'esquerra (27%), el bloc de text s'obre a la dreta del pin (31% -> 76%) */
+.checkpoint-row--right .checkpoint-editorial {
+  left: calc(var(--pin-x) + 44px);
+  width: min(44%, 520px);
+  text-align: left;
+  transform: translate(0, -50%);
+}
+
+/* Quan el vèrtex és a la dreta (73%), el bloc de text s'obre a l'esquerra del pin (24% -> 69%) */
+.checkpoint-row--left .checkpoint-editorial {
+  left: calc(var(--pin-x) - 44px);
+  width: min(44%, 520px);
+  text-align: left;
+  transform: translate(-100%, -50%);
+}
+
+/* Estat abans que arribi el punter: llisca des del lateral */
+.checkpoint-row--right:not(.is-revealed) .checkpoint-editorial {
+  opacity: 0;
+  transform: translate(64px, -50%);
+}
+
+.checkpoint-row--left:not(.is-revealed) .checkpoint-editorial {
+  opacity: 0;
+  transform: translate(calc(-100% - 64px), -50%);
+}
+
+/* Quan arriba el punter: es posa al seu lloc amb nitidesa */
+.checkpoint-row--right.is-revealed .checkpoint-editorial {
+  opacity: 1;
+  transform: translate(0, -50%);
+}
+
+.checkpoint-row--left.is-revealed .checkpoint-editorial {
+  opacity: 1;
+  transform: translate(-100%, -50%);
+}
+
+/* Tipografia Editorial Oberta (inspirada en l'anterior disseny editorial) */
+.checkpoint-editorial__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.75rem;
+}
+
+.checkpoint-editorial__year {
+  font-family: var(--font-titles, 'PP Eiko', serif);
+  font-size: clamp(1.85rem, 2.7vw, 2.75rem);
+  font-weight: 500;
+  line-height: 0.92;
+  letter-spacing: -0.03em;
   color: #891a20;
 }
 
-.checkpoint-title {
-  display: block;
+.checkpoint-editorial__badge {
+  font-family: var(--font-subtitles, 'PP Museum', serif);
+  font-size: 10px;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: rgba(0, 0, 0, 0.55);
+}
+
+.checkpoint-editorial__mobile-media {
+  display: none;
+}
+
+.checkpoint-editorial__title {
   font-family: var(--font-titles, 'PP Eiko', serif);
-  font-size: clamp(1.18rem, 1.5vw, 1.42rem);
+  font-size: clamp(1.35rem, 2vw, 1.95rem);
   font-weight: 500;
-  line-height: 1.08;
-  letter-spacing: -0.02em;
+  line-height: 1.04;
+  letter-spacing: -0.025em;
   text-transform: uppercase;
   color: #111111;
+  margin: 0.1rem 0 0 0;
 }
 
-.checkpoint-subtitle {
-  display: block;
+.checkpoint-editorial__subtitle {
   font-family: var(--font-subtitles, 'PP Museum', serif);
-  font-size: 10.5px;
-  letter-spacing: 0.05em;
+  font-size: 11px;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: rgba(0, 0, 0, 0.58);
+  color: rgba(0, 0, 0, 0.62);
+  margin: 0;
 }
 
-.checkpoint-note {
-  display: block;
-  margin-top: 0.25rem;
+.checkpoint-editorial__rule {
+  width: 100%;
+  height: 0.5px;
+  background: rgba(0, 0, 0, 0.22);
+  margin: 0.35rem 0;
+  transform-origin: left center;
+  transition: background-color 0.35s ease;
+}
+
+.checkpoint-row.is-active .checkpoint-editorial__rule {
+  background: #891a20;
+}
+
+.checkpoint-editorial__text {
   font-family: var(--font-texts, 'PP Neue Montreal', sans-serif);
-  font-size: 13px;
-  line-height: 1.52;
-  color: rgba(17, 17, 17, 0.84);
+  font-size: clamp(0.94rem, 1.05vw, 1.02rem);
+  line-height: 1.62;
+  color: rgba(17, 17, 17, 0.88);
+  margin: 0;
 }
 
-.checkpoint-extended {
-  margin-top: 0.4rem;
-  padding-top: 0.5rem;
-  border-top: 0.5px solid rgba(0, 0, 0, 0.12);
+.checkpoint-editorial__extended {
   display: flex;
   flex-direction: column;
   gap: 0.45rem;
+  margin-top: 0.25rem;
 }
 
-.checkpoint-extended__p {
-  margin: 0;
+.checkpoint-editorial__extended-p {
   font-family: var(--font-texts, 'PP Neue Montreal', sans-serif);
-  font-size: 12.5px;
-  line-height: 1.5;
+  font-size: 0.9rem;
+  line-height: 1.58;
   color: rgba(17, 17, 17, 0.72);
+  margin: 0;
 }
 
-.checkpoint-quote {
-  margin: 0.15rem 0 0 0;
-  padding-left: 0.7rem;
-  border-left: 1.5px solid #891a20;
+.checkpoint-editorial__quote {
+  margin: 0.2rem 0 0 0;
+  padding-left: 0.85rem;
+  border-left: 2px solid #891a20;
   font-family: var(--font-titles, 'PP Eiko', serif);
-  font-size: 13px;
-  line-height: 1.32;
+  font-size: 1.05rem;
+  line-height: 1.3;
   color: #111111;
 }
 
-.checkpoint-tags {
+.checkpoint-editorial__tags {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.3rem;
-  margin-top: 0.4rem;
+  gap: 0.65rem;
+  margin-top: 0.25rem;
 }
 
-.checkpoint-tag {
-  font-family: var(--font-subtitles, 'PP Museum', serif);
-  font-size: 9px;
-  letter-spacing: 0.07em;
-  text-transform: uppercase;
-  padding: 0.2rem 0.48rem;
-  border: 0.5px solid rgba(0, 0, 0, 0.2);
-  color: rgba(0, 0, 0, 0.68);
-  background: #faf9f7;
-}
-
-.checkpoint-actions {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.5rem;
-  margin-top: 0.55rem;
-  padding-top: 0.6rem;
-  border-top: 0.5px solid rgba(0, 0, 0, 0.14);
-}
-
-.checkpoint-expand-btn {
-  background: transparent;
-  border: 0.5px solid rgba(0, 0, 0, 0.25);
-  padding: 0.24rem 0.55rem;
+.checkpoint-editorial__tag {
   font-family: var(--font-subtitles, 'PP Museum', serif);
   font-size: 9.5px;
   letter-spacing: 0.07em;
   text-transform: uppercase;
-  color: #111111;
+  color: rgba(0, 0, 0, 0.52);
+}
+
+.checkpoint-editorial__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1.15rem;
+  margin-top: 0.35rem;
+  padding-top: 0.45rem;
+  border-top: 0.5px solid rgba(0, 0, 0, 0.14);
+}
+
+.checkpoint-editorial__btn {
+  background: transparent;
+  border: none;
+  padding: 0;
+  font-family: var(--font-subtitles, 'PP Museum', serif);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(0, 0, 0, 0.68);
   cursor: pointer;
-  transition: all 0.2s ease;
 }
 
-.checkpoint-expand-btn:hover {
-  background: #111111;
-  color: #ffffff;
+.checkpoint-editorial__btn:hover {
+  color: #111111;
 }
 
-.checkpoint-read-btn {
+.checkpoint-editorial__link {
   background: transparent;
   border: none;
   padding: 0;
   font-family: var(--font-titles, 'PP Eiko', serif);
-  font-size: 11px;
+  font-size: 11.5px;
   letter-spacing: 0.05em;
   text-transform: uppercase;
   color: #111111;
   cursor: pointer;
   text-decoration: underline;
   text-underline-offset: 3px;
-  transition: color 0.25s ease;
 }
 
-.checkpoint-read-btn:hover {
+.checkpoint-editorial__link:hover {
   color: #891a20;
 }
 
-.checkpoint-album-link {
+.checkpoint-editorial__album {
   font-family: var(--font-titles, 'PP Eiko', serif);
-  font-size: 11px;
+  font-size: 11.5px;
   letter-spacing: 0.05em;
   text-transform: uppercase;
   color: #891a20;
   text-decoration: none;
 }
 
-.checkpoint-album-link:hover {
+.checkpoint-editorial__album:hover {
   text-decoration: underline;
 }
 
@@ -941,7 +944,6 @@
 
 .journey-modal__figure {
   margin: 0;
-  border: 0.5px solid rgba(0, 0, 0, 0.18);
   overflow: hidden;
 }
 
@@ -963,9 +965,8 @@
 
 .journey-modal__quote {
   margin: 0;
-  padding: 1.25rem;
-  border: 0.5px solid rgba(0, 0, 0, 0.18);
-  background: #faf9f7;
+  padding-left: 1rem;
+  border-left: 2px solid #891a20;
   font-family: var(--font-titles, 'PP Eiko', serif);
   font-size: 1.25rem;
   line-height: 1.3;
@@ -975,7 +976,7 @@
 .journey-modal__tags {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.45rem;
+  gap: 0.65rem;
 }
 
 .journey-modal__tag {
@@ -983,9 +984,7 @@
   font-size: 10px;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  padding: 0.3rem 0.65rem;
-  border: 0.5px solid rgba(0, 0, 0, 0.22);
-  color: rgba(0, 0, 0, 0.78);
+  color: rgba(0, 0, 0, 0.68);
 }
 
 .journey-modal__text-col {
@@ -1028,13 +1027,14 @@
   grid-template-columns: repeat(5, 1fr);
   border-top: 0.5px solid rgba(0, 0, 0, 0.18);
   padding-top: 1.5rem;
-  gap: 0.5rem;
+  gap: 1.25rem;
 }
 
 .journey-modal__stage-switch {
-  background: #faf9f7;
-  border: 0.5px solid rgba(0, 0, 0, 0.18);
-  padding: 0.75rem;
+  background: transparent;
+  border: none;
+  border-top: 1.5px solid rgba(0, 0, 0, 0.18);
+  padding: 0.75rem 0 0 0;
   text-align: left;
   color: #111111;
   cursor: pointer;
@@ -1046,13 +1046,8 @@
 
 .journey-modal__stage-switch:hover,
 .journey-modal__stage-switch.is-active {
-  background: #111111;
-  color: #ffffff;
-}
-
-.journey-modal__stage-switch.is-active .subheading-xs,
-.journey-modal__stage-switch:hover .subheading-xs {
-  color: rgba(255, 255, 255, 0.65);
+  border-top-color: #891a20;
+  color: #891a20;
 }
 
 .journey-modal__stage-switch-title {
@@ -1077,10 +1072,6 @@
 }
 
 @media (max-width: 768px) {
-  :root {
-    --pin-gap: 20px;
-  }
-
   .journey-bar__stages-pills {
     display: none;
   }
@@ -1093,12 +1084,7 @@
 
   .journey-stages-index {
     grid-template-columns: 1fr;
-    padding: 0 1.25rem;
-  }
-
-  .journey-stage-card {
-    border-left: 0.5px solid rgba(0, 0, 0, 0.16);
-    border-bottom: 0.5px solid rgba(0, 0, 0, 0.16);
+    padding: 1.5rem 1.25rem;
   }
 
   .journey-map--desktop {
@@ -1109,26 +1095,41 @@
     display: block;
   }
 
-  .checkpoint,
-  .checkpoint--left,
-  .checkpoint--right {
-    left: var(--pin-x-m, 12%) !important;
-    top: var(--pin-y-m, 10%) !important;
-    width: calc(100% - 70px) !important;
-    transform: translate(22px, -50%) !important;
+  .checkpoint-pin {
+    left: 44px !important;
   }
 
-  .checkpoint--left .checkpoint-pin,
-  .checkpoint--right .checkpoint-pin {
-    left: -22px !important;
-  }
-
-  .checkpoint--left .checkpoint-pin::before,
-  .checkpoint--right .checkpoint-pin::before {
+  .checkpoint-pin__line {
     left: 100% !important;
     right: auto !important;
+    width: 16px !important;
     margin: 0 0 0 4px !important;
-    width: 14px !important;
+  }
+
+  .checkpoint-visual {
+    display: none;
+  }
+
+  .checkpoint-editorial__mobile-media {
+    display: block;
+    width: 100%;
+    max-width: 260px;
+    margin: 0.25rem 0;
+  }
+
+  .checkpoint-editorial__mobile-media img {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 16 / 10;
+    object-fit: cover;
+  }
+
+  .checkpoint-row--right .checkpoint-editorial,
+  .checkpoint-row--left .checkpoint-editorial {
+    left: 72px !important;
+    width: calc(100% - 84px) !important;
+    transform: translate(0, -50%) !important;
   }
 
   .ledger-row {
