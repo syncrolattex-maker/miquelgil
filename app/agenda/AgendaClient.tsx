@@ -17,6 +17,7 @@ import {
   updatePaperFrame,
   PaperMeshInstance,
 } from "./paperTexture";
+import { paperAudio } from "./paperAudio";
 import "./agenda.css";
 
 interface PaperTransformSnapshot {
@@ -146,9 +147,9 @@ export default function AgendaClient() {
             minZ: WALL_Z + 0.18,
             maxZ: isPortrait ? 1.52 : 1.58,
           },
-          openRatioW: 0.91,
-          openRatioH: 0.56,
-          openYShift: 0.05,
+          openRatioW: 0.96,
+          openRatioH: 0.88,
+          openYShift: 0.0,
         };
       }
 
@@ -165,8 +166,8 @@ export default function AgendaClient() {
           minZ: WALL_Z + 0.15,
           maxZ: 1.65,
         },
-        openRatioW: 0.84,
-        openRatioH: 0.82,
+        openRatioW: 0.95,
+        openRatioH: 0.93,
         openYShift: 0.0,
       };
     }
@@ -248,7 +249,7 @@ export default function AgendaClient() {
     composer.addPass(new OutputPass());
 
     // 5. Physics Constants & World
-    const OPEN_DISTANCE = 1.5;
+    const OPEN_DISTANCE = 1.34;
     const CLOSED_SCALE = profile.isMobile ? 0.78 : 0.82;
     const OPEN_DURATION = 1.1;
     const DISCARD_DURATION = 1.2;
@@ -563,6 +564,7 @@ export default function AgendaClient() {
     }
 
     function startOpen(paper: PaperEntity) {
+      paperAudio.playUnfold();
       setPaperBodyDynamic(paper, false);
       syncMeshToBody(paper);
       paper.state = "opening";
@@ -581,6 +583,8 @@ export default function AgendaClient() {
 
     function startDiscard(paper: PaperEntity) {
       if (paper.state === "discarding" || paper.state === "rolling") return;
+
+      paperAudio.playCrumple();
 
       const dir = new THREE.Vector3(
         randomRange(-0.85, 0.85),
@@ -1064,19 +1068,8 @@ export default function AgendaClient() {
       {/* CAPÇALERA EDITORIAL DISCRETA A24 */}
       <header className="agenda-crumble-hud-top">
         <div className="agenda-crumble-hud-top__left">
-          <span className="agenda-crumble-kicker">
-            MIQUEL GIL · AGENDA INTERACTIVA DE DIRECTES (2026 — 2027)
-          </span>
-          <h1 className="agenda-crumble-title">DIRECTES</h1>
-        </div>
-
-        <div className="agenda-crumble-hud-top__right">
-          <span className="agenda-crumble-instruction agenda-crumble-instruction--desktop">
-            CLICA UNA BOLA DE PAPER PER DESPLEGAR EL CONCERT · ARROSSEGA PER LLANÇAR
-          </span>
-          <span className="agenda-crumble-instruction agenda-crumble-instruction--mobile">
-            TOCA UNA BOLA O UNA DATA INFERIOR PER DESPLEGAR · ARROSSEGA PER LLANÇAR
-          </span>
+          <h1 className="agenda-crumble-title">Directes</h1>
+          <span className="agenda-crumble-subtitle">Agenda de directes 2026/27</span>
         </div>
       </header>
 
