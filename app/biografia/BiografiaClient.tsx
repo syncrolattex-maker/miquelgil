@@ -1,12 +1,17 @@
 "use client";
 
-import React, { useRef } from "react";
-import ExpandingStrip from "@/components/ExpandingStrip";
-import RectangleTextReveal from "@/components/RectangleTextReveal";
-import TighteningWordLines from "@/components/TighteningWordLines";
-import ScrollPathJourney from "@/components/ScrollPathJourney";
+import React, { useEffect, useRef, useState } from "react";
+import Link from "next/link";
+import gsap from "gsap";
+import A24Nav from "@/components/A24Nav";
 import { BIO_SECTIONS } from "./bioData";
-import { siteKeyMessage } from "@/lib/site";
+import {
+  siteKeyMessage,
+  biographyIntro,
+  chronologyFites,
+  liveFormats,
+} from "@/lib/site";
+import { initDissolve } from "../discografia/[slug]/dissolveEngine";
 import "./biografia.css";
 
 const FEATURED_VENUES = [
@@ -20,25 +25,25 @@ const FEATURED_VENUES = [
     name: "Teatre Principal",
     city: "València",
     territory: "País Valencià",
-    type: "Teatre Històric · Estrena de Viatger",
+    type: "Teatre Històric · Estrena de Viatger (2024)",
   },
   {
     name: "Barnasants",
     city: "Barcelona",
     territory: "Catalunya",
-    type: "Festival de Cançó d'Autor",
+    type: "Festival Internacional de Cançó d'Autor",
   },
   {
     name: "Tradicionàrius (C.A.T.)",
     city: "Barcelona",
     territory: "Catalunya",
-    type: "Festival Folk Internacional",
+    type: "Festival Folk & Arrel Mediterrània",
   },
   {
     name: "Festival Strenes",
     city: "Girona",
     territory: "Catalunya",
-    type: "Festival de Grans Estrenes",
+    type: "Cicle d'Estrenes i Creació Contemporània",
   },
   {
     name: "Fira Mediterrània",
@@ -56,116 +61,767 @@ const FEATURED_VENUES = [
     name: "FIL de Guadalajara",
     city: "Guadalajara",
     territory: "Mèxic",
-    type: "Institut Ramon Llull & Projecció Americana",
+    type: "Fira Internacional & Projecció Americana",
+  },
+];
+
+const ARTISTIC_PILLARS = [
+  {
+    num: "01",
+    title: "Tradició Oral Mediterrània",
+    desc: "Jotes, albaes, cants de batre, fandangos i romanços apresos des de l'escola fundacional d'Al Tall i projectats cap al segle XXI.",
+  },
+  {
+    num: "02",
+    title: "Experimentació i Fusió Sonora",
+    desc: "Pioner amb Terminal Sur en l'ús de sintetitzadors, samplers i loops combinats amb llaüts, bouzoukis, guitarrons i percussions d'arrel.",
+  },
+  {
+    num: "03",
+    title: "Poesia Contemporània",
+    desc: "Musicalització de grans veus líriques com Vicent Andrés Estellés, Enric Casasses, Ramon Guillem, Teresa Pasqual, Imma Màñez i Mario Benedetti.",
+  },
+  {
+    num: "04",
+    title: "Projecció Internacional",
+    desc: "Presència destacada a la World Music Charts Europe (Top 5 amb Katà), Premis Ovidi Montllor i gires per Europa, el Magrib i Amèrica.",
   },
 ];
 
 export default function BiografiaClient() {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const heroRef = useRef<HTMLElement>(null);
+  const chaptersRef = useRef<HTMLElement>(null);
   const chronoRef = useRef<HTMLElement>(null);
+  const [activeChapterId, setActiveChapterId] = useState<string>(BIO_SECTIONS[0].id);
 
-  const scrollToChronology = () => {
-    chronoRef.current?.scrollIntoView({ behavior: "smooth" });
+  // ============================================================================
+  // 1. ANIMACIÓ D'ENTRADA EN CORTINA SINCRONITZADA (DE DALT A BAIX)
+  // ============================================================================
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: "instant" as ScrollBehavior });
+
+    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const heroInfo = heroRef.current?.querySelector<HTMLElement>(".bio-hero__info");
+    const heroTitle = heroInfo?.querySelector<HTMLElement>(".bio-hero__title");
+    const heroCredits = heroInfo?.querySelector<HTMLElement>(".bio-hero__credits");
+    const heroMetaItems = heroInfo?.querySelectorAll<HTMLElement>(".bio-metadata__item");
+    const heroDividers = heroInfo?.querySelectorAll<HTMLElement>(".divider-horizontal");
+    const ctaWrap = heroRef.current?.querySelector<HTMLElement>(".bio-hero__cta-wrap");
+    const ctaDividers = ctaWrap?.querySelectorAll<HTMLElement>(":scope > .divider-horizontal");
+    const ctaCrosses = ctaWrap?.querySelectorAll<HTMLElement>(".plus");
+    const buttons = heroRef.current?.querySelectorAll<HTMLElement>('[data-reveal="btn"]');
+
+    if (prefersReducedMotion) {
+      if (buttons) {
+        buttons.forEach((btn) => {
+          const dividers = btn.querySelectorAll<HTMLElement>(".btn__divider");
+          const text = btn.querySelector<HTMLElement>(".btn__p");
+          gsap.set(dividers, { scaleX: 1 });
+          if (text) gsap.set(text, { yPercent: 0 });
+        });
+      }
+      return;
+    }
+
+    const entranceTl = gsap.timeline({ defaults: { ease: "power3.out" } });
+
+    // 1. Títol emergeix de baix cap a dalt
+    if (heroTitle) {
+      entranceTl.fromTo(
+        heroTitle,
+        { opacity: 0, y: 35 },
+        { opacity: 1, y: 0, duration: 0.85 },
+        0.05
+      );
+    }
+
+    // 2. Primera línia horitzontal es desplega d'esquerra a dreta
+    if (heroDividers && heroDividers[0]) {
+      entranceTl.fromTo(
+        heroDividers[0],
+        { scaleX: 0, transformOrigin: "left center" },
+        { scaleX: 1, duration: 0.75 },
+        0.25
+      );
+    }
+
+    // 3. Subtítols i crèdits emergeixen de baix cap a dalt
+    if (heroCredits) {
+      entranceTl.fromTo(
+        heroCredits,
+        { opacity: 0, y: 25 },
+        { opacity: 1, y: 0, duration: 0.7 },
+        0.45
+      );
+    }
+
+    // 4. Segona línia horitzontal es desplega d'esquerra a dreta
+    if (heroDividers && heroDividers[1]) {
+      entranceTl.fromTo(
+        heroDividers[1],
+        { scaleX: 0, transformOrigin: "left center" },
+        { scaleX: 1, duration: 0.75 },
+        0.65
+      );
+    }
+
+    // 5. Metadades tabulars en cascada de baix cap a dalt
+    if (heroMetaItems && heroMetaItems.length) {
+      entranceTl.fromTo(
+        heroMetaItems,
+        { opacity: 0, y: 20 },
+        { opacity: 1, y: 0, duration: 0.65, stagger: 0.08 },
+        0.8
+      );
+    }
+
+    // 6. Línies de tancament dels CTAs i creus vectorials
+    if (ctaDividers && ctaDividers.length) {
+      entranceTl.fromTo(
+        ctaDividers,
+        { scaleX: 0, transformOrigin: "left center" },
+        { scaleX: 1, duration: 0.75, stagger: 0.1 },
+        1.0
+      );
+    }
+
+    if (ctaCrosses && ctaCrosses.length) {
+      entranceTl.fromTo(
+        ctaCrosses,
+        { opacity: 0, scale: 0.5 },
+        { opacity: 1, scale: 1, duration: 0.5, stagger: 0.05 },
+        1.05
+      );
+    }
+
+    // 7. Botons d'acció A24
+    if (buttons && buttons.length) {
+      const ctaStart = 1.15;
+      const btnStagger = 0.09;
+      const duration = 0.7;
+      const textDelay = 0.04;
+
+      buttons.forEach((btn, idx) => {
+        const startTime = ctaStart + idx * btnStagger;
+        const dividers = btn.querySelectorAll<HTMLElement>(".btn__divider");
+        const text = btn.querySelector<HTMLElement>(".btn__p");
+
+        gsap.set(dividers, { scaleX: 0, transformOrigin: "left center" });
+        if (text) gsap.set(text, { yPercent: 120 });
+
+        gsap.to(dividers, {
+          scaleX: 1,
+          duration,
+          ease: "power3.out",
+          delay: startTime,
+          overwrite: "auto",
+        });
+
+        if (text) {
+          gsap.to(text, {
+            yPercent: 0,
+            duration,
+            ease: "power3.out",
+            delay: startTime + textDelay,
+            overwrite: "auto",
+          });
+        }
+      });
+    }
+  }, []);
+
+  // ============================================================================
+  // 2. MOTOR DE DISSOLUCIÓ LÍQUIDA A24 (MARCHING SQUARES)
+  // ============================================================================
+  useEffect(() => {
+    if (!containerRef.current) return;
+    initDissolve(containerRef.current);
+  }, []);
+
+  const scrollToElement = (id: string) => {
+    setActiveChapterId(id);
+    const el = document.getElementById(id);
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
   };
 
+  const scrollToChapters = () => {
+    chaptersRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
+  const scrollToChrono = () => {
+    chronoRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
+  const bioParagraphs = siteKeyMessage.shortBio250.split("\n\n");
+
   return (
-    <main className="bio-page">
-      {/* 1. HERO HEADER */}
-      <div className="bio-container">
-        <header className="biografia-hero">
-          <RectangleTextReveal
-            lines={[
-              "Miquel Gil:",
-              "el cantador que no deixa d'explorar."
-            ]}
-            color="#FF0000"
-            direction="left"
-            tag="h1"
-            lineClassName="biografia-hero__title"
-            immediate
-            duration={0.9}
-          />
+    <div ref={containerRef} className="bio-a24-page" data-bio-hero-init="true">
+      {/* MENÚ DE NAVEGACIÓ A24 INTEGRAT */}
+      <A24Nav currentSection="/biografia/" theme="dark" />
 
-          <RectangleTextReveal
-            lines={[
-              `${siteKeyMessage.tagline}.`,
-              "Des de la fundació d'Al Tall el 1975 fins a l'estrena de Viatger (2024),",
-              "mig segle d'arrel valenciana, poesia contemporània i exploració sonora sense repetir mai fórmules."
-            ]}
-            color="#222222"
-            direction="left"
-            tag="p"
-            lineClassName="biografia-hero__lead"
-            immediate
-            delay={0.25}
-            duration={0.8}
-          />
-        </header>
-      </div>
-
-      {/* 2. SECCIÓ EXPANDING STRIP (100% FULLWIDTH EDGE-TO-EDGE) */}
-      <section className="bio-strip-fullwidth" aria-label="Les cinc grans etapes biogràfiques">
-        <div className="bio-strip-fullwidth__header">
-          <RectangleTextReveal
-            lines={["CINC POSICIONS, UNA VIDA DE MÚSICA"]}
-            color="#FF0000"
-            direction="left"
-            tag="h2"
-            lineClassName="bio-strip-header__title"
-          />
-          <span className="bio-strip-header__desc">
-            Explora les cinc etapes capitals de Miquel Gil passant el cursor o seleccionant cada panell.
-          </span>
-        </div>
-
-        <div className="bio-strip-fullwidth__strip-wrap">
-          <ExpandingStrip
-            sections={BIO_SECTIONS}
-            initialIndex={0}
-            onOpenChronology={scrollToChronology}
-          />
-        </div>
-      </section>
-
-      {/* 3. SÍNTESI EDITORIAL: TIGHTENING WORD LINES (MadeWithGSAP Tutorial 097) */}
-      <TighteningWordLines />
-
-      {/* 4. CRONOLOGIA HISTÒRICA: SCROLL PATH JOURNEY (GSAP Vault Storytelling) */}
-      <div ref={chronoRef as React.RefObject<HTMLDivElement>}>
-        <ScrollPathJourney />
-      </div>
-
-      {/* 5. RESTA DE CONTINGUTS (Dins del contenidor centrat) */}
-      <div className="bio-container">
-        {/* ESCENARIS I FESTIVALS DESTACATS (REDISEÑAT) */}
-        <section className="bio-venues-section" aria-label="Escenaris i festivals internacionals">
-          <div className="bio-venues__header">
-            <span className="bio-venues__kicker">Circuits & Directes</span>
-            <RectangleTextReveal
-              lines={["PRINCIPALS ESCENARIS I FESTIVALS INTERNACIONALS"]}
-              color="#FF0000"
-              direction="left"
-              tag="h2"
-              lineClassName="bio-venues__title"
-            />
-            <p className="bio-venues__subtitle">
-              De les grans sales simfòniques i teatres emblemàtics del país a referents internacionals de la world music a Europa i Amèrica.
-            </p>
-          </div>
-
-          <div className="bio-venues__grid">
-            {FEATURED_VENUES.map((item) => (
-              <div key={item.name} className="bio-venue-card">
-                <div className="bio-venue-card__top">
-                  <span className="bio-venue-card__territory">{item.territory}</span>
-                  <span className="bio-venue-card__city">{item.city}</span>
-                </div>
-                <h3 className="bio-venue-card__name">{item.name}</h3>
-                <span className="bio-venue-card__type">{item.type}</span>
+      {/* ============================================================
+          1 & 2. TRACK DE REVELACIÓ AMB SEPARADOR LÍQUID A24
+         ============================================================ */}
+      <div data-dissolve-track="" className="reveal-track">
+        {/* 1. HERO BIOGRÀFIC (CORTINA BLANCA SUPERIOR) */}
+        <section id="bio_hero" ref={heroRef} data-dissolve="" className="bio-hero">
+          <div className="bio-hero__content">
+            <div className="bio-hero__info">
+              {/* TÍTOL MONUMENTAL EN MAJÚSCULES AMB PP EIKO */}
+              <div className="bio-hero__title">
+                <span className="subheading-xs block mb-2">
+                  ARXIU BIOGRÀFIC OFICIAL — 1973 · 2026
+                </span>
+                <h1 className="heading-l">MIQUEL GIL</h1>
               </div>
-            ))}
+
+              {/* LÍNIA SEPARADORA 1 (100VW) */}
+              <div className="divider-horizontal my-4" />
+
+              {/* CRÈDITS I DEFINICIÓ ARTÍSTICA */}
+              <div className="bio-hero__credits">
+                <span className="subheading-xs">ORIGEN</span>
+                <span className="paragraph-m font-medium">Catarroja (Horta Sud, València)</span>
+
+                <span className="subheading-xs ml-4">FUNDACIÓ</span>
+                <span className="paragraph-m font-medium">Al Tall (1975) · Terminal Sur (1988)</span>
+
+                <span className="subheading-xs ml-4"> IDENTITAT</span>
+                <span className="paragraph-m font-medium">
+                  Cantador contemporani, compositor i productor
+                </span>
+
+                <span className="subheading-xs ml-4">PREMIS</span>
+                <span className="paragraph-m font-medium">
+                  World Music Charts Europe · Premis Ovidi Montllor
+                </span>
+              </div>
+
+              {/* LÍNIA SEPARADORA 2 (100VW) */}
+              <div className="divider-horizontal my-4" />
+
+              {/* METADADES TABULARS EN QUADRÍCULA */}
+              <div className="bio-hero__metadata">
+                <div className="bio-metadata__item">
+                  <span className="subheading-xs">NAIXEMENT</span>
+                  <div className="bio-metadata__content">
+                    <span className="paragraph-m font-medium">Catarroja, 1956</span>
+                    <span className="subheading-xs">Horta Sud</span>
+                  </div>
+                </div>
+
+                <div className="bio-metadata__item">
+                  <span className="subheading-xs">TRAJECTÒRIA</span>
+                  <div className="bio-metadata__content">
+                    <span className="paragraph-m font-medium">Més de 50 anys d&apos;escenaris</span>
+                    <span className="subheading-xs">1973 — 2026</span>
+                  </div>
+                </div>
+
+                <div className="bio-metadata__item">
+                  <span className="subheading-xs">OBRA ENREGISTRADA</span>
+                  <div className="bio-metadata__content">
+                    <span className="paragraph-m font-medium">23 discos propis</span>
+                    <span className="subheading-xs">+100 col·laboracions</span>
+                  </div>
+                </div>
+
+                <div className="bio-metadata__item">
+                  <span className="subheading-xs">DARRERA PRODUCCIÓ</span>
+                  <div className="bio-metadata__content">
+                    <span className="paragraph-m font-medium">Viatger (Temps Record)</span>
+                    <span className="subheading-xs">2024 — 2026</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* CONTENIDOR FULLWIDTH PER A BOTONS I CREUS VECTORIALS */}
+            <div className="bio-hero__cta-wrap">
+              <div className="divider-horizontal" style={{ position: "absolute", top: 0 }} />
+
+              <div className="plus is--tl">
+                <div className="plus-stroke is--hor" />
+                <div className="plus-stroke is--ver" />
+              </div>
+              <div className="plus is--tr">
+                <div className="plus-stroke is--hor" />
+                <div className="plus-stroke is--ver" />
+              </div>
+              <div className="plus is--bl">
+                <div className="plus-stroke is--hor" />
+                <div className="plus-stroke is--ver" />
+              </div>
+              <div className="plus is--br">
+                <div className="plus-stroke is--hor" />
+                <div className="plus-stroke is--ver" />
+              </div>
+
+              <div className="bio-hero__cta">
+                <button
+                  type="button"
+                  data-reveal="btn"
+                  onClick={scrollToChapters}
+                  className="btn a24-btn"
+                >
+                  <div className="btn__divider" />
+                  <span className="btn__p-mask">
+                    <span
+                      className="btn__p"
+                      data-hover-inner
+                      data-text="LES 5 ETAPES CAPITALS ↓"
+                    >
+                      <span>LES 5 ETAPES CAPITALS ↓</span>
+                    </span>
+                  </span>
+                  <div className="btn__divider" />
+                </button>
+
+                <button
+                  type="button"
+                  data-reveal="btn"
+                  onClick={scrollToChrono}
+                  className="btn a24-btn"
+                >
+                  <div className="btn__divider" />
+                  <span className="btn__p-mask">
+                    <span
+                      className="btn__p"
+                      data-hover-inner
+                      data-text="CRONOLOGIA 1956—2026 ↓"
+                    >
+                      <span>CRONOLOGIA 1956—2026 ↓</span>
+                    </span>
+                  </span>
+                  <div className="btn__divider" />
+                </button>
+
+                <Link
+                  href="/discografia/"
+                  data-reveal="btn"
+                  className="btn a24-btn"
+                >
+                  <div className="btn__divider" />
+                  <span className="btn__p-mask">
+                    <span
+                      className="btn__p"
+                      data-hover-inner
+                      data-text="EXPLORAR DISCOGRAFIA ↗"
+                    >
+                      <span>EXPLORAR DISCOGRAFIA ↗</span>
+                    </span>
+                  </span>
+                  <div className="btn__divider" />
+                </Link>
+              </div>
+
+              <div className="divider-horizontal" style={{ position: "absolute", bottom: 0 }} />
+            </div>
+          </div>
+        </section>
+
+        {/* 2. SECCIÓ DE RETRAT A PANTALLA COMPLETA (100VH VISIBLE SOTA LA CORTINA LÍQUIDA) */}
+        <section data-theme-change="nav:base" className="bio-portrait-bleed theme-dark">
+          <div data-dissolve-bleed="" className="bio-portrait-bleed__vh">
+            <img
+              src="/images/miquel-gil-juan-miguel-morales-14-scaled.jpg"
+              alt="Miquel Gil en directe — Fotografia de Juan Miguel Morales"
+              className="bio-portrait-bleed__bg"
+            />
+            <div className="bio-portrait-bleed__overlay" />
+
+            <div className="bio-portrait-bleed__content">
+              <span className="subheading-xs" style={{ color: "rgba(255, 255, 255, 0.7)" }}>
+                {siteKeyMessage.motto.toUpperCase()}
+              </span>
+              <blockquote className="bio-portrait-quote">
+                “Quan Miquel Gil canta és la terra mateixa que s’expressa: mig segle transformant la memòria oral mediterrània en llenguatge viu del present.”
+              </blockquote>
+              <span className="subheading-xs" style={{ color: "rgba(255, 255, 255, 0.55)" }}>
+                {siteKeyMessage.tagline}
+              </span>
+
+              <div style={{ marginTop: "1rem" }}>
+                <button
+                  type="button"
+                  onClick={scrollToChapters}
+                  className="btn a24-btn"
+                >
+                  <div className="btn__divider" />
+                  <span className="btn__p-mask">
+                    <span
+                      className="btn__p"
+                      data-hover-inner
+                      data-text="LLEGIR BIOGRAFIA COMPLETA ↓"
+                    >
+                      <span>LLEGIR BIOGRAFIA COMPLETA ↓</span>
+                    </span>
+                  </span>
+                  <div className="btn__divider" />
+                </button>
+              </div>
+            </div>
           </div>
         </section>
       </div>
-    </main>
+
+      {/* ============================================================
+          3. SÍNTESI BIOGRÀFICA I PILARS ARTÍSTICS
+         ============================================================ */}
+      <section className="bio-synthesis">
+        <div className="bio-synthesis__grid">
+          {/* Columna Esquerra: Assaig Biogràfic */}
+          <div className="bio-synthesis__left">
+            <span className="subheading-xs">01 / SÍNTESI EDITORIAL</span>
+            <p className="paragraph-xl" style={{ margin: 0 }}>
+              {biographyIntro}
+            </p>
+            <div className="bio-synthesis__essay">
+              {bioParagraphs.map((para, i) => (
+                <p key={i} className="paragraph-l" style={{ margin: 0 }}>
+                  {para}
+                </p>
+              ))}
+            </div>
+          </div>
+
+          {/* Columna Dreta: Retrat d'Arxiu i Pilars */}
+          <div className="bio-synthesis__right">
+            <div>
+              <div className="bio-portrait-card">
+                <img
+                  src="/images/miquel-gil-juan-miguel-morales-8-scaled.jpg"
+                  alt="Retrat de Miquel Gil per Juan Miguel Morales"
+                  className="bio-portrait-card__img"
+                />
+              </div>
+              <div className="bio-portrait-card__caption">
+                <span className="subheading-xs">RETRAT D&apos;ARXIU · ÈPOCA ORGÀNIC</span>
+                <span className="paragraph-m">Foto: Juan Miguel Morales</span>
+              </div>
+            </div>
+
+            <div className="bio-pillars-list">
+              <span className="subheading-xs" style={{ marginBottom: "0.5rem" }}>
+                02 / COORDENADES CREATIVES
+              </span>
+              <div className="divider-local" />
+              {ARTISTIC_PILLARS.map((pillar) => (
+                <div key={pillar.num} className="bio-pillar-item">
+                  <span className="bio-pillar-item__num">{pillar.num}</span>
+                  <div className="bio-pillar-item__body">
+                    <h3 className="bio-pillar-item__title">{pillar.title}</h3>
+                    <p className="paragraph-m" style={{ margin: 0, color: "rgba(17,17,17,0.75)" }}>
+                      {pillar.desc}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ============================================================
+          4. LES CINC GRANS ETAPES BIOGRÀFIQUES (01 — 05)
+         ============================================================ */}
+      <section ref={chaptersRef} className="bio-chapters" aria-label="Les cinc etapes biogràfiques">
+        <div className="divider-horizontal" />
+
+        <div className="bio-chapters__header">
+          <div>
+            <span className="subheading-xs block mb-2">RECORREGUT EN CINC MOVIMENTS</span>
+            <h2 className="heading-m">CINC ETAPES, UNA VIDA DE MÚSICA</h2>
+          </div>
+          <p className="paragraph-m" style={{ maxWidth: "42ch", margin: 0 }}>
+            Des de la fundació d&apos;Al Tall el 1975 fins a l&apos;estrena de Viatger (2024): cinc capítols que defineixen l&apos;evolució de la música d&apos;arrel al País Valencià i la Mediterrània.
+          </p>
+        </div>
+
+        <div className="divider-horizontal" />
+
+        {/* Navegador tabular de les 5 etapes */}
+        <div className="bio-chapters__nav" role="tablist" aria-label="Índex d'etapes">
+          {BIO_SECTIONS.map((sec) => (
+            <button
+              key={sec.id}
+              type="button"
+              onClick={() => scrollToElement(sec.id)}
+              className={`bio-chapter-tab ${activeChapterId === sec.id ? "is-active" : ""}`}
+            >
+              <span className="subheading-xs">
+                ETAPA {sec.num} · {sec.period}
+              </span>
+              <span className="bio-chapter-tab__title">{sec.title}</span>
+            </button>
+          ))}
+        </div>
+
+        <div className="divider-horizontal" />
+
+        {/* Capítols desplegats d'extrem a extrem */}
+        {BIO_SECTIONS.map((sec, index) => (
+          <React.Fragment key={sec.id}>
+            <article id={sec.id} className="bio-chapter-block">
+              <div className="bio-chapter-block__inner">
+                {/* Capçalera del capítol */}
+                <div className="bio-chapter-block__top">
+                  <span className="bio-chapter-block__num">{sec.num}</span>
+                  <div className="bio-chapter-block__headings">
+                    <span className="subheading-xs">{sec.subtitle}</span>
+                    <h3 className="heading-m">{sec.title}</h3>
+                  </div>
+                  <span className="subheading-xs" style={{ fontSize: "12px" }}>
+                    PERÍODE: {sec.period}
+                  </span>
+                </div>
+
+                <div className="divider-local" />
+
+                {/* Cos del capítol: Fotografia + Citació vs Narrativa + Fites */}
+                <div className="bio-chapter-block__body">
+                  <div className="bio-chapter-block__media-col">
+                    <figure className="bio-chapter-block__figure">
+                      <img
+                        src={sec.image}
+                        alt={sec.imageAlt}
+                        className="bio-chapter-block__img"
+                      />
+                    </figure>
+                    <div className="bio-chapter-block__figcaption">
+                      <span className="subheading-xs">{sec.imageAlt}</span>
+                      <span className="subheading-xs">{sec.period}</span>
+                    </div>
+
+                    <div className="bio-chapter-block__quote-box">
+                      <span className="subheading-xs">CITACIÓ DESTACADA</span>
+                      <blockquote className="bio-chapter-block__quote">
+                        “{sec.quote}”
+                      </blockquote>
+                    </div>
+
+                    <div className="bio-chapter-block__tags">
+                      {sec.tags.map((tag) => (
+                        <span key={tag} className="bio-tag">
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="bio-chapter-block__text-col">
+                    <div>
+                      <span className="subheading-xs block mb-2">RESUM DE L&apos;ETAPA</span>
+                      <p className="paragraph-xl" style={{ margin: 0 }}>
+                        {sec.summary}
+                      </p>
+                    </div>
+
+                    <div className="divider-local" />
+
+                    <div className="bio-chapter-block__paragraphs">
+                      {sec.paragraphs.map((p, pIdx) => (
+                        <p key={pIdx} className="paragraph-l" style={{ margin: 0 }}>
+                          {p}
+                        </p>
+                      ))}
+                    </div>
+
+                    <div className="bio-chapter-block__milestones">
+                      <span className="subheading-xs">FITES CLAU DEL PERÍODE ({sec.period})</span>
+                      {sec.keyMilestones.map((m, mIdx) => (
+                        <div key={mIdx} className="bio-milestone-row">
+                          <span className="bio-milestone-row__year">{m.year}</span>
+                          <span className="paragraph-m font-medium" style={{ textAlign: "right" }}>
+                            {m.title}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </article>
+            {index < BIO_SECTIONS.length - 1 && <div className="divider-horizontal" />}
+          </React.Fragment>
+        ))}
+      </section>
+
+      {/* ============================================================
+          5. CRONOLOGIA HISTÒRICA (18 FITES CAPITALS EN TEMA DARK)
+         ============================================================ */}
+      <section ref={chronoRef} className="bio-chronology theme-dark" aria-label="Cronologia històrica">
+        <div className="bio-chronology__inner">
+          <div className="bio-chronology__header">
+            <div>
+              <span className="subheading-xs block mb-2">ARXIU CRONOLÒGIC OFICIAL</span>
+              <h2 className="heading-m" style={{ color: "#ffffff" }}>
+                CRONOLOGIA (1956 — 2026)
+              </h2>
+            </div>
+            <span className="subheading-xs">18 FITES HISTÒRIQUES VERIFICADES</span>
+          </div>
+
+          <div className="bio-chronology__table">
+            {chronologyFites.map((item, idx) => (
+              <div key={idx} className="bio-chrono-item">
+                <span className="bio-chrono-item__idx">
+                  {idx + 1 < 10 ? `0${idx + 1}` : idx + 1} / {chronologyFites.length}
+                </span>
+                <span className="bio-chrono-item__year">{item.year}</span>
+                <p className="bio-chrono-item__text">{item.text}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ============================================================
+          6. ESCENARIS INTERNACIONALS I FORMATS EN DIRECTE
+         ============================================================ */}
+      <section className="bio-venues" aria-label="Escenaris i formats en directe">
+        <div className="bio-venues__inner">
+          {/* Escenaris i Festivals */}
+          <div>
+            <div className="bio-venues__header" style={{ marginBottom: "2.5rem" }}>
+              <div>
+                <span className="subheading-xs block mb-2">PROJECCIÓ I CIRCUITS</span>
+                <h2 className="heading-m">PRINCIPALS ESCENARIS I FESTIVALS</h2>
+              </div>
+              <p className="paragraph-m" style={{ maxWidth: "44ch", margin: 0 }}>
+                De les grans sales simfòniques i teatres històrics del País Valencià i Catalunya als festivals referents de la world music a Europa i Amèrica.
+              </p>
+            </div>
+
+            <div className="bio-venues__grid">
+              {FEATURED_VENUES.map((venue) => (
+                <div key={venue.name} className="bio-venue-cell">
+                  <div className="bio-venue-cell__top">
+                    <span className="subheading-xs">{venue.territory}</span>
+                    <span className="subheading-xs">{venue.city}</span>
+                  </div>
+                  <div>
+                    <h3 className="bio-venue-cell__name">{venue.name}</h3>
+                    <span className="paragraph-m" style={{ opacity: 0.75 }}>
+                      {venue.type}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="divider-horizontal" />
+
+          {/* Formats de directe actuals */}
+          <div>
+            <div className="bio-venues__header" style={{ marginBottom: "2rem" }}>
+              <div>
+                <span className="subheading-xs block mb-2">PROPOSTES ESCÈNIQUES EN ACTIU</span>
+                <h2 className="heading-s">FORMATS DE DIRECTE</h2>
+              </div>
+              <Link href="/contractacio/" className="btn a24-btn">
+                <div className="btn__divider" />
+                <span className="btn__p-mask">
+                  <span
+                    className="btn__p"
+                    data-hover-inner
+                    data-text="FITXA DE CONTRACTACIÓ ↗"
+                  >
+                    <span>FITXA DE CONTRACTACIÓ ↗</span>
+                  </span>
+                </span>
+                <div className="btn__divider" />
+              </Link>
+            </div>
+
+            <div className="bio-formats__grid">
+              {liveFormats.map((fmt, idx) => (
+                <div key={fmt.id} className="bio-format-item">
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
+                    <span className="subheading-xs">FORMAT 0{idx + 1}</span>
+                    {fmt.duration && <span className="subheading-xs">{fmt.duration}</span>}
+                  </div>
+                  <h3 className="bio-format-item__title">{fmt.name}</h3>
+                  <p className="paragraph-m font-medium" style={{ margin: 0 }}>
+                    {fmt.musicians}
+                  </p>
+                  <p className="paragraph-m" style={{ margin: 0, color: "rgba(17,17,17,0.72)" }}>
+                    {fmt.description}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ============================================================
+          7. PEU EDITORIAL A24 — SEGÜENT PAS (DISCOGRAFIA & CONTRACTACIÓ)
+         ============================================================ */}
+      <footer className="bio-next-footer">
+        <div className="divider-horizontal" />
+
+        <div className="bio-next-footer__inner" style={{ position: "relative" }}>
+          <div className="plus is--tl">
+            <div className="plus-stroke is--hor" />
+            <div className="plus-stroke is--ver" />
+          </div>
+          <div className="plus is--tr">
+            <div className="plus-stroke is--hor" />
+            <div className="plus-stroke is--ver" />
+          </div>
+          <div className="plus is--bl">
+            <div className="plus-stroke is--hor" />
+            <div className="plus-stroke is--ver" />
+          </div>
+          <div className="plus is--br">
+            <div className="plus-stroke is--hor" />
+            <div className="plus-stroke is--ver" />
+          </div>
+
+          <span className="subheading-xs">CONTINUAR EXPLORANT L&apos;ARXIU</span>
+          <h2 className="heading-l">DISCOGRAFIA OFICIAL</h2>
+          <p className="paragraph-m" style={{ maxWidth: "48ch", margin: 0 }}>
+            Recorre les 10 produccions essencials de Miquel Gil en edició interactiva: des de Viajero (1988) i Orgànic (2001) fins a Viatger (2024).
+          </p>
+
+          <div className="bio-hero__cta" style={{ marginTop: "0.5rem" }}>
+            <Link href="/discografia/" className="btn a24-btn">
+              <div className="btn__divider" />
+              <span className="btn__p-mask">
+                <span
+                  className="btn__p"
+                  data-hover-inner
+                  data-text="OBRIR CATÀLEG DISCOGRÀFIC ↗"
+                >
+                  <span>OBRIR CATÀLEG DISCOGRÀFIC ↗</span>
+                </span>
+              </span>
+              <div className="btn__divider" />
+            </Link>
+
+            <Link href="/contractacio/" className="btn a24-btn">
+              <div className="btn__divider" />
+              <span className="btn__p-mask">
+                <span
+                  className="btn__p"
+                  data-hover-inner
+                  data-text="CONTRACTACIÓ & MANAGEMENT ↗"
+                >
+                  <span>CONTRACTACIÓ & MANAGEMENT ↗</span>
+                </span>
+              </span>
+              <div className="btn__divider" />
+            </Link>
+          </div>
+        </div>
+
+        <div className="divider-horizontal" />
+      </footer>
+    </div>
   );
 }

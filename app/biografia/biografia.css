@@ -1,447 +1,1148 @@
-/* ==========================================================================
-   BIOGRAFIA PAGE — /START CHROMATIC RANGE ALIGNMENT
-   Deep Black (#000000), White (#FFFFFF) & Signature Red (#FF0000)
-   Tipografies oficials: GRIFINITO L, MAELSTROM & GRAPHIK
-   ========================================================================== */
+/* ============================================================
+   A24 EDITORIAL SPECIFICATION — BIOGRAFIA OFICIAL MIQUEL GIL
+   Tipografies oficials:
+   - Títols: PP Eiko Medium
+   - Subtítols / Kickers: PP Museum Regular
+   - Textos / Metadades / UI: PP Neue Montreal
+   ============================================================ */
 
-.bio-page {
-  position: relative;
-  width: 100%;
-  min-height: 100vh;
-  background: #000000;
-  color: #ffffff;
-  font-family: var(--font-graphik, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif);
-  padding: clamp(60px, 7vw, 90px) 0 100px 0;
-  overflow-x: hidden;
-  box-sizing: border-box;
+@font-face {
+  font-family: 'PP Eiko';
+  src: url('/fonts/PPEiko-Medium.woff2') format('woff2');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
 }
 
-.bio-container {
-  width: 100%;
-  max-width: 1400px;
-  margin: 0 auto;
-  padding: 0 clamp(24px, 5vw, 80px) 0 clamp(88px, 7vw, 120px);
-  box-sizing: border-box;
-  display: flex;
-  flex-direction: column;
-  gap: 64px;
+@font-face {
+  font-family: 'PP Museum';
+  src: url('/fonts/PPMuseum-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'PP Neue Montreal';
+  src: url('/fonts/PPNeueMontreal-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'PP Neue Montreal';
+  src: url('/fonts/PPNeueMontreal-Medium.woff2') format('woff2');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  --font-titles: 'PP Eiko', serif;
+  --font-subtitles: 'PP Museum', serif;
+  --font-texts: 'PP Neue Montreal', -apple-system, BlinkMacSystemFont, sans-serif;
+
+  --_theme---background: #ffffff;
+  --_theme---body-text: #111111;
+  --_theme---border: rgba(0, 0, 0, 0.16);
+  --_colors---swatch--black: #050505;
+  --_colors---swatch--grey: #d6d3d1;
+  --_colors---swatch--white: #ffffff;
+  --_colors---swatch--brand: #891a20;
+}
+
+.bio-a24-page {
+  font-family: var(--font-texts);
+  background-color: var(--_theme---background);
+  color: var(--_theme---body-text);
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
 }
 
 /* ============================================================
-   HERO HEADER
+   TIPOGRAFIA A24
    ============================================================ */
-.biografia-hero {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-  max-width: 1000px;
-  min-height: auto;
-  justify-content: flex-start;
-}
-
-.biografia-hero__title {
-  font-family: 'Maelstrom Sans', sans-serif;
-  font-size: clamp(54px, 8.5vw, 120px);
-  font-weight: 700;
+.bio-a24-page .heading-l {
+  font-family: var(--font-titles) !important;
+  font-weight: 500 !important;
+  font-size: clamp(3rem, 7.2vw, 7.4rem);
   line-height: 0.9;
-  letter-spacing: 0.05em;
-  color: #ffffff;
+  letter-spacing: -0.04em;
+  text-transform: uppercase !important;
+  margin: 0;
+}
+
+.bio-a24-page .heading-m {
+  font-family: var(--font-titles) !important;
+  font-weight: 500 !important;
+  font-size: clamp(2.1rem, 4.2vw, 4.4rem);
+  line-height: 0.94;
+  letter-spacing: -0.03em;
+  text-transform: uppercase !important;
+  margin: 0;
+}
+
+.bio-a24-page .heading-s {
+  font-family: var(--font-titles) !important;
+  font-weight: 500 !important;
+  font-size: clamp(1.5rem, 2.5vw, 2.5rem);
+  line-height: 1.02;
+  letter-spacing: -0.025em;
+  text-transform: uppercase !important;
+  margin: 0;
+}
+
+.bio-a24-page .subheading-xs {
+  font-family: var(--font-subtitles) !important;
+  font-size: 11px;
+  line-height: 14px;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-  margin: 0;
+  color: rgba(0, 0, 0, 0.55);
 }
 
-.biografia-hero__lead {
-  font-family: 'GRIFINITO L', serif;
-  font-size: clamp(24px, 2.8vw, 38px);
-  line-height: 1.22;
-  letter-spacing: -0.015em;
-  color: rgba(255, 255, 255, 0.88);
-  max-width: 860px;
-  margin: 0;
-}
-
-/* ==========================================================================
-   SECCIÓ EXPANDING STRIP (100% FULLWIDTH EDGE-TO-EDGE)
-   ========================================================================== */
-.bio-strip-fullwidth {
-  width: 100%;
-  margin: 48px 0 64px 0;
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-}
-
-.bio-strip-fullwidth__header {
-  width: 100%;
-  max-width: 1400px;
-  margin: 0 auto;
-  padding: 0 clamp(24px, 5vw, 80px) 0 clamp(88px, 7vw, 120px);
-  box-sizing: border-box;
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 16px;
-}
-
-.bio-strip-header__title {
-  font-family: 'GRIFINITO L', serif;
-  font-size: clamp(34px, 4.5vw, 64px);
-  font-weight: 600;
-  color: #ffffff;
-  margin: 0;
-  letter-spacing: -0.01em;
-  line-height: 0.95;
-  text-transform: uppercase;
-}
-
-.bio-strip-header__desc {
-  font-family: 'GRIFINITO L', serif;
-  font-size: clamp(20px, 2.2vw, 28px);
-  font-style: italic;
-  color: rgba(255, 255, 255, 0.7);
-  line-height: 1.4;
-}
-
-.bio-strip-fullwidth__strip-wrap {
-  width: 100%;
-  margin: 0;
-  padding: 0;
-}
-
-/* ==========================================================================
-   SÍNTESI EDITORIAL (250 PARAULES DEL GUIÓ)
-   ========================================================================== */
-.bio-editorial-section {
-  display: grid;
-  grid-template-columns: 1fr 1.3fr;
-  gap: 48px;
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 16px;
-  padding: 48px;
-  position: relative;
-  overflow: hidden;
-}
-
-.bio-editorial__quote-box {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  gap: 24px;
-}
-
-.bio-editorial__badge {
-  font-family: 'GRAPHIK', sans-serif;
-  font-weight: 700;
-  font-size: 0.76rem;
-  color: #ff0000;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-}
-
-.bio-editorial__big-quote {
-  font-family: "GRIFINITO L", var(--font-display, serif);
-  font-size: clamp(1.8rem, 2.5vw, 2.4rem);
-  line-height: 1.25;
-  color: #ffffff;
-  margin: 0;
-  border-left: 3px solid #ff0000;
-  padding-left: 18px;
-}
-
-.bio-editorial__author {
-  font-family: var(--font-graphik, sans-serif);
-  font-size: 0.85rem;
+.bio-a24-page .theme-dark .subheading-xs {
   color: rgba(255, 255, 255, 0.55);
 }
 
-.bio-editorial__text-box {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-  font-size: 1.02rem;
-  line-height: 1.75;
-  color: rgba(255, 255, 255, 0.84);
+.bio-a24-page .paragraph-m {
+  font-family: var(--font-texts);
+  font-size: 13px;
+  line-height: 1.4;
+  letter-spacing: -0.01em;
+}
+
+.bio-a24-page .paragraph-l {
+  font-family: var(--font-texts);
+  font-size: clamp(1rem, 1.18vw, 1.15rem);
+  line-height: 1.68;
+  letter-spacing: -0.01em;
+  color: rgba(17, 17, 17, 0.86);
+}
+
+.bio-a24-page .theme-dark .paragraph-l {
+  color: rgba(242, 242, 242, 0.84);
+}
+
+.bio-a24-page .paragraph-xl {
+  font-family: var(--font-titles);
+  font-size: clamp(1.45rem, 2.3vw, 2.45rem);
+  line-height: 1.24;
+  letter-spacing: -0.02em;
+  font-weight: 400;
+}
+
+/* ============================================================
+   LÍNIES SEPARADORES FINES FULLWIDTH (100VW)
+   ============================================================ */
+.bio-a24-page .divider-horizontal {
+  background-color: var(--_theme---body-text);
+  opacity: 0.22;
+  width: 100vw;
+  position: relative;
+  left: 50%;
+  right: 50%;
+  margin-left: -50vw;
+  margin-right: -50vw;
+  height: 0.5px;
+  transform-origin: left center;
+  box-sizing: border-box;
+}
+
+.bio-a24-page .theme-dark .divider-horizontal {
+  background-color: #ffffff;
+  opacity: 0.18;
+}
+
+.bio-a24-page .divider-local {
+  background-color: currentColor;
+  opacity: 0.18;
+  width: 100%;
+  height: 0.5px;
+}
+
+/* ============================================================
+   CREUS VECTORIALS A24 (.plus)
+   ============================================================ */
+.bio-a24-page .plus {
+  aspect-ratio: 1;
   justify-content: center;
-}
-
-.bio-editorial__p-lead {
-  font-size: 1.15rem;
-  color: #ffffff;
-  font-weight: 400;
-  line-height: 1.6;
-}
-
-/* ==========================================================================
-   CRONOLOGIA INTEGRADA (18 FITES)
-   ========================================================================== */
-.bio-chrono-section {
+  align-items: center;
+  height: 1.25rem;
+  width: 1.25rem;
   display: flex;
-  flex-direction: column;
-  gap: 28px;
-  scroll-margin-top: 100px;
-}
-
-.bio-chrono-header {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.bio-chrono__kicker {
-  font-family: 'GRAPHIK', sans-serif;
-  font-weight: 700;
-  font-size: 0.78rem;
-  color: #ff0000;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-}
-
-.bio-chrono__title {
-  font-family: "GRIFINITO L", var(--font-display, serif);
-  font-size: clamp(2rem, 3.2vw, 3rem);
-  font-weight: 400;
-  color: #ffffff;
-  margin: 0;
-  line-height: 1.12;
-}
-
-.bio-chrono__title.animated-coign-title,
-.bio-venues__title.animated-coign-title {
-  line-height: 1.15;
-}
-
-.bio-chrono__desc {
-  font-family: var(--font-graphik, sans-serif);
-  font-size: 0.95rem;
-  color: rgba(255, 255, 255, 0.65);
-  margin: 0;
-}
-
-.bio-chrono__timeline {
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-  position: relative;
-  padding-left: 28px;
-  border-left: 1px solid rgba(255, 255, 255, 0.12);
-}
-
-.chrono-row {
-  display: grid;
-  grid-template-columns: 140px 1fr;
-  align-items: baseline;
-  gap: 24px;
-  padding: 20px 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-  position: relative;
-  transition: background 0.2s ease, transform 0.2s ease;
-}
-
-.chrono-row::before {
-  content: "";
   position: absolute;
-  left: -33px;
-  top: 26px;
-  width: 9px;
-  height: 9px;
-  border-radius: 50%;
-  background: #000000;
-  border: 2px solid #ff0000;
-  transition: transform 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+  pointer-events: none;
+  z-index: 10;
 }
 
-.chrono-row:hover::before {
-  background: #ff0000;
-  transform: scale(1.35);
-  box-shadow: 0 0 10px rgba(255, 0, 0, 0.7);
+.bio-a24-page .plus.is--tl { top: 0; left: 1.5rem; }
+.bio-a24-page .plus.is--tr { top: 0; right: 1.5rem; }
+.bio-a24-page .plus.is--bl { bottom: 0; left: 1.5rem; }
+.bio-a24-page .plus.is--br { bottom: 0; right: 1.5rem; }
+
+@media (min-width: 768px) {
+  .bio-a24-page .plus.is--tl { left: 2.5rem; }
+  .bio-a24-page .plus.is--tr { right: 2.5rem; }
+  .bio-a24-page .plus.is--bl { left: 2.5rem; }
+  .bio-a24-page .plus.is--br { right: 2.5rem; }
 }
 
-.chrono-row__year {
-  font-family: 'GRAPHIK', sans-serif;
-  font-size: 1.25rem;
-  font-weight: 700;
-  color: #ff0000;
-  letter-spacing: 0.03em;
+.bio-a24-page .plus-stroke {
+  background-color: #111111;
+  position: absolute;
 }
 
-.chrono-row__text {
-  font-family: var(--font-graphik, sans-serif);
-  font-size: 0.96rem;
-  line-height: 1.6;
-  color: rgba(255, 255, 255, 0.88);
+.bio-a24-page .theme-dark .plus-stroke {
+  background-color: #ffffff;
 }
 
-/* ==========================================================================
-   ESCENARIS I TEATRES DESTACATS
-   ========================================================================== */
-.bio-venues-section {
+.bio-a24-page .plus-stroke.is--hor {
+  width: 100%;
+  height: 1px;
+}
+
+.bio-a24-page .plus-stroke.is--ver {
+  height: 100%;
+  width: 1px;
+}
+
+/* ============================================================
+   BOTONS A24 AMB PP EIKO I HOVER ROLL
+   ============================================================ */
+.bio-a24-page .a24-btn,
+.bio-a24-page .btn {
+  background: transparent !important;
+  background-color: transparent !important;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  outline: none !important;
+  padding: 0 !important;
+  margin: 0;
+  min-width: 16.5rem;
+  justify-content: center;
+  align-items: center;
+  display: inline-flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  text-decoration: none !important;
+  color: #111111;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.bio-a24-page .theme-dark .a24-btn,
+.bio-a24-page .theme-dark .btn {
+  color: #ffffff;
+}
+
+.bio-a24-page .btn__divider {
+  background-color: #111111;
+  width: 100%;
+  height: 1px;
+  display: block;
+  transform-origin: left center;
+  transition: background-color 0.3s ease, opacity 0.3s ease;
+}
+
+.bio-a24-page .theme-dark .btn__divider {
+  background-color: #ffffff;
+}
+
+.bio-a24-page .btn__p-mask {
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  padding: 0.7rem 1.25rem;
+}
+
+.bio-a24-page .btn__p {
+  font-family: var(--font-titles) !important;
+  font-weight: 500 !important;
+  font-size: 13px !important;
+  line-height: 1.2 !important;
+  letter-spacing: 0.04em !important;
+  text-transform: uppercase !important;
+  color: inherit;
+  white-space: nowrap;
+  display: block;
+  position: relative;
+  transition: color 0.3s ease;
+}
+
+.bio-a24-page [data-hover-inner] {
+  display: inline-block;
+  position: relative;
+  transition: transform 0.45s cubic-bezier(0.19, 1, 0.22, 1);
+}
+
+.bio-a24-page [data-hover-inner]::after {
+  content: attr(data-text);
+  position: absolute;
+  left: 0;
+  top: 100%;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .bio-a24-page .btn:hover [data-hover-inner] {
+    transform: translateY(-100%);
+  }
+  .bio-a24-page .btn:hover .btn__divider {
+    background-color: #891a20;
+  }
+  .bio-a24-page .btn:hover .btn__p {
+    color: #891a20;
+  }
+  .bio-a24-page .theme-dark .btn:hover .btn__divider {
+    background-color: #ff3344;
+  }
+  .bio-a24-page .theme-dark .btn:hover .btn__p {
+    color: #ff3344;
+  }
+}
+
+/* ============================================================
+   1. SECCIÓ HERO (CORTINA SINCRONITZADA A24)
+   ============================================================ */
+.bio-a24-page .reveal-track {
+  position: relative;
+  width: 100%;
+  --dissolve-apron: 0px;
+  --dissolve-overlap: 0px;
+  --dissolve-bleed: 0px;
+  --dissolve-rest: 0px;
+}
+
+.bio-hero {
+  background-color: #ffffff;
+  color: #111111;
+  position: relative;
+  min-height: 100vh;
+  min-height: 100dvh;
   display: flex;
   flex-direction: column;
-  gap: 36px;
-  padding: clamp(36px, 4vw, 56px);
-  background: radial-gradient(ellipse at top left, rgba(255, 0, 0, 0.06) 0%, rgba(255, 255, 255, 0.015) 100%);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 20px;
+}
+
+.bio-hero__content {
+  min-height: 100vh;
+  min-height: 100dvh;
+  padding: 6.5rem 2rem 3rem 2rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: stretch;
+  max-width: 1320px;
+  margin: 0 auto;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.bio-hero__info {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.bio-hero__title {
+  margin: 0 auto 1.5rem auto;
+  text-align: center;
+}
+
+.bio-hero__credits {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: baseline;
+  gap: 0.35rem 0.75rem;
+  max-width: 88ch;
+  margin: 1.2rem auto;
+  text-align: center;
+}
+
+.bio-hero__metadata {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.5rem;
+  margin-top: 2rem;
+  width: 100%;
+}
+
+.bio-metadata__item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.bio-metadata__content {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.75rem;
+  padding-top: 0.35rem;
+  border-top: 0.5px solid rgba(0, 0, 0, 0.12);
+}
+
+.bio-hero__cta-wrap {
+  width: 100vw;
+  position: relative;
+  left: 50%;
+  right: 50%;
+  margin-left: -50vw;
+  margin-right: -50vw;
+  padding: 4.2rem 0 3.2rem 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-sizing: border-box;
+  background-color: transparent;
+  z-index: 30;
+}
+
+.bio-hero__cta {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 3rem;
+  width: 100%;
+  max-width: 1320px;
+  position: relative;
+  box-sizing: border-box;
+  padding: 0 2rem;
+}
+
+/* ============================================================
+   MOTOR DE DISSOLUCIÓ LÍQUIDA (DATA-DISSOLVE)
+   ============================================================ */
+[data-dissolve] {
+  --dissolve-reach: 0.4;
+  --dissolve-peek: 0.19;
+  --dissolve-wander: 0.13;
+  --dissolve-center: 0.13;
+  --dissolve-center-x: 0.5;
+  --dissolve-edge: 0.5;
+  --dissolve-below: 0.4;
+  --dissolve-scale: 230;
+  --dissolve-warp: 1.25;
+  --dissolve-detail: 0.16;
+  --dissolve-min-blob: 45;
+  --dissolve-smooth: 1;
+  --dissolve-grid: 16;
+  --dissolve-seed: 1;
+  --dissolve-intro: 1.5;
+  --dissolve-theme-at: 0.45;
+  --dissolve-life: 0.85;
+  --dissolve-life-speed: 0.15;
+  --dissolve-finish: 0.85;
+  --dissolve-idle-fps: 60;
+  --dissolve-surge: 0.55;
+  --dissolve-agitate: 2.2;
+  --dissolve-cursor: 1;
+  --dissolve-cursor-bite: 0.5;
+  --dissolve-cursor-drop: 90;
+  --dissolve-cursor-spread: 2.6;
+  --dissolve-cursor-wobble: 0.22;
+  --dissolve-cursor-wake: 0.15;
+  --dissolve-cursor-glide: 0.3;
+  --dissolve-cursor-turn: 0.3;
+  --dissolve-cursor-speed: 900;
+  --dissolve-cursor-rise: 0.05;
+  --dissolve-cursor-relax: 1.1;
+  --dissolve-cursor-guard: 110;
+  --dissolve-cursor-band: 120;
+  --dissolve-cursor-reserve: 0.35;
+}
+
+[data-dissolve][data-dissolve-ready] {
+  z-index: 1;
+  padding-bottom: var(--dissolve-apron);
+  contain: paint;
+}
+
+[data-dissolve][data-dissolve-ready] + * {
+  margin-top: calc(-1 * var(--dissolve-overlap));
+}
+
+[data-dissolve-bleed][data-dissolve-bleed] {
+  clip-path: inset(calc(-1 * var(--dissolve-bleed, 0px)) 0 0 0);
+  overflow: visible;
+}
+
+[data-dissolve-bleed] {
+  --bleed-cover: 130%;
+  --bleed-lead: 14%;
+}
+
+[data-dissolve-bleed] > img,
+[data-dissolve-bleed] > video,
+[data-dissolve-bleed] > picture,
+[data-dissolve-bleed] > canvas {
+  height: calc(var(--bleed-cover) + var(--bleed-lead) * 2) !important;
+  top: calc((100% - var(--bleed-cover)) / 2 - var(--bleed-lead)) !important;
+}
+
+/* ============================================================
+   2. SECCIÓ IMATGE DE FONS A PANTALLA COMPLETA (RETRAT VISUAL)
+   ============================================================ */
+.bio-portrait-bleed {
+  background-color: #050505;
+  color: #f2f2f2;
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+}
+
+.bio-portrait-bleed__vh {
+  position: relative;
+  min-height: calc(100vh + var(--dissolve-overlap, 350px));
+  min-height: calc(100dvh + var(--dissolve-overlap, 350px));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: calc(var(--dissolve-overlap, 0px) + 6rem) 2rem 6rem 2rem;
+  box-sizing: border-box;
+}
+
+.bio-portrait-bleed__bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 25%;
+  opacity: 1;
+  filter: contrast(1.05) saturate(1.05);
+  pointer-events: none;
+}
+
+.bio-portrait-bleed__overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    rgba(5, 5, 5, 0.25) 0%,
+    rgba(5, 5, 5, 0.52) 55%,
+    rgba(5, 5, 5, 0.78) 100%
+  );
+  pointer-events: none;
+  z-index: 1;
+}
+
+.bio-portrait-bleed__content {
+  position: relative;
+  z-index: 2;
+  max-width: 980px;
+  margin: 0 auto;
+  width: 100%;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2rem;
+  text-shadow: 0 2px 24px rgba(0, 0, 0, 0.75);
+}
+
+.bio-portrait-quote {
+  font-family: var(--font-titles);
+  font-size: clamp(2rem, 4.2vw, 4.2rem);
+  line-height: 1.06;
+  letter-spacing: -0.03em;
+  color: #ffffff;
+  margin: 0;
+}
+
+/* ============================================================
+   3. SÍNTESI BIOGRÀFICA I PILARS ARTÍSTICS
+   ============================================================ */
+.bio-synthesis {
+  background-color: #ffffff;
+  color: #111111;
+  padding: 7rem 2rem;
+  position: relative;
+}
+
+.bio-synthesis__grid {
+  max-width: 1320px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1.15fr 0.85fr;
+  gap: 5rem;
+  align-items: start;
+}
+
+.bio-synthesis__left {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.bio-synthesis__essay {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  padding-top: 1rem;
+  border-top: 0.5px solid rgba(0, 0, 0, 0.16);
+}
+
+.bio-synthesis__right {
+  display: flex;
+  flex-direction: column;
+  gap: 2.5rem;
+}
+
+.bio-portrait-card {
+  position: relative;
+  width: 100%;
+  background-color: #050505;
+  overflow: hidden;
+}
+
+.bio-portrait-card__img {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  display: block;
+  filter: contrast(1.04) saturate(1.04);
+  transition: transform 0.7s cubic-bezier(0.19, 1, 0.22, 1);
+}
+
+.bio-portrait-card:hover .bio-portrait-card__img {
+  transform: scale(1.03);
+}
+
+.bio-portrait-card__caption {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.85rem 0;
+  border-bottom: 0.5px solid rgba(0, 0, 0, 0.16);
+  background-color: #ffffff;
+  color: #111111;
+}
+
+.bio-pillars-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.bio-pillar-item {
+  display: grid;
+  grid-template-columns: 3.2rem 1fr;
+  gap: 1rem;
+  padding: 1.15rem 0;
+  border-bottom: 0.5px solid rgba(0, 0, 0, 0.14);
+  align-items: baseline;
+}
+
+.bio-pillar-item__num {
+  font-family: var(--font-subtitles);
+  font-size: 11px;
+  color: rgba(0, 0, 0, 0.45);
+  letter-spacing: 0.08em;
+}
+
+.bio-pillar-item__body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.bio-pillar-item__title {
+  font-family: var(--font-titles);
+  font-size: 1.2rem;
+  text-transform: uppercase;
+  letter-spacing: -0.02em;
+  color: #111111;
+  margin: 0;
+}
+
+/* ============================================================
+   4. LES CINC GRANS ETAPES BIOGRÀFIQUES (CAPÍTOLS A24)
+   ============================================================ */
+.bio-chapters {
+  background-color: #ffffff;
+  color: #111111;
+  position: relative;
+  padding-bottom: 4rem;
+}
+
+.bio-chapters__header {
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: 4.5rem 2rem 2.5rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 2rem;
+  flex-wrap: wrap;
+}
+
+/* Barra d'índex ràpid de les 5 etapes */
+.bio-chapters__nav {
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: 0 2rem;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+}
+
+.bio-chapter-tab {
+  background: transparent;
+  border: none;
+  border-right: 0.5px solid rgba(0, 0, 0, 0.14);
+  padding: 1.25rem 1rem;
+  text-align: left;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+.bio-chapter-tab:first-child {
+  border-left: 0.5px solid rgba(0, 0, 0, 0.14);
+}
+
+.bio-chapter-tab:hover,
+.bio-chapter-tab.is-active {
+  background-color: #050505;
+  color: #ffffff;
+}
+
+.bio-chapter-tab:hover .subheading-xs,
+.bio-chapter-tab.is-active .subheading-xs {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.bio-chapter-tab__title {
+  font-family: var(--font-titles);
+  font-size: 1.05rem;
+  text-transform: uppercase;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+
+/* Desplegament editorial de cada capítol */
+.bio-chapter-block {
+  position: relative;
+  padding: 5.5rem 0;
+  scroll-margin-top: 4.5rem;
+}
+
+.bio-chapter-block__inner {
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: 0 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 3rem;
+}
+
+.bio-chapter-block__top {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: baseline;
+  gap: 2rem;
+}
+
+.bio-chapter-block__num {
+  font-family: var(--font-titles);
+  font-size: clamp(2.8rem, 5vw, 5.2rem);
+  line-height: 0.85;
+  letter-spacing: -0.04em;
+  color: #111111;
+}
+
+.bio-chapter-block__headings {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.bio-chapter-block__body {
+  display: grid;
+  grid-template-columns: 1fr 1.15fr;
+  gap: 4.5rem;
+  align-items: start;
+}
+
+.bio-chapter-block__media-col {
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
+}
+
+.bio-chapter-block__figure {
+  margin: 0;
+  position: relative;
+  background-color: #050505;
+  overflow: hidden;
+}
+
+.bio-chapter-block__img {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  display: block;
+  filter: contrast(1.04) saturate(1.05);
+  transition: transform 0.75s cubic-bezier(0.19, 1, 0.22, 1);
+}
+
+.bio-chapter-block__figure:hover .bio-chapter-block__img {
+  transform: scale(1.03);
+}
+
+.bio-chapter-block__figcaption {
+  padding: 0.75rem 0;
+  border-bottom: 0.5px solid rgba(0, 0, 0, 0.15);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+
+.bio-chapter-block__quote-box {
+  padding: 1.5rem 0;
+  border-bottom: 0.5px solid rgba(0, 0, 0, 0.15);
+}
+
+.bio-chapter-block__quote {
+  font-family: var(--font-titles);
+  font-size: clamp(1.35rem, 2vw, 1.9rem);
+  line-height: 1.22;
+  letter-spacing: -0.02em;
+  margin: 0.5rem 0 0 0;
+  color: #111111;
+}
+
+.bio-chapter-block__text-col {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.bio-chapter-block__paragraphs {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.bio-chapter-block__milestones {
+  border-top: 0.5px solid rgba(0, 0, 0, 0.16);
+  padding-top: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.bio-milestone-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 1.5rem;
+  padding: 0.55rem 0;
+  border-bottom: 0.5px solid rgba(0, 0, 0, 0.1);
+}
+
+.bio-milestone-row__year {
+  font-family: var(--font-titles);
+  font-size: 1.05rem;
+  color: #111111;
+  min-width: 3.5rem;
+}
+
+.bio-chapter-block__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.bio-tag {
+  font-family: var(--font-subtitles);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 0.35rem 0.7rem;
+  border: 0.5px solid rgba(0, 0, 0, 0.22);
+  color: rgba(0, 0, 0, 0.75);
+}
+
+/* ============================================================
+   5. CRONOLOGIA HISTÒRICA (18 FITES EN TEMA DARK A24)
+   ============================================================ */
+.bio-chronology {
+  background-color: #050505;
+  color: #f2f2f2;
+  padding: 7rem 0;
+  position: relative;
+}
+
+.bio-chronology__inner {
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: 0 2rem;
+}
+
+.bio-chronology__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 2rem;
+  flex-wrap: wrap;
+  margin-bottom: 3.5rem;
+}
+
+.bio-chronology__table {
+  display: flex;
+  flex-direction: column;
+  border-top: 0.5px solid rgba(255, 255, 255, 0.2);
+}
+
+.bio-chrono-item {
+  display: grid;
+  grid-template-columns: 5rem 9rem 1fr;
+  align-items: baseline;
+  gap: 2rem;
+  padding: 1.35rem 0.75rem;
+  border-bottom: 0.5px solid rgba(255, 255, 255, 0.14);
+  transition: background-color 0.25s ease, padding-left 0.25s ease;
+}
+
+.bio-chrono-item:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+  padding-left: 1.25rem;
+}
+
+.bio-chrono-item__idx {
+  font-family: var(--font-subtitles);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.bio-chrono-item__year {
+  font-family: var(--font-titles);
+  font-size: clamp(1.25rem, 1.8vw, 1.65rem);
+  color: #ffffff;
+  letter-spacing: -0.02em;
+}
+
+.bio-chrono-item__text {
+  font-family: var(--font-texts);
+  font-size: 14px;
+  line-height: 1.55;
+  color: rgba(242, 242, 242, 0.85);
+  margin: 0;
+}
+
+/* ============================================================
+   6. PRINCIPALS ESCENARIS I FORMATS EN DIRECTE
+   ============================================================ */
+.bio-venues {
+  background-color: #ffffff;
+  color: #111111;
+  padding: 7rem 0;
+  position: relative;
+}
+
+.bio-venues__inner {
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: 0 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 4.5rem;
 }
 
 .bio-venues__header {
   display: flex;
-  flex-direction: column;
-  gap: 12px;
-  max-width: 880px;
-}
-
-.bio-venues__kicker {
-  font-family: 'GRAPHIK', sans-serif;
-  font-weight: 700;
-  font-size: 0.8rem;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: #ff0000;
-}
-
-.bio-venues__title {
-  font-family: 'GRIFINITO L', serif;
-  font-size: clamp(34px, 4.5vw, 64px);
-  font-weight: 600;
-  color: #ffffff;
-  margin: 0;
-  line-height: 0.95;
-  letter-spacing: -0.01em;
-  text-transform: uppercase;
-}
-
-.bio-venues__subtitle {
-  font-family: 'GRIFINITO L', serif;
-  font-size: clamp(21px, 2.4vw, 30px);
-  font-style: italic;
-  color: rgba(255, 255, 255, 0.82);
-  line-height: 1.25;
-  letter-spacing: -0.015em;
-  margin: 0;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 2rem;
+  flex-wrap: wrap;
 }
 
 .bio-venues__grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 16px;
+  border-top: 0.5px solid rgba(0, 0, 0, 0.18);
+  border-left: 0.5px solid rgba(0, 0, 0, 0.18);
 }
 
-.bio-venue-card {
-  position: relative;
+.bio-venue-cell {
+  padding: 2rem 1.5rem;
+  border-right: 0.5px solid rgba(0, 0, 0, 0.18);
+  border-bottom: 0.5px solid rgba(0, 0, 0, 0.18);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  min-height: 140px;
-  padding: 24px;
-  background: rgba(255, 255, 255, 0.025);
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  border-radius: 14px;
-  transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+  min-height: 11rem;
+  transition: background-color 0.25s ease, color 0.25s ease;
 }
 
-.bio-venue-card:hover {
-  background: rgba(255, 255, 255, 0.05);
-  border-color: rgba(255, 0, 0, 0.45);
-  transform: translateY(-4px);
-  box-shadow: 0 16px 36px -8px rgba(0, 0, 0, 0.7), 0 0 20px rgba(255, 0, 0, 0.15);
-}
-
-.bio-venue-card__top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  margin-bottom: 12px;
-}
-
-.bio-venue-card__territory {
-  font-family: 'GRAPHIK', sans-serif;
-  font-weight: 700;
-  font-size: 0.72rem;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: #ff0000;
-}
-
-.bio-venue-card__city {
-  font-family: var(--font-graphik, sans-serif);
-  font-size: 0.78rem;
-  color: rgba(255, 255, 255, 0.5);
-}
-
-.bio-venue-card__name {
-  font-family: "GRIFINITO L", var(--font-display, serif);
-  font-size: 1.55rem;
-  font-weight: 400;
-  line-height: 1.12;
+.bio-venue-cell:hover {
+  background-color: #050505;
   color: #ffffff;
-  margin: 0 0 10px 0;
-  letter-spacing: -0.01em;
 }
 
-.bio-venue-card__type {
-  font-family: var(--font-graphik, sans-serif);
-  font-size: 0.76rem;
-  color: rgba(255, 255, 255, 0.55);
-  line-height: 1.4;
-  letter-spacing: 0.02em;
+.bio-venue-cell:hover .subheading-xs {
+  color: rgba(255, 255, 255, 0.6);
 }
 
-/* ==========================================================================
-   RESPONSIVE
-   ========================================================================== */
-@media (max-width: 1100px) {
+.bio-venue-cell__top {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+
+.bio-venue-cell__name {
+  font-family: var(--font-titles);
+  font-size: 1.45rem;
+  line-height: 1.08;
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+  margin: 1rem 0 0.5rem 0;
+}
+
+/* Formats d'espectacle */
+.bio-formats__grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2rem;
+  padding-top: 1.5rem;
+}
+
+.bio-format-item {
+  border-top: 0.5px solid rgba(0, 0, 0, 0.22);
+  padding-top: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.bio-format-item__title {
+  font-family: var(--font-titles);
+  font-size: 1.4rem;
+  text-transform: uppercase;
+  margin: 0;
+}
+
+/* ============================================================
+   7. PEU DE PÀGINA / SEGÜENT SECCIÓ (ESTIL A24 NEXT)
+   ============================================================ */
+.bio-next-footer {
+  background-color: #ffffff;
+  color: #111111;
+  position: relative;
+  padding: 5rem 0 7rem 0;
+}
+
+.bio-next-footer__inner {
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: 4rem 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 2.5rem;
+}
+
+/* ============================================================
+   RESPONSIVE MÒBIL I TABLET (<= 991px)
+   ============================================================ */
+@media (max-width: 991px) {
+  .bio-hero__content {
+    padding: 4.5rem 1.5rem 5rem 1.5rem;
+  }
+
+  .bio-hero__metadata {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .bio-hero__cta {
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .bio-portrait-bleed__vh {
+    padding: calc(var(--dissolve-overlap, 0px) + 4rem) 1.5rem 5rem 1.5rem;
+  }
+
+  .bio-synthesis {
+    padding: 4.5rem 1.5rem;
+  }
+
+  .bio-synthesis__grid {
+    grid-template-columns: 1fr;
+    gap: 3.5rem;
+  }
+
+  .bio-chapters__nav {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .bio-chapter-block {
+    padding: 3.5rem 0;
+  }
+
+  .bio-chapter-block__top {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+
+  .bio-chapter-block__body {
+    grid-template-columns: 1fr;
+    gap: 2.5rem;
+  }
+
+  .bio-chrono-item {
+    grid-template-columns: 3.5rem 6.5rem 1fr;
+    gap: 1rem;
+  }
+
   .bio-venues__grid {
     grid-template-columns: repeat(2, 1fr);
   }
-}
 
-@media (max-width: 1024px) {
-  .bio-editorial-section {
+  .bio-formats__grid {
     grid-template-columns: 1fr;
-    gap: 32px;
-    padding: 32px;
+  }
+
+  .bio-next-footer {
+    padding-bottom: 8.5rem;
   }
 }
 
-@media (max-width: 600px) {
-  .bio-venues-section {
-    padding: 24px;
-    border-radius: 16px;
+@media (max-width: 640px) {
+  .bio-hero__metadata {
+    grid-template-columns: 1fr;
+  }
+
+  .bio-chapters__nav {
+    grid-template-columns: 1fr;
+  }
+
+  .bio-chrono-item {
+    grid-template-columns: 1fr;
+    gap: 0.35rem;
   }
 
   .bio-venues__grid {
     grid-template-columns: 1fr;
-  }
-}
-
-@media (max-width: 768px) {
-  .bio-page {
-    padding: 90px 0 80px 0;
-  }
-
-  .bio-container {
-    padding: 0 20px;
-    gap: 40px;
-  }
-
-  .bio-strip-fullwidth {
-    margin: 36px 0 48px 0;
-  }
-
-  .bio-strip-fullwidth__header {
-    padding: 0 20px;
-  }
-
-  .chrono-row {
-    grid-template-columns: 1fr;
-    gap: 6px;
-  }
-
-  .bio-editorial-section {
-    padding: 24px;
   }
 }
