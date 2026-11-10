@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useRef } from 'react';
+import { useRouter } from 'next/navigation';
 import * as THREE from 'three';
 import gsap from 'gsap';
 import A24Nav from '@/components/A24Nav';
@@ -53,6 +54,9 @@ interface ScribbleRingData {
 
 export default function DiscografiaClient() {
   const galleryRef = useRef<HTMLElement>(null);
+  const router = useRouter();
+  const routerRef = useRef(router);
+  routerRef.current = router;
 
   useEffect(() => {
     const container = galleryRef.current;
@@ -1371,16 +1375,15 @@ export default function DiscografiaClient() {
         }
       }, 350);
 
-      // Precarga de la ficha con barba.prefetch a los 450 ms
+      // Precarga instantània de la fitxa amb Next.js Router
       if (prefetchTimer) clearTimeout(prefetchTimer);
       prefetchTimer = setTimeout(() => {
-        const w = window as unknown as { barba?: { prefetch?: (url: string) => void } };
-        if (activeFilm && activeFilm.detailUrl && w.barba && typeof w.barba.prefetch === 'function') {
+        if (activeFilm && activeFilm.detailUrl) {
           try {
-            w.barba.prefetch(activeFilm.detailUrl);
+            routerRef.current?.prefetch(activeFilm.detailUrl);
           } catch (_) {}
         }
-      }, 450);
+      }, 250);
 
       // Disparar evento discgallerychange (bubbles: true)
       container!.dispatchEvent(
@@ -1813,7 +1816,8 @@ export default function DiscografiaClient() {
       const dist = Math.hypot(dxTotal, dyTotal);
 
       if (!dragState.movedBeyondThreshold) {
-        if (dist < SPEC.dragStartDistance) return;
+        const startThreshold = dragState.pointerType === 'mouse' ? SPEC.dragStartDistance : 12;
+        if (dist < startThreshold) return;
         dragState.movedBeyondThreshold = true;
 
         // En táctil, si el gesto es más horizontal que vertical, se desactiva el giro del disco y manda el carrusel
@@ -1967,7 +1971,7 @@ export default function DiscografiaClient() {
       }
 
       if (prefersReducedMotion) {
-        window.location.href = targetUrl;
+        routerRef.current.push(targetUrl);
         return;
       }
 
@@ -1981,44 +1985,30 @@ export default function DiscografiaClient() {
       settleVelocity = 0;
       setScribbleActiveIntent(false);
 
+      // Assegurar precàrrega immediata de la ruta destí
+      try {
+        routerRef.current.prefetch(targetUrl);
+      } catch (_) {}
+
       const activeHolder = discHolders[W];
       const exitOverlay = (container ? container.querySelector('#exit-transition-overlay') : null) as HTMLElement | null;
 
       const exitTl = gsap.timeline({
         onComplete: () => {
-          const w = window as unknown as { barba?: { go?: (url: string) => void } };
-          if (w.barba && typeof w.barba.go === 'function') {
-            try {
-              w.barba.go(targetUrl);
-              return;
-            } catch (_) {}
-          }
-          window.location.href = targetUrl;
+          routerRef.current.push(targetUrl);
         }
       });
 
-      // 1. Animació del CD actiu: gir ràpid sobre si mateix mentre disminueix de mida
+      // 1. Animació cinematogràfica del CD actiu: gira i avança cap al primer pla mentre s'obre
       if (activeHolder) {
         const u = activeHolder.userData as DiscHolderUserData;
         exitTl.to(
           u,
           {
-            dragSpinY: u.dragSpinY + Math.PI * 4,
+            dragSpinY: u.dragSpinY + Math.PI * 2.5,
             dragSpinX: 0,
-            duration: 0.68,
-            ease: 'power2.in'
-          },
-          0
-        );
-
-        exitTl.to(
-          activeHolder.scale,
-          {
-            x: 0.001,
-            y: 0.001,
-            z: 0.001,
-            duration: 0.65,
-            ease: 'power3.in'
+            duration: 0.78,
+            ease: 'power2.inOut'
           },
           0
         );
@@ -2026,25 +2016,60 @@ export default function DiscografiaClient() {
         exitTl.to(
           activeHolder.position,
           {
-            y: activeHolder.position.y + 0.12,
-            z: activeHolder.position.z + 0.35,
-            duration: 0.65,
-            ease: 'power2.in'
+            x: 0,
+            y: 0.04,
+            z: 2.15,
+            duration: 0.76,
+            ease: 'power2.inOut'
           },
           0
         );
+
+        exitTl.to(
+          activeHolder.scale,
+          {
+            x: 1.35,
+            y: 1.35,
+            z: 1.35,
+            duration: 0.4,
+            ease: 'power2.out'
+          },
+          0
+        );
+
+        exitTl.to(
+          activeHolder.scale,
+          {
+            x: 1.9,
+            y: 1.9,
+            z: 1.9,
+            duration: 0.38,
+            ease: 'power2.in'
+          },
+          0.4
+        );
       }
 
-      // 2. Els altres discs desapareixen ràpidament
+      // 2. Els altres discs s'aparten lateralment i desapareixen
       discHolders.forEach((holder, idx) => {
         if (idx !== W) {
+          const dir = Math.sign(idx - W) || 1;
+          exitTl.to(
+            holder.position,
+            {
+              x: holder.position.x + dir * 1.6,
+              duration: 0.42,
+              ease: 'power2.in'
+            },
+            0
+          );
           exitTl.to(
             holder.scale,
             {
               x: 0,
               y: 0,
               z: 0,
-              duration: 0.35,
+              duration: 0.36,
               ease: 'power2.in'
             },
             0
@@ -2052,28 +2077,29 @@ export default function DiscografiaClient() {
         }
       });
 
-      // 3. Desvaniment dels elements d'interfície
+      // 3. Desvaniment suau de la interfície editorial
       exitTl.to(
-        ['header', 'footer', '#left-editorial-panel', '#ui-reviews-container', '#ui-quick-list'],
+        ['#left-editorial-panel', '#ui-reviews-container', '[data-disc-prev]', '[data-disc-next]'],
         {
           opacity: 0,
-          y: -10,
-          duration: 0.35,
-          ease: 'power2.in'
+          y: -14,
+          duration: 0.34,
+          ease: 'power2.out'
         },
         0
       );
 
-      // 4. Fundit en blanc cap a la pàgina de la fitxa del CD
+      // 4. Fundit en blanc nítid per damunt de tot cap a la pàgina de la fitxa del CD
       if (exitOverlay) {
-        exitTl.to(
+        exitTl.fromTo(
           exitOverlay,
+          { opacity: 0 },
           {
             opacity: 1,
-            duration: 0.45,
-            ease: 'power2.out'
+            duration: 0.42,
+            ease: 'power2.inOut'
           },
-          0.26
+          0.38
         );
       }
     }
@@ -2274,14 +2300,14 @@ export default function DiscografiaClient() {
         const mobileSideDrop = isMobile ? (1 - smoothCenter) * 0.55 : 0;
         const y = smoothCenter * SPEC.activeDiscY - mobileSideDrop - Math.abs(flowSignal) * SPEC.flowDip;
 
-        holder.position.set(
-          x + u.zeroGOffset.x,
-          y + u.zeroGOffset.y + buoyY,
-          z + u.zeroGOffset.z + buoyZ
-        );
-
-        // Escala continua y sedosa: 1.0 en el centro exacto, desciende a inactiveScale (0.8 en desktop, 0.52 en móvil como en la captura)
+        // Posició i escala controlades només fora de la transició de sortida
         if (!isTransitioningOut) {
+          holder.position.set(
+            x + u.zeroGOffset.x,
+            y + u.zeroGOffset.y + buoyY,
+            z + u.zeroGOffset.z + buoyZ
+          );
+
           const minScale = isMobile ? 0.52 : SPEC.inactiveScale;
           const baseScale = minScale + smoothCenter * (1.0 - minScale);
           holder.scale.setScalar(baseScale + u.hoverWeight * 0.028);
@@ -2399,7 +2425,14 @@ export default function DiscografiaClient() {
       {/* OVERLAY DE TRANSICIÓ DE SORTIDA (FUNDIT A LA FITXA) */}
       <div
         id="exit-transition-overlay"
-        className="fixed inset-0 z-50 bg-white pointer-events-none opacity-0 transition-opacity"
+        style={{
+          position: 'fixed',
+          inset: 0,
+          zIndex: 9999,
+          backgroundColor: '#ffffff',
+          opacity: 0,
+          pointerEvents: 'none'
+        }}
         aria-hidden="true"
       />
 
