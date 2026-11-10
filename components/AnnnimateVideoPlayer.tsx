@@ -276,8 +276,9 @@ export default function AnnnimateVideoPlayer({
     setIsHoveringScrub(false);
   };
 
-  const handleScrubMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+  const handleScrubPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
     if (!scrubBarRef.current || videoDuration === 0) return;
+    e.stopPropagation();
     setIsScrubbing(true);
     const rect = scrubBarRef.current.getBoundingClientRect();
     const ratio = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
@@ -285,7 +286,7 @@ export default function AnnnimateVideoPlayer({
     setCurrentTime(newTime);
     if (videoRef.current) videoRef.current.currentTime = newTime;
 
-    const onMove = (me: MouseEvent) => {
+    const onMove = (me: PointerEvent) => {
       const curRatio = Math.max(0, Math.min(1, (me.clientX - rect.left) / rect.width));
       const curTime = curRatio * videoDuration;
       setCurrentTime(curTime);
@@ -294,12 +295,12 @@ export default function AnnnimateVideoPlayer({
 
     const onUp = () => {
       setIsScrubbing(false);
-      window.removeEventListener("mousemove", onMove);
-      window.removeEventListener("mouseup", onUp);
+      window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("pointerup", onUp);
     };
 
-    window.addEventListener("mousemove", onMove);
-    window.addEventListener("mouseup", onUp);
+    window.addEventListener("pointermove", onMove);
+    window.addEventListener("pointerup", onUp);
   };
 
   const progressPercent = videoDuration > 0 ? (currentTime / videoDuration) * 100 : 0;
@@ -397,7 +398,7 @@ export default function AnnnimateVideoPlayer({
             togglePlay();
           }}
         >
-          <svg className="vp_big_play_icon" viewBox="0 0 24 24" width="28" height="28" fill="currentColor">
+          <svg className="vp_big_play_icon" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
             <polygon points="7 4.2 20 12 7 19.8" />
           </svg>
         </button>
@@ -420,13 +421,13 @@ export default function AnnnimateVideoPlayer({
               title={isPlaying ? "Pausar (Espai)" : "Reproduir (Espai)"}
             >
               {isPlaying ? (
-                <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor">
-                  <rect x="3.5" y="3" width="3" height="10" rx="1" />
-                  <rect x="9.5" y="3" width="3" height="10" rx="1" />
+                <svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round">
+                  <line x1="5.5" y1="3.5" x2="5.5" y2="12.5" />
+                  <line x1="10.5" y1="3.5" x2="10.5" y2="12.5" />
                 </svg>
               ) : (
-                <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor" style={{ marginLeft: "1px" }}>
-                  <path d="M4.5 2.8v10.4L13 8z" />
+                <svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginLeft: "1px" }}>
+                  <polygon points="4.5 2.8 13 8 4.5 13.2" />
                 </svg>
               )}
             </button>
@@ -452,7 +453,7 @@ export default function AnnnimateVideoPlayer({
               aria-valuetext={`${formatTime(currentTime)} de ${formatTime(videoDuration)}`}
               onMouseMove={handleScrubMouseMove}
               onMouseLeave={handleScrubMouseLeave}
-              onMouseDown={handleScrubMouseDown}
+              onPointerDown={handleScrubPointerDown}
             >
               <span className="vp_track" data-anm-vp-scrub-track>
                 <span
@@ -496,19 +497,21 @@ export default function AnnnimateVideoPlayer({
               title={isMuted || currentVolume === 0 ? "Activar so (M)" : "Silenciar (M)"}
             >
               {isMuted || currentVolume === 0 ? (
-                <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor">
-                  <path d="M2.5 6h2.2L8 3.2v9.6L4.7 10H2.5z" />
-                  <path d="M10.8 6.2l3 3.6M13.8 6.2l-3 3.6" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                <svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <polygon points="7.5 3.5 4.5 6 2 6 2 10 4.5 10 7.5 12.5 7.5 3.5" />
+                  <line x1="10.8" y1="6.2" x2="13.8" y2="9.8" />
+                  <line x1="13.8" y1="6.2" x2="10.8" y2="9.8" />
                 </svg>
               ) : currentVolume < 0.5 ? (
-                <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor">
-                  <path d="M2.5 6h2.2L8 3.2v9.6L4.7 10H2.5z" />
-                  <path d="M10.5 5.8a3.2 3.2 0 0 1 0 4.4" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                <svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <polygon points="7.5 3.5 4.5 6 2 6 2 10 4.5 10 7.5 12.5 7.5 3.5" />
+                  <path d="M10.5 5.8a3.2 3.2 0 0 1 0 4.4" />
                 </svg>
               ) : (
-                <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor">
-                  <path d="M2.5 6h2.2L8 3.2v9.6L4.7 10H2.5z" />
-                  <path d="M10.5 5.8a3.2 3.2 0 0 1 0 4.4M12.4 4a5.8 5.8 0 0 1 0 8" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                <svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <polygon points="7.5 3.5 4.5 6 2 6 2 10 4.5 10 7.5 12.5 7.5 3.5" />
+                  <path d="M10.5 5.8a3.2 3.2 0 0 1 0 4.4" />
+                  <path d="M12.4 4a5.8 5.8 0 0 1 0 8" />
                 </svg>
               )}
             </button>

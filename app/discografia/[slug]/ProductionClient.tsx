@@ -4,7 +4,6 @@ import React, { useEffect, useRef, useState, useCallback } from 'react';
 import Link from 'next/link';
 import * as THREE from 'three';
 import gsap from 'gsap';
-import AnnnimateVideoPlayer from '@/components/AnnnimateVideoPlayer';
 import A24Nav from '@/components/A24Nav';
 import { AlbumDetail } from './albumData';
 import { initDissolve } from './dissolveEngine';
@@ -17,12 +16,15 @@ interface ProductionClientProps {
 export default function ProductionClient({ album }: ProductionClientProps) {
   // Estados para el Modal de Vídeo y Lightbox Cinemático
   const [trailerOpen, setTrailerOpen] = useState(false);
-  const [isPlaying, setIsPlaying] = useState(true);
+  const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
+  const [hasStartedOnce, setHasStartedOnce] = useState(false);
+  const [isLightboxFullscreen, setIsLightboxFullscreen] = useState(false);
   const [currentTime, setCurrentTime] = useState('00:00');
-  const [totalTime, setTotalTime] = useState('04:42');
+  const [totalTime, setTotalTime] = useState('00:00');
   const [progress, setProgress] = useState(0);
-  const [volume, setVolume] = useState(65);
+  const [volume, setVolume] = useState(80);
+  const hasNativeVideo = Boolean(album.videoSrc);
 
   // Extraer ID de YouTube
   const getYouTubeId = (url: string) => {
@@ -47,9 +49,12 @@ export default function ProductionClient({ album }: ProductionClientProps) {
   const dissolveCanvasRef = useRef<HTMLCanvasElement>(null);
   const scrollNextRef = useRef<HTMLElement>(null);
   const upNextCanvasContainerRef = useRef<HTMLDivElement>(null);
-  const iframeRef = useRef<HTMLIFrameElement>(null);
+  const ytContainerRef = useRef<HTMLDivElement>(null);
+  const htmlVideoRef = useRef<HTMLVideoElement>(null);
+  const timelineRef = useRef<HTMLDivElement>(null);
   const playerRef = useRef<any>(null);
   const expandBoxRef = useRef<HTMLDivElement>(null);
+  const lightboxRef = useRef<HTMLDivElement>(null);
 
   const [pushProgress, setPushProgress] = useState(0);
 
@@ -224,14 +229,27 @@ export default function ProductionClient({ album }: ProductionClientProps) {
   // 3. REPRODUCTOR TRAILER LIGHTBOX & ANIMACIÓN LÍQUIDA DE CIERRE
   // ============================================================================
   const openTrailer = useCallback((e?: React.MouseEvent) => {
-    // Si se pulsa desde un botón, animar cuadro negro expandiéndose desde el botón hacia pantalla completa
     let sourceRect: DOMRect | null = null;
     if (e?.currentTarget) {
       sourceRect = (e.currentTarget as HTMLElement).getBoundingClientRect();
     }
 
+    const isTouch =
+      typeof window !== 'undefined' &&
+      (window.matchMedia('(pointer: coarse)').matches ||
+        /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent));
+
+    setHasStartedOnce(false);
+    setIsPlaying(false);
+    setProgress(0);
+    setCurrentTime('00:00');
+    setIsMuted(isTouch);
+    setTrailerOpen(true);
+    document.body.style.overflow = 'hidden';
+
     const box = expandBoxRef.current;
     if (box && sourceRect) {
+      gsap.killTweensOf(box);
       gsap.set(box, {
         display: 'block',
         position: 'fixed',
@@ -250,73 +268,155 @@ export default function ProductionClient({ album }: ProductionClientProps) {
         top: 0,
         width: '100vw',
         height: '100vh',
-        duration: 0.65,
+        duration: 0.48,
         ease: 'power3.inOut',
         onComplete: () => {
-          setTrailerOpen(true);
-          setIsPlaying(true);
-          gsap.to(box, { opacity: 0, duration: 0.2, onComplete: () => {
-            box.style.display = 'none';
-          }});
+          gsap.to(box, {
+            opacity: 0,
+            duration: 0.25,
+            onComplete: () => {
+              box.style.display = 'none';
+            }
+          });
         }
       });
-    } else {
-      setTrailerOpen(true);
-      setIsPlaying(true);
     }
 
-    if (typeof window !== 'undefined' && !(window as any).YT) {
-      const tag = document.createElement('script');
-      tag.src = 'https://www.youtube.com/iframe_api';
-      const firstScriptTag = document.getElementsByTagName('script')[0];
-      firstScriptTag?.parentNode?.insertBefore(tag, firstScriptTag);
+    if (!hasNativeVideo && typeof window !== 'undefined' && !(window as any).YT) {
+      const existingScript = document.querySelector('script[src="https://www.youtube.com/iframe_api"]');
+      if (!existingScript) {
+        const tag = document.createElement('script');
+        tag.src = 'https://www.youtube.com/iframe_api';
+        const firstScriptTag = document.getElementsByTagName('script')[0];
+        firstScriptTag?.parentNode?.insertBefore(tag, firstScriptTag);
+      }
     }
-  }, []);
+  }, [hasNativeVideo]);
 
-  // Inicializar y sincronizar reproductor de YouTube de forma bidireccional y robusta
+  // Inicializar reproductor natiu MP4 o YouTube IFrame API dins del lightbox
   useEffect(() => {
     if (!trailerOpen) {
       if (playerRef.current) {
         try {
           playerRef.current.destroy?.();
-        } catch (e) {
+        } catch {
           // ignore
         }
         playerRef.current = null;
       }
+      if (htmlVideoRef.current) {
+        htmlVideoRef.current.pause();
+      }
       return;
     }
 
+    // 3A. Vídeo natiu MP4 (p. ex. Nineta) -> màxima fiabilitat en mòbil i escriptori
+    if (hasNativeVideo) {
+      const videoEl = htmlVideoRef.current;
+      if (!videoEl) return;
+
+      const isTouch =
+        window.matchMedia('(pointer: coarse)').matches ||
+        /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+
+      videoEl.volume = 0.8;
+      videoEl.muted = isTouch;
+
+      const tryPlay = async () => {
+        try {
+          await videoEl.play();
+          setIsPlaying(true);
+          setHasStartedOnce(true);
+        } catch {
+          // Si el navegador bloqueja autoplay amb àudio, silenciar i iniciar
+          videoEl.muted = true;
+          setIsMuted(true);
+          try {
+            await videoEl.play();
+            setIsPlaying(true);
+            setHasStartedOnce(true);
+          } catch {
+            setIsPlaying(false);
+          }
+        }
+      };
+
+      tryPlay();
+      return;
+    }
+
+    // 3B. Vídeo YouTube IFrame API amb suport mòbil real (origin + mute inicial en tàctil)
     let pollInterval: NodeJS.Timeout | null = null;
+    let fallbackCheckTimer: NodeJS.Timeout | null = null;
+    let initTimer: NodeJS.Timeout | null = null;
     let isSubscribed = true;
 
     const initYT = () => {
-      if (!isSubscribed) return;
-      if (typeof window === 'undefined') return;
+      if (!isSubscribed || typeof window === 'undefined') return;
 
       const YT = (window as any).YT;
-      if (!YT || !YT.Player) {
-        setTimeout(initYT, 100);
+      const mountEl = ytContainerRef.current;
+      if (!YT || !YT.Player || !mountEl) {
+        initTimer = setTimeout(initYT, 100);
         return;
       }
 
-      const playerElementId = 'youtube-lightbox-iframe';
-      if (!document.getElementById(playerElementId)) {
-        setTimeout(initYT, 50);
-        return;
-      }
+      const isTouch =
+        window.matchMedia('(pointer: coarse)').matches ||
+        /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 
       try {
-        playerRef.current = new YT.Player(playerElementId, {
+        mountEl.innerHTML = '';
+        const playerNode = document.createElement('div');
+        playerNode.id = `yt-player-${videoId}`;
+        mountEl.appendChild(playerNode);
+
+        playerRef.current = new YT.Player(playerNode, {
+          videoId,
+          host: 'https://www.youtube-nocookie.com',
+          playerVars: {
+            autoplay: 1,
+            mute: isTouch ? 1 : 0,
+            controls: 0,
+            rel: 0,
+            modestbranding: 1,
+            playsinline: 1,
+            enablejsapi: 1,
+            iv_load_policy: 3,
+            disablekb: 1,
+            fs: 0,
+            origin: window.location.origin
+          },
           events: {
             onReady: (event: any) => {
               if (!isSubscribed) return;
+              if (isTouch) {
+                event.target.mute?.();
+                setIsMuted(true);
+              } else {
+                event.target.unMute?.();
+                event.target.setVolume?.(80);
+                setIsMuted(false);
+              }
               event.target.playVideo?.();
-              setIsPlaying(true);
+
               const dur = event.target.getDuration?.() || 0;
               if (dur > 0) setTotalTime(formatSeconds(dur));
 
-              // Intervalo de polling a 150ms para timeline fluida
+              fallbackCheckTimer = setTimeout(() => {
+                if (!isSubscribed || !playerRef.current) return;
+                try {
+                  const state = playerRef.current.getPlayerState?.();
+                  if (state !== 1 && state !== 3) {
+                    playerRef.current.mute?.();
+                    setIsMuted(true);
+                    playerRef.current.playVideo?.();
+                  }
+                } catch {
+                  // ignore
+                }
+              }, 850);
+
               pollInterval = setInterval(() => {
                 if (!isSubscribed || !playerRef.current) return;
                 try {
@@ -327,7 +427,7 @@ export default function ProductionClient({ album }: ProductionClientProps) {
                     setTotalTime(formatSeconds(total));
                     setProgress((curr / total) * 100);
                   }
-                } catch (e) {
+                } catch {
                   // ignore
                 }
               }, 150);
@@ -337,6 +437,7 @@ export default function ProductionClient({ album }: ProductionClientProps) {
               // 1 = PLAYING, 2 = PAUSED, 0 = ENDED
               if (event.data === 1) {
                 setIsPlaying(true);
+                setHasStartedOnce(true);
               } else if (event.data === 2 || event.data === 0) {
                 setIsPlaying(false);
               }
@@ -348,16 +449,156 @@ export default function ProductionClient({ album }: ProductionClientProps) {
       }
     };
 
-    const timer = setTimeout(initYT, 100);
+    initTimer = setTimeout(initYT, 60);
 
     return () => {
       isSubscribed = false;
-      clearTimeout(timer);
+      if (initTimer) clearTimeout(initTimer);
+      if (fallbackCheckTimer) clearTimeout(fallbackCheckTimer);
       if (pollInterval) clearInterval(pollInterval);
     };
-  }, [trailerOpen]);
+  }, [trailerOpen, hasNativeVideo, videoId]);
+
+  const togglePlayback = useCallback(() => {
+    if (hasNativeVideo) {
+      const v = htmlVideoRef.current;
+      if (!v) return;
+      if (v.paused || v.ended) {
+        v.play()
+          .then(() => {
+            setIsPlaying(true);
+            setHasStartedOnce(true);
+          })
+          .catch(() => {
+            v.muted = true;
+            setIsMuted(true);
+            v.play().then(() => {
+              setIsPlaying(true);
+              setHasStartedOnce(true);
+            }).catch(() => {});
+          });
+      } else {
+        v.pause();
+        setIsPlaying(false);
+      }
+      return;
+    }
+
+    const p = playerRef.current;
+    if (!p) return;
+    if (isPlaying) {
+      p.pauseVideo?.();
+      setIsPlaying(false);
+    } else {
+      p.playVideo?.();
+      setIsPlaying(true);
+    }
+  }, [hasNativeVideo, isPlaying]);
+
+  const toggleAudioMute = useCallback(() => {
+    const nextMuted = !isMuted;
+    setIsMuted(nextMuted);
+
+    if (hasNativeVideo) {
+      const v = htmlVideoRef.current;
+      if (v) {
+        v.muted = nextMuted;
+        if (!nextMuted && v.volume === 0) {
+          v.volume = 0.8;
+          setVolume(80);
+        }
+      }
+      return;
+    }
+
+    const p = playerRef.current;
+    if (p) {
+      if (nextMuted) {
+        p.mute?.();
+      } else {
+        p.unMute?.();
+        p.setVolume?.(volume || 80);
+      }
+    }
+  }, [hasNativeVideo, isMuted, volume]);
+
+  const seekToClientX = useCallback(
+    (clientX: number) => {
+      const el = timelineRef.current;
+      if (!el) return;
+      const rect = el.getBoundingClientRect();
+      if (rect.width <= 0) return;
+      const frac = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
+      setProgress(frac * 100);
+
+      if (hasNativeVideo) {
+        const v = htmlVideoRef.current;
+        if (v && v.duration) {
+          v.currentTime = frac * v.duration;
+          setCurrentTime(formatSeconds(v.currentTime));
+        }
+        return;
+      }
+
+      const p = playerRef.current;
+      if (p && typeof p.getDuration === 'function') {
+        const dur = p.getDuration();
+        if (dur > 0) {
+          p.seekTo?.(frac * dur, true);
+          setCurrentTime(formatSeconds(frac * dur));
+        }
+      }
+    },
+    [hasNativeVideo]
+  );
+
+  const handleTimelinePointerDown = useCallback(
+    (e: React.PointerEvent<HTMLDivElement>) => {
+      e.stopPropagation();
+      seekToClientX(e.clientX);
+      const onMove = (ev: PointerEvent) => seekToClientX(ev.clientX);
+      const onUp = () => {
+        window.removeEventListener('pointermove', onMove);
+        window.removeEventListener('pointerup', onUp);
+      };
+      window.addEventListener('pointermove', onMove);
+      window.addEventListener('pointerup', onUp);
+    },
+    [seekToClientX]
+  );
+
+  const toggleFullscreen = useCallback(() => {
+    const v = htmlVideoRef.current as any;
+    const lb = lightboxRef.current;
+    if (!document.fullscreenElement) {
+      if (lb?.requestFullscreen) {
+        lb.requestFullscreen()
+          .then(() => setIsLightboxFullscreen(true))
+          .catch(() => {
+            if (v?.webkitEnterFullscreen) v.webkitEnterFullscreen();
+          });
+      } else if (v?.webkitEnterFullscreen) {
+        v.webkitEnterFullscreen();
+      }
+    } else {
+      document.exitFullscreen?.().then(() => setIsLightboxFullscreen(false)).catch(() => {});
+    }
+  }, []);
+
+  useEffect(() => {
+    const onFsChange = () => {
+      setIsLightboxFullscreen(Boolean(document.fullscreenElement));
+    };
+    document.addEventListener('fullscreenchange', onFsChange);
+    return () => document.removeEventListener('fullscreenchange', onFsChange);
+  }, []);
 
   const closeTrailer = useCallback(() => {
+    document.body.style.overflow = '';
+    if (document.fullscreenElement) {
+      document.exitFullscreen?.().catch(() => {});
+    }
+
     const canvas = dissolveCanvasRef.current;
     if (!canvas) {
       setTrailerOpen(false);
@@ -376,7 +617,7 @@ export default function ProductionClient({ album }: ProductionClientProps) {
     const h = canvas.height;
 
     let progressVal = 0;
-    const duration = 850; // 0.85s curva de disolución líquida A24
+    const duration = 700; // curva de disolución líquida A24
     const startTime = performance.now();
 
     const renderDissolve = (now: number) => {
@@ -391,10 +632,9 @@ export default function ProductionClient({ album }: ProductionClientProps) {
       const rows = Math.ceil(h / cellSize);
 
       for (let r = 0; r < rows; r++) {
-        const yNorm = r / rows; // 0 arriba -> 1 abajo
+        const yNorm = r / rows;
         for (let c = 0; c < cols; c++) {
-          const xNorm = 1 - (c / cols); // 0 derecha -> 1 izquierda
-          // Diagonal de arriba a la derecha (0) a abajo a la izquierda (1)
+          const xNorm = 1 - (c / cols);
           const diagProgress = (xNorm + yNorm) * 0.5;
           const noise = Math.sin(c * 0.35 + progressVal * 5) * 0.18 + Math.cos(r * 0.35 - progressVal * 3) * 0.18;
           const threshold = diagProgress + noise;
@@ -409,6 +649,10 @@ export default function ProductionClient({ album }: ProductionClientProps) {
       } else {
         ctx.clearRect(0, 0, w, h);
         setTrailerOpen(false);
+        setIsPlaying(false);
+        if (htmlVideoRef.current) {
+          htmlVideoRef.current.pause();
+        }
         if (playerRef.current && typeof playerRef.current.pauseVideo === 'function') {
           playerRef.current.pauseVideo();
         }
@@ -1468,6 +1712,7 @@ export default function ProductionClient({ album }: ProductionClientProps) {
       />
 
       <div
+        ref={lightboxRef}
         className="trailer-lightbox"
         data-trailer-status={trailerOpen ? 'open' : 'closed'}
         aria-hidden={!trailerOpen}
@@ -1505,47 +1750,75 @@ export default function ProductionClient({ album }: ProductionClientProps) {
         {/* Escenario del reproductor a pantalla completa */}
         <div className="trailer-lightbox__stage">
           <div className="trailer-lightbox__player">
-            {trailerOpen && (
+            {trailerOpen && hasNativeVideo && (
+              <video
+                ref={htmlVideoRef}
+                src={album.videoSrc}
+                poster={album.videoPoster || album.trailerStill}
+                playsInline
+                preload="auto"
+                className="trailer-lightbox__video"
+                onClick={togglePlayback}
+                onPlay={() => {
+                  setIsPlaying(true);
+                  setHasStartedOnce(true);
+                }}
+                onPause={() => setIsPlaying(false)}
+                onEnded={() => setIsPlaying(false)}
+                onLoadedMetadata={(e) => {
+                  const dur = e.currentTarget.duration;
+                  if (dur && !isNaN(dur)) setTotalTime(formatSeconds(dur));
+                }}
+                onTimeUpdate={(e) => {
+                  const v = e.currentTarget;
+                  if (v.duration && !isNaN(v.duration)) {
+                    setCurrentTime(formatSeconds(v.currentTime));
+                    setTotalTime(formatSeconds(v.duration));
+                    setProgress((v.currentTime / v.duration) * 100);
+                  }
+                }}
+              />
+            )}
+
+            {trailerOpen && !hasNativeVideo && (
               <>
-                <iframe
-                  id="youtube-lightbox-iframe"
-                  ref={iframeRef}
-                  src={`https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&controls=0&rel=0&modestbranding=1&playsinline=1&enablejsapi=1&iv_load_policy=3&disablekb=1&fs=0`}
-                  title={`${album.title} — Trailer`}
-                  allow="autoplay; encrypted-media; picture-in-picture"
-                  allowFullScreen={false}
+                <div
+                  ref={ytContainerRef}
                   className="trailer-lightbox__iframe-masked"
                 />
                 {/* Capa invisible para atrapar clicks y proteger de la interfaz de YouTube */}
                 <div
                   className="trailer-lightbox__click-shield"
-                  onClick={() => {
-                    const nextPlaying = !isPlaying;
-                    setIsPlaying(nextPlaying);
-                    if (playerRef.current) {
-                      if (nextPlaying) playerRef.current.playVideo?.();
-                      else playerRef.current.pauseVideo?.();
-                    }
-                  }}
-                  onTouchEnd={(e) => {
-                    e.preventDefault();
-                    const nextPlaying = !isPlaying;
-                    setIsPlaying(nextPlaying);
-                    if (playerRef.current) {
-                      if (nextPlaying) playerRef.current.playVideo?.();
-                      else playerRef.current.pauseVideo?.();
-                    }
-                  }}
+                  style={{ pointerEvents: hasStartedOnce ? 'auto' : 'none' }}
+                  onClick={togglePlayback}
                 />
               </>
+            )}
+
+            {/* Botó central minimalista quan està en pausa o pendent d'inici */}
+            {trailerOpen && !isPlaying && (
+              <button
+                type="button"
+                className="trailer-lightbox__center-play"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  togglePlayback();
+                }}
+                aria-label="Reproduir vídeo"
+                title="Reproduir"
+              >
+                <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginLeft: '2px' }}>
+                  <polygon points="7 4 20 12 7 20 7 4" />
+                </svg>
+              </button>
             )}
           </div>
         </div>
 
-        {/* Barra superior e inferior de controles con la misma tipografía y botones que la web */}
+        {/* Barra superior e inferior minimalista amb icones vectorials */}
         <div className="trailer-lightbox__ui">
           <div className="trailer-lightbox__top">
-            <div className="flex items-center gap-3">
+            <div className="trailer-lightbox__title-group">
               <span className="subheading-xs text-white/80">{album.title}</span>
               <span className="subheading-xs text-white/40">·</span>
               <span className="subheading-xs text-white/60">VÍDEO OFICIAL</span>
@@ -1553,27 +1826,35 @@ export default function ProductionClient({ album }: ProductionClientProps) {
             <button
               type="button"
               onClick={closeTrailer}
-              className="trailer-lightbox__ctl btn a24-btn"
-              title="Tancar vídeo i minimitzar amb líquid separador"
+              className="trailer-lightbox__icon-btn"
+              title="Tancar vídeo (Esc)"
+              aria-label="Tancar vídeo"
             >
-              TANCAR [ESC] ✕
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18" />
+                <line x1="6" y1="6" x2="18" y2="18" />
+              </svg>
             </button>
           </div>
 
           <div className="trailer-lightbox__bottom">
             <button
               type="button"
-              onClick={() => {
-                const nextPlaying = !isPlaying;
-                setIsPlaying(nextPlaying);
-                if (playerRef.current) {
-                  if (nextPlaying) playerRef.current.playVideo?.();
-                  else playerRef.current.pauseVideo?.();
-                }
-              }}
-              className="trailer-lightbox__ctl btn a24-btn"
+              onClick={togglePlayback}
+              className="trailer-lightbox__icon-btn"
+              title={isPlaying ? 'Pausar' : 'Reproduir'}
+              aria-label={isPlaying ? 'Pausar' : 'Reproduir'}
             >
-              {isPlaying ? 'PAUSA' : 'REPRODUIR'}
+              {isPlaying ? (
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="8" y1="5" x2="8" y2="19" />
+                  <line x1="16" y1="5" x2="16" y2="19" />
+                </svg>
+              ) : (
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" style={{ marginLeft: '1px' }}>
+                  <polygon points="7 4 19 12 7 20 7 4" />
+                </svg>
+              )}
             </button>
 
             <span className="trailer-lightbox__time">
@@ -1582,16 +1863,14 @@ export default function ProductionClient({ album }: ProductionClientProps) {
 
             {/* Barra de progreso / Timeline */}
             <div
+              ref={timelineRef}
               className="trailer-lightbox__timeline"
-              onClick={(e) => {
-                const rect = e.currentTarget.getBoundingClientRect();
-                const pos = (e.clientX - rect.left) / rect.width;
-                setProgress(pos * 100);
-                if (playerRef.current && typeof playerRef.current.getDuration === 'function') {
-                  const dur = playerRef.current.getDuration();
-                  playerRef.current.seekTo?.(pos * dur, true);
-                }
-              }}
+              onPointerDown={handleTimelinePointerDown}
+              role="slider"
+              aria-label="Progrés del vídeo"
+              aria-valuemin={0}
+              aria-valuemax={100}
+              aria-valuenow={Math.round(progress)}
             >
               <div className="trailer-lightbox__timeline-rule" />
               <div
@@ -1601,31 +1880,46 @@ export default function ProductionClient({ album }: ProductionClientProps) {
             </div>
 
             {/* Control de sonido y volumen */}
-            <div className="flex items-center gap-3">
+            <div className="trailer-lightbox__sound-group">
               <button
                 type="button"
-                onClick={() => {
-                  const nextMuted = !isMuted;
-                  setIsMuted(nextMuted);
-                  if (playerRef.current) {
-                    if (nextMuted) playerRef.current.mute?.();
-                    else playerRef.current.unMute?.();
-                  }
-                }}
-                className="trailer-lightbox__ctl btn a24-btn"
+                onClick={toggleAudioMute}
+                className={`trailer-lightbox__icon-btn ${isMuted ? 'is-muted' : ''}`}
+                title={isMuted ? 'Activar so' : 'Silenciar'}
+                aria-label={isMuted ? 'Activar so' : 'Silenciar'}
               >
-                {isMuted ? 'ACTIVAR SO' : 'SO'}
+                {isMuted ? (
+                  <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                    <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+                    <line x1="22" y1="9" x2="16" y2="15" />
+                    <line x1="16" y1="9" x2="22" y2="15" />
+                  </svg>
+                ) : (
+                  <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                    <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+                    <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
+                    <path d="M19.07 4.93a10 10 0 0 1 0 14.14" />
+                  </svg>
+                )}
               </button>
+
               <div
-                className="trailer-lightbox__volume hidden sm:flex"
-                onClick={(e) => {
+                className="trailer-lightbox__volume"
+                onPointerDown={(e) => {
+                  e.stopPropagation();
                   const rect = e.currentTarget.getBoundingClientRect();
                   const val = Math.max(0, Math.min(100, Math.round(((e.clientX - rect.left) / rect.width) * 100)));
                   setVolume(val);
-                  setIsMuted(false);
-                  if (playerRef.current) {
-                    playerRef.current.unMute?.();
-                    playerRef.current.setVolume?.(val);
+                  setIsMuted(val === 0);
+                  if (hasNativeVideo && htmlVideoRef.current) {
+                    htmlVideoRef.current.volume = val / 100;
+                    htmlVideoRef.current.muted = val === 0;
+                  } else if (playerRef.current) {
+                    if (val === 0) playerRef.current.mute?.();
+                    else {
+                      playerRef.current.unMute?.();
+                      playerRef.current.setVolume?.(val);
+                    }
                   }
                 }}
               >
@@ -1639,16 +1933,20 @@ export default function ProductionClient({ album }: ProductionClientProps) {
 
             <button
               type="button"
-              onClick={() => {
-                if (!document.fullscreenElement) {
-                  document.documentElement.requestFullscreen?.();
-                } else {
-                  document.exitFullscreen?.();
-                }
-              }}
-              className="trailer-lightbox__ctl btn a24-btn hidden md:inline-block"
+              onClick={toggleFullscreen}
+              className="trailer-lightbox__icon-btn trailer-lightbox__icon-btn--fs"
+              title={isLightboxFullscreen ? 'Sortir de pantalla completa' : 'Pantalla completa'}
+              aria-label={isLightboxFullscreen ? 'Sortir de pantalla completa' : 'Pantalla completa'}
             >
-              PANTALLA COMPLETA
+              {isLightboxFullscreen ? (
+                <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3" />
+                </svg>
+              ) : (
+                <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3" />
+                </svg>
+              )}
             </button>
           </div>
         </div>
