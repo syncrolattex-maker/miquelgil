@@ -836,6 +836,44 @@ export default function ScrollPathJourney() {
           );
         }
       });
+
+      // 4. Alineació mil·limètrica: la línia del punt del Railway coincideix amb la línia del subtítol (.checkpoint-editorial__rule)
+      const syncPinRuleAlignment = () => {
+        checkpointElements?.forEach((cp) => {
+          const editorial = cp.querySelector<HTMLElement>(".checkpoint-editorial");
+          const rule = cp.querySelector<HTMLElement>(".checkpoint-editorial__rule");
+          if (!editorial || !rule) return;
+
+          let y = rule.offsetHeight * 0.5;
+          let node: HTMLElement | null = rule;
+          while (node && node !== editorial) {
+            y += node.offsetTop;
+            node = node.offsetParent as HTMLElement | null;
+          }
+          cp.style.setProperty("--rule-offset", `${Math.round(y * 10) / 10}px`);
+        });
+      };
+
+      syncPinRuleAlignment();
+      window.addEventListener("resize", syncPinRuleAlignment);
+
+      let ro: ResizeObserver | null = null;
+      if (typeof ResizeObserver !== "undefined" && stageRef.current) {
+        ro = new ResizeObserver(syncPinRuleAlignment);
+        checkpointElements?.forEach((cp) => {
+          const editorial = cp.querySelector<HTMLElement>(".checkpoint-editorial");
+          if (editorial) ro?.observe(editorial);
+        });
+      }
+
+      if (typeof document !== "undefined" && document.fonts?.ready) {
+        document.fonts.ready.then(syncPinRuleAlignment).catch(() => {});
+      }
+
+      return () => {
+        window.removeEventListener("resize", syncPinRuleAlignment);
+        ro?.disconnect();
+      };
     }, containerRef);
 
     return () => ctx.revert();
@@ -947,9 +985,8 @@ export default function ScrollPathJourney() {
                 className="checkpoint-pin"
                 onClick={() => jumpToProgress(cp.progress)}
                 aria-label={`Saltar a ${cp.year}: ${cp.title}`}
-              >
-                <span className="checkpoint-pin__line" aria-hidden="true" />
-              </button>
+              />
+              <span className="checkpoint-pin__line" aria-hidden="true" />
 
               {/* ELEMENT VISUAL LATERAL (En desktop és de gran format i solapat a l'extrem lateral de la finestra) */}
               <figure className="checkpoint-visual">

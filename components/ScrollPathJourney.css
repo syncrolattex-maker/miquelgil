@@ -151,6 +151,7 @@
   height: 0;
   z-index: 10;
   pointer-events: none;
+  --pin-gap: 64px;
 }
 
 .checkpoint-row:hover,
@@ -205,26 +206,26 @@
   100% { opacity: 0; transform: scale(3.5); }
 }
 
-/* Línia fina horitzontal que surt del pin cap al text editorial */
+/* Línia fina horitzontal que surt del pin i connecta contínuament amb la línia del subtítol */
 .checkpoint-pin__line {
   position: absolute;
-  top: 50%;
-  width: 46px;
+  top: 0;
+  width: calc(var(--pin-gap) - 7px);
   height: 0.5px;
-  background: rgba(17, 17, 17, 0.28);
+  background: rgba(0, 0, 0, 0.24);
+  transform: translateY(-50%);
   transition: background-color 0.35s ease;
   will-change: transform, opacity;
+  pointer-events: none;
 }
 
 .checkpoint-row--right .checkpoint-pin__line {
-  left: 100%;
-  margin-left: 6px;
+  left: calc(var(--pin-x) + 7px);
   transform-origin: left center;
 }
 
 .checkpoint-row--left .checkpoint-pin__line {
-  right: 100%;
-  margin-right: 6px;
+  right: calc(100% - var(--pin-x) + 7px);
   transform-origin: right center;
 }
 
@@ -233,7 +234,7 @@
 }
 
 .checkpoint-row.is-passed .checkpoint-pin__line {
-  background: rgba(17, 17, 17, 0.55);
+  background: rgba(17, 17, 17, 0.5);
 }
 
 /* ------------------------------------------------------------
@@ -319,7 +320,7 @@
    ------------------------------------------------------------ */
 .checkpoint-editorial {
   position: absolute;
-  top: 0;
+  top: calc(-1 * var(--rule-offset, 128px));
   margin: 0;
   padding: 0;
   background: transparent;
@@ -328,20 +329,20 @@
   pointer-events: auto;
 }
 
-/* Quan el vèrtex és a l'esquerra, el bloc de text s'obre a la dreta del pin amb marge de seguretat sobre el rail */
+/* Quan el vèrtex és a l'esquerra, el bloc de text s'obre a la dreta del pin amb la línia del subtítol alineada al pin */
 .checkpoint-row--right .checkpoint-editorial {
-  left: calc(var(--pin-x) + 64px);
-  width: min(calc(95% - var(--pin-x) - 64px), 520px);
+  left: calc(var(--pin-x) + var(--pin-gap));
+  width: min(calc(95% - var(--pin-x) - var(--pin-gap)), 520px);
   text-align: left;
-  transform: translate(0, -50%);
+  transform: none;
 }
 
-/* Quan el vèrtex és a la dreta, el bloc de text s'obre a l'esquerra del pin amb marge de seguretat sobre el rail */
+/* Quan el vèrtex és a la dreta, el bloc de text s'obre a l'esquerra del pin amb la línia del subtítol alineada al pin */
 .checkpoint-row--left .checkpoint-editorial {
-  left: calc(var(--pin-x) - 64px);
-  width: min(calc(var(--pin-x) - 5% - 64px), 520px);
+  left: calc(var(--pin-x) - var(--pin-gap));
+  width: min(calc(var(--pin-x) - 5% - var(--pin-gap)), 520px);
   text-align: left;
-  transform: translate(-100%, -50%);
+  transform: translateX(-100%);
 }
 
 .checkpoint-editorial__scroll {
@@ -575,6 +576,10 @@
    Railway i el punter recorrent el marge esquerre al 100% d'alçada.
    ============================================================ */
 @media (max-width: 1180px) and (min-width: 769px) {
+  .checkpoint-row {
+    --pin-gap: 46px;
+  }
+
   .checkpoint-row--right .checkpoint-visual {
     left: -4vw;
     width: 37vw;
@@ -586,13 +591,13 @@
   }
 
   .checkpoint-row--right .checkpoint-editorial {
-    left: calc(var(--pin-x) + 46px);
-    width: calc(96% - var(--pin-x) - 46px);
+    left: calc(var(--pin-x) + var(--pin-gap));
+    width: calc(96% - var(--pin-x) - var(--pin-gap));
   }
 
   .checkpoint-row--left .checkpoint-editorial {
-    left: calc(var(--pin-x) - 46px);
-    width: calc(var(--pin-x) - 4% - 46px);
+    left: calc(var(--pin-x) - var(--pin-gap));
+    width: calc(var(--pin-x) - 4% - var(--pin-gap));
   }
 }
 
@@ -670,16 +675,18 @@
 
   .checkpoint-pin {
     left: 8px !important;
-    top: 1.15rem !important;
+    top: var(--rule-offset, 1.15rem) !important;
     width: 12px;
     height: 12px;
   }
 
   .checkpoint-pin__line {
-    left: 100% !important;
+    top: var(--rule-offset, 1.15rem) !important;
+    left: 14px !important;
     right: auto !important;
-    width: 20px !important;
-    margin: 0 0 0 4px !important;
+    width: 30px !important;
+    margin: 0 !important;
+    transform: translateY(-50%) !important;
     transform-origin: left center !important;
   }
 
