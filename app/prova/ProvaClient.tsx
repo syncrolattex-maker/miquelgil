@@ -6,7 +6,7 @@ import * as THREE from 'three';
 import gsap from 'gsap';
 import './prova.css';
 
-// Matrius oficials de Damar Pramudita (@damarberlari)
+// Matriu oficial Bayer 4x4 de Damar Pramudita (@damarberlari)
 const BAYER_4X4 = {
   rows: 4,
   cols: 4,
@@ -24,10 +24,12 @@ const BLOCK_VERTEX_SHADER = /* glsl */ `
   uniform float uAnimationProgress;
   uniform float uAnimationMinDelay;
   uniform float uAnimationMaxDelay;
-  uniform float uGridMode; // 1.0 = Image Blocks, 2.0 = Threshold Map Grid
-  uniform float uFlatShading; // 0.0 = relleu 3D isomètric, 1.0 = pla perfecte en pantalla completa
+  uniform float uGridMode;    // 1.0 = Image Grid, 2.0 = Threshold Map Grid
+  uniform float uFlatShading; // 0.0 = volum 3D isomètric, 1.0 = pla perfecte en pantalla completa
+  uniform float uBorderFade;  // 0.0 = vora negra tipus marc 3D, 1.0 = sense vora en pantalla completa
   uniform sampler2D uTexture;
 
+  attribute float aCellIdNormalized;
   attribute float aRowIdNormalized;
   attribute float aColumnIdNormalized;
   attribute float aDitheringThreshold;
@@ -35,9 +37,8 @@ const BLOCK_VERTEX_SHADER = /* glsl */ `
   varying vec3 vColor;
 
   void main() {
-    // Ona diagonal des de la cantonada superior esquerra fins a la inferior dreta (DELAY_TYPE 5)
-    float delayFactor = distance(vec2(aRowIdNormalized, aColumnIdNormalized), vec2(0.0, 0.0));
-    delayFactor = smoothstep(0.0, 1.42, delayFactor);
+    // Escaneig cel·la a cel·la (DELAY_TYPE == 1 a visualizing-dithering-codrops)
+    float delayFactor = aCellIdNormalized;
 
     float animationStart = mix(uAnimationMinDelay, uAnimationMaxDelay, delayFactor);
     float animationDuration = max(0.05, 1.0 - uAnimationMaxDelay);
@@ -45,8 +46,8 @@ const BLOCK_VERTEX_SHADER = /* glsl */ `
 
     float localProgress = smoothstep(animationStart, animationEnd, uAnimationProgress);
 
-    // Escala individual de cada bloc 3D
-    float cellScale = mix(uCellScaleRange.x, uCellScaleRange.y, localProgress);
+    // Escala i posició Z de cada cub 3D en travessar el pla Threshold Map
+    float cellScale = max(mix(uCellScaleRange.x, uCellScaleRange.y, localProgress), 0.0);
     vec3 cellLocalPosition = position * cellScale;
 
     vec4 cellWorldPosition = modelMatrix * instanceMatrix * vec4(cellLocalPosition, 1.0);
@@ -54,26 +55,39 @@ const BLOCK_VERTEX_SHADER = /* glsl */ `
 
     gl_Position = projectionMatrix * viewMatrix * cellWorldPosition;
 
-    // Càlcul de color: de blocs dithered (Bayer 4x4) -> fotografia de Miquel Gil
     vec3 baseColor;
     if (uGridMode < 1.5) {
-      vec3 texColor = texture2D(uTexture, vec2(aColumnIdNormalized, 1.0 - aRowIdNormalized)).rgb;
-      float lum = dot(texColor, vec3(0.299, 0.587, 0.114));
-      float ditherBit = step(aDitheringThreshold, clamp((lum - 0.5) * 1.15 + 0.5, 0.0, 1.0));
-      vec3 ditheredBlock = mix(vec3(0.04, 0.04, 0.038), vec3(0.955, 0.945, 0.92), ditherBit);
+      // Three.js descodifica sRGB -> Linear automàticament en samplejar textura sRGB;
+      // tornem a sRGB perceptual abans de comparar amb la matriu Bayer 4x4.
+      vec3 texLinear = texture2D(uTexture, vec2(aColumnIdNormalized, 1.0 - aRowIdNormalized)).rgb;
+      vec3 texSrgb = pow(max(texLinear, vec3(0.0)), vec3(1.0 / 2.2));
+      float lum = dot(texSrgb, vec3(0.299, 0.587, 0.114));
 
-      float colorStart = animationStart + animationDuration * 0.35;
-      float colorEnd = animationEnd;
+      float ditherBit = step(aDitheringThreshold, clamp((lum - 0.48) * 1.14 + 0.52, 0.0, 1.0));
+      vec3 ditheredBlock = mix(vec3(0.004), vec3(0.955, 0.948, 0.925), ditherBit);
+
+      // Transformació de blocs dithered 1-bit -> textura fotogràfica en travessar z=0
+      float colorStart = animationStart + animationDuration * 0.42;
+      float colorEnd = animationStart + animationDuration * 0.72;
       float colorProgress = smoothstep(colorStart, colorEnd, uAnimationProgress);
-      baseColor = mix(ditheredBlock, texColor, colorProgress);
+      baseColor = mix(ditheredBlock, texLinear, colorProgress);
+
+      // Marc negre perimetral de Damar Berlari (es difumina abans d'entrar a pantalla completa)
+      float borderThreshold = 0.0055;
+      float borderX = step(aColumnIdNormalized, borderThreshold) + step(1.0 - borderThreshold, aColumnIdNormalized);
+      float borderY = step(aRowIdNormalized, borderThreshold) + step(1.0 - borderThreshold, aRowIdNormalized);
+      float isBorder = clamp(borderX + borderY, 0.0, 1.0) * (1.0 - uBorderFade);
+      baseColor = mix(baseColor, vec3(0.003), isBorder);
     } else {
-      // Threshold Map Grid: blocs en escala de grisos mostrant la matriu Bayer 4x4
-      baseColor = vec3(0.18 + aDitheringThreshold * 0.72);
+      // Threshold Map Grid Bayer 4x4 en escala de grisos linealitzada correctament
+      float perceptualGray = 0.06 + aDitheringThreshold * 0.88;
+      baseColor = pow(vec3(perceptualGray), vec3(2.2));
     }
 
-    // Il·luminació direccional subtil per ressaltar les cares 3D dels blocs en vista isomètrica
-    vec3 lightDir = normalize(vec3(0.45, 0.7, 0.85));
-    float diff = 0.76 + 0.32 * max(dot(normalize(normal), lightDir), 0.0);
+    // Il·luminació direccional de les cares dels cubs 3D en vista isomètrica (+X, +Y, +Z visibles)
+    vec3 worldNormal = normalize(mat3(modelMatrix) * mat3(instanceMatrix) * normal);
+    vec3 lightDir = normalize(vec3(0.35, 0.65, 0.92));
+    float diff = 0.58 + 0.42 * max(dot(worldNormal, lightDir), 0.0);
     float lightFactor = mix(diff, 1.0, uFlatShading);
 
     vColor = baseColor * lightFactor;
@@ -116,6 +130,7 @@ function createInstancedBlockGrid(options: {
   const count = cols * rows;
   const geometry = new THREE.BoxGeometry(cellSize, cellSize, cellThickness);
 
+  const cellIds = new Float32Array(count);
   const rowIds = new Float32Array(count);
   const colIds = new Float32Array(count);
   const thresholds = new Float32Array(count);
@@ -124,6 +139,7 @@ function createInstancedBlockGrid(options: {
   for (let i = 0; i < count; i++) {
     const r = Math.floor(i / cols);
     const c = i % cols;
+    cellIds[i] = i / Math.max(1, count - 1);
     rowIds[i] = r / Math.max(1, rows - 1);
     colIds[i] = c / Math.max(1, cols - 1);
 
@@ -132,6 +148,7 @@ function createInstancedBlockGrid(options: {
     thresholds[i] = BAYER_4X4.data[mCol + mRow * BAYER_4X4.cols] / bSize;
   }
 
+  geometry.setAttribute('aCellIdNormalized', new THREE.InstancedBufferAttribute(cellIds, 1));
   geometry.setAttribute('aRowIdNormalized', new THREE.InstancedBufferAttribute(rowIds, 1));
   geometry.setAttribute('aColumnIdNormalized', new THREE.InstancedBufferAttribute(colIds, 1));
   geometry.setAttribute('aDitheringThreshold', new THREE.InstancedBufferAttribute(thresholds, 1));
@@ -147,13 +164,15 @@ function createInstancedBlockGrid(options: {
       uAnimationMaxDelay: { value: maxDelay },
       uGridMode: { value: gridMode },
       uFlatShading: { value: 0 },
+      uBorderFade: { value: 0 },
       uTexture: { value: texture },
     },
   });
 
   const mesh = new THREE.InstancedMesh(geometry, material, count);
-  const dummy = new THREE.Object3D();
+  mesh.frustumCulled = false;
 
+  const dummy = new THREE.Object3D();
   for (let i = 0; i < count; i++) {
     const r = Math.floor(i / cols);
     const c = i % cols;
@@ -178,7 +197,7 @@ export default function ProvaClient() {
     fullResMat: THREE.MeshBasicMaterial;
     cameraAnchor: THREE.Group;
     camera: THREE.OrthographicCamera;
-    getCoverZoom: () => number;
+    getMetrics: () => { fitIsoZoom: number; coverZoom: number };
   } | null>(null);
 
   const [isFinished, setIsFinished] = useState(false);
@@ -191,24 +210,26 @@ export default function ProvaClient() {
       tlRef.current.kill();
     }
 
-    const { imageMat, thresholdMat, fullResMat, cameraAnchor, camera, getCoverZoom } = rig;
-    const coverZoom = getCoverZoom();
-    const isMobile = typeof window !== 'undefined' && window.innerWidth <= 768;
+    const { imageMat, thresholdMat, fullResMat, cameraAnchor, camera, getMetrics } = rig;
+    const { fitIsoZoom, coverZoom } = getMetrics();
 
     setIsFinished(false);
     if (ctaRef.current) {
       gsap.set(ctaRef.current, { opacity: 0, y: 24 });
     }
 
-    // Estat inicial idèntic a la vista isomètrica de blocs 3D de Damar Berlari
-    cameraAnchor.rotation.set(-Math.PI * 0.16, Math.PI * 0.24, 0);
-    camera.zoom = isMobile ? coverZoom * 0.52 : coverZoom * 0.72;
+    // Estat inicial isomètric idèntic a Damar Berlari (Ordered Dithering - A Close-Up Look)
+    cameraAnchor.rotation.set(-Math.PI * 0.15, Math.PI * 0.25, 0);
+    camera.zoom = fitIsoZoom * 1.24;
     camera.updateProjectionMatrix();
 
     imageMat.uniforms.uAnimationProgress.value = 0;
     imageMat.uniforms.uFlatShading.value = 0;
+    imageMat.uniforms.uBorderFade.value = 0;
     thresholdMat.uniforms.uAnimationProgress.value = 0;
     fullResMat.opacity = 0;
+
+    gsap.ticker.lagSmoothing(800, 33);
 
     const tl = gsap.timeline({
       onComplete: () => {
@@ -224,64 +245,86 @@ export default function ProvaClient() {
     });
     tlRef.current = tl;
 
-    // 1. Els blocs 3D de la foto travessen el pla del Threshold Map en ona diagonal
+    // 1. Primer pla dels cubs 3D -> enquadrament isomètric complet sobre #6171E5
+    tl.to(
+      camera,
+      {
+        zoom: fitIsoZoom * 1.12,
+        duration: 1.25,
+        ease: 'power2.out',
+        onUpdate: () => camera.updateProjectionMatrix(),
+      },
+      0.15
+    );
+
+    // 2. Cascada de milers de cubs 3D travessant el Threshold Map Bayer 4x4 (z: +22 -> -22)
     const blockState = { progress: 0 };
     tl.to(
       blockState,
       {
         progress: 1,
-        duration: 2.55,
-        ease: 'power2.inOut',
+        duration: 2.65,
+        ease: 'none',
         onUpdate: () => {
           imageMat.uniforms.uAnimationProgress.value = blockState.progress;
           thresholdMat.uniforms.uAnimationProgress.value = blockState.progress;
         },
       },
-      0.25
+      0.2
     );
 
-    // 2. La càmera isomètrica gira frontalment i s'acosta fins a pantalla completa
+    // 3. Gir frontal suau de la càmera i zoom fi fins a cobrir 100vw x 100dvh
     tl.to(
       cameraAnchor.rotation,
       {
         x: 0,
         y: 0,
-        duration: 1.85,
+        duration: 1.55,
         ease: 'power3.inOut',
       },
-      1.35
+      2.35
     );
 
     tl.to(
       camera,
       {
         zoom: coverZoom,
-        duration: 1.9,
+        duration: 1.6,
         ease: 'power3.inOut',
         onUpdate: () => camera.updateProjectionMatrix(),
       },
-      1.35
+      2.35
     );
 
     tl.to(
       imageMat.uniforms.uFlatShading,
       {
         value: 1,
-        duration: 0.9,
+        duration: 0.85,
         ease: 'power2.out',
       },
-      2.15
+      2.8
     );
 
-    // 3. Fosa final nítida amb la fotografia d'alta resolució cobrint tota la pantalla
+    tl.to(
+      imageMat.uniforms.uBorderFade,
+      {
+        value: 1,
+        duration: 0.65,
+        ease: 'power2.out',
+      },
+      2.65
+    );
+
+    // 4. Fosa final d'alta resolució amb la fotografia completa de Miquel Gil
     tl.to(
       fullResMat,
       {
         opacity: 1,
-        duration: 0.65,
+        duration: 0.55,
         ease: 'power2.out',
       },
-      2.75
+      3.45
     );
   }, []);
 
@@ -293,14 +336,15 @@ export default function ProvaClient() {
     let isDisposed = false;
 
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color('#0c0c0b');
+    scene.background = new THREE.Color('#6171E5');
 
-    const COLS = 78;
-    const ROWS = 52; // Proporció 1.50 igual que la foto 2560x1725 amb blocs 3D ben definits
+    const isMobileViewport = window.innerWidth <= 768;
+    const COLS = isMobileViewport ? 180 : 260;
+    const ROWS = isMobileViewport ? 120 : 176;
     const CELL_SIZE = 1.0;
 
-    const camera = new THREE.OrthographicCamera(-75, 75, 50, -50, 0.1, 1000);
-    camera.position.set(0, 0, 320);
+    const camera = new THREE.OrthographicCamera(-130, 130, 88, -88, 0.1, 1200);
+    camera.position.set(0, 0, 500);
     camera.lookAt(0, 0, 0);
 
     const cameraAnchor = new THREE.Group();
@@ -317,7 +361,7 @@ export default function ProvaClient() {
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
     renderer.setSize(window.innerWidth, window.innerHeight, false);
 
-    const updateFrustumAndGetCoverZoom = () => {
+    const updateFrustumAndGetMetrics = () => {
       const w = window.innerWidth;
       const h = window.innerHeight;
       const aspect = w / Math.max(1, h);
@@ -334,7 +378,16 @@ export default function ProvaClient() {
       renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
       renderer.setSize(w, h, false);
 
-      return aspect > gridAspect ? aspect / gridAspect : 1.0;
+      // En vista isomètrica (y=45°, x=-27°), projecció màxima per emmarcar tota la làmina dins pantalla
+      const projectedW = gridW * 0.72 + 44 * 0.72;
+      const projectedH = gridH * 0.90 + gridW * 0.34 + 44 * 0.68;
+      const fitZoomX = (gridH * aspect * 0.78) / projectedW;
+      const fitZoomY = (gridH * 0.76) / projectedH;
+      const fitIsoZoom = Math.min(fitZoomX, fitZoomY);
+
+      const coverZoom = (aspect > gridAspect ? aspect / gridAspect : 1.0) * 1.015;
+
+      return { fitIsoZoom, coverZoom };
     };
 
     const textureLoader = new THREE.TextureLoader();
@@ -350,37 +403,37 @@ export default function ProvaClient() {
       }
     );
 
-    // 1. Graella de blocs d'imatge 3D (comença elevada en z=+18 amb separació visible entre blocs -> baixa a z=0 i s'uneix)
+    // 1. Image Grid d'alta densitat en blocs 3D (z: +22 -> -22)
     const imageGrid = createInstancedBlockGrid({
       cols: COLS,
       rows: ROWS,
       cellSize: CELL_SIZE,
-      cellThickness: 1.65,
+      cellThickness: 0.5,
       gridMode: 1.0,
-      zRange: new THREE.Vector2(18, 0),
-      scaleRange: new THREE.Vector2(0.8, 1.0),
+      zRange: new THREE.Vector2(22, -22),
+      scaleRange: new THREE.Vector2(1.0, 1.0),
       minDelay: 0.0,
-      maxDelay: 0.72,
+      maxDelay: 0.88,
       texture,
     });
     scene.add(imageGrid.mesh);
 
-    // 2. Graella inferior del Threshold Map Bayer 4x4 (en escala de grisos, baixa i desapareix en ser travessada)
+    // 2. Threshold Map Grid Bayer 4x4 (z: 0 -> -22, es contreu a 0 en ser travessat)
     const thresholdGrid = createInstancedBlockGrid({
       cols: COLS,
       rows: ROWS,
       cellSize: CELL_SIZE,
-      cellThickness: 0.5,
+      cellThickness: 0.1,
       gridMode: 2.0,
-      zRange: new THREE.Vector2(0, -14),
-      scaleRange: new THREE.Vector2(0.82, 0.0),
-      minDelay: 0.06,
-      maxDelay: 0.78,
+      zRange: new THREE.Vector2(0, -22),
+      scaleRange: new THREE.Vector2(1.0, 0.0),
+      minDelay: 0.04,
+      maxDelay: 0.92,
       texture,
     });
     scene.add(thresholdGrid.mesh);
 
-    // 3. Pla d'alta resolució per al tancament final completament nítid
+    // 3. Pla fotogràfic d'alta resolució per al tancament final en pantalla completa
     const fullResGeom = new THREE.PlaneGeometry(COLS * CELL_SIZE, ROWS * CELL_SIZE);
     const fullResMat = new THREE.MeshBasicMaterial({
       map: texture,
@@ -389,7 +442,7 @@ export default function ProvaClient() {
       depthTest: false,
     });
     const fullResPlane = new THREE.Mesh(fullResGeom, fullResMat);
-    fullResPlane.position.z = 1.0;
+    fullResPlane.position.z = -21.5;
     fullResPlane.renderOrder = 10;
     scene.add(fullResPlane);
 
@@ -399,15 +452,15 @@ export default function ProvaClient() {
       fullResMat,
       cameraAnchor,
       camera,
-      getCoverZoom: updateFrustumAndGetCoverZoom,
+      getMetrics: updateFrustumAndGetMetrics,
     };
 
-    updateFrustumAndGetCoverZoom();
+    updateFrustumAndGetMetrics();
 
     const onResize = () => {
-      const nextCoverZoom = updateFrustumAndGetCoverZoom();
+      const { coverZoom } = updateFrustumAndGetMetrics();
       if (tlRef.current && tlRef.current.progress() >= 0.99) {
-        camera.zoom = nextCoverZoom;
+        camera.zoom = coverZoom;
         camera.updateProjectionMatrix();
       }
     };
@@ -425,6 +478,7 @@ export default function ProvaClient() {
       isDisposed = true;
       cancelAnimationFrame(rafId);
       window.removeEventListener('resize', onResize);
+      gsap.ticker.lagSmoothing(500, 33);
       if (tlRef.current) tlRef.current.kill();
       imageGrid.geometry.dispose();
       imageGrid.material.dispose();
@@ -444,7 +498,10 @@ export default function ProvaClient() {
         className="prova-canvas"
         aria-label="Animació en blocs 3D Ordered Dithering de Miquel Gil"
       />
-      <div className="prova-vignette" aria-hidden="true" />
+      <div
+        className={`prova-vignette ${isFinished ? 'is-ready' : ''}`}
+        aria-hidden="true"
+      />
 
       <div
         ref={ctaRef}
@@ -452,7 +509,7 @@ export default function ProvaClient() {
       >
         <Link href="/discografia/" className="prova-enter-btn">
           <span>Entrar a la Web</span>
-          <span aria-hidden="true">↗</span>
+          <span className="prova-enter-arrow" aria-hidden="true">↗</span>
         </Link>
 
         <button

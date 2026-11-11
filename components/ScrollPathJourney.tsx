@@ -1068,9 +1068,11 @@ export default function ScrollPathJourney() {
           <div className="btn__divider" />
           <span className="btn__p-mask">
             <span className="btn__p">
-              {showFullArchive
-                ? "AMAGAR TAULA DE LES 18 FITES ↑"
-                : "VEURE TAULA DE LES 18 FITES ↓"}
+              <span>
+                {showFullArchive
+                  ? "AMAGAR TAULA DE LES 18 FITES ↑"
+                  : "VEURE TAULA DE LES 18 FITES ↓"}
+              </span>
             </span>
           </span>
           <div className="btn__divider" />

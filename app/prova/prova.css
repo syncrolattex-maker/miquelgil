@@ -10,7 +10,7 @@
   height: 100vh;
   height: 100dvh;
   overflow: hidden;
-  background-color: #080807;
+  background-color: #6171e5;
   color: #f4f2ec;
   user-select: none;
   -webkit-user-select: none;
@@ -28,12 +28,17 @@
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background: radial-gradient(
-    circle at 50% 45%,
-    rgba(0, 0, 0, 0) 45%,
-    rgba(0, 0, 0, 0.58) 100%
+  opacity: 0;
+  background: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 0.56) 0%,
+    rgba(0, 0, 0, 0) 38%
   );
   transition: opacity 0.8s ease;
+}
+
+.prova-vignette.is-ready {
+  opacity: 1;
 }
 
 /* Botó editorial central "Entrar a la web" un cop finalitzada l'animació */
@@ -87,8 +92,17 @@
   background: #ffffff;
   color: #080807;
   border-color: #ffffff;
-  transform: translateY(-2px);
+  transform: translateY(-2px) scale(1.02);
   box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
+}
+
+.prova-enter-arrow {
+  display: inline-block;
+  transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.prova-enter-btn:hover .prova-enter-arrow {
+  transform: translate(3px, -3px);
 }
 
 .prova-enter-btn:active {

@@ -248,7 +248,10 @@
   height: 1px;
   display: block;
   transform-origin: left center;
-  transition: background-color 0.3s ease, opacity 0.3s ease;
+  transition:
+    background-color 0.3s ease,
+    opacity 0.3s ease,
+    transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .bio-a24-page .theme-dark .btn__divider {
@@ -275,7 +278,14 @@
   white-space: nowrap;
   display: block;
   position: relative;
-  transition: color 0.28s ease, opacity 0.28s ease, transform 0.28s ease;
+  transition: color 0.28s ease, opacity 0.28s ease;
+}
+
+.bio-a24-page .btn__p > span,
+.bio-a24-page [data-hover-inner] > span {
+  display: inline-block;
+  position: relative;
+  transition: transform 0.32s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .bio-a24-page [data-hover-inner] {
@@ -283,22 +293,58 @@
   position: relative;
 }
 
+.bio-a24-page .a24-btn,
+.bio-a24-page .btn {
+  transition: transform 0.42s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes bio-btn-text-roll {
+  0% {
+    transform: translateY(0%);
+    opacity: 1;
+  }
+  42% {
+    transform: translateY(-115%);
+    opacity: 0;
+  }
+  43% {
+    transform: translateY(115%);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0%);
+    opacity: 1;
+  }
+}
+
 @media (hover: hover) and (pointer: fine) {
-  .bio-a24-page .btn:hover .btn__divider {
-    background-color: #111111;
-    opacity: 0.65;
+  .bio-a24-page .btn:hover {
+    transform: scale(1.02) rotate(-0.45deg);
+  }
+  .bio-a24-page .btn:active {
+    transform: scale(0.975) rotate(0deg);
+  }
+  .bio-a24-page .btn:hover .btn__divider:first-child {
+    transform: translateY(-2px);
+    opacity: 0.85;
+  }
+  .bio-a24-page .btn:hover .btn__divider:last-child {
+    transform: translateY(2px);
+    opacity: 0.85;
+  }
+  .bio-a24-page .btn:hover .btn__p > span,
+  .bio-a24-page .btn:focus-visible .btn__p > span {
+    animation: bio-btn-text-roll 0.46s cubic-bezier(0.19, 1, 0.22, 1) forwards;
   }
   .bio-a24-page .btn:hover .btn__p {
     color: #111111;
-    opacity: 0.72;
   }
   .bio-a24-page .theme-dark .btn:hover .btn__divider {
     background-color: #ffffff;
-    opacity: 0.65;
+    opacity: 0.85;
   }
   .bio-a24-page .theme-dark .btn:hover .btn__p {
     color: #ffffff;
-    opacity: 0.78;
   }
 }
 
