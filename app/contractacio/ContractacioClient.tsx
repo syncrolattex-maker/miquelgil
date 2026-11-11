@@ -895,10 +895,10 @@ Moltes gràcies.`;
                       <span
                         className="btn__p"
                         data-hover-inner
-                        data-text={`SOL·LICITAR DISPONIBILITAT · FORMAT ${currentTabFormat.num} +`}
+                        data-text={`SOL·LICITAR FORMAT ${currentTabFormat.num} +`}
                       >
                         <span>
-                          SOL·LICITAR DISPONIBILITAT · FORMAT {currentTabFormat.num} +
+                          SOL·LICITAR FORMAT {currentTabFormat.num} +
                         </span>
                       </span>
                     </span>
@@ -1332,10 +1332,10 @@ Moltes gràcies.`;
                     <span
                       className="btn__p"
                       data-hover-inner
-                      data-text={`ENVIAR SOL·LICITUD PER A ${activeFormatObj.name.toUpperCase()} ↗`}
+                      data-text={`ENVIAR SOL·LICITUD (${activeFormatObj.num}) ↗`}
                     >
                       <span>
-                        ENVIAR SOL·LICITUD PER A {activeFormatObj.name.toUpperCase()} ↗
+                        ENVIAR SOL·LICITUD ({activeFormatObj.num}) ↗
                       </span>
                     </span>
                   </span>

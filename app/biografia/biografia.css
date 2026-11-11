@@ -261,49 +261,36 @@
   justify-content: center;
   align-items: center;
   width: 100%;
-  padding: 0.7rem 1.25rem;
+  padding: 0.85rem 1.75rem;
 }
 
 .bio-a24-page .btn__p {
   font-family: var(--font-titles) !important;
   font-weight: 500 !important;
-  font-size: 13px !important;
-  line-height: 1.2 !important;
+  font-size: clamp(16px, 1.5vw, 22px) !important;
+  line-height: 1.15 !important;
   letter-spacing: 0.04em !important;
   text-transform: uppercase !important;
   color: inherit;
   white-space: nowrap;
   display: block;
   position: relative;
-  transition: color 0.3s ease;
+  transition: color 0.28s ease, opacity 0.28s ease, transform 0.28s ease;
 }
 
 .bio-a24-page [data-hover-inner] {
   display: inline-block;
   position: relative;
-  transition: transform 0.45s cubic-bezier(0.19, 1, 0.22, 1);
-}
-
-.bio-a24-page [data-hover-inner]::after {
-  content: attr(data-text);
-  position: absolute;
-  left: 0;
-  top: 100%;
-  width: 100%;
-  height: 100%;
-  display: block;
 }
 
 @media (hover: hover) and (pointer: fine) {
-  .bio-a24-page .btn:hover [data-hover-inner] {
-    transform: translateY(-100%);
-  }
   .bio-a24-page .btn:hover .btn__divider {
     background-color: #111111;
     opacity: 0.65;
   }
   .bio-a24-page .btn:hover .btn__p {
     color: #111111;
+    opacity: 0.72;
   }
   .bio-a24-page .theme-dark .btn:hover .btn__divider {
     background-color: #ffffff;
@@ -311,6 +298,7 @@
   }
   .bio-a24-page .theme-dark .btn:hover .btn__p {
     color: #ffffff;
+    opacity: 0.78;
   }
 }
 
@@ -1102,8 +1090,16 @@
   .bio-a24-page .a24-btn,
   .bio-a24-page .btn {
     width: 100%;
-    max-width: 22rem;
+    max-width: 24rem;
     min-width: 0;
+  }
+
+  .bio-a24-page .btn__p-mask {
+    padding: 0.78rem 1rem;
+  }
+
+  .bio-a24-page .btn__p {
+    font-size: clamp(13.5px, 3.8vw, 17px) !important;
   }
 
   .bio-portrait-bleed__vh {

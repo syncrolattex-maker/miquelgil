@@ -1067,20 +1067,10 @@ export default function ScrollPathJourney() {
         >
           <div className="btn__divider" />
           <span className="btn__p-mask">
-            <span
-              className="btn__p"
-              data-hover-inner
-              data-text={
-                showFullArchive
-                  ? "AMAGAR TAULA RESUM DE LES 18 FITES ↑"
-                  : "VEURE TAULA RESUM DE LES 18 FITES HISTÒRIQUES ↓"
-              }
-            >
-              <span>
-                {showFullArchive
-                  ? "AMAGAR TAULA RESUM DE LES 18 FITES ↑"
-                  : "VEURE TAULA RESUM DE LES 18 FITES HISTÒRIQUES ↓"}
-              </span>
+            <span className="btn__p">
+              {showFullArchive
+                ? "AMAGAR TAULA DE LES 18 FITES ↑"
+                : "VEURE TAULA DE LES 18 FITES ↓"}
             </span>
           </span>
           <div className="btn__divider" />

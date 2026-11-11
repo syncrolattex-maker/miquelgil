@@ -2013,10 +2013,10 @@ button {
   white-space: nowrap;
   font-family: var(--font-graphik), sans-serif;
   letter-spacing: 0.05em;
-  font-size: 13px;
+  font-size: 15px;
   text-transform: uppercase;
   font-weight: 500;
-  padding: 12px 28px;
+  padding: 14px 32px;
   border-radius: 9999px;
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.6);
   transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
