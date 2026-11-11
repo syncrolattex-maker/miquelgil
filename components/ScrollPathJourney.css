@@ -206,37 +206,6 @@
   100% { opacity: 0; transform: scale(3.5); }
 }
 
-/* Línia fina horitzontal que surt del pin i connecta contínuament amb la línia del subtítol */
-.checkpoint-pin__line {
-  position: absolute;
-  top: 0;
-  width: calc(var(--pin-gap) - 7px);
-  height: 0.5px;
-  background: rgba(0, 0, 0, 0.24);
-  transform: translateY(-50%);
-  transition: background-color 0.35s ease;
-  will-change: transform, opacity;
-  pointer-events: none;
-}
-
-.checkpoint-row--right .checkpoint-pin__line {
-  left: calc(var(--pin-x) + 7px);
-  transform-origin: left center;
-}
-
-.checkpoint-row--left .checkpoint-pin__line {
-  right: calc(100% - var(--pin-x) + 7px);
-  transform-origin: right center;
-}
-
-.checkpoint-row.is-active .checkpoint-pin__line {
-  background: #111111;
-}
-
-.checkpoint-row.is-passed .checkpoint-pin__line {
-  background: rgba(17, 17, 17, 0.5);
-}
-
 /* ------------------------------------------------------------
    ELEMENT VISUAL LATERAL (.checkpoint-visual)
    En desktop apareix en mida gran i solapat a l'extrem lateral
@@ -405,18 +374,29 @@
   will-change: transform, opacity;
 }
 
+/* Única línia del subtítol que neix directament des de la vora exterior del punt del Railway (±7px) */
 .checkpoint-editorial__rule {
-  width: 100%;
-  height: 0.5px;
+  height: 1px;
   background: rgba(0, 0, 0, 0.24);
   margin: 0.35rem 0;
-  transform-origin: left center;
   transition: background-color 0.35s ease;
   will-change: transform, opacity;
 }
 
+.checkpoint-row--right .checkpoint-editorial__rule {
+  margin-left: calc(-1 * (var(--pin-gap) - 7px));
+  width: calc(100% + var(--pin-gap) - 7px);
+  transform-origin: left center;
+}
+
 .checkpoint-row--left .checkpoint-editorial__rule {
+  margin-left: 0;
+  width: calc(100% + var(--pin-gap) - 7px);
   transform-origin: right center;
+}
+
+.checkpoint-row.is-passed .checkpoint-editorial__rule {
+  background: rgba(17, 17, 17, 0.5);
 }
 
 .checkpoint-row.is-active .checkpoint-editorial__rule {
@@ -680,16 +660,6 @@
     height: 12px;
   }
 
-  .checkpoint-pin__line {
-    top: var(--rule-offset, 1.15rem) !important;
-    left: 14px !important;
-    right: auto !important;
-    width: 30px !important;
-    margin: 0 !important;
-    transform: translateY(-50%) !important;
-    transform-origin: left center !important;
-  }
-
   .checkpoint-visual {
     display: none !important;
   }
@@ -749,9 +719,11 @@
     line-height: 1.4;
   }
 
-  .checkpoint-editorial__rule {
+  .checkpoint-row--right .checkpoint-editorial__rule,
+  .checkpoint-row--left .checkpoint-editorial__rule {
+    margin: 0.25rem 0 0.25rem -30px;
+    width: calc(100% + 30px);
     transform-origin: left center !important;
-    margin: 0.25rem 0;
   }
 
   .checkpoint-editorial__text {

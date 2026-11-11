@@ -575,7 +575,6 @@ export default function ScrollPathJourney() {
         const visualLateralShift = side === "right" ? -110 : 110;
         const editorialLateralShift = side === "right" ? 90 : -90;
 
-        const pinLine = cp.querySelector<HTMLElement>(".checkpoint-pin__line");
         const visualWrap = cp.querySelector<HTMLElement>(".checkpoint-visual__scroll");
         const imgWrap = cp.querySelector<HTMLElement>(".checkpoint-visual__img-wrap");
         const imgEl = cp.querySelector<HTMLElement>(".checkpoint-visual__img-wrap img");
@@ -601,16 +600,6 @@ export default function ScrollPathJourney() {
           },
           defaults: { ease: "power3.out" },
         });
-
-        // A) Línia del pin que connecta amb el bloc
-        if (pinLine) {
-          stepTl.fromTo(
-            pinLine,
-            { scaleX: 0, opacity: 0 },
-            { scaleX: 1, opacity: 1, duration: 0.65 },
-            0
-          );
-        }
 
         // B) Fotografia lateral (entra del costat + obertura de màscara clip-path + fade-in + zoom)
         if (visualWrap && !isMobile) {
@@ -733,20 +722,20 @@ export default function ScrollPathJourney() {
           );
         }
 
-        // 4. Línia divisòria horitzontal (d'un costat a l'altre com a les fitxes de CD)
+        // 4. Línia divisòria única que surt directament del punt del Railway i travessa el subtítol
         if (ruleEl) {
           stepTl.fromTo(
             ruleEl,
             {
               scaleX: 0,
-              transformOrigin: side === "right" ? "left center" : "right center",
+              transformOrigin: isMobile || side === "right" ? "left center" : "right center",
             },
             {
               scaleX: 1,
-              duration: 0.78,
+              duration: 0.85,
               ease: "power3.inOut",
             },
-            0.38
+            0.06
           );
         }
 
@@ -844,7 +833,7 @@ export default function ScrollPathJourney() {
           const rule = cp.querySelector<HTMLElement>(".checkpoint-editorial__rule");
           if (!editorial || !rule) return;
 
-          let y = rule.offsetHeight * 0.5;
+          let y = (rule.getBoundingClientRect().height || rule.offsetHeight || 1) * 0.5;
           let node: HTMLElement | null = rule;
           while (node && node !== editorial) {
             y += node.offsetTop;
@@ -986,7 +975,6 @@ export default function ScrollPathJourney() {
                 onClick={() => jumpToProgress(cp.progress)}
                 aria-label={`Saltar a ${cp.year}: ${cp.title}`}
               />
-              <span className="checkpoint-pin__line" aria-hidden="true" />
 
               {/* ELEMENT VISUAL LATERAL (En desktop és de gran format i solapat a l'extrem lateral de la finestra) */}
               <figure className="checkpoint-visual">
