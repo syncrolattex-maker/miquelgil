@@ -37,6 +37,7 @@
 
 .contacte-a24-page {
   min-height: 100vh;
+  min-height: 100dvh;
   background-color: #ffffff;
   color: #111111;
   position: relative;
@@ -51,6 +52,7 @@
   position: relative;
   width: 100%;
   min-height: 100vh;
+  min-height: 100dvh;
   display: block;
 }
 
@@ -60,6 +62,7 @@
   flex-direction: row;
   width: 100%;
   min-height: 100vh;
+  min-height: 100dvh;
   align-items: stretch;
   background-color: #ffffff;
   position: relative;
@@ -85,6 +88,7 @@
   position: relative;
   width: 100%;
   min-height: 100vh;
+  min-height: 100dvh;
   background: transparent;
   border: none;
   box-shadow: none;
@@ -98,6 +102,7 @@
   z-index: 1;
   width: 100%;
   min-height: 100vh;
+  min-height: 100dvh;
   display: block;
   background: transparent;
 }
@@ -160,20 +165,17 @@
   background-color: rgba(17, 17, 17, 0.2);
 }
 
-/* Subtítol amb la classe .contacte-subtitle perquè SandReveal hi faci el traç inicial */
 .contacte-subtitle {
   font-family: 'PP Eiko', serif;
-  font-weight: 400;
-  font-size: clamp(1.45rem, 2.35vw, 2.25rem);
-  line-height: 1.18;
-  letter-spacing: -0.02em;
+  font-size: clamp(1.35rem, 2vw, 1.85rem);
+  line-height: 1.25;
   color: #111111;
+  letter-spacing: -0.01em;
   margin: 0;
-  max-width: 34ch;
-  user-select: text;
+  max-width: 38ch;
 }
 
-/* Graella de 2 columnes (Management & Dossier Tècnic) */
+/* Graella de contacte en 2 columnes en escriptori */
 .contacte-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -225,6 +227,7 @@
   width: fit-content;
   word-break: break-all;
   transition: opacity 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .contacte-primary-link:hover {
@@ -247,6 +250,12 @@
   gap: 0.85rem;
 }
 
+/* Fila d'icones per a mòbil (oculta per defecte en escriptori) */
+.contacte-socials-icons-row {
+  display: none;
+}
+
+/* Graella de pastilles per a escriptori */
 .contacte-socials-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -266,11 +275,27 @@
   text-decoration: none;
   background-color: rgba(255, 255, 255, 0.6);
   transition: background-color 0.2s ease, color 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .contacte-social-pill:hover {
   background-color: #111111;
   color: #ffffff;
+}
+
+.contacte-social-pill__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 15px;
+  height: 15px;
+  opacity: 0.75;
+}
+
+.contacte-social-pill__icon svg {
+  width: 14px;
+  height: 14px;
+  fill: currentColor;
 }
 
 .contacte-social-pill__idx {
@@ -312,6 +337,7 @@
   flex: 1.15;
   position: relative;
   min-height: 100vh;
+  min-height: 100dvh;
   background-image: url("/images/7.jpg");
   background-position: 72% center;
   background-repeat: no-repeat;
@@ -324,7 +350,7 @@
   box-sizing: border-box;
 }
 
-/* Degradat suau cap a blanc en escriptori (d'esquerra a dreta per fondre amb el text i la duna) */
+/* Degradat suau cap a blanc en escriptori */
 .contacte-photo-col::before {
   content: "";
   position: absolute;
@@ -376,34 +402,60 @@
   }
 }
 
+/* ============================================================
+   RESPONSIVE MÒBIL: SENSE SCROLL (100DVH FIX), MINIMALISTA
+   I ICONES PER A LES XARXES SOCIALS
+   ============================================================ */
 @media (max-width: 767px) {
   .contacte-a24-page {
+    height: 100vh;
+    height: 100dvh;
+    max-height: 100dvh;
+    overflow: hidden;
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    touch-action: none;
+    overscroll-behavior: none;
     padding-top: 0;
-    min-height: 100vh;
+  }
+
+  .sand-reveal-container,
+  .sand-reveal-content,
+  .contacte-sand-fullscreen {
+    height: 100%;
+    min-height: 100%;
+    max-height: 100dvh;
+    overflow: hidden;
+    touch-action: none;
   }
 
   .contacte-main-wrapper {
     flex-direction: column;
-    min-height: 100vh;
+    height: 100%;
+    min-height: 100%;
+    max-height: 100dvh;
+    overflow: hidden;
+    justify-content: flex-start;
   }
 
-  /* Imatge de Miquel Gil a la platja a la part superior amb degradat suau cap a la duna inferior */
+  /* Capçalera visual compacta de la platja amb degradat subtil cap a blanc */
   .contacte-photo-col {
     order: -1;
-    min-height: 240px;
-    height: 34vh;
-    max-height: 310px;
+    height: clamp(80px, 16vh, 120px);
+    min-height: 80px;
+    max-height: 120px;
     flex: none;
-    background-position: 65% 22%;
-    padding: 1rem;
+    background-position: 65% 24%;
+    padding: 0;
   }
 
   .contacte-photo-col::before {
     background: linear-gradient(
       to bottom,
-      rgba(255, 255, 255, 0) 42%,
-      rgba(255, 255, 255, 0.55) 72%,
-      rgba(255, 255, 255, 0.95) 94%,
+      rgba(255, 255, 255, 0) 10%,
+      rgba(255, 255, 255, 0.45) 55%,
+      rgba(255, 255, 255, 0.92) 88%,
       #ffffff 100%
     );
   }
@@ -412,46 +464,125 @@
     display: none;
   }
 
-  /* Secció inferior de text amb l'arena entrant de baix a dalt */
+  /* Secció de contingut que ompli exactament l'espai restant sense fer scroll */
   .contacte-content-col {
     order: 1;
     padding: 0;
     margin: 0;
     flex: 1;
+    min-height: 0;
     width: 100%;
-    min-height: 66vh;
+    overflow: hidden;
     display: flex;
     flex-direction: column;
-  }
-
-  .sand-reveal-container {
-    min-height: 100vh;
-    height: 100%;
-    width: 100%;
+    justify-content: center;
   }
 
   .contacte-editorial-panel {
-    padding: 1.5rem 1.25rem 6.5rem 1.25rem;
+    padding: 0.6rem 1.4rem 1.25rem;
     max-width: 100%;
     width: 100%;
-    gap: 1.1rem;
+    gap: 0.65rem;
+    box-sizing: border-box;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+  }
+
+  .contacte-header-block {
+    gap: 0.2rem;
+  }
+
+  .contacte-kicker {
+    font-size: 9px;
+    letter-spacing: 0.07em;
   }
 
   .contacte-display-title {
-    font-size: clamp(2.35rem, 10vw, 3.2rem);
+    font-size: clamp(2.1rem, 8.2vw, 2.65rem);
+    line-height: 0.9;
   }
 
-  .contacte-subtitle {
-    font-size: clamp(1.25rem, 5.2vw, 1.65rem);
+  /* Ocultem elements verbosos per garantir un disseny 100% net i minimalista */
+  .contacte-subtitle,
+  .mobile-hidden,
+  .contacte-cell__meta {
+    display: none;
   }
 
   .contacte-grid {
     grid-template-columns: 1fr;
-    gap: 1.25rem;
+    gap: 0.55rem;
   }
 
+  .contacte-cell {
+    gap: 0.2rem;
+  }
+
+  .contacte-cell__role {
+    font-size: 12px;
+    opacity: 0.85;
+  }
+
+  .contacte-primary-link {
+    font-size: 1.05rem;
+    padding-bottom: 0.05rem;
+  }
+
+  .contacte-socials-section {
+    gap: 0.5rem;
+  }
+
+  /* Canvi de pastilles grans a icones circulars en una sola fila compacta */
   .contacte-socials-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    display: none;
+  }
+
+  .contacte-socials-icons-row {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 10px;
+    width: 100%;
+  }
+
+  .contacte-social-icon-btn {
+    width: 42px;
+    height: 42px;
+    min-width: 42px;
+    border-radius: 50%;
+    border: 1px solid rgba(17, 17, 17, 0.16);
+    background: rgba(255, 255, 255, 0.88);
+    color: #111111;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    transition: transform 0.18s cubic-bezier(0.2, 0.8, 0.2, 1), background-color 0.18s ease, color 0.18s ease;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .contacte-social-icon-btn svg {
+    width: 17px;
+    height: 17px;
+    fill: currentColor;
+  }
+
+  .contacte-social-icon-btn:active {
+    transform: scale(0.92);
+    background: #111111;
+    color: #ffffff;
+    border-color: #111111;
+  }
+
+  .contacte-archival-footer {
+    font-size: 8.5px;
+    letter-spacing: 0.06em;
+    gap: 0.4rem;
+    padding-top: 0.2rem;
+    opacity: 0.75;
   }
 }
 

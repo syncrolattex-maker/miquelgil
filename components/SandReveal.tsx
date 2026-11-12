@@ -558,8 +558,8 @@ export default function SandReveal({
 
     // Traç inicial subtil i orgànic sobre el subtítol i les xarxes socials per convidar a apartar l'arena i deixar visibles els enllaços
     if (starterCue) {
-      const subtitle = container.querySelector(".contacte-subtitle");
-      const socialsEl = container.querySelector(".contacte-socials-grid");
+      const subtitle = container.querySelector(".contacte-subtitle, .contacte-header-block");
+      const socialsEl = container.querySelector(".contacte-socials-grid, .contacte-socials-icons-row");
 
       let startX = isMobile ? 0.14 : 0.10;
       let startY = isMobile ? 0.46 : 0.28;
