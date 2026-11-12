@@ -7,7 +7,6 @@ import {
   ConcertStatus,
   FORMAT_PRESETS,
   PALETTE_SWATCHES,
-  DEFAULT_CONCERTS,
 } from "@/types/concert";
 import {
   getConcerts,
@@ -24,9 +23,133 @@ import "./admin.css";
 const MASTER_KEY = "mgil2026";
 const AUTH_STORAGE_KEY = "miquel_gil_admin_logged_in";
 
+/* -------------------------------------------------------------------------
+   ICONES MINIMALISTES (1.5px stroke, coherents amb l'estètica editorial)
+   ------------------------------------------------------------------------- */
+function IconSearch() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <circle cx="11" cy="11" r="7" />
+      <path d="m20 20-3.5-3.5" />
+    </svg>
+  );
+}
+
+function IconPlus() {
+  return (
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden="true">
+      <path d="M12 5v14M5 12h14" />
+    </svg>
+  );
+}
+
+function IconReset() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M3 12a9 9 0 1 0 3-6.7L3 8" />
+      <path d="M3 3v5h5" />
+    </svg>
+  );
+}
+
+function IconEdit() {
+  return (
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M12 20h9" />
+      <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" />
+    </svg>
+  );
+}
+
+function IconDuplicate() {
+  return (
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <rect x="9" y="9" width="11" height="11" rx="2" />
+      <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+    </svg>
+  );
+}
+
+function IconTrash() {
+  return (
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M3 6h18" />
+      <path d="M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2" />
+      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" />
+    </svg>
+  );
+}
+
+function IconPin() {
+  return (
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M12 21s-6-5.3-6-11a6 6 0 1 1 12 0c0 5.7-6 11-6 11Z" />
+      <circle cx="12" cy="10" r="2.2" />
+    </svg>
+  );
+}
+
+function IconTicket() {
+  return (
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M3 9a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v1a2 2 0 0 0 0 4v1a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-1a2 2 0 0 0 0-4V9Z" />
+      <path d="M13 7v10" strokeDasharray="2 2" />
+    </svg>
+  );
+}
+
+function IconStar() {
+  return (
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path d="M12 2.5 14.9 8.4l6.5.9-4.7 4.6 1.1 6.5L12 17.3l-5.8 3.1 1.1-6.5-4.7-4.6 6.5-.9L12 2.5Z" />
+    </svg>
+  );
+}
+
+function IconClock() {
+  return (
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <circle cx="12" cy="12" r="9" />
+      <path d="M12 7v5l3 2" />
+    </svg>
+  );
+}
+
+function IconClose() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" aria-hidden="true">
+      <path d="M18 6 6 18M6 6l12 12" />
+    </svg>
+  );
+}
+
+function IconEye({ open }: { open: boolean }) {
+  return open ? (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z" />
+      <circle cx="12" cy="12" r="3" />
+    </svg>
+  ) : (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M10.6 5.1A10.6 10.6 0 0 1 12 5c6.5 0 10 7 10 7a16.8 16.8 0 0 1-3.2 4.2" />
+      <path d="M6.6 6.6A16.5 16.5 0 0 0 2 12s3.5 7 10 7a10.4 10.4 0 0 0 5.4-1.5" />
+      <path d="M3 3l18 18" />
+    </svg>
+  );
+}
+
+function IconCheck() {
+  return (
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M20 6 9 17l-5-5" />
+    </svg>
+  );
+}
+
 export default function AdminClient() {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [passwordInput, setPasswordInput] = useState<string>("");
+  const [showPassword, setShowPassword] = useState<boolean>(false);
   const [authError, setAuthError] = useState<string>("");
 
   const [concerts, setConcerts] = useState<Concert[]>([]);
@@ -152,14 +275,14 @@ export default function AdminClient() {
       statusText: "Properament",
     };
     await saveConcert(duplicated);
-    showToast(`Concert duplicat correctament`);
+    showToast("Concert duplicat correctament");
   };
 
   // Eliminar concert
   const handleDelete = async (id: string, title: string) => {
     if (window.confirm(`Segur que vols eliminar el concert «${title}»?`)) {
       await deleteConcert(id);
-      showToast(`Concert eliminat`);
+      showToast("Concert eliminat");
     }
   };
 
@@ -180,7 +303,7 @@ export default function AdminClient() {
     }
 
     await quickUpdateStatus(concert.id, nextStatus, nextText);
-    showToast(`Estat canviat a: ${nextText}`);
+    showToast(`Estat actualitzat: ${nextText}`);
   };
 
   // Canviar preset de format al formulari
@@ -208,14 +331,14 @@ export default function AdminClient() {
     await saveConcert(editingConcert);
     setIsModalOpen(false);
     setEditingConcert(null);
-    showToast(`Concert guardat correctament!`);
+    showToast("Canvis guardats correctament");
   };
 
   // Restablir inicials
   const handleResetDefaults = async () => {
     if (
       window.confirm(
-        "Vols restablir la llista als concerts inicials de Miquel Gil? (Això recuperarà les 6 dates oficials)."
+        "Vols restablir la llista als concerts inicials de Miquel Gil? (Això recuperarà les dates oficials)."
       )
     ) {
       await resetToDefaults();
@@ -224,58 +347,71 @@ export default function AdminClient() {
   };
 
   // -----------------------------------------------------------------------
-  // PANTALLA D'ACCÉS (LOGIN)
+  // PANTALLA D'ACCÉS (LOGIN EDITORIAL)
   // -----------------------------------------------------------------------
   if (!isAuthenticated) {
     return (
       <main className="admin-login-wrap">
         <div className="admin-login-card">
+          <div className="admin-corner-row" aria-hidden="true">
+            <span>+</span>
+            <span>+</span>
+          </div>
+
           <span className="admin-login-badge">Intranet de Gestió</span>
           <h1 className="admin-login-title">Miquel Gil</h1>
           <p className="admin-login-subtitle">
-            Panell d'administració per a gestionar l'agenda de concerts, recintes i entrades sense codi.
+            Estudi d&apos;edició privada per a gestionar l&apos;agenda de directes, recintes i entrades en temps real.
           </p>
+
+          <div className="admin-hairline" />
 
           <form onSubmit={handleLogin} className="admin-login-form">
             <div>
               <label htmlFor="admin-pin" className="admin-login-label">
-                Clau d'accés d'administració
+                Clau d&apos;accés d&apos;administració
               </label>
-              <input
-                id="admin-pin"
-                type="password"
-                className="admin-login-input"
-                placeholder="Introdueix la clau d'accés..."
-                value={passwordInput}
-                onChange={(e) => setPasswordInput(e.target.value)}
-                autoFocus
-              />
-              {authError && (
-                <p style={{ color: "#E63946", fontSize: "0.82rem", margin: "6px 0 0" }}>
-                  {authError}
-                </p>
-              )}
+              <div className="admin-input-wrap">
+                <input
+                  id="admin-pin"
+                  type={showPassword ? "text" : "password"}
+                  className="admin-login-input"
+                  placeholder="Introdueix la clau d'accés"
+                  value={passwordInput}
+                  onChange={(e) => setPasswordInput(e.target.value)}
+                  autoFocus
+                />
+                <button
+                  type="button"
+                  className="admin-input-eye"
+                  onClick={() => setShowPassword((v) => !v)}
+                  aria-label={showPassword ? "Amagar clau" : "Mostrar clau"}
+                >
+                  <IconEye open={showPassword} />
+                </button>
+              </div>
+              {authError && <p className="admin-login-error">{authError}</p>}
             </div>
 
             <button type="submit" className="admin-login-btn">
-              Entrar al Panell
+              <span>Entrar al Panell</span>
+              <span aria-hidden="true">↗</span>
             </button>
           </form>
 
           <p className="admin-login-hint">
-            Clau mestra inicial de demostració: <strong style={{ color: "#F4A261" }}>mgil2026</strong>
+            Clau de demostració: <strong>mgil2026</strong>
           </p>
-          <div style={{ marginTop: "16px" }}>
-            <Link
-              href="/agenda"
-              style={{
-                color: "rgba(255,255,255,0.5)",
-                fontSize: "0.82rem",
-                textDecoration: "underline",
-              }}
-            >
-              ← Tornar a l'Agenda pública
+
+          <div className="admin-login-footer">
+            <Link href="/directes" className="admin-back-link">
+              ← Tornar als Directes públics
             </Link>
+          </div>
+
+          <div className="admin-corner-row bottom" aria-hidden="true">
+            <span>+</span>
+            <span>+</span>
           </div>
         </div>
       </main>
@@ -296,75 +432,103 @@ export default function AdminClient() {
     <div className="admin-root">
       {/* NAVBAR */}
       <header className="admin-navbar">
-        <div className="admin-brand">
-          <h1 className="admin-brand-title">Miquel Gil</h1>
-          <span className="admin-brand-tag">Intranet</span>
-        </div>
-
-        <div className="admin-nav-actions">
-          <div className="admin-sync-indicator" title="Mode d'emmagatzematge de dades">
-            <span className={`admin-sync-dot ${isSupabaseConfigured ? "" : "local"}`} />
-            <span>
-              {isSupabaseConfigured ? "Supabase Cloud connectat" : "Mode local actiu (Sense codi)"}
-            </span>
+        <div className="admin-navbar-inner">
+          <div className="admin-brand">
+            <h1 className="admin-brand-title">Miquel Gil</h1>
+            <span className="admin-brand-divider" aria-hidden="true">/</span>
+            <span className="admin-brand-tag">Intranet de Gestió</span>
           </div>
 
-          <Link href="/agenda" target="_blank" className="admin-nav-btn">
-            ↗ Veure Agenda
-          </Link>
+          <div className="admin-nav-actions">
+            <div className="admin-sync-indicator" title="Mode d'emmagatzematge de dades">
+              <span className={`admin-sync-dot ${isSupabaseConfigured ? "" : "local"}`} />
+              <span>
+                {isSupabaseConfigured ? "Supabase Cloud" : "Mode Local"}
+              </span>
+            </div>
 
-          <button onClick={handleLogout} className="admin-nav-btn logout">
-            Eixir
-          </button>
+            <Link href="/directes" target="_blank" className="admin-nav-btn">
+              <span>Veure Directes</span>
+              <span aria-hidden="true">↗</span>
+            </Link>
+
+            <button onClick={handleLogout} className="admin-nav-btn logout">
+              Eixir
+            </button>
+          </div>
         </div>
       </header>
 
       {/* CONTAINER */}
       <main className="admin-container">
-        {/* STATS */}
-        <section className="admin-stats-grid">
+        {/* CAPÇALERA D'ESTUDI */}
+        <section className="admin-page-head">
+          <div>
+            <p className="admin-page-kicker">Arxiu &amp; Programació 2026 / 27</p>
+            <h2 className="admin-page-heading">Agenda de Directes</h2>
+          </div>
+          <button onClick={handleOpenCreate} className="admin-create-btn">
+            <IconPlus />
+            <span>Nou Concert</span>
+          </button>
+        </section>
+
+        {/* STATS LEDGER */}
+        <section className="admin-stats-grid" aria-label="Resum de concerts">
           <div className="admin-stat-card">
             <span className="admin-stat-label">Total Concerts</span>
             <span className="admin-stat-value">{stats.total}</span>
-            <span className="admin-stat-hint">Registrats al sistema</span>
+            <span className="admin-stat-hint">Registrats al catàleg</span>
           </div>
           <div className="admin-stat-card">
-            <span className="admin-stat-label">Entrades a la Venda</span>
-            <span className="admin-stat-value" style={{ color: "#2A9D8F" }}>
-              {stats.upcoming}
+            <span className="admin-stat-label">
+              <span className="admin-stat-dot is-upcoming" /> Entrades a la Venda
             </span>
+            <span className="admin-stat-value">{stats.upcoming}</span>
             <span className="admin-stat-hint">Dates actives programades</span>
           </div>
           <div className="admin-stat-card">
-            <span className="admin-stat-label">Ajornats</span>
-            <span className="admin-stat-value" style={{ color: "#F4A261" }}>
-              {stats.postponed}
+            <span className="admin-stat-label">
+              <span className="admin-stat-dot is-postponed" /> Ajornats
             </span>
+            <span className="admin-stat-value">{stats.postponed}</span>
             <span className="admin-stat-hint">Pendents de nova data</span>
           </div>
           <div className="admin-stat-card">
-            <span className="admin-stat-label">Exhaurits / Històrics</span>
-            <span className="admin-stat-value" style={{ color: "rgba(255,255,255,0.6)" }}>
-              {stats.past}
+            <span className="admin-stat-label">
+              <span className="admin-stat-dot is-past" /> Exhaurits / Històrics
             </span>
-            <span className="admin-stat-hint">Arxiu de grans cites</span>
+            <span className="admin-stat-value">{stats.past}</span>
+            <span className="admin-stat-hint">Arxiu de cites anteriors</span>
           </div>
         </section>
 
         {/* ACTION BAR */}
         <section className="admin-action-bar">
           <div className="admin-search-wrap">
-            <span className="admin-search-icon">🔍</span>
+            <span className="admin-search-icon">
+              <IconSearch />
+            </span>
             <input
               type="text"
               className="admin-search-input"
-              placeholder="Cerca per concert, teatre, format o municipi..."
+              placeholder="Cerca per títol, teatre, format o municipi..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
+            {searchTerm && (
+              <button
+                type="button"
+                className="admin-search-clear"
+                onClick={() => setSearchTerm("")}
+                aria-label="Netejar cerca"
+              >
+                <IconClose />
+              </button>
+            )}
           </div>
 
-          <div className="admin-filter-tabs">
+          <div className="admin-filter-tabs" role="tablist" aria-label="Filtrar per estat">
             <button
               className={`admin-filter-tab ${statusFilter === "all" ? "active" : ""}`}
               onClick={() => setStatusFilter("all")}
@@ -391,14 +555,14 @@ export default function AdminClient() {
             </button>
           </div>
 
-          <div style={{ display: "flex", gap: "10px" }}>
-            <button onClick={handleResetDefaults} className="admin-nav-btn" title="Restablir inicials">
-              ↺ Restablir dades
-            </button>
-            <button onClick={handleOpenCreate} className="admin-create-btn">
-              <span>+</span> Nou Concert
-            </button>
-          </div>
+          <button
+            onClick={handleResetDefaults}
+            className="admin-nav-btn admin-reset-btn"
+            title="Restablir concerts inicials"
+          >
+            <IconReset />
+            <span>Restablir</span>
+          </button>
         </section>
 
         {/* CONCERTS LIST */}
@@ -408,12 +572,12 @@ export default function AdminClient() {
           ) : filteredConcerts.length === 0 ? (
             <div className="admin-empty">
               <p className="admin-empty-title">Cap concert trobat</p>
-              <p>No hi ha concerts amb aquests filtres de cerca.</p>
+              <p className="admin-empty-sub">No hi ha concerts amb aquests criteris de cerca o filtre.</p>
             </div>
           ) : (
             <div className="admin-list">
               {filteredConcerts.map((c) => (
-                <div key={c.id} className="admin-item">
+                <article key={c.id} className="admin-item">
                   {/* Stripe color de la targeta */}
                   <div className="admin-item-stripe" style={{ backgroundColor: c.bg }} />
 
@@ -422,82 +586,91 @@ export default function AdminClient() {
                     <div className="admin-item-row-top">
                       <span
                         className="admin-item-badge"
-                        style={{ backgroundColor: `${c.bg}25`, color: c.bg }}
+                        style={{
+                          borderColor: `${c.bg}55`,
+                          color: c.bg,
+                        }}
                       >
                         {c.badge || c.format}
                       </span>
                       <span className="admin-item-date">{c.dateStr}</span>
                       {c.isFeatured && (
-                        <span
-                          style={{
-                            fontSize: "0.7rem",
-                            color: "#E9C46A",
-                            display: "inline-flex",
-                            alignItems: "center",
-                            gap: "3px",
-                          }}
-                        >
-                          ★ Al cartell interactiu
+                        <span className="admin-featured-pill">
+                          <IconStar />
+                          <span>Destacat</span>
                         </span>
                       )}
                     </div>
 
-                    <h2 className="admin-item-title">{c.title}</h2>
+                    <h3 className="admin-item-title">{c.title}</h3>
 
                     <div className="admin-item-details">
                       <span className="admin-item-detail-icon">
-                        📍 {c.venue} {c.city ? `· ${c.city}` : ""}
+                        <IconPin />
+                        <span>
+                          {c.venue}
+                          {c.city ? ` · ${c.city}` : ""}
+                        </span>
                       </span>
+                      <span className="admin-item-detail-sep" aria-hidden="true">/</span>
                       <span>Format: {c.format}</span>
                       {c.ticketUrl && (
-                        <a
-                          href={c.ticketUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          style={{ color: "#2A9D8F", textDecoration: "underline" }}
-                        >
-                          🎟️ Entrades oficials
-                        </a>
+                        <>
+                          <span className="admin-item-detail-sep" aria-hidden="true">/</span>
+                          <a
+                            href={c.ticketUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="admin-ticket-link"
+                          >
+                            <IconTicket />
+                            <span>Entrades oficials ↗</span>
+                          </a>
+                        </>
                       )}
                     </div>
                   </div>
 
                   {/* Accions ràpides */}
                   <div className="admin-item-actions">
-                    {/* Botó ràpid per canviar estat a 1 clic */}
                     <button
                       className={`admin-status-toggle ${c.status}`}
                       onClick={() => handleQuickStatus(c)}
-                      title="Fes clic per canviar d'estat ràpidament"
+                      title="Fes clic per canviar d'estat"
                     >
                       {c.statusText || c.status}
                     </button>
 
-                    <button
-                      className="admin-icon-btn"
-                      onClick={() => handleOpenEdit(c)}
-                      title="Editar concert"
-                    >
-                      ✏️
-                    </button>
+                    <div className="admin-item-icon-group">
+                      <button
+                        className="admin-icon-btn"
+                        onClick={() => handleOpenEdit(c)}
+                        title="Editar concert"
+                        aria-label={`Editar ${c.title}`}
+                      >
+                        <IconEdit />
+                      </button>
 
-                    <button
-                      className="admin-icon-btn"
-                      onClick={() => handleDuplicate(c)}
-                      title="Duplicar concert"
-                    >
-                      📋
-                    </button>
+                      <button
+                        className="admin-icon-btn"
+                        onClick={() => handleDuplicate(c)}
+                        title="Duplicar concert"
+                        aria-label={`Duplicar ${c.title}`}
+                      >
+                        <IconDuplicate />
+                      </button>
 
-                    <button
-                      className="admin-icon-btn delete"
-                      onClick={() => handleDelete(c.id, c.title)}
-                      title="Eliminar concert"
-                    >
-                      🗑️
-                    </button>
+                      <button
+                        className="admin-icon-btn delete"
+                        onClick={() => handleDelete(c.id, c.title)}
+                        title="Eliminar concert"
+                        aria-label={`Eliminar ${c.title}`}
+                      >
+                        <IconTrash />
+                      </button>
+                    </div>
                   </div>
-                </div>
+                </article>
               ))}
             </div>
           )}
@@ -511,17 +684,25 @@ export default function AdminClient() {
         <div className="admin-modal-backdrop" onClick={() => setIsModalOpen(false)}>
           <div className="admin-modal" onClick={(e) => e.stopPropagation()}>
             <div className="admin-modal-header">
-              <h2 className="admin-modal-title">
-                {editingConcert.title ? `Editar: ${editingConcert.title}` : "Afegir Nou Concert"}
-              </h2>
-              <button className="admin-modal-close" onClick={() => setIsModalOpen(false)}>
-                ✕
+              <div>
+                <span className="admin-modal-kicker">Fitxa de Concert</span>
+                <h2 className="admin-modal-title">
+                  {editingConcert.title ? editingConcert.title : "Nou Concert"}
+                </h2>
+              </div>
+              <button
+                type="button"
+                className="admin-modal-close"
+                onClick={() => setIsModalOpen(false)}
+                aria-label="Tancar modal"
+              >
+                <IconClose />
               </button>
             </div>
 
             <form onSubmit={handleSaveModal}>
               <div className="admin-modal-body">
-                {/* COLUMNA ESQUERRA: FORMULARI SENSE CODI */}
+                {/* COLUMNA ESQUERRA: FORMULARI */}
                 <div>
                   <div className="admin-form-group">
                     <label className="admin-label">Títol del Concert o Festival *</label>
@@ -639,7 +820,7 @@ export default function AdminClient() {
                           const st = e.target.value as ConcertStatus;
                           let text = "Entrades a la venda";
                           if (st === "past") text = "Entrades Esgotades";
-                          if (st === "postponed") text = "Ajornat per pluja · Nova data";
+                          if (st === "postponed") text = "Ajornat · Nova data";
                           setEditingConcert({
                             ...editingConcert,
                             status: st,
@@ -654,7 +835,7 @@ export default function AdminClient() {
                     </div>
 
                     <div className="admin-form-group">
-                      <label className="admin-label">Text de l'Estat</label>
+                      <label className="admin-label">Text de l&apos;Estat</label>
                       <input
                         type="text"
                         className="admin-input"
@@ -690,6 +871,7 @@ export default function AdminClient() {
                           className={`admin-swatch ${editingConcert.bg === swatch.bg ? "active" : ""}`}
                           style={{ backgroundColor: swatch.bg }}
                           title={swatch.label}
+                          aria-label={swatch.label}
                           onClick={() =>
                             setEditingConcert({
                               ...editingConcert,
@@ -714,29 +896,25 @@ export default function AdminClient() {
                     />
                   </div>
 
-                  <div style={{ display: "flex", alignItems: "center", gap: "10px", marginTop: "12px" }}>
+                  <label className="admin-checkbox-row" htmlFor="isFeatured">
                     <input
                       type="checkbox"
                       id="isFeatured"
+                      className="admin-checkbox"
                       checked={editingConcert.isFeatured ?? true}
                       onChange={(e) =>
                         setEditingConcert({ ...editingConcert, isFeatured: e.target.checked })
                       }
                     />
-                    <label
-                      htmlFor="isFeatured"
-                      style={{ fontSize: "0.85rem", color: "rgba(255,255,255,0.85)", cursor: "pointer" }}
-                    >
-                      Mostrar com a targeta destacada a la baralla interactiva d'inici
-                    </label>
-                  </div>
+                    <span>Mostrar com a targeta destacada als directes interactius</span>
+                  </label>
                 </div>
 
                 {/* COLUMNA DRETA: LIVE CARD PREVIEW EN TEMPS REAL */}
                 <div className="admin-preview-col">
                   <div className="admin-preview-kicker">
                     <span className="admin-preview-dot" />
-                    Vista prèvia en directe de la targeta
+                    Vista prèvia en directe
                   </div>
 
                   <div className="admin-preview-card-frame">
@@ -746,14 +924,14 @@ export default function AdminClient() {
                         backgroundColor: editingConcert.bg || "#F4A261",
                         color: editingConcert.fg || "#111211",
                         width: "100%",
-                        maxWidth: "320px",
-                        height: "440px",
-                        borderRadius: "18px",
+                        maxWidth: "310px",
+                        height: "420px",
+                        borderRadius: "14px",
                         padding: "24px 22px 20px",
                         display: "flex",
                         flexDirection: "column",
                         justifyContent: "space-between",
-                        boxShadow: "0 18px 40px rgba(0,0,0,0.5)",
+                        boxShadow: "0 20px 44px rgba(0,0,0,0.45)",
                         boxSizing: "border-box",
                         position: "relative",
                       }}
@@ -784,7 +962,7 @@ export default function AdminClient() {
                               fontFamily: "var(--font-maelstrom, var(--font-coign, Georgia, serif))",
                               fontSize: "0.95rem",
                               fontWeight: 700,
-                              opacity: 0.6,
+                              opacity: 0.65,
                             }}
                           >
                             {editingConcert.year || "2026"}
@@ -796,7 +974,7 @@ export default function AdminClient() {
                           style={{
                             fontFamily: "var(--font-grifinito, Georgia, serif)",
                             fontSize: "1.55rem",
-                            lineHeight: 1.15,
+                            lineHeight: 1.12,
                             margin: "0 0 14px",
                             fontWeight: 400,
                           }}
@@ -805,12 +983,34 @@ export default function AdminClient() {
                         </h3>
 
                         {/* Lloc i data */}
-                        <p style={{ fontSize: "0.82rem", margin: "0 0 6px", fontWeight: 600 }}>
-                          📍 {editingConcert.venue || "Recinte"}
-                          {editingConcert.city ? ` · ${editingConcert.city}` : ""}
+                        <p
+                          style={{
+                            fontSize: "0.82rem",
+                            margin: "0 0 6px",
+                            fontWeight: 600,
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "6px",
+                          }}
+                        >
+                          <IconPin />
+                          <span>
+                            {editingConcert.venue || "Recinte"}
+                            {editingConcert.city ? ` · ${editingConcert.city}` : ""}
+                          </span>
                         </p>
-                        <p style={{ fontSize: "0.78rem", margin: "0 0 12px", opacity: 0.75 }}>
-                          🕒 {editingConcert.dateStr || "Data per confirmar"}
+                        <p
+                          style={{
+                            fontSize: "0.78rem",
+                            margin: "0 0 12px",
+                            opacity: 0.78,
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "6px",
+                          }}
+                        >
+                          <IconClock />
+                          <span>{editingConcert.dateStr || "Data per confirmar"}</span>
                         </p>
 
                         {/* Descripció curta */}
@@ -834,7 +1034,7 @@ export default function AdminClient() {
                       {/* Footer targeta */}
                       <div
                         style={{
-                          borderTop: "1px dashed rgba(17,18,17,0.25)",
+                          borderTop: "1px dashed rgba(17,18,17,0.28)",
                           paddingTop: "12px",
                           display: "flex",
                           justifyContent: "space-between",
@@ -853,17 +1053,17 @@ export default function AdminClient() {
                         </span>
                         <div
                           style={{
-                            width: "32px",
-                            height: "32px",
+                            width: "30px",
+                            height: "30px",
                             borderRadius: "50%",
-                            background: "rgba(17,18,17,0.15)",
+                            background: "rgba(17,18,17,0.14)",
                             display: "flex",
                             alignItems: "center",
                             justifyContent: "center",
                             fontSize: "0.85rem",
                           }}
                         >
-                          →
+                          ↗
                         </div>
                       </div>
                     </article>
@@ -890,7 +1090,12 @@ export default function AdminClient() {
       )}
 
       {/* TOAST DE CONFIRMACIÓ */}
-      {toastMessage && <div className="admin-toast">{toastMessage}</div>}
+      {toastMessage && (
+        <div className="admin-toast" role="status">
+          <IconCheck />
+          <span>{toastMessage}</span>
+        </div>
+      )}
     </div>
   );
 }
