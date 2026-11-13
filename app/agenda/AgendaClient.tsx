@@ -1100,22 +1100,40 @@ export default function AgendaClient() {
                 href={activeConcert.ticketUrl || activeConcert.infoUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="agenda-crumble-btn"
+                className="btn a24-btn agenda-crumble-btn"
               >
-                <span>ENTRADES / INFO ↗</span>
+                <div className="btn__divider" />
+                <span className="btn__p-mask">
+                  <span className="btn__p">
+                    <span>ENTRADES / INFO ↗</span>
+                  </span>
+                </span>
+                <div className="btn__divider" />
               </a>
             )}
 
-            <Link href="/contractacio/" className="agenda-crumble-btn">
-              <span>CONTRACTACIÓ ↗</span>
+            <Link href="/contractacio/" className="btn a24-btn agenda-crumble-btn">
+              <div className="btn__divider" />
+              <span className="btn__p-mask">
+                <span className="btn__p">
+                  <span>CONTRACTACIÓ ↗</span>
+                </span>
+              </span>
+              <div className="btn__divider" />
             </Link>
 
             <button
               type="button"
               onClick={() => closeActivePaperRef.current?.()}
-              className="agenda-crumble-btn"
+              className="btn a24-btn agenda-crumble-btn"
             >
-              <span>TANCAR [×]</span>
+              <div className="btn__divider" />
+              <span className="btn__p-mask">
+                <span className="btn__p">
+                  <span>TANCAR [×]</span>
+                </span>
+              </span>
+              <div className="btn__divider" />
             </button>
           </div>
         </div>

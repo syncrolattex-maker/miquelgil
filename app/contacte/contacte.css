@@ -243,79 +243,143 @@
   margin-top: 0.15rem;
 }
 
-/* Bloc 03: Xarxes Socials en graella A24 */
+/* Bloc 03: Xarxes Socials com a icones minimalistes (Escriptori i Mòbil) */
 .contacte-socials-section {
   display: flex;
   flex-direction: column;
-  gap: 0.85rem;
+  gap: 0.75rem;
 }
 
-/* Fila d'icones per a mòbil (oculta per defecte en escriptori) */
 .contacte-socials-icons-row {
-  display: none;
-}
-
-/* Graella de pastilles per a escriptori */
-.contacte-socials-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  border-top: 0.5px solid rgba(17, 17, 17, 0.2);
-  border-left: 0.5px solid rgba(17, 17, 17, 0.2);
-}
-
-.contacte-social-pill {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 0.5rem;
-  padding: 0.65rem 0.85rem;
-  border-right: 0.5px solid rgba(17, 17, 17, 0.2);
-  border-bottom: 0.5px solid rgba(17, 17, 17, 0.2);
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 2px;
+}
+
+.contacte-social-icon-btn {
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  border-radius: 50%;
+  border: 1px solid rgba(17, 17, 17, 0.18);
+  background: rgba(255, 255, 255, 0.85);
   color: #111111;
-  text-decoration: none;
-  background-color: rgba(255, 255, 255, 0.6);
-  transition: background-color 0.2s ease, color 0.2s ease;
-  -webkit-tap-highlight-color: transparent;
-}
-
-.contacte-social-pill:hover {
-  background-color: #111111;
-  color: #ffffff;
-}
-
-.contacte-social-pill__icon {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 15px;
-  height: 15px;
-  opacity: 0.75;
+  text-decoration: none;
+  transition: transform 0.22s cubic-bezier(0.2, 0.8, 0.2, 1), background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  -webkit-tap-highlight-color: transparent;
 }
 
-.contacte-social-pill__icon svg {
-  width: 14px;
-  height: 14px;
+.contacte-social-icon-btn svg {
+  width: 18px;
+  height: 18px;
   fill: currentColor;
+  transition: transform 0.2s ease;
 }
 
-.contacte-social-pill__idx {
-  font-family: 'PP Museum', serif;
-  font-size: 9.5px;
-  letter-spacing: 0.06em;
-  opacity: 0.55;
+@media (hover: hover) and (pointer: fine) {
+  .contacte-social-icon-btn:hover {
+    background: #111111;
+    color: #ffffff;
+    border-color: #111111;
+    transform: translateY(-2px) scale(1.06);
+  }
 }
 
-.contacte-social-pill__name {
-  font-family: 'PP Eiko', serif;
-  font-size: 12.5px;
-  letter-spacing: 0.02em;
-  text-transform: uppercase;
-  flex: 1;
+.contacte-social-icon-btn:active {
+  transform: scale(0.92);
+  background: #111111;
+  color: #ffffff;
 }
 
-.contacte-social-pill__arrow {
-  font-size: 11px;
-  opacity: 0.7;
+/* Botó d'estil A24 amb línia superior i inferior (idèntic als discs de la discografia) */
+.contacte-a24-btn {
+  background: transparent !important;
+  border: none !important;
+  border-radius: 0 !important;
+  padding: 0 !important;
+  margin: 4px 0 0;
+  min-width: 200px;
+  width: fit-content;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  text-decoration: none !important;
+  color: #111111 !important;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.contacte-a24-btn .btn__divider {
+  background-color: #111111;
+  width: 100%;
+  height: 1px;
+  display: block;
+  transition: transform 0.32s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.3s ease;
+}
+
+.contacte-a24-btn .btn__p-mask {
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 0.5rem 1.1rem;
+}
+
+.contacte-a24-btn .btn__p {
+  font-family: 'PP Neue Montreal', sans-serif !important;
+  font-size: 11.5px !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.08em !important;
+  text-transform: uppercase !important;
+  color: #111111 !important;
+  white-space: nowrap;
+  display: block;
+  position: relative;
+}
+
+.contacte-a24-btn .btn__p > span {
+  display: inline-block;
+  position: relative;
+  transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes contacte-btn-roll {
+  0% { transform: translateY(0%); opacity: 1; }
+  42% { transform: translateY(-115%); opacity: 0; }
+  43% { transform: translateY(115%); opacity: 0; }
+  100% { transform: translateY(0%); opacity: 1; }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .contacte-a24-btn:hover {
+    transform: scale(1.02);
+  }
+  .contacte-a24-btn:hover .btn__divider:first-child {
+    transform: translateY(-2px);
+    opacity: 0.9;
+  }
+  .contacte-a24-btn:hover .btn__divider:last-child {
+    transform: translateY(2px);
+    opacity: 0.9;
+  }
+  .contacte-a24-btn:hover .btn__p > span {
+    animation: contacte-btn-roll 0.46s cubic-bezier(0.19, 1, 0.22, 1) forwards;
+  }
+}
+
+.contacte-a24-btn:active {
+  transform: scale(0.975);
 }
 
 /* Peu d'arxiu */
@@ -395,10 +459,6 @@
   .contacte-grid {
     grid-template-columns: 1fr;
     gap: 1.35rem;
-  }
-
-  .contacte-socials-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
@@ -532,11 +592,6 @@
 
   .contacte-socials-section {
     gap: 0.5rem;
-  }
-
-  /* Canvi de pastilles grans a icones circulars en una sola fila compacta */
-  .contacte-socials-grid {
-    display: none;
   }
 
   .contacte-socials-icons-row {

@@ -631,67 +631,121 @@ button {
   margin: clamp(48px, 7vw, 96px) 0;
 }
 
-/* ---------- Buttons ---------- */
+/* ---------- Buttons: Estil Oficial A24 (Línia dalt i baix, mai recuadre) ---------- */
 
-.btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 16px;
-  padding: 15px 26px;
-  border: 1px solid currentColor;
-  border-radius: 999px;
-  font-size: 11px;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  background: transparent;
-  cursor: pointer;
-  transition: background 0.35s var(--ease), color 0.35s var(--ease),
-    gap 0.35s var(--ease);
-}
-
-.btn svg {
-  width: 15px;
-  height: 15px;
-  transition: transform 0.35s var(--ease);
-}
-
-.btn:not(.a24-btn):hover {
-  background: currentColor;
-}
-
-.btn:not(.a24-btn):hover span {
-  color: #000;
-}
-
-.production-page .btn,
-.production-page .btn:hover,
-.production-page .a24-btn,
-.production-page .a24-btn:hover {
+.btn,
+.a24-btn {
   background: transparent !important;
   background-color: transparent !important;
-  border-radius: 0 !important;
   border: none !important;
+  border-radius: 0 !important;
   box-shadow: none !important;
+  outline: none !important;
+  padding: 0 !important;
+  margin: 0;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  text-decoration: none !important;
+  color: inherit;
+  -webkit-appearance: none;
+  appearance: none;
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+  -webkit-tap-highlight-color: transparent;
 }
 
-.btn:hover svg {
-  transform: translateX(5px);
+/* Línia superior i inferior (sense recuadre als laterals) */
+.btn__divider {
+  background-color: currentColor;
+  width: 100%;
+  height: 1px;
+  display: block;
+  transform-origin: center;
+  transition:
+    background-color 0.3s ease,
+    opacity 0.3s ease,
+    transform 0.32s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-.btn--light:hover {
-  color: #000;
+/* Fallback per a botons simples sense elements .btn__divider interns */
+.btn:not(:has(.btn__divider)) {
+  border-top: 1px solid currentColor !important;
+  border-bottom: 1px solid currentColor !important;
+  border-left: none !important;
+  border-right: none !important;
+  padding: 0.7rem 1.6rem !important;
 }
 
-.btn--light:hover span {
-  color: #000;
+.btn__p-mask {
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  padding: 0.75rem 1.6rem;
 }
 
-.btn--dark:hover {
-  color: #fff;
+.btn__p,
+.btn > span:not(.btn__p-mask) {
+  font-family: var(--font-titles, 'GRIFINITO L', serif);
+  font-weight: 500;
+  font-size: clamp(14px, 1.35vw, 19px);
+  line-height: 1.15;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: inherit;
+  white-space: nowrap;
+  display: block;
+  position: relative;
+  transition: color 0.28s ease, opacity 0.28s ease;
 }
 
-.btn--dark:hover span {
-  color: #fff;
+.btn__p > span,
+.btn [data-hover-text] {
+  display: inline-block;
+  position: relative;
+  transition: transform 0.32s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes a24-btn-roll {
+  0% { transform: translateY(0%); opacity: 1; }
+  42% { transform: translateY(-115%); opacity: 0; }
+  43% { transform: translateY(115%); opacity: 0; }
+  100% { transform: translateY(0%); opacity: 1; }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .btn:hover,
+  .a24-btn:hover {
+    transform: scale(1.02);
+  }
+
+  .btn:active,
+  .a24-btn:active {
+    transform: scale(0.975);
+  }
+
+  .btn:hover .btn__divider:first-child,
+  .a24-btn:hover .btn__divider:first-child {
+    transform: translateY(-2px);
+    opacity: 0.85;
+  }
+
+  .btn:hover .btn__divider:last-child,
+  .a24-btn:hover .btn__divider:last-child {
+    transform: translateY(2px);
+    opacity: 0.85;
+  }
+
+  .btn:hover .btn__p > span,
+  .btn:hover [data-hover-text],
+  .a24-btn:hover .btn__p > span {
+    animation: a24-btn-roll 0.46s cubic-bezier(0.19, 1, 0.22, 1) forwards;
+  }
 }
 
 /* ---------- Home ---------- */

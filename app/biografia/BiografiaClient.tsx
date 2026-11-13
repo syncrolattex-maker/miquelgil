@@ -209,9 +209,6 @@ export default function BiografiaClient() {
             <div className="bio-hero__info">
               {/* TÍTOL MONUMENTAL EN MAJÚSCULES AMB PP EIKO */}
               <div className="bio-hero__title">
-                <span className="subheading-xs block mb-2">
-                  ARXIU BIOGRÀFIC OFICIAL — 1973 · 2026
-                </span>
                 <h1 className="heading-l">MIQUEL GIL</h1>
               </div>
 
@@ -412,7 +409,6 @@ export default function BiografiaClient() {
         <div className="bio-synthesis__grid">
           {/* Columna Esquerra: Assaig Biogràfic */}
           <div className="bio-synthesis__left">
-            <span className="subheading-xs">01 / SÍNTESI EDITORIAL</span>
             <p className="paragraph-xl" style={{ margin: 0 }}>
               {biographyIntro}
             </p>
@@ -442,9 +438,6 @@ export default function BiografiaClient() {
             </div>
 
             <div className="bio-pillars-list">
-              <span className="subheading-xs" style={{ marginBottom: "0.5rem" }}>
-                02 / COORDENADES CREATIVES
-              </span>
               <div className="divider-local" />
               {ARTISTIC_PILLARS.map((pillar) => (
                 <div key={pillar.num} className="bio-pillar-item">
@@ -493,7 +486,6 @@ export default function BiografiaClient() {
             <div className="plus-stroke is--ver" />
           </div>
 
-          <span className="subheading-xs">CONTINUAR EXPLORANT L&apos;ARXIU</span>
           <h2 className="heading-l">DISCOGRAFIA OFICIAL</h2>
           <p className="paragraph-m" style={{ maxWidth: "48ch", margin: 0 }}>
             Recorre les 10 produccions essencials de Miquel Gil en edició interactiva: des de Viajero (1988) i Orgànic (2001) fins a Viatger (2024).

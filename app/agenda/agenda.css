@@ -167,9 +167,10 @@
 }
 
 .agenda-crumble-active-bar__name {
-  font-family: 'PP Eiko', serif;
-  font-size: 1rem;
-  letter-spacing: -0.01em;
+  font-family: 'PP Neue Montreal', -apple-system, sans-serif;
+  font-size: 0.95rem;
+  letter-spacing: 0.02em;
+  font-weight: 500;
   text-transform: uppercase;
   color: #ffffff;
   white-space: nowrap;
@@ -178,27 +179,96 @@
 .agenda-crumble-active-bar__actions {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 1rem;
 }
 
 .agenda-crumble-btn {
-  background: transparent;
-  border: 0.5px solid rgba(255, 255, 255, 0.35);
-  padding: 0.45rem 0.85rem;
-  font-family: 'PP Eiko', serif;
-  font-size: 11px;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  color: #ffffff;
-  text-decoration: none;
+  background: transparent !important;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  outline: none !important;
+  padding: 0 !important;
+  margin: 0;
+  min-width: 120px;
+  justify-content: center;
+  align-items: center;
+  display: inline-flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
   cursor: pointer;
-  white-space: nowrap;
-  transition: background-color 0.2s ease, color 0.2s ease;
+  text-decoration: none !important;
+  color: #ffffff !important;
+  -webkit-appearance: none;
+  appearance: none;
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-.agenda-crumble-btn:hover {
+.agenda-crumble-btn .btn__divider {
   background-color: #ffffff;
-  color: #111111;
+  width: 100%;
+  height: 1px;
+  display: block;
+  transform-origin: center;
+  transition:
+    background-color 0.3s ease,
+    opacity 0.3s ease,
+    transform 0.32s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.agenda-crumble-btn .btn__p-mask {
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  padding: 0.45rem 1rem;
+}
+
+.agenda-crumble-btn .btn__p {
+  font-family: 'PP Neue Montreal', sans-serif !important;
+  font-size: 11px !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.08em !important;
+  text-transform: uppercase !important;
+  color: #ffffff !important;
+  white-space: nowrap;
+  display: block;
+  position: relative;
+}
+
+.agenda-crumble-btn .btn__p > span {
+  display: inline-block;
+  position: relative;
+  transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes agenda-btn-roll {
+  0% { transform: translateY(0%); opacity: 1; }
+  42% { transform: translateY(-115%); opacity: 0; }
+  43% { transform: translateY(115%); opacity: 0; }
+  100% { transform: translateY(0%); opacity: 1; }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .agenda-crumble-btn:hover {
+    transform: scale(1.02);
+  }
+  .agenda-crumble-btn:active {
+    transform: scale(0.975);
+  }
+  .agenda-crumble-btn:hover .btn__divider:first-child {
+    transform: translateY(-2px);
+    opacity: 0.9;
+  }
+  .agenda-crumble-btn:hover .btn__divider:last-child {
+    transform: translateY(2px);
+    opacity: 0.9;
+  }
+  .agenda-crumble-btn:hover .btn__p > span {
+    animation: agenda-btn-roll 0.46s cubic-bezier(0.19, 1, 0.22, 1) forwards;
+  }
 }
 
 /* Barra inferior d'accés directe a cada data */
@@ -247,9 +317,10 @@
 }
 
 .agenda-crumble-dock__city {
-  font-family: 'PP Eiko', serif;
+  font-family: 'PP Neue Montreal', -apple-system, sans-serif;
   font-size: 11.5px;
-  letter-spacing: -0.01em;
+  font-weight: 500;
+  letter-spacing: 0.02em;
   text-transform: uppercase;
 }
 

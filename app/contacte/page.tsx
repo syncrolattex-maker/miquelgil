@@ -47,11 +47,8 @@ export default function ContactePage() {
             aria-label="Informació de contacte oficial de Miquel Gil"
           >
             <div className="contacte-editorial-panel">
-              {/* 1. Kicker i Títol Monumental PP Eiko */}
+              {/* 1. Títol Monumental PP Eiko */}
               <div className="contacte-header-block">
-                <span className="contacte-kicker">
-                  05 / CANALS OFICIALS · MANAGEMENT &amp; XARXES
-                </span>
                 <h1 className="contacte-display-title">CONTACTE</h1>
               </div>
 
@@ -101,8 +98,17 @@ export default function ContactePage() {
                   <p className="contacte-cell__role">
                     Duo · Trio · Banda Completa · «Nus»
                   </p>
-                  <Link href="/contractacio/" className="contacte-primary-link">
-                    OBRIR DOSSIER DE CONTRACTACIÓ ↗
+                  <Link
+                    href="/contractacio/"
+                    className="btn a24-btn contacte-a24-btn"
+                  >
+                    <div className="btn__divider" />
+                    <span className="btn__p-mask">
+                      <span className="btn__p">
+                        <span>OBRIR DOSSIER DE CONTRACTACIÓ ↗</span>
+                      </span>
+                    </span>
+                    <div className="btn__divider" />
                   </Link>
                   <span className="contacte-cell__meta">
                     RIDERS TÈCNICS, STAGE PLOTS I SOL·LICITUD DE DATA
@@ -112,7 +118,7 @@ export default function ContactePage() {
 
               <div className="contacte-divider" />
 
-              {/* 4. Xarxes Oficials i Plataformes Digitals */}
+              {/* 4. Xarxes Oficials (Icones minimalistes amb interacció) */}
               <div className="contacte-socials-section">
                 <div className="contacte-cell__head">
                   <span className="contacte-cell__num">03</span>
@@ -121,7 +127,6 @@ export default function ContactePage() {
                   </span>
                 </div>
 
-                {/* FILA D'ICONES MINIMALISTES PER A MÒBIL (CABEN TOTES EN UNA SOLA LÍNIA SENSE SCROLL) */}
                 <div
                   className="contacte-socials-icons-row"
                   aria-label="Xarxes socials de Miquel Gil"
@@ -137,30 +142,6 @@ export default function ContactePage() {
                       title={soc.name}
                     >
                       <SocialIcon icon={soc.icon} />
-                    </a>
-                  ))}
-                </div>
-
-                {/* PASTILLES EDITORIALS EN ESCRIPTORI */}
-                <div className="contacte-socials-grid">
-                  {socials.map((soc, idx) => (
-                    <a
-                      key={soc.name}
-                      href={soc.href}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="contacte-social-pill"
-                    >
-                      <span className="contacte-social-pill__icon">
-                        <SocialIcon icon={soc.icon} />
-                      </span>
-                      <span className="contacte-social-pill__idx">
-                        0{idx + 1}
-                      </span>
-                      <span className="contacte-social-pill__name">
-                        {soc.name}
-                      </span>
-                      <span className="contacte-social-pill__arrow">↗</span>
                     </a>
                   ))}
                 </div>

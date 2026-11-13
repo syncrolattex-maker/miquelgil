@@ -213,11 +213,11 @@ export function renderConcertPaperCanvas(
 
   // 6. Editorial Synopsis / Description
   const descLabelY = divDescY + 44;
-  ctx.fillStyle = "rgba(17, 17, 17, 0.52)";
-  ctx.font = `400 20px ${FONT_SUB}`;
+  ctx.fillStyle = "rgba(17, 17, 17, 0.65)";
+  ctx.font = `500 20px ${FONT_TEXT}`;
   ctx.fillText("SINOPSI DEL CONCERT & REPERTORI", padX, descLabelY);
 
-  ctx.fillStyle = "rgba(17, 17, 17, 0.88)";
+  ctx.fillStyle = "#000000";
   ctx.font = `400 28px ${FONT_TEXT}`;
   drawWrappedText(
     ctx,

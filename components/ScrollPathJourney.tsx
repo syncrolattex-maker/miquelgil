@@ -882,7 +882,6 @@ export default function ScrollPathJourney() {
       {/* Capçalera editorial A24 sobre fons clar (només el bloc CINC ETAPES, UNA VIDA DE MÚSICA) */}
       <header className="journey-head">
         <div className="journey-head__title">
-          <p className="journey-kicker">03 / CRONOLOGIA INTERACTIVA (1956 — 2026)</p>
           <h2>CINC ETAPES, UNA VIDA DE MÚSICA</h2>
         </div>
         <div className="journey-head__intro">
