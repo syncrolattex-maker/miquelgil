@@ -1,7 +1,8 @@
 /* ============================================================
-   /prova — ORDERED DITHERING CLOSE-UP REVEAL (TEST PAGE)
-   Estètica inspirada en Damar Pramudita (Ordered Dithering)
-   adaptada a pantalla completa editorial Miquel Gil
+   /prova — ORDERED DITHERING (DAMAR PRAMUDITA / @damarberlari)
+   Exact match amb https://codepen.io/damarberlari/full/LENBEzy
+   i visualizing-dithering-codrops, acabant en pantalla completa
+   i botó editorial Miquel Gil (.btn.a24-btn amb línies dalt/baix)
    ============================================================ */
 
 .prova-screen {
@@ -31,8 +32,8 @@
   opacity: 0;
   background: linear-gradient(
     to top,
-    rgba(0, 0, 0, 0.56) 0%,
-    rgba(0, 0, 0, 0) 38%
+    rgba(0, 0, 0, 0.6) 0%,
+    rgba(0, 0, 0, 0) 36%
   );
   transition: opacity 0.8s ease;
 }
@@ -41,17 +42,17 @@
   opacity: 1;
 }
 
-/* Botó editorial central "Entrar a la web" un cop finalitzada l'animació */
+/* Emplaçament del botó central un cop finalitzada l'animació */
 .prova-cta-wrap {
   position: absolute;
   left: 50%;
-  bottom: clamp(2.75rem, 8vh, 5.5rem);
+  bottom: clamp(3rem, 9vh, 6rem);
   transform: translateX(-50%);
   z-index: 20;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.9rem;
+  gap: 1.1rem;
   opacity: 0;
   pointer-events: none;
 }
@@ -60,64 +61,42 @@
   pointer-events: auto;
 }
 
-.prova-enter-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.65rem;
-  padding: 1rem 2.4rem;
-  border: 1px solid rgba(255, 255, 255, 0.72);
-  border-radius: 9999px;
-  background: rgba(10, 10, 9, 0.52);
-  -webkit-backdrop-filter: blur(12px);
+/* Botó A24 unificat segons les regles de disseny del lloc (sense requadre, línia dalt i baix) */
+.prova-a24-btn {
+  color: #ffffff !important;
+}
+
+.prova-a24-btn .btn__p-mask {
+  padding: 0.85rem 2.6rem;
+  background: rgba(0, 0, 0, 0.35);
   backdrop-filter: blur(12px);
-  color: #ffffff;
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.prova-a24-btn .btn__p {
   font-family: var(--font-titles, 'PP Eiko', serif);
-  font-size: clamp(16px, 1.5vw, 21px);
-  font-weight: 500;
+  font-size: clamp(15px, 1.3vw, 19px);
   letter-spacing: 0.08em;
-  text-transform: uppercase;
-  text-decoration: none;
-  white-space: nowrap;
-  cursor: pointer;
-  transition:
-    background-color 0.3s ease,
-    color 0.3s ease,
-    border-color 0.3s ease,
-    transform 0.3s ease,
-    box-shadow 0.3s ease;
+  color: #ffffff;
 }
 
-.prova-enter-btn:hover {
-  background: #ffffff;
-  color: #080807;
-  border-color: #ffffff;
-  transform: translateY(-2px) scale(1.02);
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
+.prova-a24-btn .btn__divider {
+  background-color: rgba(255, 255, 255, 0.85);
 }
 
-.prova-enter-arrow {
-  display: inline-block;
-  transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-.prova-enter-btn:hover .prova-enter-arrow {
-  transform: translate(3px, -3px);
-}
-
-.prova-enter-btn:active {
-  transform: scale(0.97);
+.prova-a24-btn:hover .btn__divider {
+  background-color: #ffffff;
 }
 
 .prova-replay-btn {
   appearance: none;
   background: transparent;
   border: none;
-  padding: 0.35rem 0.75rem;
-  color: rgba(244, 242, 236, 0.65);
-  font-family: var(--font-subtitles, 'PP Museum', serif);
-  font-size: 10.5px;
-  letter-spacing: 0.14em;
+  padding: 0.4rem 0.8rem;
+  color: rgba(244, 242, 236, 0.7);
+  font-family: var(--font-body, 'Neue Montreal', sans-serif);
+  font-size: 11px;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
   cursor: pointer;
   transition: color 0.25s ease;
@@ -129,13 +108,13 @@
 
 @media (max-width: 768px) {
   .prova-cta-wrap {
-    bottom: calc(2.5rem + env(safe-area-inset-bottom, 0px));
+    bottom: calc(2.75rem + env(safe-area-inset-bottom, 0px));
     width: max-content;
     max-width: calc(100vw - 2rem);
   }
 
-  .prova-enter-btn {
-    padding: 0.9rem 1.85rem;
+  .prova-a24-btn {
+    padding: 0.85rem 2rem;
     font-size: clamp(14px, 4vw, 17px);
   }
 }
