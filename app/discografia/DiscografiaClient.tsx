@@ -2081,16 +2081,28 @@ export default function DiscografiaClient() {
         }
       });
 
-      // 1. Animació cinematogràfica del CD actiu: gira i avança cap al primer pla mentre s'obre
+      // 1. Animació del CD actiu: gir ràpid sobre si mateix mentre disminueix de mida (efecte original preferit)
       if (activeHolder) {
         const u = activeHolder.userData as DiscHolderUserData;
         exitTl.to(
           u,
           {
-            dragSpinY: u.dragSpinY + Math.PI * 2.5,
+            dragSpinY: u.dragSpinY + Math.PI * 4,
             dragSpinX: 0,
-            duration: 0.78,
-            ease: 'power2.inOut'
+            duration: 0.68,
+            ease: 'power2.in'
+          },
+          0
+        );
+
+        exitTl.to(
+          activeHolder.scale,
+          {
+            x: 0.001,
+            y: 0.001,
+            z: 0.001,
+            duration: 0.65,
+            ease: 'power3.in'
           },
           0
         );
@@ -2098,60 +2110,25 @@ export default function DiscografiaClient() {
         exitTl.to(
           activeHolder.position,
           {
-            x: 0,
-            y: 0.04,
-            z: 2.15,
-            duration: 0.76,
-            ease: 'power2.inOut'
-          },
-          0
-        );
-
-        exitTl.to(
-          activeHolder.scale,
-          {
-            x: 1.35,
-            y: 1.35,
-            z: 1.35,
-            duration: 0.4,
-            ease: 'power2.out'
-          },
-          0
-        );
-
-        exitTl.to(
-          activeHolder.scale,
-          {
-            x: 1.9,
-            y: 1.9,
-            z: 1.9,
-            duration: 0.38,
+            y: activeHolder.position.y + 0.12,
+            z: activeHolder.position.z + 0.35,
+            duration: 0.65,
             ease: 'power2.in'
           },
-          0.4
+          0
         );
       }
 
-      // 2. Els altres discs s'aparten lateralment i desapareixen
+      // 2. Els altres discs desapareixen ràpidament
       discHolders.forEach((holder, idx) => {
         if (idx !== W) {
-          const dir = Math.sign(idx - W) || 1;
-          exitTl.to(
-            holder.position,
-            {
-              x: holder.position.x + dir * 1.6,
-              duration: 0.42,
-              ease: 'power2.in'
-            },
-            0
-          );
           exitTl.to(
             holder.scale,
             {
               x: 0,
               y: 0,
               z: 0,
-              duration: 0.36,
+              duration: 0.35,
               ease: 'power2.in'
             },
             0
@@ -2161,17 +2138,17 @@ export default function DiscografiaClient() {
 
       // 3. Desvaniment suau de la interfície editorial
       exitTl.to(
-        ['#left-editorial-panel', '#ui-reviews-container', '[data-disc-prev]', '[data-disc-next]'],
+        ['#left-editorial-panel', '#ui-reviews-container', '[data-disc-prev]', '[data-disc-next]', 'header', 'footer'],
         {
           opacity: 0,
-          y: -14,
-          duration: 0.34,
+          y: -10,
+          duration: 0.32,
           ease: 'power2.out'
         },
         0
       );
 
-      // 4. Fundit en blanc nítid per damunt de tot cap a la pàgina de la fitxa del CD
+      // 4. Fundit en blanc cap a la pàgina de la fitxa del CD
       if (exitOverlay) {
         exitTl.fromTo(
           exitOverlay,
@@ -2181,7 +2158,7 @@ export default function DiscografiaClient() {
             duration: 0.42,
             ease: 'power2.inOut'
           },
-          0.38
+          0.26
         );
       }
     }
