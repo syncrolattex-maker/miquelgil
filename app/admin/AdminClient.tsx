@@ -494,9 +494,14 @@ export default function AdminClient() {
               {authError && <p className="admin-login-error">{authError}</p>}
             </div>
 
-            <button type="submit" className="admin-login-btn">
-              <span>Entrar a l&apos;Estudi</span>
-              <span aria-hidden="true">↗</span>
+            <button type="submit" className="btn a24-btn admin-login-btn">
+              <span className="btn__divider" aria-hidden="true" />
+              <span className="btn__p-mask">
+                <span className="btn__p">
+                  <span>Entrar a l&apos;Estudi ↗</span>
+                </span>
+              </span>
+              <span className="btn__divider" aria-hidden="true" />
             </button>
           </form>
 
@@ -505,8 +510,14 @@ export default function AdminClient() {
           </p>
 
           <div className="admin-login-footer">
-            <Link href="/directes" className="admin-back-link">
-              ← Tornar als Directes públics
+            <Link href="/directes" className="btn a24-btn admin-back-link">
+              <span className="btn__divider" aria-hidden="true" />
+              <span className="btn__p-mask">
+                <span className="btn__p">
+                  <span>← Tornar als Directes públics</span>
+                </span>
+              </span>
+              <span className="btn__divider" aria-hidden="true" />
             </Link>
           </div>
 
@@ -554,13 +565,24 @@ export default function AdminClient() {
               </span>
             </div>
 
-            <Link href="/directes" target="_blank" className="admin-nav-btn">
-              <span>Veure Directes</span>
-              <span aria-hidden="true">↗</span>
+            <Link href="/directes" target="_blank" className="btn a24-btn admin-nav-btn">
+              <span className="btn__divider" aria-hidden="true" />
+              <span className="btn__p-mask">
+                <span className="btn__p">
+                  <span>Veure Directes ↗</span>
+                </span>
+              </span>
+              <span className="btn__divider" aria-hidden="true" />
             </Link>
 
-            <button onClick={handleLogout} className="admin-nav-btn logout">
-              Eixir
+            <button onClick={handleLogout} className="btn a24-btn admin-nav-btn admin-logout-btn">
+              <span className="btn__divider" aria-hidden="true" />
+              <span className="btn__p-mask">
+                <span className="btn__p">
+                  <span>Eixir</span>
+                </span>
+              </span>
+              <span className="btn__divider" aria-hidden="true" />
             </button>
           </div>
         </div>
@@ -574,9 +596,14 @@ export default function AdminClient() {
             <p className="admin-page-kicker">Arxiu &amp; Programació d&apos;Escenaris 2026 / 27</p>
             <h2 className="admin-page-heading">Agenda de Directes</h2>
           </div>
-          <button onClick={handleOpenCreate} className="admin-create-btn">
-            <IconPlus />
-            <span>Nou Concert</span>
+          <button onClick={handleOpenCreate} className="btn a24-btn admin-create-btn">
+            <span className="btn__divider" aria-hidden="true" />
+            <span className="btn__p-mask">
+              <span className="btn__p">
+                <span>+ Nou Concert</span>
+              </span>
+            </span>
+            <span className="btn__divider" aria-hidden="true" />
           </button>
         </section>
 
@@ -637,38 +664,67 @@ export default function AdminClient() {
 
           <div className="admin-filter-tabs" role="tablist" aria-label="Filtrar per estat">
             <button
-              className={`admin-filter-tab ${statusFilter === "all" ? "active" : ""}`}
+              className={`btn a24-btn admin-filter-tab ${statusFilter === "all" ? "active" : ""}`}
               onClick={() => setStatusFilter("all")}
             >
-              Totes ({concerts.length})
+              <span className="btn__divider" aria-hidden="true" />
+              <span className="btn__p-mask">
+                <span className="btn__p">
+                  <span>Totes ({concerts.length})</span>
+                </span>
+              </span>
+              <span className="btn__divider" aria-hidden="true" />
             </button>
             <button
-              className={`admin-filter-tab ${statusFilter === "upcoming" ? "active" : ""}`}
+              className={`btn a24-btn admin-filter-tab ${statusFilter === "upcoming" ? "active" : ""}`}
               onClick={() => setStatusFilter("upcoming")}
             >
-              A la venda ({stats.upcoming})
+              <span className="btn__divider" aria-hidden="true" />
+              <span className="btn__p-mask">
+                <span className="btn__p">
+                  <span>A la venda ({stats.upcoming})</span>
+                </span>
+              </span>
+              <span className="btn__divider" aria-hidden="true" />
             </button>
             <button
-              className={`admin-filter-tab ${statusFilter === "postponed" ? "active" : ""}`}
+              className={`btn a24-btn admin-filter-tab ${statusFilter === "postponed" ? "active" : ""}`}
               onClick={() => setStatusFilter("postponed")}
             >
-              Ajornats ({stats.postponed})
+              <span className="btn__divider" aria-hidden="true" />
+              <span className="btn__p-mask">
+                <span className="btn__p">
+                  <span>Ajornats ({stats.postponed})</span>
+                </span>
+              </span>
+              <span className="btn__divider" aria-hidden="true" />
             </button>
             <button
-              className={`admin-filter-tab ${statusFilter === "past" ? "active" : ""}`}
+              className={`btn a24-btn admin-filter-tab ${statusFilter === "past" ? "active" : ""}`}
               onClick={() => setStatusFilter("past")}
             >
-              Històrics ({stats.past})
+              <span className="btn__divider" aria-hidden="true" />
+              <span className="btn__p-mask">
+                <span className="btn__p">
+                  <span>Històrics ({stats.past})</span>
+                </span>
+              </span>
+              <span className="btn__divider" aria-hidden="true" />
             </button>
           </div>
 
           <button
             onClick={handleResetDefaults}
-            className="admin-nav-btn admin-reset-btn"
+            className="btn a24-btn admin-reset-btn"
             title="Restablir concerts inicials oficials"
           >
-            <IconReset />
-            <span>Restablir</span>
+            <span className="btn__divider" aria-hidden="true" />
+            <span className="btn__p-mask">
+              <span className="btn__p">
+                <span>↺ Restablir</span>
+              </span>
+            </span>
+            <span className="btn__divider" aria-hidden="true" />
           </button>
         </section>
 
@@ -740,11 +796,17 @@ export default function AdminClient() {
                     {/* Accions de la fitxa */}
                     <div className="admin-item-actions">
                       <button
-                        className={`admin-status-toggle ${c.status}`}
+                        className={`btn a24-btn admin-status-toggle ${c.status}`}
                         onClick={() => handleQuickStatus(c)}
                         title="Fes clic per canviar d'estat a la web"
                       >
-                        {c.statusText || c.status}
+                        <span className="btn__divider" aria-hidden="true" />
+                        <span className="btn__p-mask">
+                          <span className="btn__p">
+                            <span>{c.statusText || c.status}</span>
+                          </span>
+                        </span>
+                        <span className="btn__divider" aria-hidden="true" />
                       </button>
 
                       <div className="admin-item-icon-group">
@@ -1019,14 +1081,25 @@ export default function AdminClient() {
               <div className="admin-modal-footer">
                 <button
                   type="button"
-                  className="admin-btn-secondary"
+                  className="btn a24-btn admin-modal-btn admin-modal-btn-sec"
                   onClick={() => setIsModalOpen(false)}
                 >
-                  Cancel·lar
+                  <span className="btn__divider" aria-hidden="true" />
+                  <span className="btn__p-mask">
+                    <span className="btn__p">
+                      <span>Cancel·lar</span>
+                    </span>
+                  </span>
+                  <span className="btn__divider" aria-hidden="true" />
                 </button>
-                <button type="submit" className="admin-btn-primary">
-                  <span>Guardar Fitxa</span>
-                  <IconCheck />
+                <button type="submit" className="btn a24-btn admin-modal-btn admin-modal-btn-pri">
+                  <span className="btn__divider" aria-hidden="true" />
+                  <span className="btn__p-mask">
+                    <span className="btn__p">
+                      <span>Guardar Fitxa ✓</span>
+                    </span>
+                  </span>
+                  <span className="btn__divider" aria-hidden="true" />
                 </button>
               </div>
             </form>
