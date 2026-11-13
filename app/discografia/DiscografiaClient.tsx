@@ -1715,6 +1715,7 @@ export default function DiscografiaClient() {
       pointerType: 'mouse',
       startX: 0,
       startY: 0,
+      startTime: 0,
       lastX: 0,
       lastY: 0,
       lastTime: 0,
@@ -1736,14 +1737,18 @@ export default function DiscografiaClient() {
       if (isInteractiveElement(e.target)) return;
 
       const hit = updateRaycasterFromEvent(e.clientX, e.clientY);
+      const isTouch = e.pointerType !== 'mouse';
+      const now = performance.now();
+
       dragState.active = true;
       dragState.pointerId = e.pointerId;
       dragState.pointerType = e.pointerType || 'mouse';
       dragState.startX = e.clientX;
       dragState.startY = e.clientY;
+      dragState.startTime = now;
       dragState.lastX = e.clientX;
       dragState.lastY = e.clientY;
-      dragState.lastTime = performance.now();
+      dragState.lastTime = now;
       dragState.movedBeyondThreshold = false;
       dragState.velocity = 0;
       dragState.spinVelocityY = 0;
@@ -1751,6 +1756,39 @@ export default function DiscografiaClient() {
       // Modo 1: Pulsar sobre el disco activo -> gira sobre sí mismo en X/Y
       // Modo 2: Pulsar en otro sitio -> mueve el carrusel (L)
       dragState.mode = hit.index === W ? 'disc-spin' : 'carousel';
+
+      // Activació immediata de l'animació de hover, flotabilitat Zero-G i Scribble en mantenir el dit sobre el CD
+      if (hit.index >= 0) {
+        const prevHovered = hoveredDiscIndex;
+        hoveredDiscIndex = hit.index;
+
+        if (prevHovered >= 0 && prevHovered !== hoveredDiscIndex && discHolders[prevHovered]) {
+          const prevU = discHolders[prevHovered].userData as DiscHolderUserData;
+          prevU.hoverTiltTargetX = 0;
+          prevU.hoverTiltTargetY = 0;
+        }
+
+        if (discHolders[hoveredDiscIndex]) {
+          triggerSingleZeroGImpulse(discHolders[hoveredDiscIndex], hoveredDiscIndex === W);
+        }
+
+        if (hoveredDiscIndex === W) {
+          keyboardNavMode = false;
+          setScribbleActiveIntent(true);
+        } else if (prevHovered === W && !keyboardNavMode) {
+          setScribbleActiveIntent(false);
+        }
+
+        if (hit.localPt && discHolders[hoveredDiscIndex]) {
+          const u = discHolders[hoveredDiscIndex].userData as DiscHolderUserData;
+          const tiltScale =
+            hoveredDiscIndex === W ? SPEC.hoverTiltStrength : SPEC.hoverTiltStrength * 1.15;
+          u.hoverTiltTargetX = -hit.localPt.y * tiltScale;
+          u.hoverTiltTargetY = hit.localPt.x * tiltScale;
+        }
+
+        container.style.cursor = 'pointer';
+      }
 
       if (activeTween) {
         activeTween.kill();
@@ -1817,12 +1855,35 @@ export default function DiscografiaClient() {
 
       if (!dragState.movedBeyondThreshold) {
         const startThreshold = dragState.pointerType === 'mouse' ? SPEC.dragStartDistance : 12;
-        if (dist < startThreshold) return;
+        if (dist < startThreshold) {
+          // Mantenir el dit sobre el CD: actualitzem la inclinació magnètica segons el punt de contacte
+          if (hoveredDiscIndex >= 0 && discHolders[hoveredDiscIndex]) {
+            const hit = updateRaycasterFromEvent(e.clientX, e.clientY);
+            if (hit.index === hoveredDiscIndex && hit.localPt) {
+              const u = discHolders[hoveredDiscIndex].userData as DiscHolderUserData;
+              const tiltScale =
+                hoveredDiscIndex === W ? SPEC.hoverTiltStrength : SPEC.hoverTiltStrength * 1.15;
+              u.hoverTiltTargetX = -hit.localPt.y * tiltScale;
+              u.hoverTiltTargetY = hit.localPt.x * tiltScale;
+            }
+          }
+          return;
+        }
         dragState.movedBeyondThreshold = true;
 
         // En táctil, si el gesto es más horizontal que vertical, se desactiva el giro del disco y manda el carrusel
         if (dragState.pointerType !== 'mouse' && Math.abs(dxTotal) > Math.abs(dyTotal)) {
           dragState.mode = 'carousel';
+          // Quan l'usuari passa a arrossegar el carrusel horitzontalment, apaguem el scribble i l'estat hover
+          if (hoveredDiscIndex >= 0) {
+            if (discHolders[hoveredDiscIndex]) {
+              const u = discHolders[hoveredDiscIndex].userData as DiscHolderUserData;
+              u.hoverTiltTargetX = 0;
+              u.hoverTiltTargetY = 0;
+            }
+            hoveredDiscIndex = -1;
+            setScribbleActiveIntent(false);
+          }
         }
       }
 
@@ -1871,11 +1932,32 @@ export default function DiscografiaClient() {
 
     const endPointerDrag = (e: PointerEvent) => {
       if (!dragState.active || e.pointerId !== dragState.pointerId) return;
+      const isTouch = dragState.pointerType !== 'mouse';
+      const holdDuration = performance.now() - dragState.startTime;
       dragState.active = false;
 
       try {
         container.releasePointerCapture(e.pointerId);
       } catch (_) {}
+
+      // Si en versió mòbil l'usuari ha mantingut el dit sobre el CD (> 280ms) per admirar l'animació,
+      // suprimim el clic perquè l'acció no obri sobtadament la fitxa en aixecar el dit:
+      if (isTouch && holdDuration > 280) {
+        suppressClickUntil = performance.now() + 250;
+      }
+
+      // En aixecar el dit en dispositius tàctils, finalitzem l'estat de hover i scribble de forma suau:
+      if (isTouch) {
+        if (hoveredDiscIndex >= 0 && discHolders[hoveredDiscIndex]) {
+          const u = discHolders[hoveredDiscIndex].userData as DiscHolderUserData;
+          u.hoverTiltTargetX = 0;
+          u.hoverTiltTargetY = 0;
+        }
+        hoveredDiscIndex = -1;
+        if (!keyboardNavMode) {
+          setScribbleActiveIntent(false);
+        }
+      }
 
       if (!dragState.movedBeyondThreshold) return;
 
