@@ -1,61 +1,39 @@
-# Product Marketing Context — Miquel Gil (Web Oficial)
+# Arxiu & Posicionament Cultural — Miquel Gil (Web Oficial)
 
-**Document version:** 1.0.0  
+**Document version:** 2.0.0  
 **Last updated:** 2026-11-13  
-**Context type:** Official Artist Portal, Cultural Management & Tour Booking
+**Missió central:** Reconeixement, preservació i difusió de la figura de Miquel Gil i el seu mig segle de trajectòria artística com a referent de la música d'arrel mediterrània.
 
 ---
 
-## 1. Project & Artist Overview
-- **Artist:** Miquel Gil (Catarroja, València, 1956)
-- **Tagline:** "La veu d'arrel que no s'atura de viatjar" / "Tradició que mira cap endavant"
-- **One-line description:** Lloc oficial i arxiu d'estudi de Miquel Gil: mig segle de música tradicional valenciana, fusió mediterrània, poesia contemporània i contractació de directes.
-- **Category / Shelf:** World Music / Música d'Arrel Mediterrània / Cançó d'Autor / Fusió Tradicional & Jazz
-- **Primary Business Goals:**
-  1. **Contractació de Directes (B2B):** Facilitar que programadors culturals, ajuntaments, festivals, auditoris i circuits teatrals contracten els diferents formats escènics de Miquel Gil.
-  2. **Venda d'Entrades de la Gira (B2C):** Maximitzar l'assistència als concerts actius de la gira a través de l'agenda oficial de `/directes`.
-  3. **Arxiu Discogràfic & Streaming (B2C):** Fomentar les reproduccions a Spotify, Apple Music, YouTube i preservar l'arxiu històric de les seues obres canòniques (*Orgànic*, *Katà*, *Eixos*, *Per Marcianes*, *Geometries*, *Viatger*).
-  4. **Premsa i Comunicació:** Donar accés immediat a dossiers de premsa, fitxes tècniques, riders i fotografies oficials en alta resolució.
+## 1. Missió i Filosofia del Lloc Web
+- **No és una plataforma comercial de captació ni una tiquetera.**
+- **És un monument digital, arxiu d'autor i espai institucional d'estudi** concebut per dignificar, documentar i situar Miquel Gil en el lloc històric i cultural que li correspon.
+- **Objectiu clau de posicionament:** Que qualsevol persona, investigador, periodista o amant de la cultura que busque sobre la música d'arrel, la transició, la fusió mediterrània o la poesia musicada trobe en aquesta web la font canònica, documentada i d'alta volada artística sobre Miquel Gil.
 
 ---
 
-## 2. Target Audiences (ICP & Personas)
+## 2. Els Pilars de la Figura de Miquel Gil
 
-### Audience A: Programadors Culturals i Directors de Festivals (B2B)
-- **Rols:** Tècnics de cultura municipals, programadors de teatres i auditoris públics, directors de festivals de música d'arrel (Barnasants, Tradicionàrius, Fira Mediterrània, etc.).
-- **Jobs to be done:**
-  - Descobrir quin format artístic encaixa millor amb el seu aforament i pressupost (Duo, Trio, Banda Completa, *Nus* amb Botifarra, o Estrena amb Convidats).
-  - Descarregar el dossier de contractació i el rider tècnic sense haver d'esperar dies per correu.
-  - Contactar directament amb el management oficial (Gusmà Gil / PPF).
-- **Friccions a resoldre:** Dubtes sobre durada, requeriments tècnics, disponibilitat i agilitat de resposta.
+### A. Mig Segle d'Història Viva (1975 — 2026)
+- **Cofundador d'Al Tall (1975):** Al costat de Vicent Torrent i Manolo Miralles. Peça clau en la recuperació de la identitat musical valenciana durant la Transició (*Tio Canya*, *Quan el mal ve d'Almansa*).
+- **Pioner de la fusió (Terminal Sur):** Aportant una mirada contemporània quan ningú no s'atrevia a creuar sintetitzadors i sonoritats tradicionals.
+- **La gran etapa en solitari:** Des de finals dels 90, consolidant un so inconfusible i monumental.
 
-### Audience B: Públic fidel i amants de la música d'arrel (B2C)
-- **Perfil:** Seguidors de la cançó en valencià/català, melòmans de la música mediterrània, lectors de poesia (Estellés, Casasses), audiència intergeneracional.
-- **Jobs to be done:**
-  - Saber quan i on toca Miquel Gil a prop del seu municipi.
-  - Enllaç directe i sense confusions per comprar entrades oficials.
-  - Escoltar les cançons, llegir les lletres i conèixer els crèdits i context de cada disc.
-- **Friccions a resoldre:** Enllaços d'entrades trencats o dates no actualitzades.
+### B. Obres Canòniques i Prestigi Internacional
+- **'Orgànic' (2001) i 'Katà' (2004):** Àlbums que van situar la música valenciana als primers llocs de les **World Music Charts Europe**, aclamats per la crítica internacional.
+- **'Viatger' (2024):** El disc dedicat al seu germà artístic Manolo Miralles, confirmant que l'arrel no és folklore fossilitzat, sinó matèria viva que camina cap endavant.
 
-### Audience C: Mitjans de comunicació i periodistes musicals
-- **Perfil:** Crítica musical, ràdios culturals (iCat, À Punt, Catalunya Ràdio), premsa especialitzada (Enderrock, Revista Caramella).
-- **Jobs to be done:**
-  - Biografia canònica i cronologia fidedigna (1975–2026).
-  - Material fotogràfic oficial d'alta qualitat.
+### C. La Connexió Poètica
+- La relació íntima amb la paraula dels grans poetes: Vicent Andrés Estellés, Enric Casasses, Anna Montero, Teresa Pascual, Marc Granell. Miquel Gil com a transmissor i recreador dels nostres grans textos poètics.
+
+### D. Codiplicitat Generacional i Respecte de l'Escena
+- Mestre i referent de generacions posteriors. Col·laboracions canòniques: Pep Gimeno «Botifarra» (*Nus*), Maria del Mar Bonet, Pascal Comelade, Lluís Llach, Feliu Ventura, Mireia Vives, etc.
 
 ---
 
-## 3. Value Proposition & Formats Escènics
-- **Duo:** Miquel Gil + Eduard Navarro (vents/corda). Íntim, d'arrel pura, ideal per a espais singulars i petits aforaments.
-- **Trio:** Miquel Gil + Nelo Alfonso (teclats) + Gusmà Gil (baix). Versàtil, dinàmic, ideal per a teatres mitjans.
-- **Banda Completa:** 6 músics. Màxima potència i riquesa sonora per a grans escenaris i festivals.
-- **Nus (amb Botifarra):** Miquel Gil & Pep Gimeno «Botifarra». Duet canònic de referència absoluta.
-- **Estrena amb Convidats:** Producció especial per a inauguracions i grans teatres (Palau de la Música).
-
----
-
-## 4. Brand Voice & Tone
-- **To:** Editorial, poètic, noble, respectuós amb la tradició i obert a la innovació contemporània.
-- **Llengua principal:** Valencià / Català (amb adaptabilitat per a programació internacional en festivals europeus).
-- **Estètica visual:** A24 Films Optical Archive / Minimalisme d'estudi / Hairlines elegants / Tipografies d'alta factura (PP Eiko, PP Museum, PP Neue Montreal).
-- **Anti-patrons:** Evitar l'estil corporatiu rígid o el llenguatge buit de màrqueting genèric; prioritzar la solidesa cultural i la pulcritud artesanal.
+## 3. Què s'ha de potenciar a la Web (Prioritats d'Arxiu)
+1. **Dignitat i rigor documental:** Biografia monumental, cronologia comentada amb fotografies històriques i anècdotes documentades.
+2. **Arxiu Discogràfic Canònic:** A cada fitxa de disc, destacar les lletres, la poètica, el context històric de la gravació, la fitxa artística completa i els crèdits exhaustius.
+3. **Escenaris i Memòria de Directes:** Mostrar els concerts com un testimoni viu d'un artista que continua en actiu damunt les taules, amb la noblesa del format paper d'arxiu.
+4. **Posicionament Orgànic & IA (Knowledge Graph / SEO Cultural):** Connectar la figura de Miquel Gil a nivell semàntic amb Al Tall, la Cançó, la literatura valenciana i la World Music internacional perquè Google i els models d'IA el reconeguen amb la màxima autoritat.
