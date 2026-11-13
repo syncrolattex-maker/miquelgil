@@ -246,6 +246,7 @@ export default function AdminClient() {
   const [passwordInput, setPasswordInput] = useState<string>("");
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [authError, setAuthError] = useState<string>("");
+  const [isShaking, setIsShaking] = useState<boolean>(false);
 
   const [concerts, setConcerts] = useState<Concert[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -313,6 +314,8 @@ export default function AdminClient() {
       setAuthError("");
     } else {
       setAuthError("Clau d'accés incorrecta. Torna-ho a provar.");
+      setIsShaking(true);
+      setTimeout(() => setIsShaking(false), 500);
     }
   };
 
@@ -456,7 +459,7 @@ export default function AdminClient() {
   if (!isAuthenticated) {
     return (
       <main className="admin-login-wrap">
-        <div className="admin-login-card">
+        <div className={`admin-login-card ${isShaking ? "is-shaking" : ""}`}>
           <div className="admin-corner-row" aria-hidden="true">
             <span>+</span>
             <span>+</span>
@@ -675,52 +678,36 @@ export default function AdminClient() {
 
           <div className="admin-filter-tabs" role="tablist" aria-label="Filtrar per estat">
             <button
-              className={`btn a24-btn admin-filter-tab ${statusFilter === "all" ? "active" : ""}`}
+              role="tab"
+              aria-selected={statusFilter === "all"}
+              className={`admin-filter-tab ${statusFilter === "all" ? "active" : ""}`}
               onClick={() => setStatusFilter("all")}
             >
-              <span className="btn__divider" aria-hidden="true" />
-              <span className="btn__p-mask">
-                <span className="btn__p">
-                  <span>Totes ({concerts.length})</span>
-                </span>
-              </span>
-              <span className="btn__divider" aria-hidden="true" />
+              Totes ({concerts.length})
             </button>
             <button
-              className={`btn a24-btn admin-filter-tab ${statusFilter === "upcoming" ? "active" : ""}`}
+              role="tab"
+              aria-selected={statusFilter === "upcoming"}
+              className={`admin-filter-tab ${statusFilter === "upcoming" ? "active" : ""}`}
               onClick={() => setStatusFilter("upcoming")}
             >
-              <span className="btn__divider" aria-hidden="true" />
-              <span className="btn__p-mask">
-                <span className="btn__p">
-                  <span>A la venda ({stats.upcoming})</span>
-                </span>
-              </span>
-              <span className="btn__divider" aria-hidden="true" />
+              A la venda ({stats.upcoming})
             </button>
             <button
-              className={`btn a24-btn admin-filter-tab ${statusFilter === "postponed" ? "active" : ""}`}
+              role="tab"
+              aria-selected={statusFilter === "postponed"}
+              className={`admin-filter-tab ${statusFilter === "postponed" ? "active" : ""}`}
               onClick={() => setStatusFilter("postponed")}
             >
-              <span className="btn__divider" aria-hidden="true" />
-              <span className="btn__p-mask">
-                <span className="btn__p">
-                  <span>Ajornats ({stats.postponed})</span>
-                </span>
-              </span>
-              <span className="btn__divider" aria-hidden="true" />
+              Ajornats ({stats.postponed})
             </button>
             <button
-              className={`btn a24-btn admin-filter-tab ${statusFilter === "past" ? "active" : ""}`}
+              role="tab"
+              aria-selected={statusFilter === "past"}
+              className={`admin-filter-tab ${statusFilter === "past" ? "active" : ""}`}
               onClick={() => setStatusFilter("past")}
             >
-              <span className="btn__divider" aria-hidden="true" />
-              <span className="btn__p-mask">
-                <span className="btn__p">
-                  <span>Històrics ({stats.past})</span>
-                </span>
-              </span>
-              <span className="btn__divider" aria-hidden="true" />
+              Històrics ({stats.past})
             </button>
           </div>
 
@@ -814,7 +801,10 @@ export default function AdminClient() {
                         <span className="btn__divider" aria-hidden="true" />
                         <span className="btn__p-mask">
                           <span className="btn__p">
-                            <span>{c.statusText || c.status}</span>
+                            <span className="admin-status-label-inner">
+                              <span className={`admin-status-bullet is-${c.status}`} aria-hidden="true" />
+                              <span>{c.statusText || c.status}</span>
+                            </span>
                           </span>
                         </span>
                         <span className="btn__divider" aria-hidden="true" />

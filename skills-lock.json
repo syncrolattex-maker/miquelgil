@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "skills": {
+    "ios-design": {
+      "source": "uizze.sh",
+      "sourceType": "well-known",
+      "computedHash": "de4e9ed42df966a90087ea3a723571521ce72420442cbf6686388c00b2597312"
+    },
+    "ui-taste": {
+      "source": "uizze.sh",
+      "sourceType": "well-known",
+      "computedHash": "9a37107c51b6bf6e3bdc2675d559094619b1b03092f8466c32ffc8e0cb9c1d4a"
+    }
+  }
+}
