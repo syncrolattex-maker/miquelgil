@@ -1,0 +1,483 @@
+/* ==========================================================================
+   MORPHING PILL MENU — MIQUEL GIL ARXIU OFICIAL
+   Inspirat en Annnimate Morphing Pill Menu amb estètica editorial A24
+   ========================================================================== */
+
+/* Variables de disseny */
+:root {
+  --mpm-bg: rgba(14, 15, 17, 0.94);
+  --mpm-border: rgba(255, 255, 255, 0.12);
+  --mpm-fg: #f2f2ef;
+  --mpm-fg-muted: rgba(255, 255, 255, 0.45);
+  --mpm-accent: #e5a968;
+  --mpm-focus: rgba(229, 169, 104, 0.6);
+  --mpm-shadow: 0 20px 48px rgba(0, 0, 0, 0.5), 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+
+/* 1. Scrim (Fons difuminat darrere del menú obert) */
+.mpm_scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 9980;
+  background-color: rgba(6, 7, 8, 0.65);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.mpm_scrim.is-open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* 2. Wrap contenidor fix superior centrat */
+.mpm_wrap {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9999;
+  pointer-events: none;
+}
+
+/* 3. Surface que canvia de forma (The Morphing Pill) */
+.mpm_surface {
+  position: relative;
+  pointer-events: auto;
+  overflow: hidden;
+  box-sizing: border-box;
+  background-color: var(--mpm-bg);
+  -webkit-backdrop-filter: blur(24px) saturate(170%);
+  backdrop-filter: blur(24px) saturate(170%);
+  border: 1px solid var(--mpm-border);
+  box-shadow: var(--mpm-shadow);
+  color: var(--mpm-fg);
+  will-change: width, height, border-radius;
+
+  /* Mides inicials de la píndola plegada */
+  width: auto;
+  min-width: 216px;
+  height: 48px;
+  border-radius: 24px;
+}
+
+.mpm_surface.is-expanded {
+  border-color: rgba(255, 255, 255, 0.16);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.08);
+}
+
+/* 4. Capçalera de la píndola (Logo + Separador + Botó Toggle) */
+.mpm_header {
+  position: relative;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 8px 0 16px;
+  box-sizing: border-box;
+  width: 100%;
+  transition: border-color 0.3s ease;
+}
+
+.mpm_surface.is-expanded .mpm_header {
+  height: 52px;
+  padding: 0 18px 0 22px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* Logo oficial Miquel Gil */
+.mpm_logo {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  flex-shrink: 0;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.mpm_logo:hover {
+  opacity: 0.85;
+  transform: scale(0.98);
+}
+
+.mpm_logo_img {
+  height: 22px;
+  width: auto;
+  max-width: 82px;
+  object-fit: contain;
+  display: block;
+  filter: brightness(1.1);
+}
+
+/* Separador vertical subtil */
+.mpm_header_divider {
+  width: 1px;
+  height: 18px;
+  background-color: rgba(255, 255, 255, 0.15);
+  margin: 0 10px;
+  flex-shrink: 0;
+  transition: opacity 0.3s ease;
+}
+
+.mpm_surface.is-expanded .mpm_header_divider {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Botó de Toggle (Menú / Tancar) */
+.mpm_toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  height: 36px;
+  padding: 0 4px 0 10px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--mpm-fg);
+  font-family: var(--font-sans, "GRAPHIK", sans-serif);
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+.mpm_toggle:focus-visible {
+  outline: 2px solid var(--mpm-focus);
+  outline-offset: 3px;
+  border-radius: 999px;
+}
+
+/* Text roller (MENÚ -> TANCAR) */
+.mpm_toggle_text {
+  overflow: hidden;
+  height: 20px;
+}
+
+.mpm_toggle_text_roller {
+  display: flex;
+  flex-direction: column;
+  will-change: transform;
+}
+
+.mpm_toggle_line {
+  display: block;
+  height: 20px;
+  line-height: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--mpm-fg);
+  text-align: right;
+}
+
+/* Icon roller circular (9 punts -> [X]) */
+.mpm_toggle_icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  background-color: #f2f2ef;
+  color: #121214;
+  overflow: hidden;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.25s ease;
+}
+
+.mpm_toggle:hover .mpm_toggle_icon {
+  transform: scale(1.06);
+  background-color: #ffffff;
+}
+
+.mpm_toggle_icon_roller {
+  display: flex;
+  flex-direction: column;
+  will-change: transform;
+}
+
+.mpm_toggle_icon_face {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+}
+
+/* 5. Panell desplegat (MPM Panel) */
+.mpm_panel {
+  display: none;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 100%;
+  height: calc(100% - 52px);
+  padding: 24px 28px 20px 28px;
+  box-sizing: border-box;
+  opacity: 0;
+  visibility: hidden;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.mpm_panel:focus {
+  outline: none;
+}
+
+/* Llista de navegació */
+.mpm_nav {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.mpm_list {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(8px, 1.8vh, 14px);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.mpm_item {
+  display: block;
+}
+
+/* Enllaç principal */
+.mpm_link {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 12px;
+  text-decoration: none;
+  cursor: pointer;
+  padding: 4px 6px;
+  border-radius: 6px;
+  transition: background-color 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.mpm_link:focus-visible {
+  outline: 2px solid var(--mpm-focus);
+  outline-offset: 4px;
+}
+
+/* Número índex (01, 02...) */
+.mpm_link_num {
+  font-family: var(--font-sans, "GRAPHIK", monospace);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  color: var(--mpm-fg-muted);
+  opacity: 0.6;
+  flex-shrink: 0;
+  transition: color 0.25s ease, opacity 0.25s ease;
+}
+
+.mpm_link:hover .mpm_link_num,
+.mpm_link.is-active .mpm_link_num {
+  color: var(--mpm-accent);
+  opacity: 1;
+}
+
+/* Punctuation bullet */
+.mpm_link_bullet {
+  font-family: var(--font-sans, "GRAPHIK", sans-serif);
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.2);
+  flex-shrink: 0;
+}
+
+/* Títol editorial del menú amb lletres grans */
+.mpm_link_title {
+  display: inline-block;
+  font-family: var(--font-titles, "GRIFINITO L"), "PP Neue Montreal", sans-serif;
+  font-size: clamp(26px, 3.6vw, 36px);
+  font-weight: 400;
+  line-height: 1.08;
+  letter-spacing: -0.015em;
+  text-transform: uppercase;
+  color: var(--mpm-fg);
+  white-space: nowrap;
+}
+
+.mpm_link.is-active .mpm_link_title {
+  color: #ffffff;
+}
+
+/* Punt actiu brillant */
+.mpm_link_active_dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: var(--mpm-accent);
+  box-shadow: 0 0 10px var(--mpm-accent);
+  margin-left: 4px;
+  align-self: center;
+}
+
+/* 6. Efecte Roll-on-Hover de lletres (Annnimate Core Effect) */
+.mpm_char {
+  position: relative;
+  display: inline-block;
+  overflow-x: visible;
+  overflow-y: hidden;
+  vertical-align: top;
+  padding-bottom: 0.14em;
+  margin-bottom: -0.14em;
+}
+
+.mpm_char_inner {
+  position: relative;
+  display: inline-block;
+  will-change: transform;
+}
+
+.mpm_char_face {
+  display: block;
+}
+
+.mpm_char_face_next {
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform: translateY(110%);
+  color: #ffffff;
+}
+
+.mpm_char_space {
+  display: inline-block;
+  white-space: pre;
+}
+
+/* 7. Sub-footer del menú obert */
+.mpm_footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 18px;
+  margin-top: 14px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  box-sizing: border-box;
+}
+
+.mpm_footer_tagline {
+  font-family: var(--font-sans, "GRAPHIK", monospace);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  color: var(--mpm-fg-muted);
+  text-transform: uppercase;
+}
+
+.mpm_footer_socials {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.mpm_footer_link {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  text-decoration: none;
+  font-family: var(--font-sans, "GRAPHIK", monospace);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  color: var(--mpm-fg-muted);
+  text-transform: uppercase;
+  transition: color 0.2s ease;
+}
+
+.mpm_footer_link:hover {
+  color: var(--mpm-fg);
+}
+
+.mpm_footer_arrow {
+  font-size: 10px;
+  opacity: 0.7;
+}
+
+/* 8. Adaptació per tema clar (theme="base", per exemple a /agenda) */
+.mpm_wrap.theme-base .mpm_surface {
+  background-color: rgba(20, 21, 23, 0.95);
+  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.35), 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* 9. Responsivitat mòbil */
+@media (max-width: 640px) {
+  .mpm_wrap {
+    top: 14px;
+  }
+
+  .mpm_surface {
+    min-width: 200px;
+    height: 44px;
+    border-radius: 22px;
+  }
+
+  .mpm_header {
+    height: 44px;
+    padding: 0 6px 0 12px;
+  }
+
+  .mpm_logo_img {
+    height: 19px;
+    max-width: 72px;
+  }
+
+  .mpm_toggle {
+    gap: 8px;
+    height: 32px;
+    padding: 0 2px 0 6px;
+  }
+
+  .mpm_toggle_line {
+    font-size: 11px;
+    height: 18px;
+    line-height: 18px;
+  }
+
+  .mpm_toggle_icon {
+    width: 28px;
+    height: 28px;
+  }
+
+  .mpm_toggle_icon_face {
+    width: 28px;
+    height: 28px;
+  }
+
+  .mpm_surface.is-expanded .mpm_header {
+    height: 48px;
+    padding: 0 14px 0 16px;
+  }
+
+  .mpm_panel {
+    height: calc(100% - 48px);
+    padding: 16px 18px 16px 18px;
+  }
+
+  .mpm_list {
+    gap: 10px;
+  }
+
+  .mpm_link_title {
+    font-size: clamp(22px, 6.2vw, 28px);
+  }
+
+  .mpm_footer {
+    padding-top: 12px;
+    margin-top: 10px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .mpm_footer_socials {
+    gap: 12px;
+  }
+}
