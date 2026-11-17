@@ -1068,8 +1068,8 @@ export default function AgendaClient() {
       {/* CAPÇALERA EDITORIAL DISCRETA A24 */}
       <header className="agenda-crumble-hud-top">
         <div className="agenda-crumble-hud-top__left">
-          <h1 className="agenda-crumble-title">Directes</h1>
-          <span className="agenda-crumble-subtitle">Agenda de directes 2026/27</span>
+          <h1 className="agenda-crumble-title">DIRECTES</h1>
+          <span className="agenda-crumble-subtitle">AGENDA DE DIRECTES 2026/27</span>
         </div>
       </header>
 

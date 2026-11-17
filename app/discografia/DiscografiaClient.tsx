@@ -104,7 +104,7 @@ export default function DiscografiaClient() {
 
     // 2. Constantes exactas de la especificación (dmtrbrl/discography - A24 base)
     const SPEC = {
-      hGap: 2.8,
+      hGap: 2.15,
       narrowWidth: 650,
       depthGap: 1.0,
       activeDiscY: 0.06,

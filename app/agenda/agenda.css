@@ -99,6 +99,7 @@
   font-size: clamp(2rem, 3.8vw, 3.6rem);
   line-height: 0.95;
   letter-spacing: -0.02em;
+  text-transform: uppercase;
   color: #f4f2ec;
   margin: 0;
 }
@@ -144,7 +145,7 @@
 .agenda-crumble-active-bar {
   position: absolute;
   left: 50%;
-  bottom: 5.5rem;
+  bottom: 6.25rem;
   transform: translateX(-50%);
   z-index: 20;
   background-color: rgba(17, 17, 17, 0.94);
@@ -274,32 +275,49 @@
 /* Barra inferior d'accés directe a cada data */
 .agenda-crumble-dock {
   position: absolute;
-  left: 2.25rem;
+  left: 50%;
+  transform: translateX(-50%);
   bottom: 1.5rem;
   z-index: 15;
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
+  width: max-content;
+  max-width: calc(100vw - 3rem);
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
   gap: 0;
-  border-top: 0.5px solid rgba(17, 17, 17, 0.25);
-  border-left: 0.5px solid rgba(17, 17, 17, 0.25);
-  background-color: rgba(244, 242, 236, 0.92);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
+  border: 0.5px solid rgba(17, 17, 17, 0.28);
+  background-color: rgba(244, 242, 236, 0.94);
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.18);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.agenda-crumble-dock::-webkit-scrollbar {
+  display: none;
 }
 
 .agenda-crumble-dock__item {
+  flex: 0 0 auto;
   background: transparent;
   border: none;
   border-right: 0.5px solid rgba(17, 17, 17, 0.25);
-  border-bottom: 0.5px solid rgba(17, 17, 17, 0.25);
   padding: 0.5rem 0.85rem;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
+  justify-content: center;
   gap: 0.12rem;
   cursor: pointer;
   color: #111111;
+  white-space: nowrap;
   transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.agenda-crumble-dock__item:last-child {
+  border-right: none;
 }
 
 .agenda-crumble-dock__item:hover,
@@ -371,30 +389,17 @@
 
   /* Tira horitzontal tàctil amb totes les dates (just damunt del dock del menú A24) */
   .agenda-crumble-dock {
-    display: flex;
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    overflow-y: hidden;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
     left: 0.75rem;
     right: 0.75rem;
+    transform: none;
+    width: auto;
+    max-width: none;
     bottom: calc(4.8rem + env(safe-area-inset-bottom, 0px));
-    border: 0.5px solid rgba(17, 17, 17, 0.28);
-    background-color: rgba(244, 242, 236, 0.94);
-    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.18);
-  }
-
-  .agenda-crumble-dock::-webkit-scrollbar {
-    display: none;
   }
 
   .agenda-crumble-dock__item {
-    flex: 0 0 auto;
     padding: 0.45rem 0.75rem;
     min-height: 42px;
-    justify-content: center;
-    border-bottom: none;
     touch-action: manipulation;
   }
 
@@ -404,7 +409,6 @@
 
   .agenda-crumble-dock__city {
     font-size: 11px;
-    white-space: nowrap;
   }
 
   /* Barra d'accions eliminada en mòbil per deixar tot l'espai i llegibilitat al paper desplegat */
