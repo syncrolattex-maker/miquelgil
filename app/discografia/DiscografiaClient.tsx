@@ -105,6 +105,7 @@ export default function DiscografiaClient() {
     // 2. Constantes exactas de la especificación (dmtrbrl/discography - A24 base)
     const SPEC = {
       hGap: 2.15,
+      mobileHGap: 2.8 * 0.72,
       narrowWidth: 650,
       depthGap: 1.0,
       activeDiscY: 0.06,
@@ -2315,7 +2316,7 @@ export default function DiscografiaClient() {
       // Profundidad: depthGap: 1. Elevación del disco activo: activeDiscY: 0.06.
       // Escala del inactivo: inactiveScale: 0.8.
       const isMobile = window.innerWidth <= SPEC.narrowWidth;
-      const rowGap = isMobile ? SPEC.hGap * 0.72 : SPEC.hGap;
+      const rowGap = isMobile ? SPEC.mobileHGap : SPEC.hGap;
       const v = Math.max(0.12, SPEC.depthGap);
 
       for (let p = 0; p < N; p++) {
