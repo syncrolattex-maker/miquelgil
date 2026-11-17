@@ -190,17 +190,17 @@ export default function DiscografiaClient() {
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.setSize(container.clientWidth, container.clientHeight);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.05;
+    // Mapeo tonal neutro (Khronos/PBR Neutral) para preservar la viveza cromática original, saturación y tonos fieles de la portada
+    renderer.toneMapping = THREE.NeutralToneMapping;
+    renderer.toneMappingExposure = 1.0;
 
-    // Iluminación según especificación: key, fill, rim azul (#499FF5) y tira superior
-    // Multiply by Math.PI to match r128 non-physical punctual light scaleFactor
+    // Iluminación cinemática equilibrada para respetar la riqueza cromática sin lavar los colores
     const LIGHT_SCALE = Math.PI;
-    const keyLight = new THREE.DirectionalLight(0xffffff, 2.2 * LIGHT_SCALE);
+    const keyLight = new THREE.DirectionalLight(0xffffff, 1.75 * LIGHT_SCALE);
     keyLight.position.set(2.8, 3.8, 4.2);
     scene.add(keyLight);
 
-    const fillLight = new THREE.DirectionalLight(0xf5f7fa, 1.15 * LIGHT_SCALE);
+    const fillLight = new THREE.DirectionalLight(0xf5f7fa, 0.95 * LIGHT_SCALE);
     fillLight.position.set(-3.2, 1.0, 3.0);
     scene.add(fillLight);
 
@@ -208,11 +208,11 @@ export default function DiscografiaClient() {
     rimLight.position.set(0.0, -3.2, -2.5);
     scene.add(rimLight);
 
-    const topStripLight = new THREE.DirectionalLight(0xffffff, 1.45 * LIGHT_SCALE);
+    const topStripLight = new THREE.DirectionalLight(0xffffff, 1.15 * LIGHT_SCALE);
     topStripLight.position.set(0.0, 5.5, 1.5);
     scene.add(topStripLight);
 
-    scene.add(new THREE.AmbientLight(0xffffff, 0.75 * LIGHT_SCALE));
+    scene.add(new THREE.AmbientLight(0xffffff, 0.85 * LIGHT_SCALE));
 
     // Mapa de entorno reflectante de estudio (PMREM softboxes estilo A24) para los reflejos especulares e iridiscentes de la cara opuesta y anillos del CD
     function createStudioEnvMap() {
@@ -368,7 +368,18 @@ export default function DiscografiaClient() {
       ctx.clip('evenodd');
 
       if (loadedImg) {
-        ctx.drawImage(loadedImg, 0, 0, size, size);
+        ctx.save();
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = 'high';
+        // Realce sutil de saturación y contraste para colores vivos, ricos y 100% fieles a la portada original
+        ctx.filter = 'saturate(1.15) contrast(1.05)';
+        const iw = loadedImg.naturalWidth || loadedImg.width;
+        const ih = loadedImg.naturalHeight || loadedImg.height;
+        const minDim = Math.min(iw, ih);
+        const sx = (iw - minDim) / 2;
+        const sy = (ih - minDim) / 2;
+        ctx.drawImage(loadedImg, sx, sy, minDim, minDim, 0, 0, size, size);
+        ctx.restore();
       } else {
         const grad = ctx.createRadialGradient(cx, cy, size * 0.1, cx, cy, size * 0.5);
         grad.addColorStop(0, '#2a2a28');
@@ -377,18 +388,8 @@ export default function DiscografiaClient() {
         ctx.fillRect(0, 0, size, size);
       }
 
-      // Trama sutil de tinta serigráfica sobre el arte
-      ctx.fillStyle = 'rgba(255,255,255,0.04)';
-      for (let r = size * 0.14; r < size * 0.48; r += 6) {
-        ctx.beginPath();
-        ctx.arc(cx, cy, r, 0, Math.PI * 2);
-        ctx.strokeStyle = 'rgba(0,0,0,0.035)';
-        ctx.lineWidth = 1;
-        ctx.stroke();
-      }
-
-      // Anell perimetral d'arxiu oficial en serigrafia
-      ctx.fillStyle = 'rgba(255,255,255,0.88)';
+      // Anell perimetral d'arxiu oficial en serigrafia nítida
+      ctx.fillStyle = 'rgba(255,255,255,0.92)';
       ctx.font = '600 18px "PP Neue Montreal", Arial, sans-serif';
       ctx.textAlign = 'center';
       ctx.fillText(`${film.title.toUpperCase()} · ${film.year} · ARXIU ÒPTIC MIQUEL GIL`, cx, size * 0.93);
@@ -404,6 +405,9 @@ export default function DiscografiaClient() {
       const tex = new THREE.CanvasTexture(c);
       tex.colorSpace = THREE.SRGBColorSpace;
       tex.anisotropy = renderer.capabilities.getMaxAnisotropy();
+      tex.generateMipmaps = true;
+      tex.minFilter = THREE.LinearMipmapLinearFilter;
+      tex.magFilter = THREE.LinearFilter;
       tex.needsUpdate = true;
       return tex;
     }
@@ -767,13 +771,13 @@ export default function DiscografiaClient() {
 
       const frontMat = new THREE.MeshPhysicalMaterial({
         color: 0xffffff,
-        roughness: 0.18,
-        metalness: 0.04,
+        roughness: 0.28,
+        metalness: 0.0,
         bumpMap: printMaps.bumpMap,
-        bumpScale: 0.003,
-        roughnessMap: printMaps.roughnessMap,
-        clearcoat: 0.9,
-        clearcoatRoughness: 0.06
+        bumpScale: 0.0004,
+        clearcoat: 0.25,
+        clearcoatRoughness: 0.12,
+        envMapIntensity: 0.35
       });
 
       const frontMesh = new THREE.Mesh(sharedDiscGeo, frontMat);
@@ -2606,7 +2610,7 @@ export default function DiscografiaClient() {
           <span data-film-field="year">2024</span>
           <span data-film-field="starring">Arrel Viva, Fusió, Tradició Contemporània</span>
           <span data-film-field="detailUrl">/discografia/viatger/</span>
-          <span data-film-field="discUrl">https://miquelgil.vercel.app/images/disco_8.webp</span>
+          <span data-film-field="discUrl">/images/disco_8.webp</span>
           <span data-film-field="reviews">
             Enderrock|Foc en moviment continu|★★★★★;Diari La Veu|Vint-i-cinc anys de mestratge|★★★★☆
           </span>
@@ -2621,7 +2625,7 @@ export default function DiscografiaClient() {
           <span data-film-field="year">2019</span>
           <span data-film-field="starring">Vicent Andrés Estellés, Enric Casasses</span>
           <span data-film-field="detailUrl">/discografia/geometries/</span>
-          <span data-film-field="discUrl">https://miquelgil.vercel.app/images/disco_7.jpg</span>
+          <span data-film-field="discUrl">/images/disco_7.jpg</span>
           <span data-film-field="reviews">
             Mondosonoro|Arquitectura polifònica fascinant|★★★★★;Tresdeu|Polígons emocionals perfectes|★★★★☆
           </span>
@@ -2636,7 +2640,7 @@ export default function DiscografiaClient() {
           <span data-film-field="year">2011</span>
           <span data-film-field="starring">Tradició Mutant, Experimentació Sonora</span>
           <span data-film-field="detailUrl">/discografia/per-marcianes/</span>
-          <span data-film-field="discUrl">https://miquelgil.vercel.app/images/disco_6.png</span>
+          <span data-film-field="discUrl">/images/disco_6.png</span>
           <span data-film-field="reviews">
             World Music Central|Electricitat i tradició|★★★★★;Sons Mediterrània|Rumb a nous planetes|★★★★☆
           </span>
@@ -2651,7 +2655,7 @@ export default function DiscografiaClient() {
           <span data-film-field="year">2009</span>
           <span data-film-field="starring">David Pastor, Jazz, Improvisació</span>
           <span data-film-field="detailUrl">/discografia/gil-camp-trio/</span>
-          <span data-film-field="discUrl">https://miquelgil.vercel.app/images/disco_4.png</span>
+          <span data-film-field="discUrl">/images/disco_4.png</span>
           <span data-film-field="reviews">
             Cuadernos de Jazz|Diàleg hipnòtic i lliure|★★★★★;El País|Jazz de cambra mediterrani|★★★★★
           </span>
@@ -2666,7 +2670,7 @@ export default function DiscografiaClient() {
           <span data-film-field="year">2006</span>
           <span data-film-field="starring">Mediterrània Cosmopolita, Poetes</span>
           <span data-film-field="detailUrl">/discografia/eixos/</span>
-          <span data-film-field="discUrl">https://miquelgil.vercel.app/images/disco_5.png</span>
+          <span data-film-field="discUrl">/images/disco_5.png</span>
           <span data-film-field="reviews">
             Folker Magazine|Gran veu de la Mediterrània|★★★★★;RootsWorld|Cartografia sonora impecable|★★★★☆
           </span>
@@ -2681,7 +2685,7 @@ export default function DiscografiaClient() {
           <span data-film-field="year">2006</span>
           <span data-film-field="starring">Directe, Acústic, Energia Escènica</span>
           <span data-film-field="detailUrl">/discografia/en-concert/</span>
-          <span data-film-field="discUrl">https://miquelgil.vercel.app/images/disco_4.png</span>
+          <span data-film-field="discUrl">/images/disco_4.png</span>
           <span data-film-field="reviews">
             Enderrock|Dimensió tel·lúrica irrepetible|★★★★★;B-Ritmos|Força escènica absoluta|★★★★★
           </span>
@@ -2696,7 +2700,7 @@ export default function DiscografiaClient() {
           <span data-film-field="year">2004</span>
           <span data-film-field="starring">World Music, Llaüt, Percussió</span>
           <span data-film-field="detailUrl">/discografia/kata/</span>
-          <span data-film-field="discUrl">https://miquelgil.vercel.app/images/disco_3.png</span>
+          <span data-film-field="discUrl">/images/disco_3.png</span>
           <span data-film-field="reviews">
             fRoots Magazine|Pont sonor fascinant|★★★★★;World Music Charts|Selecció Europea|★★★★★
           </span>
@@ -2711,7 +2715,7 @@ export default function DiscografiaClient() {
           <span data-film-field="year">2001</span>
           <span data-film-field="starring">Ausiàs March, Neo-Tradició</span>
           <span data-film-field="detailUrl">/discografia/organic/</span>
-          <span data-film-field="discUrl">https://miquelgil.vercel.app/images/disco_2.png</span>
+          <span data-film-field="discUrl">/images/disco_2.png</span>
           <span data-film-field="reviews">
             El País|Obra mestra fundacional|★★★★★;La Vanguardia|Redefineix l&apos;arrel|★★★★★
           </span>
@@ -2726,7 +2730,7 @@ export default function DiscografiaClient() {
           <span data-film-field="year">1997</span>
           <span data-film-field="starring">Fusió, Flamenc, Experimentació</span>
           <span data-film-field="detailUrl">/discografia/buscando-tu-olor/</span>
-          <span data-film-field="discUrl">https://miquelgil.vercel.app/images/disco_1.jpg</span>
+          <span data-film-field="discUrl">/images/disco_1.jpg</span>
           <span data-film-field="reviews">
             Arxiu Valencià|Debut en solitari valent|★★★★☆;Levante EMV|Laboratori sonor inèdit|★★★★☆
           </span>
@@ -2741,7 +2745,7 @@ export default function DiscografiaClient() {
           <span data-film-field="year">1988</span>
           <span data-film-field="starring">Electro-Mediterrània, Sintetitzadors</span>
           <span data-film-field="detailUrl">/discografia/viajero/</span>
-          <span data-film-field="discUrl">https://miquelgil.vercel.app/images/disco_1.jpg</span>
+          <span data-film-field="discUrl">/images/disco_1.jpg</span>
           <span data-film-field="reviews">
             RNE Radio 3|Avançat al seu temps|★★★★★;Discos Medicinales|Pioners de la fusió|★★★★★
           </span>

@@ -702,8 +702,8 @@ export default function ProductionClient({ album }: ProductionClientProps) {
     });
     renderer.setSize(width, height);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
-    renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.05;
+    renderer.toneMapping = THREE.NeutralToneMapping;
+    renderer.toneMappingExposure = 1.0;
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.setClearColor(0x000000, 0);
 
@@ -763,10 +763,11 @@ export default function ProductionClient({ album }: ProductionClientProps) {
 
     const frontMaterial = new THREE.MeshPhysicalMaterial({
       map: discTexture,
-      roughness: 0.18,
-      metalness: 0.04,
-      clearcoat: 0.85,
-      clearcoatRoughness: 0.06,
+      roughness: 0.28,
+      metalness: 0.0,
+      clearcoat: 0.25,
+      clearcoatRoughness: 0.12,
+      envMapIntensity: 0.35,
       side: THREE.FrontSide
     });
     const frontMesh = new THREE.Mesh(frontGeom, frontMaterial);
