@@ -1244,12 +1244,12 @@ export default function DiscografiaClient() {
       // 1. Título en tipografía Serif PP Eiko en MAYÚSCULAS y negro (delay tras movimiento inicial del CD)
       splitAndAnimateChars(uiTitle, film.title, 0.35, true);
 
-      // 2. Líneas divisorias horizontales animadas con GSAP (scaleX: 0 -> 1)
+      // 2. Líneas divisorias horizontales y etiquetas meta (PRODUCCIÓ, ANY, COL·LABORACIONS) animadas con GSAP
       if (leftPanel && !prefersReducedMotion) {
         const lines = leftPanel.querySelectorAll('.editorial-line');
         gsap.fromTo(
           lines,
-          { scaleX: 0, opacity: 0.3 },
+          { scaleX: 0, opacity: 0 },
           {
             scaleX: 1,
             opacity: 1,
@@ -1260,6 +1260,26 @@ export default function DiscografiaClient() {
             overwrite: true
           }
         );
+
+        const labels = leftPanel.querySelectorAll<HTMLElement>('.a24-meta-label');
+        gsap.fromTo(
+          labels,
+          { opacity: 0, y: 8 },
+          {
+            opacity: 1,
+            y: 0,
+            duration: 0.52,
+            stagger: 0.05,
+            delay: 0.35,
+            ease: 'expo.out',
+            overwrite: true
+          }
+        );
+      } else if (leftPanel) {
+        const lines = leftPanel.querySelectorAll('.editorial-line');
+        gsap.set(lines, { scaleX: 1, opacity: 1, y: 0 });
+        const labels = leftPanel.querySelectorAll<HTMLElement>('.a24-meta-label');
+        gsap.set(labels, { opacity: 1, y: 0 });
       }
 
       // 3. Descripción si está presente
@@ -1474,15 +1494,27 @@ export default function DiscografiaClient() {
       const oldIndex = W;
       let hasSwappedMeta = false;
 
-      // Suave desvanecimiento del texto anterior al iniciar el viaje si cambiamos de disco (manteniendo el título nítido)
+      // Desvanecimiento completo del bloque editorial anterior (incluyendo PRODUCCIÓ, ANY, COL·LABORACIONS) al iniciar el viaje si cambiamos de disco
       if (clamped !== oldIndex && leftPanel && !prefersReducedMotion) {
-        gsap.to(['#ui-description', '#ui-director', '#ui-year', '#ui-starring', '#ui-reviews'], {
-          opacity: 0.6,
-          y: dir > 0 ? -4 : 4,
-          duration: 0.18,
-          ease: 'power2.in',
-          overwrite: 'auto'
-        });
+        gsap.to(
+          [
+            '#ui-title',
+            '.a24-meta-label',
+            '.editorial-line',
+            '#ui-description',
+            '#ui-director',
+            '#ui-year',
+            '#ui-starring',
+            '#ui-reviews'
+          ],
+          {
+            opacity: 0,
+            y: dir > 0 ? -6 : 6,
+            duration: 0.2,
+            ease: 'power2.in',
+            overwrite: 'auto'
+          }
+        );
       }
 
       targetL = clamped;
