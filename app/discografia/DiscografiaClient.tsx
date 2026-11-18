@@ -1148,6 +1148,8 @@ export default function DiscografiaClient() {
 
     function splitAndAnimateChars(element: HTMLElement | null, text: string, delay = 0, forceUppercase = false) {
       if (!element) return;
+      element.style.opacity = '1';
+      element.style.transform = 'none';
       element.innerHTML = '';
       const displayText = forceUppercase ? (text || '').toUpperCase() : text || '';
       const words = displayText.split(' ');
@@ -1192,6 +1194,8 @@ export default function DiscografiaClient() {
     // Animación por palabras/líneas con máscara para la descripción del CD y bloques
     function animateMaskedLines(element: HTMLElement | null, text: string, delay = 0.06) {
       if (!element) return;
+      element.style.opacity = '1';
+      element.style.transform = 'none';
       element.innerHTML = '';
       const words = (text || '').split(' ');
       words.forEach((w, i) => {
@@ -1231,15 +1235,41 @@ export default function DiscografiaClient() {
       const e = ev as CustomEvent<{ index: number; film: FilmData }>;
       const { index, film } = e.detail;
 
+      if (!film) return;
+
       if (uiCatalogNum) {
         uiCatalogNum.textContent = `A24—${String(index + 1).padStart(2, '0')}`;
       }
 
-      // Restablecer contenedores editoriales en color negro nítido y opacidad 1
-      gsap.set(['#ui-title', '#ui-description', '#ui-director', '#ui-year', '#ui-starring', '#ui-reviews'], {
-        opacity: 1,
-        y: 0
-      });
+      // Detener cualquier animación de desvanecimiento previa y restaurar los paneles a opacidad 1
+      gsap.killTweensOf([
+        '#left-editorial-panel',
+        '#ui-reviews',
+        '#ui-title',
+        '#ui-description',
+        '#ui-director',
+        '#ui-year',
+        '#ui-starring',
+        '.a24-meta-label',
+        '.editorial-line'
+      ]);
+
+      if (leftPanel) {
+        gsap.set(leftPanel, { opacity: 1, y: 0, clearProps: 'transform' });
+      }
+      if (uiReviews) {
+        gsap.set(uiReviews, { opacity: 1, y: 0, clearProps: 'transform' });
+      }
+
+      // Limpiar cualquier estilo inline residual en los contenedores de texto
+      gsap.set(
+        ['#ui-title', '#ui-description', '#ui-director', '#ui-year', '#ui-starring'],
+        {
+          opacity: 1,
+          y: 0,
+          clearProps: 'opacity,transform'
+        }
+      );
 
       // 1. Título en tipografía Serif PP Eiko en MAYÚSCULAS y negro (delay tras movimiento inicial del CD)
       splitAndAnimateChars(uiTitle, film.title, 0.35, true);
@@ -1277,9 +1307,9 @@ export default function DiscografiaClient() {
         );
       } else if (leftPanel) {
         const lines = leftPanel.querySelectorAll('.editorial-line');
-        gsap.set(lines, { scaleX: 1, opacity: 1, y: 0 });
+        gsap.set(lines, { scaleX: 1, opacity: 1, y: 0, clearProps: 'transform,opacity' });
         const labels = leftPanel.querySelectorAll<HTMLElement>('.a24-meta-label');
-        gsap.set(labels, { opacity: 1, y: 0 });
+        gsap.set(labels, { opacity: 1, y: 0, clearProps: 'transform,opacity' });
       }
 
       // 3. Descripción si está presente
@@ -1293,7 +1323,9 @@ export default function DiscografiaClient() {
 
       // 5. Reparto / Col·laboracions (cada línea apilada alineada a la derecha)
       if (uiStarring) {
-        const items = film.starring.split(/,\s*/);
+        uiStarring.style.opacity = '1';
+        uiStarring.style.transform = 'none';
+        const items = (film.starring || '').split(/,\s*/);
         uiStarring.innerHTML = '';
         items.forEach((itemText) => {
           const lineMask = document.createElement('span');
@@ -1328,14 +1360,16 @@ export default function DiscografiaClient() {
       // 2º Nombre del medio en pequeño uppercase espaciado
       // 3º Cita en tipografía Serif grande PP Eiko en MAYÚSCULAS entre comillas
       if (uiReviews) {
+        uiReviews.style.opacity = '1';
+        uiReviews.style.transform = 'none';
         uiReviews.innerHTML = '';
-        film.reviews.forEach((rev) => {
+        (film.reviews || []).forEach((rev) => {
           const block = document.createElement('div');
           block.className = 'a24-review-card';
           block.innerHTML = `
             <div class="a24-review-stars">${rev.stars}</div>
             <div class="a24-review-pub">${rev.pub}</div>
-            <div class="a24-review-quote">“${rev.quote.toUpperCase()}”</div>
+            <div class="a24-review-quote">“${(rev.quote || '').toUpperCase()}”</div>
           `;
           uiReviews.appendChild(block);
         });
@@ -1343,7 +1377,7 @@ export default function DiscografiaClient() {
           gsap.fromTo(
             Array.from(uiReviews.children),
             { y: 14, opacity: 0 },
-            { y: 0, opacity: 1, duration: 0.55, stagger: 0.08, delay: 0.62, ease: 'expo.out' }
+            { y: 0, opacity: 1, duration: 0.55, stagger: 0.08, delay: 0.62, ease: 'expo.out', overwrite: true }
           );
         }
       }
@@ -1494,27 +1528,16 @@ export default function DiscografiaClient() {
       const oldIndex = W;
       let hasSwappedMeta = false;
 
-      // Desvanecimiento completo del bloque editorial anterior (incluyendo PRODUCCIÓ, ANY, COL·LABORACIONS) al iniciar el viaje si cambiamos de disco
+      // Desvanecimiento completo del bloque editorial anterior al iniciar el viaje si cambiamos de disco
       if (clamped !== oldIndex && leftPanel && !prefersReducedMotion) {
-        gsap.to(
-          [
-            '#ui-title',
-            '.a24-meta-label',
-            '.editorial-line',
-            '#ui-description',
-            '#ui-director',
-            '#ui-year',
-            '#ui-starring',
-            '#ui-reviews'
-          ],
-          {
-            opacity: 0,
-            y: dir > 0 ? -6 : 6,
-            duration: 0.2,
-            ease: 'power2.in',
-            overwrite: 'auto'
-          }
-        );
+        gsap.killTweensOf(['#left-editorial-panel', '#ui-reviews']);
+        gsap.to(['#left-editorial-panel', '#ui-reviews'], {
+          opacity: 0,
+          y: dir > 0 ? -6 : 6,
+          duration: 0.18,
+          ease: 'power2.in',
+          overwrite: true
+        });
       }
 
       targetL = clamped;
