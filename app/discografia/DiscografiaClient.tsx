@@ -2182,20 +2182,20 @@ export default function DiscografiaClient() {
         }
       });
 
-      // 3. El CD seleccionat cau cap al centre minimitzant-se sense girar (mode ingravidesa)
+      // 3. El CD seleccionat cau cap al centre minimitzant-se amb una lleu inclinació en ingravidesa (sense girar)
       if (activeHolder) {
         const u = activeHolder.userData as DiscHolderUserData;
         u.dragSpinX = 0;
         u.dragSpinY = 0;
 
-        // Sense girar: estabilitza suaument la rotació cap a un pla frontal net (0, 0, 0)
+        // Lleu inclinació elegant en caure (cabeceo i perspectiva subtil en ingravidesa, sense girar sobre si mateix)
         exitTl.to(
           activeHolder.rotation,
           {
-            x: 0,
-            y: 0,
-            z: 0,
-            duration: 0.35,
+            x: -0.26,
+            y: 0.12,
+            z: -0.08,
+            duration: 0.72,
             ease: 'power2.out'
           },
           0
