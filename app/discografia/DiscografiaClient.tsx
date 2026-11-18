@@ -2128,6 +2128,9 @@ export default function DiscografiaClient() {
       dragInertia = 0;
       settleVelocity = 0;
       setScribbleActiveIntent(false);
+      if (scribbleGroup) {
+        scribbleGroup.visible = false;
+      }
 
       // Assegurar precàrrega immediata de la ruta destí
       try {
@@ -2143,45 +2146,26 @@ export default function DiscografiaClient() {
         }
       });
 
-      // 1. Animació del CD actiu: gir ràpid sobre si mateix mentre disminueix de mida (efecte original preferit)
-      if (activeHolder) {
-        const u = activeHolder.userData as DiscHolderUserData;
-        exitTl.to(
-          u,
-          {
-            dragSpinY: u.dragSpinY + Math.PI * 4,
-            dragSpinX: 0,
-            duration: 0.68,
-            ease: 'power2.in'
-          },
-          0
-        );
+      // 1. Textos desapareixen immediatament
+      exitTl.to(
+        [
+          '#left-editorial-panel',
+          '#ui-reviews-container',
+          '[data-disc-prev]',
+          '[data-disc-next]',
+          'header',
+          'footer'
+        ],
+        {
+          opacity: 0,
+          y: -6,
+          duration: 0.2,
+          ease: 'power2.out'
+        },
+        0
+      );
 
-        exitTl.to(
-          activeHolder.scale,
-          {
-            x: 0.001,
-            y: 0.001,
-            z: 0.001,
-            duration: 0.65,
-            ease: 'power3.in'
-          },
-          0
-        );
-
-        exitTl.to(
-          activeHolder.position,
-          {
-            y: activeHolder.position.y + 0.12,
-            z: activeHolder.position.z + 0.35,
-            duration: 0.65,
-            ease: 'power2.in'
-          },
-          0
-        );
-      }
-
-      // 2. Els altres discs desapareixen ràpidament
+      // 2. Es queda només el CD seleccionat: els altres discs desapareixen ràpidament
       discHolders.forEach((holder, idx) => {
         if (idx !== W) {
           exitTl.to(
@@ -2190,7 +2174,7 @@ export default function DiscografiaClient() {
               x: 0,
               y: 0,
               z: 0,
-              duration: 0.35,
+              duration: 0.22,
               ease: 'power2.in'
             },
             0
@@ -2198,19 +2182,53 @@ export default function DiscografiaClient() {
         }
       });
 
-      // 3. Desvaniment suau de la interfície editorial
-      exitTl.to(
-        ['#left-editorial-panel', '#ui-reviews-container', '[data-disc-prev]', '[data-disc-next]', 'header', 'footer'],
-        {
-          opacity: 0,
-          y: -10,
-          duration: 0.32,
-          ease: 'power2.out'
-        },
-        0
-      );
+      // 3. El CD seleccionat cau cap al centre minimitzant-se sense girar (mode ingravidesa)
+      if (activeHolder) {
+        const u = activeHolder.userData as DiscHolderUserData;
+        u.dragSpinX = 0;
+        u.dragSpinY = 0;
 
-      // 4. Fundit en blanc cap a la pàgina de la fitxa del CD
+        // Sense girar: estabilitza suaument la rotació cap a un pla frontal net (0, 0, 0)
+        exitTl.to(
+          activeHolder.rotation,
+          {
+            x: 0,
+            y: 0,
+            z: 0,
+            duration: 0.35,
+            ease: 'power2.out'
+          },
+          0
+        );
+
+        // Minimitza la seva mida fins a dissoldre's (mode ingravidesa)
+        exitTl.to(
+          activeHolder.scale,
+          {
+            x: 0.0001,
+            y: 0.0001,
+            z: 0.0001,
+            duration: 0.72,
+            ease: 'power2.in'
+          },
+          0
+        );
+
+        // Cau suaument cap al centre de la pantalla i cap a la profunditat Z
+        exitTl.to(
+          activeHolder.position,
+          {
+            x: 0,
+            y: activeHolder.position.y - 0.42,
+            z: activeHolder.position.z - 0.75,
+            duration: 0.72,
+            ease: 'power2.in'
+          },
+          0
+        );
+      }
+
+      // 4. Fosa suau del fons cap a la pàgina de la fitxa del CD (#f2f2f2)
       if (exitOverlay) {
         exitTl.fromTo(
           exitOverlay,
@@ -2220,7 +2238,7 @@ export default function DiscografiaClient() {
             duration: 0.42,
             ease: 'power2.inOut'
           },
-          0.26
+          0.32
         );
       }
     }
@@ -2434,30 +2452,32 @@ export default function DiscografiaClient() {
           holder.scale.setScalar(baseScale + u.hoverWeight * 0.028);
         }
 
-        // Rotación con cabeceo aerodinámico (flowLean), alabeo natural (flowBank) y balanceo
-        const isAct = p === W;
-        if (!isAct && (Math.abs(u.dragSpinX) > 1e-4 || Math.abs(u.dragSpinY) > 1e-4)) {
-          const decay = Math.min(1, dt * 8);
-          u.dragSpinX += (0 - u.dragSpinX) * decay;
-          u.dragSpinY += (0 - u.dragSpinY) * decay;
-          if (Math.abs(u.dragSpinX) <= 1e-4) u.dragSpinX = 0;
-          if (Math.abs(u.dragSpinY) <= 1e-4) u.dragSpinY = 0;
-        }
-        const rotX =
-          flowSignal * SPEC.flowLean +
-          u.hoverTiltCurrentX +
-          u.zeroGRot.x +
-          buoyPitch +
-          u.dragSpinX;
-        const rotY =
-          -a - flowSignal * 0.035 +
-          u.hoverTiltCurrentY +
-          u.zeroGRot.y +
-          u.dragSpinY;
-        const rotZ =
-          -flowSignal * SPEC.flowBank + u.zeroGRot.z + buoyRoll;
+        // Rotación con cabeceo aerodinámico (flowLean), alabeo natural (flowBank) y balanceo (solo fuera de la transición de salida)
+        if (!isTransitioningOut) {
+          const isAct = p === W;
+          if (!isAct && (Math.abs(u.dragSpinX) > 1e-4 || Math.abs(u.dragSpinY) > 1e-4)) {
+            const decay = Math.min(1, dt * 8);
+            u.dragSpinX += (0 - u.dragSpinX) * decay;
+            u.dragSpinY += (0 - u.dragSpinY) * decay;
+            if (Math.abs(u.dragSpinX) <= 1e-4) u.dragSpinX = 0;
+            if (Math.abs(u.dragSpinY) <= 1e-4) u.dragSpinY = 0;
+          }
+          const rotX =
+            flowSignal * SPEC.flowLean +
+            u.hoverTiltCurrentX +
+            u.zeroGRot.x +
+            buoyPitch +
+            u.dragSpinX;
+          const rotY =
+            -a - flowSignal * 0.035 +
+            u.hoverTiltCurrentY +
+            u.zeroGRot.y +
+            u.dragSpinY;
+          const rotZ =
+            -flowSignal * SPEC.flowBank + u.zeroGRot.z + buoyRoll;
 
-        holder.rotation.set(rotX, rotY, rotZ);
+          holder.rotation.set(rotX, rotY, rotZ);
+        }
       }
 
       // Actualizar el efecto Scribble (halo negro de trazo a mano a 10 fps stop motion)
