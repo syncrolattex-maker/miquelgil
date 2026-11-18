@@ -61,61 +61,33 @@ export default function MainframeHero() {
     600
   );
 
-  // 3. Background video mouse-scrubbing controller
+  // 3. Background video mouse-scrubbing controller (calibrat al 100% de la durada del vídeo)
   useEffect(() => {
-    const SENSITIVITY = 0.8;
-
     const handleMouseMove = (e: MouseEvent) => {
       const video = videoRef.current;
-      if (!video || !video.duration || isNaN(video.duration)) {
-        prevXRef.current = e.clientX;
-        return;
-      }
+      if (!video || !video.duration || isNaN(video.duration)) return;
 
-      if (prevXRef.current === null) {
-        prevXRef.current = e.clientX;
-        return;
-      }
-
-      const delta = e.clientX - prevXRef.current;
       prevXRef.current = e.clientX;
-
-      const timeOffset = (delta / window.innerWidth) * SENSITIVITY * video.duration;
-      let nextTarget = targetTimeRef.current + timeOffset;
-      nextTarget = Math.max(0, Math.min(video.duration, nextTarget));
+      const progress = Math.max(0, Math.min(1, e.clientX / window.innerWidth));
+      const nextTarget = progress * video.duration;
       targetTimeRef.current = nextTarget;
 
       if (!isSeekingRef.current) {
         isSeekingRef.current = true;
         video.currentTime = nextTarget;
       }
-    };
-
-    const handleMouseLeave = () => {
-      prevXRef.current = null;
     };
 
     // Touch scrubbing support on touch devices
     const handleTouchMove = (e: TouchEvent) => {
       if (e.touches.length === 0) return;
-      const clientX = e.touches[0].clientX;
       const video = videoRef.current;
-      if (!video || !video.duration || isNaN(video.duration)) {
-        prevXRef.current = clientX;
-        return;
-      }
+      if (!video || !video.duration || isNaN(video.duration)) return;
 
-      if (prevXRef.current === null) {
-        prevXRef.current = clientX;
-        return;
-      }
-
-      const delta = clientX - prevXRef.current;
+      const clientX = e.touches[0].clientX;
       prevXRef.current = clientX;
-
-      const timeOffset = (delta / window.innerWidth) * SENSITIVITY * video.duration;
-      let nextTarget = targetTimeRef.current + timeOffset;
-      nextTarget = Math.max(0, Math.min(video.duration, nextTarget));
+      const progress = Math.max(0, Math.min(1, clientX / window.innerWidth));
+      const nextTarget = progress * video.duration;
       targetTimeRef.current = nextTarget;
 
       if (!isSeekingRef.current) {
@@ -124,20 +96,12 @@ export default function MainframeHero() {
       }
     };
 
-    const handleTouchEnd = () => {
-      prevXRef.current = null;
-    };
-
     window.addEventListener("mousemove", handleMouseMove);
-    window.addEventListener("mouseleave", handleMouseLeave);
     window.addEventListener("touchmove", handleTouchMove, { passive: true });
-    window.addEventListener("touchend", handleTouchEnd);
 
     return () => {
       window.removeEventListener("mousemove", handleMouseMove);
-      window.removeEventListener("mouseleave", handleMouseLeave);
       window.removeEventListener("touchmove", handleTouchMove);
-      window.removeEventListener("touchend", handleTouchEnd);
     };
   }, []);
 
@@ -153,6 +117,16 @@ export default function MainframeHero() {
       video.currentTime = targetTimeRef.current;
     } else {
       isSeekingRef.current = false;
+    }
+  };
+
+  const handleLoadedMetadata = () => {
+    const video = videoRef.current;
+    if (video && video.duration && prevXRef.current !== null) {
+      const progress = Math.max(0, Math.min(1, prevXRef.current / window.innerWidth));
+      const nextTarget = progress * video.duration;
+      video.currentTime = nextTarget;
+      targetTimeRef.current = nextTarget;
     }
   };
 
@@ -177,6 +151,7 @@ export default function MainframeHero() {
         preload="auto"
         className="mainframe-video"
         onSeeked={handleSeeked}
+        onLoadedMetadata={handleLoadedMetadata}
       />
 
       {/* -------------------------------------------------------------
