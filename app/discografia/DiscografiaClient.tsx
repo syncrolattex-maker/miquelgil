@@ -104,17 +104,17 @@ export default function DiscografiaClient() {
 
     // 2. Constantes exactas de la especificación (dmtrbrl/discography - A24 base)
     const SPEC = {
-      hGap: 2.15,
+      hGap: 2.32,
       mobileHGap: 2.8 * 0.72,
       narrowWidth: 650,
       depthGap: 1.0,
       activeDiscY: 0.06,
-      galleryRotX: THREE.MathUtils.degToRad(-22),
-      galleryRotY: THREE.MathUtils.degToRad(-22),
+      galleryRotX: THREE.MathUtils.degToRad(-28),
+      galleryRotY: THREE.MathUtils.degToRad(-28),
       galleryScale: 1.08,
       fov: 40,
       camDistance: 4.4,
-      exposure: 0.86,
+      exposure: 0.84,
       discRadius: 1.0,
       discThickness: 0.01,
       holeRadius: 0.14,
@@ -190,29 +190,29 @@ export default function DiscografiaClient() {
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.setSize(container.clientWidth, container.clientHeight);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    // Mapeo tonal neutro (Khronos/PBR Neutral) para preservar la viveza cromática original, saturación y tonos fieles de la portada
+    // Mapeo tonal neutro (Khronos/PBR Neutral) calibrado para tonos ricos, contraste profundo y negros puros
     renderer.toneMapping = THREE.NeutralToneMapping;
-    renderer.toneMappingExposure = 1.0;
+    renderer.toneMappingExposure = SPEC.exposure;
 
     // Iluminación cinemática equilibrada para respetar la riqueza cromática sin lavar los colores
     const LIGHT_SCALE = Math.PI;
-    const keyLight = new THREE.DirectionalLight(0xffffff, 1.75 * LIGHT_SCALE);
+    const keyLight = new THREE.DirectionalLight(0xffffff, 1.45 * LIGHT_SCALE);
     keyLight.position.set(2.8, 3.8, 4.2);
     scene.add(keyLight);
 
-    const fillLight = new THREE.DirectionalLight(0xf5f7fa, 0.95 * LIGHT_SCALE);
+    const fillLight = new THREE.DirectionalLight(0xf5f7fa, 0.72 * LIGHT_SCALE);
     fillLight.position.set(-3.2, 1.0, 3.0);
     scene.add(fillLight);
 
-    const rimLight = new THREE.DirectionalLight(0x499FF5, 1.65 * LIGHT_SCALE);
+    const rimLight = new THREE.DirectionalLight(0x499FF5, 1.25 * LIGHT_SCALE);
     rimLight.position.set(0.0, -3.2, -2.5);
     scene.add(rimLight);
 
-    const topStripLight = new THREE.DirectionalLight(0xffffff, 1.15 * LIGHT_SCALE);
+    const topStripLight = new THREE.DirectionalLight(0xffffff, 0.95 * LIGHT_SCALE);
     topStripLight.position.set(0.0, 5.5, 1.5);
     scene.add(topStripLight);
 
-    scene.add(new THREE.AmbientLight(0xffffff, 0.85 * LIGHT_SCALE));
+    scene.add(new THREE.AmbientLight(0xffffff, 0.50 * LIGHT_SCALE));
 
     // Mapa de entorno reflectante de estudio (PMREM softboxes estilo A24) para los reflejos especulares e iridiscentes de la cara opuesta y anillos del CD
     function createStudioEnvMap() {
@@ -346,7 +346,7 @@ export default function DiscografiaClient() {
     const textureRecords = new Map<number, { promise: Promise<THREE.CanvasTexture | null> }>();
 
     function buildDiscCanvasTexture(film: FilmData, loadedImg: HTMLImageElement | null) {
-      const size = 1024;
+      const size = 2048;
       const c = document.createElement('canvas');
       c.width = size;
       c.height = size;
@@ -371,8 +371,8 @@ export default function DiscografiaClient() {
         ctx.save();
         ctx.imageSmoothingEnabled = true;
         ctx.imageSmoothingQuality = 'high';
-        // Realce sutil de saturación y contraste para colores vivos, ricos y 100% fieles a la portada original
-        ctx.filter = 'saturate(1.15) contrast(1.05)';
+        // Realce de saturación y contraste para colores oscuros, ricos y fieles a la portada original
+        ctx.filter = 'saturate(1.20) contrast(1.10)';
         const iw = loadedImg.naturalWidth || loadedImg.width;
         const ih = loadedImg.naturalHeight || loadedImg.height;
         const minDim = Math.min(iw, ih);
@@ -390,14 +390,14 @@ export default function DiscografiaClient() {
 
       // Anell perimetral d'arxiu oficial en serigrafia nítida
       ctx.fillStyle = 'rgba(255,255,255,0.92)';
-      ctx.font = '600 18px "PP Neue Montreal", Arial, sans-serif';
+      ctx.font = '600 36px "PP Neue Montreal", Arial, sans-serif';
       ctx.textAlign = 'center';
       ctx.fillText(`${film.title.toUpperCase()} · ${film.year} · ARXIU ÒPTIC MIQUEL GIL`, cx, size * 0.93);
       ctx.restore();
 
       // Anillo espejo de matriz (matrix ring alrededor del buje)
       ctx.strokeStyle = 'rgba(30, 30, 30, 0.35)';
-      ctx.lineWidth = 10;
+      ctx.lineWidth = 20;
       ctx.beginPath();
       ctx.arc(cx, cy, size * 0.13, 0, Math.PI * 2);
       ctx.stroke();
@@ -771,13 +771,13 @@ export default function DiscografiaClient() {
 
       const frontMat = new THREE.MeshPhysicalMaterial({
         color: 0xffffff,
-        roughness: 0.28,
+        roughness: 0.32,
         metalness: 0.0,
         bumpMap: printMaps.bumpMap,
         bumpScale: 0.0004,
-        clearcoat: 0.25,
-        clearcoatRoughness: 0.12,
-        envMapIntensity: 0.35
+        clearcoat: 0.22,
+        clearcoatRoughness: 0.15,
+        envMapIntensity: 0.26
       });
 
       const frontMesh = new THREE.Mesh(sharedDiscGeo, frontMat);
@@ -2447,7 +2447,7 @@ export default function DiscografiaClient() {
             z + u.zeroGOffset.z + buoyZ
           );
 
-          const minScale = isMobile ? 0.52 : SPEC.inactiveScale;
+          const minScale = isMobile ? 0.52 : 1.0;
           const baseScale = minScale + smoothCenter * (1.0 - minScale);
           holder.scale.setScalar(baseScale + u.hoverWeight * 0.028);
         }
