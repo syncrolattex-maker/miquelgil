@@ -1,0 +1,193 @@
+/* ============================================================
+   INTRO GATE PAGE STYLES (app/page.tsx)
+   Video interactiu calibrat amb botó idèntic al de les fitxes de CDs (A24)
+   Optimitzat per a mòbil (iOS Safari & Android)
+   ============================================================ */
+
+.intro-gate-root {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+  background-color: #000000;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: none;
+}
+
+/* Background video */
+.intro-gate-video {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
+  z-index: 0;
+  object-fit: cover;
+  object-position: center center;
+  pointer-events: none;
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+  background-color: #000000;
+}
+
+/* Contenidor central/inferior per al botó d'entrada */
+.intro-gate-action {
+  position: absolute;
+  bottom: 12%;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 30;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  pointer-events: auto;
+}
+
+@media (max-width: 640px) {
+  .intro-gate-action {
+    bottom: 9%;
+  }
+}
+
+/* ============================================================
+   DISSENY EXACTE DELS BOTONS DE LES FITXES DELS CDS (A24)
+   ============================================================ */
+
+.intro-gate-root .btn,
+.intro-gate-root .a24-btn {
+  display: inline-flex;
+  flex-direction: column;
+  position: relative;
+  text-decoration: none;
+  color: #ffffff;
+  cursor: pointer;
+  background: transparent !important;
+  background-color: transparent !important;
+  border: none !important;
+  border-radius: 0 !important;
+  padding: 0.5rem 0;
+  outline: none;
+  box-shadow: none !important;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.intro-gate-root .btn__divider {
+  width: 100%;
+  height: 1.5px;
+  background-color: #ffffff !important;
+  transform-origin: left center;
+  display: block;
+  box-shadow: 0 0 12px rgba(255, 255, 255, 0.4);
+}
+
+.intro-gate-root .btn__p-mask {
+  overflow: hidden;
+  padding: 0.95rem 2.8rem;
+  display: inline-block;
+  background: transparent !important;
+}
+
+@media (max-width: 640px) {
+  .intro-gate-root .btn__p-mask {
+    padding: 0.8rem 2rem;
+  }
+}
+
+.intro-gate-root .btn__p {
+  font-family: var(--font-titles, 'GRIFINITO L', 'PP Eiko', serif) !important;
+  font-weight: 500 !important;
+  font-size: clamp(17px, 1.7vw, 24px);
+  letter-spacing: 0.08em;
+  text-transform: uppercase !important;
+  white-space: nowrap;
+  display: block;
+  line-height: 1.15;
+  color: #ffffff !important;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.7);
+  background: transparent !important;
+}
+
+/* ------------------------------------------------------------
+   HOVER EDITORIAL CINÈTIC (ROLL + JITTER DE LES LÍNIES)
+   ------------------------------------------------------------ */
+[data-hover] {
+  --elastic-ease-out: linear(0, .5737 7.6%, .8382 11.87%, .9463 14.19%, 1.0292 16.54%, 1.0886 18.97%, 1.1258 21.53%, 1.137 22.97%, 1.1424 24.48%, 1.1423 26.1%, 1.1366 27.86%, 1.1165 31.01%, 1.0507 38.62%, 1.0219 42.57%, .9995 46.99%, .9872 51.63%, .9842 58.77%, 1.0011 81.26%, 1);
+  --smooth-ease: cubic-bezier(.32, .72, 0, 1);
+  transition: transform .45s var(--elastic-ease-out);
+}
+
+[data-hover] [data-hover-inner] {
+  vertical-align: top;
+  display: inline-block;
+  position: relative;
+}
+
+[data-hover] [data-hover-text] {
+  display: inline-block;
+  transition: opacity .28s var(--smooth-ease), transform .32s var(--smooth-ease);
+}
+
+@keyframes prod-btn-text-roll {
+  0% {
+    transform: translateY(0%);
+    opacity: 1;
+  }
+  42% {
+    transform: translateY(-115%);
+    opacity: 0;
+  }
+  43% {
+    transform: translateY(115%);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0%);
+    opacity: 1;
+  }
+}
+
+@keyframes btn-film-jitter {
+  0% { transform: translate(0, 0) scaleX(1); }
+  25% { transform: translate(-.045em, .02em) scaleX(.996); }
+  50% { transform: translate(.04em, -.015em) scaleX(1.004); }
+  75% { transform: translate(-.02em, -.025em) scaleX(.998); }
+  100% { transform: translate(0, 0) scaleX(1); }
+}
+
+@keyframes btn-film-wiggle {
+  0% { transform: rotate(.4deg) translateY(.01em); }
+  33% { transform: rotate(-.35deg) translate(-.01em, -.01em); }
+  66% { transform: rotate(.25deg) translate(.015em); }
+  100% { transform: rotate(.4deg) translateY(.01em); }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  [data-hover]:is(:hover, :focus-visible) [data-hover-text] {
+    animation: prod-btn-text-roll 0.46s cubic-bezier(0.19, 1, 0.22, 1) forwards;
+  }
+  
+  .btn[data-hover]:is(:hover, :focus-visible) {
+    transform: scale(1.03) rotate(-.75deg);
+  }
+  
+  .btn[data-hover]:active {
+    transform: scale(.97) rotate(0);
+  }
+  
+  .btn[data-hover]:is(:hover, :focus-visible) .btn__divider {
+    animation: .4s step-end infinite btn-film-jitter;
+  }
+  
+  .btn[data-hover]:is(:hover, :focus-visible) .btn__divider:last-child {
+    animation-duration: .35s;
+    animation-direction: reverse;
+  }
+  
+  .btn[data-hover]:is(:hover, :focus-visible) .btn__p-mask {
+    animation: .45s step-end infinite btn-film-wiggle;
+  }
+}
