@@ -1,6 +1,7 @@
 /* ============================================================
    INTRO GATE PAGE STYLES (/prova01)
    Video interactiu calibrat amb botó idèntic al de les fitxes de CDs (A24)
+   Optimitzat per a mòbil (iOS Safari & Android)
    ============================================================ */
 
 .intro-gate-root {
@@ -11,12 +12,16 @@
   overflow: hidden;
   background-color: #000000;
   user-select: none;
+  -webkit-user-select: none;
+  touch-action: none;
 }
 
 /* Background video */
 .intro-gate-video {
   position: fixed;
   inset: 0;
+  width: 100%;
+  height: 100%;
   width: 100vw;
   height: 100vh;
   height: 100dvh;
@@ -24,6 +29,9 @@
   object-fit: cover;
   object-position: center center;
   pointer-events: none;
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+  background-color: #000000;
 }
 
 /* Contenidor central/inferior per al botó d'entrada */
