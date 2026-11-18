@@ -8,6 +8,20 @@ import A24Nav from '@/components/A24Nav';
 import { AlbumDetail } from './albumData';
 import { initDissolve } from './dissolveEngine';
 import './production.css';
+import {
+  createStudioEnvMap,
+  createSilkscreenPrintMaps,
+  createOpticalBackMaps,
+  buildArchivalDiscCanvasTexture,
+  createDiscFrontMaterial,
+  createDiscBackMaterial,
+  createHubMaterial,
+  createFrostMaterial,
+  createMatrixMaterial,
+  createEdgeMaterial,
+  buildAnnulusLatheGeo,
+  remapRingUVs
+} from '../cdMaterials';
 
 interface ProductionClientProps {
   album: AlbumDetail;
@@ -747,74 +761,103 @@ export default function ProductionClient({ album }: ProductionClientProps) {
     topLight.position.set(0, 3.2, 3);
     scene.add(topLight);
 
-    // Geometría y materiales del disco óptico CD
+    // Mapa de entorno de estudio y mapas de serigrafía de alta fidelidad
+    const studioEnvRT = createStudioEnvMap(renderer);
+    scene.environment = studioEnvRT.texture;
+
+    const printMaps = createSilkscreenPrintMaps(renderer);
+
+    // Geometría y materiales del disco óptico CD de alta definición
     const holeRadius = 0.14;
     const hubRadius = 0.24;
-    const discRadius = 0.985;
+    const discRadius = 1.0;
+    const discThickness = 0.01;
+    const halfThick = discThickness * 0.5;
+    const hubSpan = hubRadius - holeRadius;
+    const rFrostOuter = holeRadius + hubSpan * 0.34;
+    const rMatrixOuter = holeRadius + hubSpan * 0.64;
+    const edgeBleed = 0.026;
 
-    // 1. Cara frontal con artwork del siguiente álbum
-    const frontGeom = new THREE.RingGeometry(hubRadius, discRadius, 128, 8);
-    const pos = frontGeom.attributes.position;
-    const uvs = frontGeom.attributes.uv;
-    for (let i = 0; i < pos.count; i++) {
-      uvs.setXY(i, (pos.getX(i) + 1) * 0.5, (pos.getY(i) + 1) * 0.5);
-    }
-    uvs.needsUpdate = true;
+    const backOpticalMaps = createOpticalBackMaps(renderer, rFrostOuter, rMatrixOuter);
 
-    const textureLoader = new THREE.TextureLoader();
-    const discTexture = textureLoader.load(album.nextAlbum.discArtUrl);
-    discTexture.colorSpace = THREE.SRGBColorSpace;
-    discTexture.anisotropy = renderer.capabilities.getMaxAnisotropy();
+    // Textura de 2048px para la portada con tipografía circular y estampa serigráfica
+    const placeholderTex = buildArchivalDiscCanvasTexture(
+      renderer,
+      album.nextAlbum.title,
+      album.nextAlbum.year,
+      1,
+      null
+    );
 
-    const frontMaterial = new THREE.MeshPhysicalMaterial({
-      map: discTexture,
-      roughness: 0.28,
-      metalness: 0.0,
-      clearcoat: 0.25,
-      clearcoatRoughness: 0.12,
-      envMapIntensity: 0.35,
-      side: THREE.FrontSide
-    });
-    const frontMesh = new THREE.Mesh(frontGeom, frontMaterial);
+    const frontMaterial = createDiscFrontMaterial(printMaps, placeholderTex);
+
+    // Carga de la imagen de portada con reintento y fallback
+    const discImg = new Image();
+    discImg.crossOrigin = 'anonymous';
+    discImg.onload = () => {
+      if (isDisposed) return;
+      const finalTex = buildArchivalDiscCanvasTexture(
+        renderer,
+        album.nextAlbum.title,
+        album.nextAlbum.year,
+        1,
+        discImg
+      );
+      frontMaterial.map = finalTex;
+      frontMaterial.needsUpdate = true;
+    };
+    discImg.src = album.nextAlbum.discArtUrl;
+
+    const backMaterial = createDiscBackMaterial(backOpticalMaps);
+    const sharedHubMat = createHubMaterial();
+    const sharedMatrixMat = createMatrixMaterial(backOpticalMaps.matrixMap);
+    const sharedFrostMat = createFrostMaterial();
+    const sharedEdgeMat = createEdgeMaterial();
+
+    const sharedDiscGeo = new THREE.RingGeometry(hubRadius, discRadius - edgeBleed, 180, 1);
+    remapRingUVs(sharedDiscGeo, discRadius);
+
+    const frontMesh = new THREE.Mesh(sharedDiscGeo, frontMaterial);
+    frontMesh.position.z = halfThick + 0.0006;
     spinGroup.add(frontMesh);
 
-    // 2. Cara trasera oscura con iridiscencia metálica
-    const backGeom = new THREE.RingGeometry(hubRadius, discRadius, 128, 8);
-    const backMaterial = new THREE.MeshPhysicalMaterial({
-      color: 0x1a1e2a,
-      roughness: 0.25,
-      metalness: 0.85,
-      clearcoat: 0.4,
-      side: THREE.BackSide
-    });
-    const backMesh = new THREE.Mesh(backGeom, backMaterial);
+    const backMesh = new THREE.Mesh(sharedDiscGeo, backMaterial);
+    backMesh.rotation.y = Math.PI;
+    backMesh.position.z = -halfThick - 0.0006;
     spinGroup.add(backMesh);
 
-    // 3. Borde perimetral exterior
-    const edgeGeom = new THREE.CylinderGeometry(discRadius + 0.005, discRadius + 0.005, 0.012, 128, 1, true);
-    edgeGeom.rotateX(Math.PI / 2);
-    const edgeMaterial = new THREE.MeshPhysicalMaterial({
-      color: 0xffffff,
-      roughness: 0.05,
-      metalness: 0.55,
-      clearcoat: 0.7,
-      side: THREE.DoubleSide
-    });
-    const edgeMesh = new THREE.Mesh(edgeGeom, edgeMaterial);
+    const sharedEdgeGeo = (() => {
+      const rIn = discRadius - edgeBleed;
+      const pts = [
+        new THREE.Vector2(rIn, -halfThick),
+        new THREE.Vector2(0.996, -halfThick),
+        new THREE.Vector2(1.0, -halfThick * 0.45),
+        new THREE.Vector2(1.0, halfThick * 0.45),
+        new THREE.Vector2(0.996, halfThick),
+        new THREE.Vector2(rIn, halfThick),
+        new THREE.Vector2(rIn, -halfThick)
+      ];
+      const geo = new THREE.LatheGeometry(pts, 180);
+      geo.rotateX(Math.PI / 2);
+      return geo;
+    })();
+
+    const sharedHubGeo = buildAnnulusLatheGeo(rMatrixOuter, hubRadius, halfThick * 0.94);
+    const sharedMatrixGeo = buildAnnulusLatheGeo(rFrostOuter, rMatrixOuter, halfThick * 0.96);
+    const sharedFrostGeo = buildAnnulusLatheGeo(holeRadius, rFrostOuter, halfThick * 0.98);
+
+    const hubMesh = new THREE.Mesh(sharedHubGeo, sharedHubMat);
+    spinGroup.add(hubMesh);
+
+    const matrixMesh = new THREE.Mesh(sharedMatrixGeo, sharedMatrixMat);
+    spinGroup.add(matrixMesh);
+
+    const frostMesh = new THREE.Mesh(sharedFrostGeo, sharedFrostMat);
+    spinGroup.add(frostMesh);
+
+    const edgeMesh = new THREE.Mesh(sharedEdgeGeo, sharedEdgeMat);
     spinGroup.add(edgeMesh);
 
-    // 4. Hub central acrílico transparente
-    const hubGeom = new THREE.RingGeometry(holeRadius, hubRadius, 64, 2);
-    const hubMaterial = new THREE.MeshPhysicalMaterial({
-      color: 0xffffff,
-      roughness: 0.25,
-      metalness: 0.05,
-      transmission: 0.75,
-      thickness: 0.5,
-      ior: 1.5,
-      transparent: true,
-      side: THREE.DoubleSide
-    });
     // 5. SISTEMA SCRIBBLE DE TRAZO A MANO (STROKE IDÉNTICO A /discografia CON STOP-MOTION A 10 FPS)
     const SCRIBBLE_SPEC = {
       segments: 72,
@@ -1421,15 +1464,20 @@ export default function ProductionClient({ album }: ProductionClientProps) {
 
       scribbleRings.forEach((r) => r.geometry.dispose());
       scribbleMaterial.dispose();
-      frontGeom.dispose();
+      sharedDiscGeo.dispose();
+      sharedEdgeGeo.dispose();
+      sharedHubGeo.dispose();
+      sharedMatrixGeo.dispose();
+      sharedFrostGeo.dispose();
       frontMaterial.dispose();
-      backGeom.dispose();
       backMaterial.dispose();
-      edgeGeom.dispose();
-      edgeMaterial.dispose();
-      hubGeom.dispose();
-      hubMaterial.dispose();
-      discTexture.dispose();
+      sharedHubMat.dispose();
+      sharedMatrixMat.dispose();
+      sharedFrostMat.dispose();
+      sharedEdgeMat.dispose();
+      studioEnvRT.dispose();
+      printMaps.normalMap.dispose();
+      printMaps.roughnessMap.dispose();
       renderer.dispose();
     };
   }, [album.nextAlbum]);
