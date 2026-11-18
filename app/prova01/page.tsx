@@ -171,7 +171,7 @@ export default function MainframeHero() {
           ------------------------------------------------------------- */}
       <video
         ref={videoRef}
-        src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260826_041744_63efcd78-bf7d-4039-99e2-2461e8a61903.mp4"
+        src="/video/mainframe_bg.mp4"
         muted
         playsInline
         preload="auto"
