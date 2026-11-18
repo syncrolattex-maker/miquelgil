@@ -43,7 +43,7 @@
   --font-subtitles: 'PP Museum', serif;
   --font-texts: 'PP Neue Montreal', -apple-system, BlinkMacSystemFont, sans-serif;
   
-  --_theme---background: #ffffff;
+  --_theme---background: #f2f2f2;
   --_theme---body-text: #111111;
   --_theme---border: rgba(0, 0, 0, 0.15);
   --_colors---swatch--black: #050505;
@@ -139,7 +139,7 @@
 }
 
 .production-hero {
-  background-color: #ffffff;
+  background-color: #f2f2f2;
   color: #111111;
   position: relative;
   min-height: 100vh;
@@ -631,7 +631,7 @@
    SECCIÓN DESCRIPCIÓN Y TRACKLIST
    ============================================================ */
 .production-description {
-  background-color: #ffffff;
+  background-color: #f2f2f2;
   color: #111111;
   padding: 8rem 2rem;
   position: relative;
@@ -676,13 +676,13 @@
   --scroll-next-lift: .35em;
   --scroll-next-inset: 2em;
   position: relative;
-  background-color: #ffffff;
+  background-color: #f2f2f2;
   color: #111111;
   width: 100%;
 }
 
 .scroll-to {
-  background-color: #ffffff;
+  background-color: #f2f2f2;
   color: #111111;
   position: relative;
   width: 100%;

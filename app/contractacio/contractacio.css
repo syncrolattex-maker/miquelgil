@@ -42,7 +42,7 @@
   --font-subtitles: 'PP Museum', serif;
   --font-texts: 'PP Neue Montreal', -apple-system, BlinkMacSystemFont, sans-serif;
 
-  --_theme---background: #ffffff;
+  --_theme---background: #f2f2f2;
   --_theme---body-text: #111111;
   --_theme---border: rgba(0, 0, 0, 0.16);
 }
@@ -305,7 +305,7 @@
    1. SECCIÓ HERO INFORMATIVA (SENSE FOTOS)
    ============================================================ */
 .contract-hero {
-  background-color: #ffffff;
+  background-color: #f2f2f2;
   color: #111111;
   position: relative;
   display: flex;
@@ -403,7 +403,7 @@
    2. SELECTOR NUMÈRIC INTERACTIU DELS 5 FORMATS (01 — 05)
    ============================================================ */
 .contract-formats {
-  background-color: #ffffff;
+  background-color: #f2f2f2;
   color: #111111;
   position: relative;
   padding-bottom: 5rem;
@@ -625,7 +625,7 @@
    3. TAULA EDITORIAL DE DOSSIERS I RIDERS OFICIALS
    ============================================================ */
 .contract-docs {
-  background-color: #ffffff;
+  background-color: #f2f2f2;
   color: #111111;
   padding: 6rem 0;
   position: relative;
@@ -742,7 +742,7 @@
    4. OFICINA DE MANAGEMENT & CONTRACTACIÓ PÚBLICA
    ============================================================ */
 .contract-management {
-  background-color: #ffffff;
+  background-color: #f2f2f2;
   color: #111111;
   padding: 5.5rem 0;
 }
@@ -787,7 +787,7 @@
    5. PEU DE PÀGINA A24 NEXT
    ============================================================ */
 .contract-next-footer {
-  background-color: #ffffff;
+  background-color: #f2f2f2;
   color: #111111;
   position: relative;
   padding: 4rem 0 7rem 0;
@@ -830,7 +830,7 @@
   max-height: calc(100vh - 2.5rem);
   max-height: calc(100dvh - 2.5rem);
   overflow-y: auto;
-  background-color: #ffffff;
+  background-color: #f2f2f2;
   color: #111111;
   border: 0.5px solid rgba(17, 17, 17, 0.38);
   padding: 2.2rem 4.25rem;

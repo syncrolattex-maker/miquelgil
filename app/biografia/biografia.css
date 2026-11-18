@@ -43,7 +43,7 @@
   --font-subtitles: 'PP Museum', serif;
   --font-texts: 'PP Neue Montreal', -apple-system, BlinkMacSystemFont, sans-serif;
 
-  --_theme---background: #ffffff;
+  --_theme---background: #f2f2f2;
   --_theme---body-text: #111111;
   --_theme---border: rgba(0, 0, 0, 0.16);
   --_colors---swatch--black: #050505;
@@ -361,7 +361,7 @@
 }
 
 .bio-hero {
-  background-color: #ffffff;
+  background-color: #f2f2f2;
   color: #111111;
   position: relative;
   min-height: 100vh;
@@ -602,7 +602,7 @@
    3. SÍNTESI BIOGRÀFICA I PILARS ARTÍSTICS
    ============================================================ */
 .bio-synthesis {
-  background-color: #ffffff;
+  background-color: #f2f2f2;
   color: #111111;
   padding: 7rem 2rem;
   position: relative;
@@ -664,7 +664,7 @@
   align-items: center;
   padding: 0.85rem 0;
   border-bottom: 0.5px solid rgba(0, 0, 0, 0.16);
-  background-color: #ffffff;
+  background-color: #f2f2f2;
   color: #111111;
 }
 
@@ -708,7 +708,7 @@
    4. LES CINC GRANS ETAPES BIOGRÀFIQUES (CAPÍTOLS A24)
    ============================================================ */
 .bio-chapters {
-  background-color: #ffffff;
+  background-color: #f2f2f2;
   color: #111111;
   position: relative;
   padding-bottom: 4rem;
@@ -988,7 +988,7 @@
    6. PRINCIPALS ESCENARIS I FORMATS EN DIRECTE
    ============================================================ */
 .bio-venues {
-  background-color: #ffffff;
+  background-color: #f2f2f2;
   color: #111111;
   padding: 7rem 0;
   position: relative;
@@ -1081,7 +1081,7 @@
    7. PEU DE PÀGINA / SEGÜENT SECCIÓ (ESTIL A24 NEXT)
    ============================================================ */
 .bio-next-footer {
-  background-color: #ffffff;
+  background-color: #f2f2f2;
   color: #111111;
   position: relative;
   padding: 5rem 0 7rem 0;

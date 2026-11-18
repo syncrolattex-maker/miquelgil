@@ -251,8 +251,8 @@
 
 :root {
   --bg: #000000;
-  --cream: #f8f0e6;
-  --cream-deep: #efe4d6;
+  --cream: #f2f2f2;
+  --cream-deep: #e8e8e8;
   --ink: #000000;
   --white: #ffffff;
   --accent: #805681;
@@ -3093,7 +3093,7 @@ button {
    ============================================================ */
 
 .contacte-root-wrapper {
-  background-color: #FFFFFF !important;
+  background-color: #f2f2f2 !important;
   color: #000000 !important;
   min-height: 100vh;
   width: 100vw;
@@ -3105,7 +3105,7 @@ button {
   min-height: 100vh;
   width: 100vw;
   display: flex;
-  background-color: #FFFFFF !important;
+  background-color: #f2f2f2 !important;
   position: relative;
 }
 
@@ -3119,7 +3119,7 @@ button {
     flex-direction: row !important;
     min-height: 100vh !important;
     width: 100vw !important;
-    background-color: #FFFFFF !important;
+    background-color: #f2f2f2 !important;
     align-items: stretch !important;
   }
 
@@ -3167,7 +3167,7 @@ button {
 
   .contacte-root-wrapper .elementor-element-255e1ba {
     flex-direction: column !important;
-    background-color: #FFFFFF !important;
+    background-color: #f2f2f2 !important;
   }
 
   .contacte-root-wrapper .elementor-element-a9ca502 {

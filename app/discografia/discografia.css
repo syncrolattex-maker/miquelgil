@@ -143,7 +143,7 @@
   height: 100vh;
   outline: none;
   overflow: hidden;
-  background-color: #ffffff;
+  background-color: #f2f2f2;
   color: #111111;
   font-family: var(--font-texts);
   user-select: none;
@@ -224,7 +224,7 @@
   top: 1.4rem;
   left: 1.75rem;
   z-index: 20;
-  width: clamp(16.5rem, 23vw, 22.5rem);
+  width: clamp(19.5rem, 26vw, 25.5rem);
   color: #000000 !important;
 }
 
@@ -243,7 +243,7 @@
 
 .a24-meta-label {
   font-family: var(--font-subtitles) !important;
-  font-size: 8.5px;
+  font-size: 10px !important;
   line-height: 1.2;
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -255,7 +255,7 @@
 .a24-meta-value,
 .a24-meta-value * {
   font-family: var(--font-texts) !important;
-  font-size: 13px;
+  font-size: 18px !important;
   line-height: 1.32;
   letter-spacing: -0.01em;
   color: #000000 !important;
@@ -306,7 +306,7 @@
 
 .a24-review-pub {
   font-family: var(--font-subtitles) !important;
-  font-size: 8px;
+  font-size: 9px;
   line-height: 1.2;
   letter-spacing: 0.15em;
   text-transform: uppercase;
@@ -317,18 +317,19 @@
 
 .a24-review-quote {
   font-family: var(--font-titles) !important;
-  font-size: clamp(1.05rem, 1.65vw, 1.5rem);
-  line-height: 1.06;
+  font-size: 16px !important;
+  line-height: 1.18;
   letter-spacing: -0.01em;
   color: #000000 !important;
   text-transform: uppercase;
   font-weight: 400 !important;
 }
 
-/* Responsive móvil según captura A24 mobile (THE SYMPATHIZER):
-   - Bloque editorial pegado arriba a la izquierda (sin barra superior en el top)
-   - Barra de navegación flotante blanca abajo centrada (M.GIL · Àlbums · Índex ∧)
-   - Críticas ocultas en móvil para dejar aire al CD central y los CDs laterales que asoman */
+/* Responsive móvil según captura A24 mobile:
+   - Título grande en mayúsculas a la izquierda
+   - Línea divisoria de ancho completo
+   - Filas de metadata: etiqueta a la izquierda, valor alineado a la derecha
+   - Críticas ocultas en móvil para dejar aire al CD central */
 @media (max-width: 991px) {
   .a24-bottom-reviews-container {
     display: none !important;
@@ -337,30 +338,57 @@
 
 @media (max-width: 650px) {
   .a24-top-left-block {
-    top: 0.9rem;
-    left: 0.85rem;
-    width: clamp(14.5rem, 62vw, 18.5rem);
+    top: calc(1.15rem + env(safe-area-inset-top, 0px));
+    left: 1.25rem;
+    right: 1.25rem;
+    width: calc(100% - 2.5rem);
+    max-width: 100%;
   }
 
   .a24-serif-title,
   #ui-title {
-    font-size: clamp(1.35rem, 5.6vw, 1.85rem) !important;
-    line-height: 0.94 !important;
+    font-size: clamp(1.75rem, 6.8vw, 2.35rem) !important;
+    line-height: 0.92 !important;
+    letter-spacing: -0.015em;
+    margin-bottom: 0.45rem;
   }
 
   .a24-meta-row {
-    padding: 0.32rem 0;
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    padding: 0.44rem 0;
+    gap: 0.75rem;
+    width: 100%;
+  }
+
+  .a24-meta-row--starring {
+    align-items: flex-start;
+    padding-top: 0.46rem;
   }
 
   .a24-meta-label {
-    font-size: 7.5px;
+    font-size: 10px !important;
     letter-spacing: 0.09em;
+    color: #000000 !important;
+    font-weight: 500;
   }
 
   .a24-meta-value,
   .a24-meta-value * {
-    font-size: 12px;
-    line-height: 1.3;
+    font-size: 15px !important;
+    line-height: 1.32;
+    color: #000000 !important;
+    font-weight: 400;
+    text-align: right;
+  }
+
+  .editorial-line {
+    width: 100%;
+    height: 1px;
+    background-color: rgba(0, 0, 0, 0.22);
+    transform-origin: left center;
+    will-change: transform;
   }
 }
 
@@ -592,7 +620,7 @@
 [data-disc-gallery] .border-black\/20 { border-color: rgba(0, 0, 0, 0.2); }
 [data-disc-gallery] .rounded { border-radius: 0.25rem; }
 
-[data-disc-gallery] .bg-white { background-color: #ffffff; }
+[data-disc-gallery] .bg-white { background-color: #f2f2f2; }
 [data-disc-gallery] .bg-white\/95 { background-color: rgba(255, 255, 255, 0.95); }
 [data-disc-gallery] .bg-black { background-color: #000000; }
 [data-disc-gallery] .backdrop-blur-md {

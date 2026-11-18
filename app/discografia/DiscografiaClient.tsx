@@ -285,7 +285,7 @@ export default function DiscografiaClient() {
           THREE.MathUtils.degToRad(14)
         );
         galleryGroup.scale.setScalar(0.68);
-        galleryGroup.position.set(0, -0.05, 0);
+        galleryGroup.position.set(0, -0.20, 0);
       } else if (w <= 1024) {
         camera.position.set(0, 0, 5.0);
         galleryGroup.rotation.set(SPEC.galleryRotX, SPEC.galleryRotY, 0);
@@ -1241,8 +1241,8 @@ export default function DiscografiaClient() {
         y: 0
       });
 
-      // 1. Título en tipografía Serif PP Eiko en MAYÚSCULAS y negro
-      splitAndAnimateChars(uiTitle, film.title, 0, true);
+      // 1. Título en tipografía Serif PP Eiko en MAYÚSCULAS y negro (delay tras movimiento inicial del CD)
+      splitAndAnimateChars(uiTitle, film.title, 0.35, true);
 
       // 2. Líneas divisorias horizontales animadas con GSAP (scaleX: 0 -> 1)
       if (leftPanel && !prefersReducedMotion) {
@@ -1253,8 +1253,9 @@ export default function DiscografiaClient() {
           {
             scaleX: 1,
             opacity: 1,
-            duration: 0.7,
-            stagger: 0.07,
+            duration: 0.65,
+            delay: 0.32,
+            stagger: 0.06,
             ease: 'expo.out',
             overwrite: true
           }
@@ -1263,12 +1264,12 @@ export default function DiscografiaClient() {
 
       // 3. Descripción si está presente
       if (uiDescription) {
-        animateMaskedLines(uiDescription, film.description, 0.05);
+        animateMaskedLines(uiDescription, film.description, 0.38);
       }
 
       // 4. Productor / Director y Año (alineados a la derecha en la tabla superior izquierda)
-      splitAndAnimateChars(uiDirector, film.director, 0.07, false);
-      splitAndAnimateChars(uiYear, film.year, 0.1, false);
+      splitAndAnimateChars(uiDirector, film.director, 0.38, false);
+      splitAndAnimateChars(uiYear, film.year, 0.42, false);
 
       // 5. Reparto / Col·laboracions (cada línea apilada alineada a la derecha)
       if (uiStarring) {
@@ -1293,7 +1294,7 @@ export default function DiscografiaClient() {
               opacity: 1,
               duration: 0.52,
               stagger: 0.045,
-              delay: 0.13,
+              delay: 0.46,
               ease: 'expo.out',
               overwrite: true
             }
@@ -1302,6 +1303,7 @@ export default function DiscografiaClient() {
       }
 
       // 6. Críticas abajo de los CDs al estilo exacto A24:
+      // Aparecen después del bloque superior ("más tarde pero no mucho")
       // 1º Estrellas (★★★★★) arriba
       // 2º Nombre del medio en pequeño uppercase espaciado
       // 3º Cita en tipografía Serif grande PP Eiko en MAYÚSCULAS entre comillas
@@ -1321,7 +1323,7 @@ export default function DiscografiaClient() {
           gsap.fromTo(
             Array.from(uiReviews.children),
             { y: 14, opacity: 0 },
-            { y: 0, opacity: 1, duration: 0.5, stagger: 0.08, delay: 0.08, ease: 'expo.out' }
+            { y: 0, opacity: 1, duration: 0.55, stagger: 0.08, delay: 0.62, ease: 'expo.out' }
           );
         }
       }
@@ -2493,7 +2495,7 @@ export default function DiscografiaClient() {
           position: 'fixed',
           inset: 0,
           zIndex: 9999,
-          backgroundColor: '#ffffff',
+          backgroundColor: '#f2f2f2',
           opacity: 0,
           pointerEvents: 'none'
         }}
@@ -2565,7 +2567,8 @@ export default function DiscografiaClient() {
       {/* MODAL DE FICHA DE PRODUCCIÓN (Simula la navegación Barba a detailUrl) */}
       <div
         id="detail-modal"
-        className="fixed inset-0 z-40 bg-white opacity-0 pointer-events-none transition-opacity duration-300 flex flex-col justify-between p-8"
+        className="fixed inset-0 z-40 opacity-0 pointer-events-none transition-opacity duration-300 flex flex-col justify-between p-8"
+        style={{ backgroundColor: '#f2f2f2' }}
       >
         <div className="flex justify-between items-center border-b border-black/10 pb-4">
           <span id="modal-slug" className="a24-label">
