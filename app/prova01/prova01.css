@@ -1,15 +1,7 @@
 /* ============================================================
    INTRO GATE PAGE STYLES (/prova01)
-   Video interactiu calibrat amb botó únic d'entrada
+   Video interactiu calibrat amb botó idèntic al de les fitxes de CDs (A24)
    ============================================================ */
-
-@import url("https://db.onlinewebfonts.com/c/5ac3fe7c6abd2f62067f266d89671492?family=HelveticaNowDisplay-Medium");
-@import url("https://db.onlinewebfonts.com/c/1aa3377e489837a26d019bba501e779d?family=HelveticaNowDisplayW01-Rg");
-
-:root {
-  --font-heading: 'HelveticaNowDisplay-Medium', 'Helvetica Neue', Arial, sans-serif;
-  --font-body: 'HelveticaNowDisplayW01-Rg', 'Helvetica Neue', Arial, sans-serif;
-}
 
 .intro-gate-root {
   position: relative;
@@ -34,7 +26,7 @@
   pointer-events: none;
 }
 
-/* Contenidor central/inferior per al botó únic d'entrada */
+/* Contenidor central/inferior per al botó d'entrada */
 .intro-gate-action {
   position: absolute;
   bottom: 12%;
@@ -49,60 +41,145 @@
 
 @media (max-width: 640px) {
   .intro-gate-action {
-    bottom: 10%;
-    width: 90%;
+    bottom: 9%;
   }
 }
 
-/* Botó d'entrada a la web: disseny A24 / editorial d'alta precisió */
-.intro-gate-btn {
+/* ============================================================
+   DISSENY EXACTE DELS BOTONS DE LES FITXES DELS CDS (A24)
+   ============================================================ */
+
+.intro-gate-root .btn,
+.intro-gate-root .a24-btn {
   display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  background-color: rgba(255, 255, 255, 0.94);
-  color: #000000;
-  border: 1px solid rgba(255, 255, 255, 0.6);
-  padding: 16px 38px;
-  border-radius: 9999px;
-  font-family: var(--font-heading), 'Helvetica Neue', Arial, sans-serif;
-  font-size: 14px;
-  font-weight: 500;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
+  flex-direction: column;
+  position: relative;
   text-decoration: none;
+  color: #ffffff;
   cursor: pointer;
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  box-shadow: 0 10px 35px rgba(0, 0, 0, 0.45);
-  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-  white-space: nowrap;
+  background: transparent !important;
+  background-color: transparent !important;
+  border: none !important;
+  border-radius: 0 !important;
+  padding: 0.5rem 0;
+  outline: none;
+  box-shadow: none !important;
+  -webkit-tap-highlight-color: transparent;
 }
 
-@media (min-width: 640px) {
-  .intro-gate-btn {
-    font-size: 15px;
-    padding: 18px 46px;
+.intro-gate-root .btn__divider {
+  width: 100%;
+  height: 1.5px;
+  background-color: #ffffff !important;
+  transform-origin: left center;
+  display: block;
+  box-shadow: 0 0 12px rgba(255, 255, 255, 0.4);
+}
+
+.intro-gate-root .btn__p-mask {
+  overflow: hidden;
+  padding: 0.95rem 2.8rem;
+  display: inline-block;
+  background: transparent !important;
+}
+
+@media (max-width: 640px) {
+  .intro-gate-root .btn__p-mask {
+    padding: 0.8rem 2rem;
   }
 }
 
-.intro-gate-btn:hover {
-  background-color: #000000;
-  color: #ffffff;
-  border-color: rgba(255, 255, 255, 0.85);
-  box-shadow: 0 15px 45px rgba(0, 0, 0, 0.7), 0 0 25px rgba(255, 255, 255, 0.2);
-  transform: translateY(-2px) scale(1.03);
+.intro-gate-root .btn__p {
+  font-family: var(--font-titles, 'GRIFINITO L', 'PP Eiko', serif) !important;
+  font-weight: 500 !important;
+  font-size: clamp(17px, 1.7vw, 24px);
+  letter-spacing: 0.08em;
+  text-transform: uppercase !important;
+  white-space: nowrap;
+  display: block;
+  line-height: 1.15;
+  color: #ffffff !important;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.7);
+  background: transparent !important;
 }
 
-.intro-gate-btn:active {
-  transform: translateY(0) scale(0.98);
+/* ------------------------------------------------------------
+   HOVER EDITORIAL CINÈTIC (ROLL + JITTER DE LES LÍNIES)
+   ------------------------------------------------------------ */
+[data-hover] {
+  --elastic-ease-out: linear(0, .5737 7.6%, .8382 11.87%, .9463 14.19%, 1.0292 16.54%, 1.0886 18.97%, 1.1258 21.53%, 1.137 22.97%, 1.1424 24.48%, 1.1423 26.1%, 1.1366 27.86%, 1.1165 31.01%, 1.0507 38.62%, 1.0219 42.57%, .9995 46.99%, .9872 51.63%, .9842 58.77%, 1.0011 81.26%, 1);
+  --smooth-ease: cubic-bezier(.32, .72, 0, 1);
+  transition: transform .45s var(--elastic-ease-out);
 }
 
-.intro-gate-btn-arrow {
+[data-hover] [data-hover-inner] {
+  vertical-align: top;
   display: inline-block;
-  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
 }
 
-.intro-gate-btn:hover .intro-gate-btn-arrow {
-  transform: translate(3px, -3px);
+[data-hover] [data-hover-text] {
+  display: inline-block;
+  transition: opacity .28s var(--smooth-ease), transform .32s var(--smooth-ease);
+}
+
+@keyframes prod-btn-text-roll {
+  0% {
+    transform: translateY(0%);
+    opacity: 1;
+  }
+  42% {
+    transform: translateY(-115%);
+    opacity: 0;
+  }
+  43% {
+    transform: translateY(115%);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0%);
+    opacity: 1;
+  }
+}
+
+@keyframes btn-film-jitter {
+  0% { transform: translate(0, 0) scaleX(1); }
+  25% { transform: translate(-.045em, .02em) scaleX(.996); }
+  50% { transform: translate(.04em, -.015em) scaleX(1.004); }
+  75% { transform: translate(-.02em, -.025em) scaleX(.998); }
+  100% { transform: translate(0, 0) scaleX(1); }
+}
+
+@keyframes btn-film-wiggle {
+  0% { transform: rotate(.4deg) translateY(.01em); }
+  33% { transform: rotate(-.35deg) translate(-.01em, -.01em); }
+  66% { transform: rotate(.25deg) translate(.015em); }
+  100% { transform: rotate(.4deg) translateY(.01em); }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  [data-hover]:is(:hover, :focus-visible) [data-hover-text] {
+    animation: prod-btn-text-roll 0.46s cubic-bezier(0.19, 1, 0.22, 1) forwards;
+  }
+  
+  .btn[data-hover]:is(:hover, :focus-visible) {
+    transform: scale(1.03) rotate(-.75deg);
+  }
+  
+  .btn[data-hover]:active {
+    transform: scale(.97) rotate(0);
+  }
+  
+  .btn[data-hover]:is(:hover, :focus-visible) .btn__divider {
+    animation: .4s step-end infinite btn-film-jitter;
+  }
+  
+  .btn[data-hover]:is(:hover, :focus-visible) .btn__divider:last-child {
+    animation-duration: .35s;
+    animation-direction: reverse;
+  }
+  
+  .btn[data-hover]:is(:hover, :focus-visible) .btn__p-mask {
+    animation: .45s step-end infinite btn-film-wiggle;
+  }
 }

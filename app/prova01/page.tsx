@@ -96,14 +96,26 @@ export default function IntroGatePage() {
       />
 
       {/* -------------------------------------------------------------
-          ÚNIC BOTÓ D'ENTRADA A LA WEB
+          ÚNIC BOTÓ D'ENTRADA (DISSENY EXACTE DE LES FITXES DELS CDS)
           ------------------------------------------------------------- */}
       <div className="intro-gate-action">
-        <Link href="/discografia/" className="intro-gate-btn">
-          <span>Entrar a la web</span>
-          <span className="intro-gate-btn-arrow" aria-hidden="true">
-            ↗
+        <Link
+          href="/discografia/"
+          data-hover=""
+          className="btn a24-btn"
+          aria-label="Entrar a la web oficial de Miquel Gil"
+        >
+          <div className="btn__divider" />
+          <span className="btn__p-mask">
+            <span
+              className="btn__p"
+              data-hover-inner=""
+              data-text="ENTRAR A LA WEB ↗"
+            >
+              <span data-hover-text="">ENTRAR A LA WEB ↗</span>
+            </span>
           </span>
+          <div className="btn__divider" />
         </Link>
       </div>
     </main>
