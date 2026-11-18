@@ -992,7 +992,13 @@ export default function ProductionClient({ album }: ProductionClientProps) {
     let idleTimer = 0;
     let currentSpinZ = 0;
     let hasPoppedIn = false;
-    const revealedRules: boolean[] = [false, false, false, false, false];
+    const revealedBgLines: boolean[] = [false, false, false];
+
+    // Inicializar estado de las 3 líneas de fondo tras el CD para despliegue de lado a lado
+    const initialBgLines = section.querySelectorAll<HTMLElement>('.scroll-to__bg-line');
+    if (initialBgLines.length) {
+      gsap.set(initialBgLines, { scaleX: 0, transformOrigin: 'left center' });
+    }
 
     const popScaleState = { value: 0.35 };
     const exitPhysics = { spin: 0, lift: 0 };
@@ -1022,16 +1028,16 @@ export default function ProductionClient({ album }: ProductionClientProps) {
         const scaleMultiplier = 1.25;
         pt = ((Math.min(1.2 * height, 1.3 * width) * ht) / 2) * scaleMultiplier;
 
-        // Alineación con la 4ª línea separadora horizontal (.divider-horizontal)
-        const rows = section.querySelectorAll<HTMLElement>('.scroll-to__row > .divider-horizontal');
-        if (rows.length >= 4) {
+        // Alineación con las 3 líneas horizontales detrás del CD (.scroll-to__bg-line)
+        const currentBgLines = section.querySelectorAll<HTMLElement>('.scroll-to__bg-line');
+        if (currentBgLines.length >= 2) {
           const sRect = section.getBoundingClientRect();
-          const rTop = rows[3].getBoundingClientRect().top - sRect.top;
+          const rTop = currentBgLines[1].getBoundingClientRect().top - sRect.top;
           const restTiltRad = THREE.MathUtils.degToRad(-30);
           const topOffset = pt * Math.cos(restTiltRad);
           mt = -(rTop - height / 2) * ht - topOffset;
         } else {
-          mt = -pt * 0.15;
+          mt = -pt * 0.2;
         }
       }
     };
@@ -1126,17 +1132,17 @@ export default function ProductionClient({ album }: ProductionClientProps) {
         );
       }
 
-      // 4. Colapso de las líneas horizontales
-      const rowEls = section.querySelectorAll('.scroll-to__row > .divider-horizontal');
-      if (rowEls.length) {
+      // 4. Colapso de las 3 líneas horizontales detrás del CD
+      const currentBgLines = section.querySelectorAll<HTMLElement>('.scroll-to__bg-line');
+      if (currentBgLines.length) {
         exitTl.to(
-          rowEls,
+          currentBgLines,
           {
             scaleX: 0,
             opacity: 0,
             duration: 0.5,
             ease: 'power3.out',
-            stagger: { each: 0.03, from: 'end' }
+            stagger: { each: 0.04, from: 'end' }
           },
           0.02
         );
@@ -1176,13 +1182,17 @@ export default function ProductionClient({ album }: ProductionClientProps) {
         });
       }
 
-      // Revelación progresiva de las líneas horizontales
-      const rowEls = section.querySelectorAll<HTMLElement>('.scroll-to__row > .divider-horizontal');
-      rowEls.forEach((row, idx) => {
-        const thresh = (idx + 1) / (rowEls.length + 1);
-        if (Ce >= thresh && !revealedRules[idx]) {
-          revealedRules[idx] = true;
-          gsap.to(row, { scaleX: 1, duration: 0.9, ease: 'power3.out' });
+      // Animación de lado a lado de las 3 líneas horizontales detrás del CD
+      const bgLines = section.querySelectorAll<HTMLElement>('.scroll-to__bg-line');
+      const lineThresholds = [0.18, 0.36, 0.54];
+      bgLines.forEach((line, idx) => {
+        if (Ce >= lineThresholds[idx] && !revealedBgLines[idx]) {
+          revealedBgLines[idx] = true;
+          gsap.to(line, {
+            scaleX: 1,
+            duration: 0.85,
+            ease: 'power3.out'
+          });
         }
       });
     };
@@ -1295,6 +1305,30 @@ export default function ProductionClient({ album }: ProductionClientProps) {
     window.addEventListener('touchend', onTouchEnd, { passive: true });
     window.addEventListener('keydown', onKeyDown);
 
+    // Observer para animar de lado a lado las 3 líneas cuando la sección entra en pantalla
+    const lineObserver = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            const bgLines = section.querySelectorAll<HTMLElement>('.scroll-to__bg-line');
+            bgLines.forEach((line, idx) => {
+              if (!revealedBgLines[idx]) {
+                revealedBgLines[idx] = true;
+                gsap.to(line, {
+                  scaleX: 1,
+                  duration: 0.85,
+                  delay: idx * 0.12,
+                  ease: 'power3.out'
+                });
+              }
+            });
+          }
+        });
+      },
+      { threshold: 0.2 }
+    );
+    lineObserver.observe(section);
+
     updateScroll();
 
     // Bucle de renderizado animado a 60 fps
@@ -1370,6 +1404,7 @@ export default function ProductionClient({ album }: ProductionClientProps) {
     return () => {
       isDisposed = true;
       cancelAnimationFrame(animId);
+      lineObserver.disconnect();
       window.removeEventListener('scroll', updateScroll);
       window.removeEventListener('resize', updateDimensions);
       window.removeEventListener('wheel', onWheel);
@@ -1688,33 +1723,6 @@ export default function ProductionClient({ album }: ProductionClientProps) {
         className="scroll-to theme-base"
       >
         <div className="scroll-to__vh">
-          <div className="container">
-            <div className="scroll-to__content">
-              <div className="scroll-to__row">
-                <div className="divider-horizontal" />
-              </div>
-              <div className="scroll-to__row">
-                <div className="divider-horizontal" />
-              </div>
-              <div className="scroll-to__row">
-                <div className="divider-horizontal" />
-              </div>
-              <div className="scroll-to__row">
-                <div className="divider-horizontal" />
-              </div>
-              <div className="scroll-to__row">
-                <div className="divider-horizontal" />
-              </div>
-            </div>
-          </div>
-
-          {/* Lienzo WebGL Three.js con el disco 3D */}
-          <div
-            ref={upNextCanvasContainerRef}
-            data-scroll-next-canvas=""
-            className="scroll-to__canvas"
-          />
-
           {/* Etiqueta y Título en mayúsculas PP Eiko */}
           <div data-scroll-next-label="" className="scroll-to__label">
             <p data-scroll-next-kicker="" className="subheading-xs">
@@ -1749,6 +1757,26 @@ export default function ProductionClient({ album }: ProductionClientProps) {
               </div>
             </div>
           </div>
+
+          {/* 3 Líneas separadoras horizontales detrás del CD en el hueco tras el título */}
+          <div className="scroll-to__backdrop-lines" aria-hidden="true">
+            <div className="scroll-to__bg-line-wrap">
+              <div className="divider-horizontal scroll-to__bg-line" />
+            </div>
+            <div className="scroll-to__bg-line-wrap">
+              <div className="divider-horizontal scroll-to__bg-line" />
+            </div>
+            <div className="scroll-to__bg-line-wrap">
+              <div className="divider-horizontal scroll-to__bg-line" />
+            </div>
+          </div>
+
+          {/* Lienzo WebGL Three.js con el disco 3D */}
+          <div
+            ref={upNextCanvasContainerRef}
+            data-scroll-next-canvas=""
+            className="scroll-to__canvas"
+          />
 
           {/* Enlace interactivo por polígono de 48 puntos sobre el disco */}
           <a
