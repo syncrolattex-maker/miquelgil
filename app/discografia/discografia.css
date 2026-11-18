@@ -282,8 +282,8 @@
   flex-direction: row;
   align-items: flex-start;
   justify-content: center;
-  gap: clamp(2.25rem, 6vw, 5.5rem);
-  max-width: 52rem;
+  gap: clamp(2.5rem, 6vw, 6rem);
+  max-width: 62rem;
   width: 100%;
 }
 
@@ -292,34 +292,34 @@
   flex-direction: column;
   align-items: center;
   text-align: center;
-  max-width: 18.5rem;
+  max-width: 24rem;
   flex: 1 1 0%;
 }
 
 .a24-review-stars {
-  font-size: 11px;
+  font-size: 12px;
   letter-spacing: 0.18em;
   color: #000000 !important;
-  margin-bottom: 0.45rem;
+  margin-bottom: 0.5rem;
   line-height: 1;
 }
 
 .a24-review-pub {
   font-family: var(--font-subtitles) !important;
-  font-size: 9px;
+  font-size: 10px;
   line-height: 1.2;
   letter-spacing: 0.15em;
   text-transform: uppercase;
   color: #000000 !important;
-  margin-bottom: 0.35rem;
+  margin-bottom: 0.45rem;
   font-weight: 500;
 }
 
 .a24-review-quote {
   font-family: var(--font-titles) !important;
-  font-size: 16px !important;
-  line-height: 1.18;
-  letter-spacing: -0.01em;
+  font-size: clamp(1.4rem, 1.8vw, 1.85rem) !important;
+  line-height: 1.08;
+  letter-spacing: -0.015em;
   color: #000000 !important;
   text-transform: uppercase;
   font-weight: 400 !important;
