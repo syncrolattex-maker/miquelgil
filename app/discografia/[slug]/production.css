@@ -1204,11 +1204,120 @@
   display: block;
 }
 
+@media (min-width: 992px) {
+  .mobile-only {
+    display: none !important;
+  }
+}
+
+@media (max-width: 991px) {
+  .desktop-only {
+    display: none !important;
+  }
+}
+
 /* ============================================================
    RESPONSIVE MÓVIL (<= 991px)
    ============================================================ */
 @media (max-width: 991px) {
-  /* En versió mòbil: la fotografia cobreix tot el fons edge-to-edge fins dins de la vora líquida */
+  /* 1. HERO EN MÓVIL (según captura A24):
+     - Título centrado en mayúsculas
+     - Créditos centrados directamente debajo sin línea divisoria
+     - Tabla de 4 filas con etiquetas a la izquierda y valores a la derecha
+     - Sin botones que separen la tabla de la foto */
+  .production-hero {
+    min-height: auto;
+  }
+
+  .production-content {
+    min-height: auto;
+    padding: calc(4.5rem + env(safe-area-inset-top, 0px)) 1.25rem 2.25rem 1.25rem;
+  }
+
+  .production__title {
+    margin: 0 auto 0.65rem auto;
+    text-align: center;
+  }
+
+  .production__title h1 {
+    font-size: clamp(2rem, 8.5vw, 2.85rem) !important;
+    line-height: 0.95;
+    letter-spacing: -0.02em;
+    margin: 0;
+  }
+
+  /* Se oculta la línea entre título y créditos */
+  .production-hero .production__info > .divider-horizontal:first-of-type {
+    display: none !important;
+  }
+
+  .production__credits {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: baseline;
+    gap: 0.35rem 0.65rem;
+    max-width: 100%;
+    margin: 0.5rem auto 1.4rem auto;
+    text-align: center;
+  }
+
+  .production__credits .subheading-xs {
+    font-size: 9px;
+    letter-spacing: 0.08em;
+    color: rgba(0, 0, 0, 0.55);
+    margin-left: 0 !important;
+  }
+
+  .production__credits .paragraph-m {
+    font-size: 11.5px;
+    font-weight: 500;
+    color: #111111;
+  }
+
+  /* Tabla de 4 filas (ANY, GÈNERE, DURADA, FORMAT) de ancho completo */
+  .production__metadata {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    margin-top: 1.2rem;
+    gap: 0;
+  }
+
+  .production-metadata__item {
+    width: 100%;
+    padding: 0.52rem 0;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.16);
+  }
+
+  .metadata-item__content {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    width: 100%;
+    padding: 0;
+  }
+
+  .metadata-item__content .subheading-xs {
+    font-family: var(--font-subtitles) !important;
+    font-size: 9.5px !important;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: rgba(0, 0, 0, 0.6);
+    font-weight: 500;
+    text-align: left;
+    flex-shrink: 0;
+  }
+
+  .metadata-item__content .paragraph-m {
+    font-family: var(--font-texts) !important;
+    font-size: 13.5px !important;
+    font-weight: 500;
+    text-align: right;
+    color: #000000;
+  }
+
+  /* 2. FITXA AUDIOVISUAL Y FOTOGRAFÍA */
   .trailer {
     background-color: #050505;
     width: 100%;
@@ -1217,12 +1326,12 @@
   }
 
   .trailer__vh {
-    min-height: calc(74vh + var(--dissolve-overlap, 180px));
-    min-height: calc(74dvh + var(--dissolve-overlap, 180px));
+    min-height: calc(72vh + var(--dissolve-overlap, 180px));
+    min-height: calc(72dvh + var(--dissolve-overlap, 180px));
     width: 100%;
     max-width: none;
     margin: 0;
-    padding: calc(var(--dissolve-overlap, 0px) + 3.5rem) 1.5rem 4.5rem 1.5rem;
+    padding: calc(var(--dissolve-overlap, 0px) + 3.25rem) 1.25rem 4rem 1.25rem;
     border-radius: 0;
     display: flex;
     align-items: center;
@@ -1244,24 +1353,46 @@
   }
 
   .trailer-quote-text {
-    font-size: clamp(1.35rem, 5vw, 1.85rem);
-    line-height: 1.18;
-    margin: 0.35rem 0;
+    font-size: clamp(1.4rem, 5.5vw, 1.95rem);
+    line-height: 1.15;
+    margin: 0.4rem 0;
+    text-transform: uppercase;
   }
 
-  .production__metadata {
-    grid-template-columns: repeat(2, 1fr);
-    margin-top: 1.5rem;
+  /* 3. SINOPSIS Y BOTONES DE ACCIÓN (bajo la foto) */
+  .production-description {
+    padding: 3.5rem 1.25rem;
   }
-  
+
   .description-content {
     grid-template-columns: 1fr;
-    gap: 3.5rem;
+    gap: 3rem;
   }
-  
-  .production__cta {
-    flex-direction: column;
-    gap: 1.5rem;
+
+  .description__synopsis {
+    gap: 1.25rem;
+  }
+
+  .description__synopsis p {
+    font-size: clamp(1.15rem, 4.4vw, 1.45rem) !important;
+    line-height: 1.35;
+    letter-spacing: -0.01em;
+    color: #111111;
+    text-align: left;
+  }
+
+  .production__synopsis-ctas {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-top: 1.5rem;
+    width: 100%;
+  }
+
+  .production__synopsis-ctas .btn {
+    flex: 1 1 calc(50% - 0.5rem);
+    min-width: 140px;
   }
 
   .production-page .btn__p-mask {
@@ -1270,56 +1401,66 @@
 
   .production-page .btn__p,
   .production-page [data-reveal="btn"] .btn__p {
-    font-size: clamp(14px, 4vw, 17.5px);
+    font-size: clamp(13px, 3.8vw, 16px);
   }
-  
-  .production__cta-touch {
-    margin-top: 2.5rem;
+
+  /* 4. FOOTER "UP NEXT" (DISC SEGÜENT):
+     - Kicker y título escalonado con líneas horizontales
+     - El CD 3D asoma exactamente su mitad superior desde el footer */
+  .scroll-to__vh {
+    height: 100vh;
+    min-height: 100dvh;
+    padding: calc(3.5rem + env(safe-area-inset-top, 0px)) 1.25rem calc(1rem + env(safe-area-inset-bottom, 0px)) 1.25rem;
+    box-sizing: border-box;
     display: flex;
     flex-direction: column;
-    gap: 1rem;
+    justify-content: flex-start;
+    position: relative;
+    overflow: hidden;
   }
 
-  /* Sección Footer UP NEXT en Móvil: los textos no deben montarse sobre el CD */
   .scroll-to__label {
-    padding: 3rem 1.5rem 0 1.5rem;
+    padding: 0;
     position: relative;
     z-index: 10;
+    width: 100%;
+    text-align: left;
   }
 
-  .scroll-to__label h2 {
-    font-size: clamp(2.4rem, 9vw, 4rem);
-    line-height: 0.95;
-    margin-bottom: 0.75rem;
+  .scroll-to__staggered-mobile {
+    width: 100%;
+    margin-top: 0.75rem;
+    display: flex;
+    flex-direction: column;
   }
 
-  /* Any - Gènere pasa justo debajo del título del Disc Següent */
-  .scroll-to__credit,
-  [data-scroll-next] .scroll-to__credit {
-    position: relative !important;
-    inset: auto !important;
-    bottom: auto !important;
-    right: auto !important;
-    margin-top: 0.5rem;
-    align-items: center;
-    text-align: center;
-    z-index: 10;
-    pointer-events: auto;
+  .scroll-to__title-word {
+    font-family: var(--font-titles) !important;
+    font-size: clamp(2.6rem, 10vw, 4.4rem);
+    line-height: 0.92;
+    letter-spacing: -0.02em;
+    text-transform: uppercase;
+    color: #111111;
+    font-weight: 500;
+    padding: 0.25rem 0;
   }
 
-  .scroll-to__credit .text-right {
-    text-align: center;
-    margin-top: 0.35rem;
+  .scroll-to__title-word.is--left {
+    text-align: left;
   }
 
-  /* Empeny per passar de disc también se ubica limpiamente debajo */
-  .scroll-to__hint {
+  .scroll-to__title-word.is--right {
+    text-align: right;
+  }
+
+  .scroll-to__link {
     position: absolute;
-    bottom: 2rem;
-    left: 50%;
-    transform: translateX(-50%);
-    width: auto;
-    z-index: 10;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 55%;
+    z-index: 20;
+    cursor: pointer;
   }
 
   .trailer-lightbox__editorial {

@@ -26,6 +26,11 @@ export default function ProductionClient({ album }: ProductionClientProps) {
   const [volume, setVolume] = useState(80);
   const hasNativeVideo = Boolean(album.videoSrc);
 
+  // Palabras para el título escalonado del próximo CD en versión móvil
+  const nextWords = (album.nextAlbum.title || '').toUpperCase().split(/\s+/);
+  const nextWordLeft = nextWords[0] || '';
+  const nextWordRight = nextWords.slice(1).join(' ') || '';
+
   // Extraer ID de YouTube
   const getYouTubeId = (url: string) => {
     const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
@@ -1004,19 +1009,30 @@ export default function ProductionClient({ album }: ProductionClientProps) {
       // Conversión de píxeles a unidades Three.js
       ht = (2 * cameraDistance * Math.tan(THREE.MathUtils.degToRad(cameraFOV) / 2)) / height;
       const isMobile = width <= 991;
-      const scaleMultiplier = isMobile ? (width <= 650 ? 0.88 : 0.98) : 1.25;
-      pt = ((Math.min(1.2 * height, 1.3 * width) * ht) / 2) * scaleMultiplier;
 
-      // Alineación con la 4ª línea separadora horizontal (.divider-horizontal)
-      const rows = section.querySelectorAll<HTMLElement>('.scroll-to__row > .divider-horizontal');
-      if (rows.length >= 4 && !isMobile) {
-        const sRect = section.getBoundingClientRect();
-        const rTop = rows[3].getBoundingClientRect().top - sRect.top;
-        const restTiltRad = THREE.MathUtils.degToRad(-30);
-        const topOffset = pt * Math.cos(restTiltRad);
-        mt = -(rTop - height / 2) * ht - topOffset;
+      if (isMobile) {
+        // En versión móvil según la especificación A24 del usuario:
+        // El próximo CD tiene un diámetro amplio que abarca el ancho de pantalla (~94%)
+        // y su centro se sitúa justo en el borde inferior del viewport (-halfVh),
+        // de modo que la mitad superior del disco asoma desde el footer.
+        pt = (width * ht) * 0.47;
+        const halfVh = (height * ht) / 2;
+        mt = -halfVh + pt * 0.05;
       } else {
-        mt = isMobile ? -pt * 0.25 : -pt * 0.15;
+        const scaleMultiplier = 1.25;
+        pt = ((Math.min(1.2 * height, 1.3 * width) * ht) / 2) * scaleMultiplier;
+
+        // Alineación con la 4ª línea separadora horizontal (.divider-horizontal)
+        const rows = section.querySelectorAll<HTMLElement>('.scroll-to__row > .divider-horizontal');
+        if (rows.length >= 4) {
+          const sRect = section.getBoundingClientRect();
+          const rTop = rows[3].getBoundingClientRect().top - sRect.top;
+          const restTiltRad = THREE.MathUtils.degToRad(-30);
+          const topOffset = pt * Math.cos(restTiltRad);
+          mt = -(rTop - height / 2) * ht - topOffset;
+        } else {
+          mt = -pt * 0.15;
+        }
       }
     };
 
@@ -1257,7 +1273,10 @@ export default function ProductionClient({ album }: ProductionClientProps) {
     };
     const onLinkClick = (e: MouseEvent) => {
       e.preventDefault();
-      if (!isLeaving && checkDiscHover(e.clientX, e.clientY)) {
+      const isMobile = window.innerWidth <= 991;
+      const rect = container.getBoundingClientRect();
+      const isBottomTap = isMobile && (e.clientY - rect.top) > rect.height * 0.45;
+      if (!isLeaving && (checkDiscHover(e.clientX, e.clientY) || isBottomTap)) {
         triggerExit();
       }
     };
@@ -1318,20 +1337,26 @@ export default function ProductionClient({ album }: ProductionClientProps) {
 
       // Inclinación cinematográfica (arriveTilt -> restTilt -> pushTilt)
       const rad = THREE.MathUtils.degToRad;
-      const tiltX = rad(-52) * (1 - a) + rad(-30) * a * (1 - o) + rad(-16) * a * o;
-      const tiltY = rad(10) * (1 - a) + rad(-30) * a * (1 - o) + rad(-10) * a * o;
+      const isMobile = width <= 991;
+      const tiltX = isMobile
+        ? rad(-22) * a * (1 - o) + rad(-12) * a * o
+        : rad(-52) * (1 - a) + rad(-30) * a * (1 - o) + rad(-16) * a * o;
+      const tiltY = isMobile
+        ? 0
+        : rad(10) * (1 - a) + rad(-30) * a * (1 - o) + rad(-10) * a * o;
       rootGroup.rotation.x = tiltX;
       rootGroup.rotation.y = tiltY;
 
       // Escala del disco con factor de crecimiento por empuje (pushGrow: 1.04)
       const popScale = popScaleState.value;
       const discScale = pt * Math.max(0.0001, popScale) * (1 + 0.04 * o);
-      const compX = getCenterComp(rootGroup.rotation);
+      const compX = isMobile ? 0 : getCenterComp(rootGroup.rotation);
 
-      // Posición con caída de llegada (arriveDrop: 0.9) y elevación por empuje (pushLift: 0.1)
+      // Posición con caída de llegada (arriveDrop) y elevación por empuje (pushLift: 0.1)
+      const arriveDrop = isMobile ? 0.35 * pt * (1 - a) : 0.9 * pt * (1 - a);
       rootGroup.position.set(
         -compX * discScale,
-        mt - 0.9 * pt * (1 - a) + 0.1 * pt * o + exitPhysics.lift * pt,
+        mt - arriveDrop + 0.1 * pt * o + exitPhysics.lift * pt,
         0
       );
       rootGroup.scale.setScalar(discScale);
@@ -1454,7 +1479,7 @@ export default function ProductionClient({ album }: ProductionClientProps) {
             {/* ============================================================
                 CONTENEDOR FULLWIDTH PARA BOTONES Y CRUCES VECTORIALES
                ============================================================ */}
-            <div className="production__cta-wrap">
+            <div className="production__cta-wrap desktop-only">
               {/* LÍNEA FULLWIDTH SUPERIOR DE BOTONES */}
               <div className="divider-horizontal absolute top-0" />
 
@@ -1585,6 +1610,40 @@ export default function ProductionClient({ album }: ProductionClientProps) {
           <div className="description__synopsis">
             <span className="subheading-xs">SINOPSI I CONTEXT</span>
             <p className="paragraph-xl">{album.synopsis}</p>
+
+            {/* Botons d'acció sota la sinopsi en versió mòbil (calcat a la captura A24) */}
+            <div className="production__synopsis-ctas mobile-only">
+              <a
+                data-reveal="btn"
+                href={album.streamUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn a24-btn"
+              >
+                <div className="btn__divider" />
+                <span className="btn__p-mask">
+                  <span className="btn__p" data-text="ESCOLTAR EN STREAMING ↗">
+                    <span>ESCOLTAR EN STREAMING ↗</span>
+                  </span>
+                </span>
+                <div className="btn__divider" />
+              </a>
+
+              <button
+                type="button"
+                data-reveal="btn"
+                onClick={openTrailer}
+                className="btn a24-btn"
+              >
+                <div className="btn__divider" />
+                <span className="btn__p-mask">
+                  <span className="btn__p" data-text="VEURE VÍDEO OFICIAL ▶">
+                    <span>VEURE VÍDEO OFICIAL ▶</span>
+                  </span>
+                </span>
+                <div className="btn__divider" />
+              </button>
+            </div>
           </div>
 
           {/* Tracklist & Reconocimientos */}
@@ -1661,12 +1720,25 @@ export default function ProductionClient({ album }: ProductionClientProps) {
             <p data-scroll-next-kicker="" className="subheading-xs">
               DISC SEGÜENT
             </p>
-            <h2 data-scroll-next-title="" className="heading-l">
+            <h2 data-scroll-next-title="" className="heading-l desktop-only">
               {album.nextAlbum.title.toUpperCase()}
             </h2>
 
-            {/* En versión móvil se muestra directamente debajo del título */}
-            <div data-scroll-next-credit="" className="scroll-to__credit">
+            {/* Versió mòbil escalonada segons captura A24 */}
+            <div className="scroll-to__staggered-mobile mobile-only" aria-hidden="true">
+              <div className="divider-horizontal my-2" />
+              <div className="scroll-to__title-word is--left">{nextWordLeft}</div>
+              {nextWordRight ? (
+                <>
+                  <div className="divider-horizontal my-2" />
+                  <div className="scroll-to__title-word is--right">{nextWordRight}</div>
+                </>
+              ) : null}
+              <div className="divider-horizontal my-2" />
+            </div>
+
+            {/* En escriptori es mostren Any i Gènere */}
+            <div data-scroll-next-credit="" className="scroll-to__credit desktop-only">
               <div data-reveal="" className="text-right">
                 <span className="subheading-xs block">ANY</span>
                 <span className="paragraph-m font-medium">{album.nextAlbum.year}</span>
