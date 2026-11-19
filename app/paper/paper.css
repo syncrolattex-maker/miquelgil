@@ -264,18 +264,21 @@
 
 /* ------------------------------------------------------------
    TRANSICIÓ DE SORTIDA ("ENTRAR A LA WEB"):
-   1. Les tipografies desapareixen ràpidament
-   2. La cara s'acciona a major velocitat i es queda al seu lloc
-   3. Fundit a negre una mica abans
-   4. Mostra el logotip de MIQUEL GIL en blanc al centre
+   1. Els textos desapareixen IMMEDIATAMENT SENSE ANIMACIÓ
+   2. La cara es reprodueix fins al final (per apreciar el plegat complet en bola)
+   3. Fundit a negre en culminar l'animació de la cara
+   4. Mostra el logotip oficial de MIQUEL GIL en blanc al centre
    5. Transició de farcit líquid directament cap a /discografia/
    ------------------------------------------------------------ */
 
 .paper-root.is-exiting .paper-left-content {
-  opacity: 0;
-  transform: translateY(-20px);
-  filter: blur(12px);
-  pointer-events: none;
+  display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  transform: none !important;
+  filter: none !important;
+  transition: none !important;
+  pointer-events: none !important;
 }
 
 /* La cara NO es mou al centre, es queda al seu lloc a la dreta */

@@ -16,6 +16,8 @@ export default function PaperClient() {
   const [isFadingToBlack, setIsFadingToBlack] = useState<boolean>(false);
   const [showLogo, setShowLogo] = useState<boolean>(false);
   const hasTriggeredSequenceRef = useRef<boolean>(false);
+  const hasTriggeredFadeRef = useRef<boolean>(false);
+  const fallbackTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   // Precàrrega de la ruta /discografia/ per a una navegació immediata
   useEffect(() => {
@@ -31,37 +33,28 @@ export default function PaperClient() {
       video.pause();
       video.currentTime = 0;
     }
+    return () => {
+      if (fallbackTimerRef.current) clearTimeout(fallbackTimerRef.current);
+    };
   }, []);
 
-  // Seqüència cinètica en prémer "Entrar a la web":
-  // 1. Tipografies desapareixen immediatament.
-  // 2. El vídeo de la cara es reprodueix més ràpid (playbackRate: 1.45) i es queda al seu lloc.
-  // 3. El fundit a negre apareix una mica abans (~1.6s).
-  // 4. Es mostra el logotip de MIQUEL GIL en blanc al centre del negre.
-  // 5. Transició de l'efecte líquid des del centre cap a la pantalla de discografia.
-  const handleEnter = (e?: React.MouseEvent) => {
-    if (e) e.preventDefault();
-    if (hasTriggeredSequenceRef.current) return;
-    hasTriggeredSequenceRef.current = true;
+  // Transició cinètica quan la cara acaba de plegar-se completament en bola de paper
+  const triggerFadeAndTransition = () => {
+    if (hasTriggeredFadeRef.current) return;
+    hasTriggeredFadeRef.current = true;
 
-    setIsExiting(true);
-
-    const video = videoRef.current;
-    if (video) {
-      video.currentTime = 0;
-      video.playbackRate = 1.45; // Animació més ràpida
-      video.play().catch(() => {});
+    if (fallbackTimerRef.current) {
+      clearTimeout(fallbackTimerRef.current);
+      fallbackTimerRef.current = null;
     }
 
-    // Pas 1: El fundit a negre s'activa abans (~1.65s)
-    setTimeout(() => {
-      setIsFadingToBlack(true);
-    }, 1650);
+    // Pas 1: Fundit a negre en finalitzar l'animació de la cara
+    setIsFadingToBlack(true);
 
-    // Pas 2: Es mostra el logotip de MIQUEL GIL en blanc al centre
+    // Pas 2: Mostrar el logotip blanc oficial de Miquel Gil al centre del negre
     setTimeout(() => {
       setShowLogo(true);
-    }, 2100);
+    }, 420);
 
     // Pas 3: Transició de l'efecte líquid directament cap a discografia
     setTimeout(() => {
@@ -72,7 +65,50 @@ export default function PaperClient() {
       } else {
         router.push("/discografia/");
       }
-    }, 2950);
+    }, 1450);
+  };
+
+  // Seqüència cinètica en prémer "Entrar a la web":
+  // 1. Tipografies desapareixen IMMEDIATAMENT SENSE ANIMACIÓ.
+  // 2. El vídeo de la cara es reprodueix per complet fins al final (per apreciar tot el plegat en bola).
+  // 3. El fundit a negre s'activa quan culmina l'animació de la cara (~3.3s - 3.5s).
+  // 4. Es mostra el logotip oficial de Miquel Gil (/images/logo-W.png) en blanc al centre del negre.
+  // 5. Transició de l'efecte líquid des del centre cap a la pantalla de discografia.
+  const handleEnter = (e?: React.MouseEvent) => {
+    if (e) e.preventDefault();
+    if (hasTriggeredSequenceRef.current) return;
+    hasTriggeredSequenceRef.current = true;
+
+    // Desaparició immediata dels textos sense cap animació
+    setIsExiting(true);
+
+    const video = videoRef.current;
+    if (video) {
+      video.currentTime = 0;
+      video.playbackRate = 1.05; // Velocitat fluida i natural per apreciar el plegat sencer
+      video.play().catch(() => {});
+    }
+
+    // Fallback de seguretat si no s'emeten els esdeveniments del vídeo
+    fallbackTimerRef.current = setTimeout(() => {
+      triggerFadeAndTransition();
+    }, 3650);
+  };
+
+  const handleVideoTimeUpdate = () => {
+    const video = videoRef.current;
+    if (!video || !isExiting || hasTriggeredFadeRef.current) return;
+    const dur = video.duration || 3.92;
+    // S'activa quan la bola de paper s'ha format completament
+    if (video.currentTime >= 3.35 || video.currentTime >= dur - 0.45) {
+      triggerFadeAndTransition();
+    }
+  };
+
+  const handleVideoEnded = () => {
+    if (isExiting) {
+      triggerFadeAndTransition();
+    }
   };
 
   const handleSkipOnClick = () => {
@@ -140,6 +176,8 @@ export default function PaperClient() {
             // @ts-ignore
             webkit-playsinline="true"
             className="paper-face-video"
+            onTimeUpdate={handleVideoTimeUpdate}
+            onEnded={handleVideoEnded}
           />
         </div>
       </div>
