@@ -2,14 +2,20 @@
 
 import React, { useRef, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import LiquidFillTransition, {
+  LiquidFillTransitionHandle,
+} from "@/components/LiquidFillTransition";
 import "./paper.css";
 
 export default function PaperClient() {
   const router = useRouter();
   const videoRef = useRef<HTMLVideoElement | null>(null);
+  const liquidRef = useRef<LiquidFillTransitionHandle | null>(null);
+
   const [isExiting, setIsExiting] = useState<boolean>(false);
   const [isFadingToBlack, setIsFadingToBlack] = useState<boolean>(false);
-  const hasTriggeredFadeRef = useRef<boolean>(false);
+  const [showLogo, setShowLogo] = useState<boolean>(false);
+  const hasTriggeredSequenceRef = useRef<boolean>(false);
 
   // Precàrrega de la ruta /discografia/ per a una navegació immediata
   useEffect(() => {
@@ -27,47 +33,51 @@ export default function PaperClient() {
     }
   }, []);
 
-  // Execució del fundit a negre i navegació a /discografia/
-  const triggerFadeToBlack = () => {
-    if (hasTriggeredFadeRef.current) return;
-    hasTriggeredFadeRef.current = true;
-    setIsFadingToBlack(true);
-
-    // Un cop el fundit a negre és complet (550ms), passem a la pàgina de discografia
-    setTimeout(() => {
-      router.push("/discografia/");
-    }, 550);
-  };
-
-  // Acció en clicar "Entrar a la web":
-  // 1. Desapareixen les tipografies
-  // 2. La cara es queda al seu lloc (a la dreta) i s'acciona la seva animació
-  // 3. Quan acaba, es produeix un fundit a negre i pas a /discografia/
+  // Seqüència cinètica en prémer "Entrar a la web":
+  // 1. Tipografies desapareixen immediatament.
+  // 2. El vídeo de la cara es reprodueix més ràpid (playbackRate: 1.45) i es queda al seu lloc.
+  // 3. El fundit a negre apareix una mica abans (~1.6s).
+  // 4. Es mostra el logotip de MIQUEL GIL en blanc al centre del negre.
+  // 5. Transició de l'efecte líquid des del centre cap a la pantalla de discografia.
   const handleEnter = (e?: React.MouseEvent) => {
     if (e) e.preventDefault();
-    if (isExiting) return;
+    if (hasTriggeredSequenceRef.current) return;
+    hasTriggeredSequenceRef.current = true;
 
     setIsExiting(true);
 
     const video = videoRef.current;
     if (video) {
       video.currentTime = 0;
+      video.playbackRate = 1.45; // Animació més ràpida
       video.play().catch(() => {});
     }
 
-    // Fallback de seguretat per si l'esdeveniment 'ended' no es dispara en algun navegador (~3.9s)
+    // Pas 1: El fundit a negre s'activa abans (~1.65s)
     setTimeout(() => {
-      triggerFadeToBlack();
-    }, 3900);
-  };
+      setIsFadingToBlack(true);
+    }, 1650);
 
-  const handleVideoEnded = () => {
-    triggerFadeToBlack();
+    // Pas 2: Es mostra el logotip de MIQUEL GIL en blanc al centre
+    setTimeout(() => {
+      setShowLogo(true);
+    }, 2100);
+
+    // Pas 3: Transició de l'efecte líquid directament cap a discografia
+    setTimeout(() => {
+      if (liquidRef.current) {
+        liquidRef.current.trigger(0.5, 0.5, () => {
+          router.push("/discografia/");
+        });
+      } else {
+        router.push("/discografia/");
+      }
+    }, 2950);
   };
 
   const handleSkipOnClick = () => {
     if (isExiting) {
-      triggerFadeToBlack();
+      router.push("/discografia/");
     }
   };
 
@@ -125,17 +135,37 @@ export default function PaperClient() {
             // @ts-ignore
             webkit-playsinline="true"
             className="paper-face-video"
-            onEnded={handleVideoEnded}
           />
         </div>
       </div>
 
       {/* -------------------------------------------------------------
-          CAPA DE FUNDIT A NEGRE EN FINALITZAR L'ANIMACIÓ DE LA CARA
+          CAPA DE FUNDIT A NEGRE
           ------------------------------------------------------------- */}
       <div
         className={`paper-fade-to-black ${isFadingToBlack ? "is-active" : ""}`}
         aria-hidden="true"
+        onClick={handleSkipOnClick}
+      />
+
+      {/* -------------------------------------------------------------
+          LOGOTIP DE MIQUEL GIL EN BLANC SOBRE EL NEGRE
+          ------------------------------------------------------------- */}
+      <div
+        className={`paper-transition-logo-wrap ${showLogo ? "is-visible" : ""}`}
+        aria-hidden="true"
+      >
+        <div className="paper-transition-logo">Miquel Gil</div>
+        <div className="paper-transition-sub">Arxiu Oficial // 1975–2026</div>
+      </div>
+
+      {/* -------------------------------------------------------------
+          TRANSICIÓ DE L'EFECTE LÍQUID A LA PANTALLA DE DISCOGRAFIA
+          ------------------------------------------------------------- */}
+      <LiquidFillTransition
+        ref={liquidRef}
+        color="#f2f2f2"
+        duration={0.78}
       />
     </main>
   );
