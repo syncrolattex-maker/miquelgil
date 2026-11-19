@@ -2,6 +2,8 @@
    PAPER HERO PAGE (/paper) — MIQUEL GIL PRESENTACIÓ OFICIAL
    Sense header ni menú. Vídeo a sang sense requadres.
    Tipografies: Eiko Medium, Museum i Neue Montreal.
+   La cara es queda al seu lloc (a la dreta) i quan acaba el vídeo,
+   es produeix un fundit a negre i pas a /discografia/
    ============================================================ */
 
 .paper-root {
@@ -150,6 +152,7 @@
 /* ------------------------------------------------------------
    VÍDEO DE LA CARA: A SANG, SENSE REQUADRES NI MARCS
    No es reprodueix en bucle. Fons fos purament amb el negre.
+   Es manté fidelment a la dreta en tot moment.
    ------------------------------------------------------------ */
 .paper-face-video-wrapper {
   position: absolute;
@@ -165,7 +168,6 @@
   /* Degradat suau a l'esquerra per fondre amb el negre pur */
   -webkit-mask-image: linear-gradient(to right, transparent 0%, rgba(0, 0, 0, 0.7) 10%, black 24%, black 100%);
   mask-image: linear-gradient(to right, transparent 0%, rgba(0, 0, 0, 0.7) 10%, black 24%, black 100%);
-  transition: all 0.9s cubic-bezier(0.16, 1, 0.3, 1);
   pointer-events: none;
 }
 
@@ -195,8 +197,8 @@
 /* ------------------------------------------------------------
    TRANSICIÓ DE SORTIDA ("ENTRAR A LA WEB"):
    1. Les tipografies desapareixen completament
-   2. S'acciona l'animació de la cara (que no estava en bucle)
-   3. Es queda com a protagonista única i dóna pas a la web
+   2. La cara ES QUEDA EXACTAMENT AL SEU LLOC (a la dreta, NO passa al centre)
+   3. Quan acaba el vídeo, es produeix un fundit a negre i pas a /discografia/
    ------------------------------------------------------------ */
 
 .paper-root.is-exiting .paper-left-content {
@@ -206,13 +208,27 @@
   pointer-events: none;
 }
 
+/* La cara NO es mou al centre, es queda exactament al seu lloc a la dreta */
 .paper-root.is-exiting .paper-face-video-wrapper {
-  width: 100vw;
-  -webkit-mask-image: none;
-  mask-image: none;
-  opacity: 1;
-  z-index: 50;
-  cursor: pointer;
   pointer-events: auto;
-  transform: scale(1.02);
+  cursor: pointer;
+}
+
+/* Capa de fundit a negre cinètic en finalitzar el vídeo */
+.paper-fade-to-black {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
+  background-color: #000000;
+  z-index: 9999;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.55s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.paper-fade-to-black.is-active {
+  opacity: 1;
+  pointer-events: auto;
 }

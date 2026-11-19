@@ -8,8 +8,10 @@ export default function PaperClient() {
   const router = useRouter();
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const [isExiting, setIsExiting] = useState<boolean>(false);
+  const [isFadingToBlack, setIsFadingToBlack] = useState<boolean>(false);
+  const hasTriggeredFadeRef = useRef<boolean>(false);
 
-  // Precàrrega de la ruta /discografia/ per a una entrada instantània
+  // Precàrrega de la ruta /discografia/ per a una navegació immediata
   useEffect(() => {
     try {
       router.prefetch("/discografia/");
@@ -25,10 +27,22 @@ export default function PaperClient() {
     }
   }, []);
 
+  // Execució del fundit a negre i navegació a /discografia/
+  const triggerFadeToBlack = () => {
+    if (hasTriggeredFadeRef.current) return;
+    hasTriggeredFadeRef.current = true;
+    setIsFadingToBlack(true);
+
+    // Un cop el fundit a negre és complet (550ms), passem a la pàgina de discografia
+    setTimeout(() => {
+      router.push("/discografia/");
+    }, 550);
+  };
+
   // Acció en clicar "Entrar a la web":
-  // 1. Desapareixen immediatament les tipografies
-  // 2. S'acciona l'animació de la cara (reproducció única del vídeo)
-  // 3. Un cop transcorreguda l'animació, dóna pas a la web
+  // 1. Desapareixen les tipografies
+  // 2. La cara es queda al seu lloc (a la dreta) i s'acciona la seva animació
+  // 3. Quan acaba, es produeix un fundit a negre i pas a /discografia/
   const handleEnter = (e?: React.MouseEvent) => {
     if (e) e.preventDefault();
     if (isExiting) return;
@@ -41,19 +55,19 @@ export default function PaperClient() {
       video.play().catch(() => {});
     }
 
-    // Quan l'animació del paper s'acosta al final (~3.5s), naveguem a la web
+    // Fallback de seguretat per si l'esdeveniment 'ended' no es dispara en algun navegador (~3.9s)
     setTimeout(() => {
-      router.push("/discografia/");
-    }, 3500);
+      triggerFadeToBlack();
+    }, 3900);
   };
 
   const handleVideoEnded = () => {
-    router.push("/discografia/");
+    triggerFadeToBlack();
   };
 
-  const handleSkipToWeb = () => {
+  const handleSkipOnClick = () => {
     if (isExiting) {
-      router.push("/discografia/");
+      triggerFadeToBlack();
     }
   };
 
@@ -95,11 +109,11 @@ export default function PaperClient() {
         </div>
 
         {/* VÍDEO DE LA CARA: A SANG, SENSE REQUADRES NI MARCS
-            No es reprodueix en bucle, s'acciona en prémer el botó */}
+            Es queda al seu lloc a la dreta (no passa al centre) */}
         <div
           className="paper-face-video-wrapper"
-          onClick={handleSkipToWeb}
-          title={isExiting ? "Fes clic per entrar directament" : undefined}
+          onClick={handleSkipOnClick}
+          title={isExiting ? "Fes clic per avançar" : undefined}
         >
           <video
             ref={videoRef}
@@ -115,6 +129,14 @@ export default function PaperClient() {
           />
         </div>
       </div>
+
+      {/* -------------------------------------------------------------
+          CAPA DE FUNDIT A NEGRE EN FINALITZAR L'ANIMACIÓ DE LA CARA
+          ------------------------------------------------------------- */}
+      <div
+        className={`paper-fade-to-black ${isFadingToBlack ? "is-active" : ""}`}
+        aria-hidden="true"
+      />
     </main>
   );
 }
