@@ -510,6 +510,8 @@ export default function PillarMenu() {
                       src="/images/viatgerO1.jpg"
                       alt="Miquel Gil — Viatger"
                       className="anm-pillar-tile-img"
+                      loading="lazy"
+                      decoding="async"
                       data-anm-kit-menu-pillar-tile-img
                     />
                     <div className="anm-pillar-tile-roller" data-anm-kit-menu-pillar-tile-roller>

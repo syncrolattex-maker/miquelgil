@@ -19,11 +19,14 @@ export default function PaperClient() {
   const hasTriggeredFadeRef = useRef<boolean>(false);
   const fallbackTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Precàrrega de la ruta /discografia/ per a una navegació immediata
+  // Precàrrega suau de /discografia/ retardada per prioritzar el render inicial del hero
   useEffect(() => {
-    try {
-      router.prefetch("/discografia/");
-    } catch (_) {}
+    const t = setTimeout(() => {
+      try {
+        router.prefetch("/discografia/");
+      } catch (_) {}
+    }, 1500);
+    return () => clearTimeout(t);
   }, [router]);
 
   // Assegurar que el vídeo estigui en pausa inicialment (no bucle, no autoplay)
@@ -170,7 +173,7 @@ export default function PaperClient() {
             ref={videoRef}
             src="/video/paper_reel.mp4"
             poster="/video/paper_poster.jpg"
-            preload="auto"
+            preload="metadata"
             muted
             playsInline
             // @ts-ignore

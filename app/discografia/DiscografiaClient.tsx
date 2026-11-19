@@ -412,6 +412,9 @@ export default function DiscografiaClient() {
             mat.map = finalTex;
             mat.needsUpdate = true;
           }
+          if (placeholderTex && placeholderTex !== finalTex) {
+            placeholderTex.dispose();
+          }
           resolve(finalTex);
         };
         img.onerror = () => {

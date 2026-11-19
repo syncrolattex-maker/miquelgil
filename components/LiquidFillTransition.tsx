@@ -149,6 +149,37 @@ const LiquidFillTransition = forwardRef<LiquidFillTransitionHandle, LiquidFillTr
     const meshRef = useRef<THREE.Mesh | null>(null);
     const tweenRef = useRef<gsap.core.Tween | null>(null);
     const isRunningRef = useRef<boolean>(false);
+    const animIdRef = useRef<number>(0);
+
+    const stopLoop = useCallback(() => {
+      if (animIdRef.current) {
+        cancelAnimationFrame(animIdRef.current);
+        animIdRef.current = 0;
+      }
+    }, []);
+
+    const startLoop = useCallback(() => {
+      if (animIdRef.current) return;
+      const render = (time: number) => {
+        if (
+          rendererRef.current &&
+          sceneRef.current &&
+          cameraRef.current &&
+          uniformsRef.current &&
+          (isRunningRef.current || uniformsRef.current.uProgress.value > 0)
+        ) {
+          uniformsRef.current.uTime.value = time * 0.001;
+          uniformsRef.current.uProgress.value = animStateRef.current.progress;
+          rendererRef.current.render(sceneRef.current, cameraRef.current);
+        }
+        if (isRunningRef.current) {
+          animIdRef.current = requestAnimationFrame(render);
+        } else {
+          animIdRef.current = 0;
+        }
+      };
+      animIdRef.current = requestAnimationFrame(render);
+    }, []);
 
     // Parse color
     const parseColor = useCallback((hex: string) => {
@@ -266,25 +297,10 @@ const LiquidFillTransition = forwardRef<LiquidFillTransitionHandle, LiquidFillTr
       handleResize();
       window.addEventListener("resize", handleResize);
 
-      // Render loop
-      let animId = 0;
-      const render = (time: number) => {
-        if (
-          rendererRef.current &&
-          sceneRef.current &&
-          cameraRef.current &&
-          (isRunningRef.current || uniforms.uProgress.value > 0)
-        ) {
-          uniforms.uTime.value = time * 0.001;
-          uniforms.uProgress.value = animStateRef.current.progress;
-          rendererRef.current.render(sceneRef.current, cameraRef.current);
-        }
-        animId = requestAnimationFrame(render);
-      };
-      animId = requestAnimationFrame(render);
-
+      // El bucle de renderització no s'executa en repòs per estalviar CPU i GPU (0% consum mentre es llegeix la pàgina).
+      // S'inicia exclusivament a demanda en disparar trigger() amb startLoop()
       return () => {
-        cancelAnimationFrame(animId);
+        stopLoop();
         window.removeEventListener("resize", handleResize);
         if (tweenRef.current) tweenRef.current.kill();
         geometry.dispose();
@@ -294,7 +310,7 @@ const LiquidFillTransition = forwardRef<LiquidFillTransitionHandle, LiquidFillTr
           rendererRef.current.dispose();
         }
       };
-    }, [color, parseColor]);
+    }, [color, parseColor, stopLoop]);
 
     useImperativeHandle(ref, () => ({
       trigger: (originX = 0.5, originY = 0.88, onComplete) => {
@@ -326,6 +342,8 @@ const LiquidFillTransition = forwardRef<LiquidFillTransitionHandle, LiquidFillTr
           uniformsRef.current.uOrigin.value.set(originX, 1.0 - originY);
         }
 
+        startLoop();
+
         tweenRef.current = gsap.to(animStateRef.current, {
           progress: 1,
           duration,
@@ -336,6 +354,8 @@ const LiquidFillTransition = forwardRef<LiquidFillTransitionHandle, LiquidFillTr
             }
           },
           onComplete: () => {
+            isRunningRef.current = false;
+            stopLoop();
             if (onComplete) {
               onComplete();
             }
@@ -343,12 +363,13 @@ const LiquidFillTransition = forwardRef<LiquidFillTransitionHandle, LiquidFillTr
         });
       },
       reset: () => {
+        isRunningRef.current = false;
+        stopLoop();
         if (tweenRef.current) tweenRef.current.kill();
         animStateRef.current.progress = 0;
         if (uniformsRef.current) {
           uniformsRef.current.uProgress.value = 0;
         }
-        isRunningRef.current = false;
         if (rendererRef.current && sceneRef.current && cameraRef.current) {
           rendererRef.current.clear();
         }

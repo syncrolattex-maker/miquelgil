@@ -805,6 +805,9 @@ export default function ProductionClient({ album }: ProductionClientProps) {
       );
       frontMaterial.map = finalTex;
       frontMaterial.needsUpdate = true;
+      if (placeholderTex && placeholderTex !== finalTex) {
+        placeholderTex.dispose();
+      }
     };
     discImg.src = album.nextAlbum.discArtUrl;
 
@@ -1348,6 +1351,22 @@ export default function ProductionClient({ album }: ProductionClientProps) {
     window.addEventListener('touchend', onTouchEnd, { passive: true });
     window.addEventListener('keydown', onKeyDown);
 
+    // Observer per pausar el bucle de render Three.js quan la secció no és visible
+    let isSectionVisible = false;
+    const visibilityObserver = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          isSectionVisible = entry.isIntersecting;
+          if (isSectionVisible && !animId && !isDisposed) {
+            lastTime = performance.now();
+            animId = requestAnimationFrame(animate);
+          }
+        });
+      },
+      { rootMargin: '300px 0px 300px 0px' }
+    );
+    visibilityObserver.observe(section);
+
     // Observer para animar de lado a lado las 3 líneas cuando la sección entra en pantalla
     const lineObserver = new IntersectionObserver(
       (entries) => {
@@ -1374,10 +1393,14 @@ export default function ProductionClient({ album }: ProductionClientProps) {
 
     updateScroll();
 
-    // Bucle de renderizado animado a 60 fps
+    // Bucle de renderizado animado (solo activo cuando la sección está en pantalla)
     let lastTime = performance.now();
     const animate = (now: number) => {
       if (isDisposed) return;
+      if (!isSectionVisible || (typeof document !== 'undefined' && document.hidden)) {
+        animId = 0;
+        return;
+      }
       animId = requestAnimationFrame(animate);
 
       const dt = Math.max(0.001, Math.min(0.05, (now - lastTime) / 1000));
@@ -1442,11 +1465,10 @@ export default function ProductionClient({ album }: ProductionClientProps) {
       renderer.render(scene, camera);
     };
 
-    animate(performance.now());
-
     return () => {
       isDisposed = true;
-      cancelAnimationFrame(animId);
+      if (animId) cancelAnimationFrame(animId);
+      visibilityObserver.disconnect();
       lineObserver.disconnect();
       window.removeEventListener('scroll', updateScroll);
       window.removeEventListener('resize', updateDimensions);

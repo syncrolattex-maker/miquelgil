@@ -455,7 +455,8 @@ export function createOpticalBackMaps(
 }
 
 // ----------------------------------------------------------------------------
-// 5. GENERADOR DE TEXTURA SERIGRÁFICA DE 2048 PX (Carátula, tipografía curvada y micro-grano)
+// 5. GENERADOR DE TEXTURA SERIGRÁFICA (Carátula, tipografía curvada y micro-grano)
+// Optimizado a 1024px para reducir VRAM un 75% sin pérdida perceptual en 3D
 // ----------------------------------------------------------------------------
 export function buildArchivalDiscCanvasTexture(
   renderer: THREE.WebGLRenderer,
@@ -464,7 +465,8 @@ export function buildArchivalDiscCanvasTexture(
   index: number,
   loadedImg: HTMLImageElement | null
 ): THREE.CanvasTexture {
-  const size = 2048;
+  const size = 1024;
+  const fontScale = size / 2048;
   const c = document.createElement('canvas');
   c.width = size;
   c.height = size;
@@ -484,7 +486,7 @@ export function buildArchivalDiscCanvasTexture(
 
   // Borde perimetral pulido de seguridad
   ctx.strokeStyle = 'rgba(255, 255, 255, 0.85)';
-  ctx.lineWidth = 3;
+  ctx.lineWidth = Math.max(1.5, 3 * fontScale);
   ctx.beginPath();
   ctx.arc(cx, cy, size * 0.492, 0, Math.PI * 2);
   ctx.stroke();
@@ -503,7 +505,7 @@ export function buildArchivalDiscCanvasTexture(
   // Código técnico IFPI en el anillo de matriz
   ctx.save();
   ctx.fillStyle = 'rgba(40, 45, 55, 0.65)';
-  ctx.font = '600 13px "PP Neue Montreal", monospace';
+  ctx.font = `600 ${Math.max(8, Math.round(13 * fontScale))}px "PP Neue Montreal", monospace`;
   drawCurvedText(
     ctx,
     'IFPI L024 · 44.1kHz 24-BIT MASTER RECORDING · DADC AUSTRIA',
@@ -572,14 +574,14 @@ export function buildArchivalDiscCanvasTexture(
   // 4. Tipografía perimetral curvada de archivo oficial A24 / Miquel Gil
   ctx.save();
   ctx.fillStyle = 'rgba(255, 255, 255, 0.94)';
-  ctx.font = '600 32px "PP Neue Montreal", Arial, sans-serif';
+  ctx.font = `600 ${Math.round(32 * fontScale)}px "PP Neue Montreal", Arial, sans-serif`;
 
   // Arco superior exterior: TÍTULO · AÑO · ARXIU ÒPTIC MIQUEL GIL
   const topText = `${title.toUpperCase()} · ${year} · ARXIU ÒPTIC MIQUEL GIL`;
   drawCurvedText(ctx, topText, cx, cy, size * 0.462, -Math.PI / 2, 2.2, false);
 
   // Arco inferior exterior: COMPACT DISC DIGITAL AUDIO · STEREO · SGAE · CÓDIGO ARCHIVO
-  ctx.font = '500 24px "PP Neue Montreal", Arial, sans-serif';
+  ctx.font = `500 ${Math.round(24 * fontScale)}px "PP Neue Montreal", Arial, sans-serif`;
   ctx.fillStyle = 'rgba(255, 255, 255, 0.88)';
   const catalogCode = `MG-${String(index + 1).padStart(3, '0')}`;
   const bottomText = `COMPACT DISC DIGITAL AUDIO · STEREO · SGAE · ${catalogCode}`;
@@ -589,14 +591,14 @@ export function buildArchivalDiscCanvasTexture(
 
   // Línea perimetral circular fina delimitadora de la zona serigrafiada
   ctx.strokeStyle = 'rgba(255, 255, 255, 0.45)';
-  ctx.lineWidth = 1.5;
+  ctx.lineWidth = Math.max(1, 1.5 * fontScale);
   ctx.beginPath();
   ctx.arc(cx, cy, size * 0.484, 0, Math.PI * 2);
   ctx.stroke();
 
   // Línea interior circular de encaje con el buje
   ctx.strokeStyle = 'rgba(255, 255, 255, 0.55)';
-  ctx.lineWidth = 1.5;
+  ctx.lineWidth = Math.max(1, 1.5 * fontScale);
   ctx.beginPath();
   ctx.arc(cx, cy, size * 0.124, 0, Math.PI * 2);
   ctx.stroke();
