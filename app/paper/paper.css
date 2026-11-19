@@ -1,8 +1,8 @@
 /* ============================================================
-   PAPER HERO PORTFOLIO STYLES (/paper)
-   Pàgina de presentació oficial de Miquel Gil
-   Fons negre, tipografies pròpies (Maelstrom, Grifinito L, PP Neue Montreal)
-   i transició cinètica a l'arxiu web
+   PAPER HERO PAGE (/paper) — MIQUEL GIL PRESENTACIÓ OFICIAL
+   Estètica d'alta fidelitat inspirada en la captura de referència
+   Fons negre absolut (#000000), vídeo de la cara a sang (sense requadres ni marcs)
+   i tipografies oficials de /discografia (Maelstrom, Grifinito L, PP Neue Montreal)
    ============================================================ */
 
 .paper-root {
@@ -17,18 +17,7 @@
   flex-direction: column;
   user-select: none;
   -webkit-user-select: none;
-  font-family: 'PP Neue Montreal', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  transition: background-color 0.8s ease;
-}
-
-/* Subtle background grain / ambient vignette */
-.paper-ambient-glow {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background: radial-gradient(circle at 75% 50%, rgba(255, 255, 255, 0.035) 0%, transparent 65%);
-  z-index: 1;
-  transition: opacity 0.8s ease;
+  font-family: var(--font-texts, 'PP Neue Montreal', -apple-system, BlinkMacSystemFont, sans-serif);
 }
 
 /* ------------------------------------------------------------
@@ -36,493 +25,319 @@
    ------------------------------------------------------------ */
 .paper-nav {
   position: relative;
-  z-index: 40;
+  z-index: 30;
   width: 100%;
-  padding: 1.6rem 3rem;
+  padding: 1.8rem 3.2rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), filter 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: opacity 0.55s cubic-bezier(0.16, 1, 0.3, 1), transform 0.55s cubic-bezier(0.16, 1, 0.3, 1), filter 0.55s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-@media (max-width: 768px) {
+@media (max-width: 868px) {
   .paper-nav {
-    padding: 1.1rem 1.4rem;
+    padding: 1.2rem 1.5rem;
   }
 }
 
-/* Logo (left) — utilitza Maelstrom */
+/* Logo (left) */
 .paper-logo {
-  font-family: 'Maelstrom', 'PP Neue Montreal', sans-serif;
-  font-size: 1.45rem;
+  font-family: 'Maelstrom', var(--font-texts, 'PP Neue Montreal'), sans-serif;
+  font-size: 1.4rem;
   font-weight: 700;
   letter-spacing: 0.04em;
   text-transform: uppercase;
   color: #ffffff;
   text-decoration: none;
-  transition: opacity 0.2s ease, transform 0.2s ease;
+  transition: opacity 0.2s ease;
 }
 
 .paper-logo:hover {
-  opacity: 0.82;
-  transform: translateY(-1px);
+  opacity: 0.8;
 }
 
 /* Center nav links */
 .paper-nav-links {
   display: flex;
   align-items: center;
-  gap: 2.4rem;
+  gap: 1.6rem;
   list-style: none;
   margin: 0;
   padding: 0;
 }
 
-@media (max-width: 920px) {
+@media (max-width: 960px) {
   .paper-nav-links {
     display: none;
   }
 }
 
 .paper-nav-link {
-  font-family: 'PP Neue Montreal', sans-serif;
-  color: rgba(255, 255, 255, 0.65);
+  color: rgba(255, 255, 255, 0.7);
   text-decoration: none;
-  font-size: 0.88rem;
-  font-weight: 500;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
+  font-size: 0.9rem;
+  font-weight: 400;
+  letter-spacing: 0.02em;
   transition: color 0.2s ease;
-  position: relative;
-  padding: 4px 0;
 }
 
 .paper-nav-link:hover {
   color: #ffffff;
 }
 
+.paper-nav-dot {
+  color: rgba(255, 255, 255, 0.35);
+  font-size: 0.85rem;
+  user-select: none;
+}
+
 /* Right buttons */
 .paper-nav-actions {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 0.9rem;
 }
 
-.paper-btn-welcome-nav {
+.paper-pill-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 0.6rem 1.4rem;
+  padding: 0.65rem 1.4rem;
   border-radius: 9999px;
-  border: 1px solid rgba(255, 255, 255, 0.35);
-  background: #ffffff;
-  color: #000000;
-  font-family: 'PP Neue Montreal', sans-serif;
-  font-size: 0.78rem;
+  font-size: 0.82rem;
   font-weight: 600;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
+  letter-spacing: 0.02em;
   text-decoration: none;
   cursor: pointer;
   transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   white-space: nowrap;
 }
 
-.paper-btn-welcome-nav:hover {
-  background-color: #f0f0f0;
+.paper-pill-outline {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  color: #ffffff;
+}
+
+.paper-pill-outline:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.5);
+  transform: translateY(-1px);
+}
+
+.paper-pill-white {
+  background: #ffffff;
+  border: 1px solid #ffffff;
+  color: #000000;
+  box-shadow: 0 4px 18px rgba(255, 255, 255, 0.18);
+}
+
+.paper-pill-white:hover {
+  background: #f0f0f0;
   transform: translateY(-1px) scale(1.02);
-  box-shadow: 0 4px 16px rgba(255, 255, 255, 0.2);
-}
-
-/* ------------------------------------------------------------
-   MAIN HERO GRID (LEFT COPY + RIGHT VIDEO REEL)
-   ------------------------------------------------------------ */
-.paper-hero {
-  position: relative;
-  z-index: 10;
-  flex: 1;
-  width: 100%;
-  display: grid;
-  grid-template-columns: 1.15fr 0.85fr;
-  padding: 0 3rem 2.8rem 3rem;
-  gap: 3rem;
-  align-items: center;
-  overflow: hidden;
-}
-
-@media (max-width: 992px) {
-  .paper-hero {
-    grid-template-columns: 1fr;
-    grid-template-rows: 1fr auto;
-    padding: 0 1.5rem 2rem 1.5rem;
-    gap: 1.5rem;
-  }
-}
-
-/* Left Content Column */
-.paper-hero-left {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  height: 100%;
-  max-width: 760px;
-  padding-top: 1.5rem;
-  padding-bottom: 0.5rem;
-  transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), filter 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.paper-headline-block {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-}
-
-/* Tag line near top left */
-.paper-tagline {
-  font-family: 'PP Neue Montreal', sans-serif;
-  font-size: 0.8rem;
-  text-transform: uppercase;
-  letter-spacing: 0.2em;
-  color: rgba(255, 255, 255, 0.6);
-  font-weight: 500;
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-}
-
-.paper-tagline-dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background-color: #ffffff;
-  display: inline-block;
-  opacity: 0.75;
-}
-
-/* Large Heading amb GRIFINITO L i MAELSTROM */
-.paper-heading {
-  font-size: clamp(2.4rem, 4.5vw, 4.8rem);
-  line-height: 1.06;
-  font-weight: 400;
-  letter-spacing: -0.03em;
-  color: #ffffff;
-  margin: 0;
-}
-
-.paper-heading-main {
-  display: block;
-  font-family: 'PP Neue Montreal', sans-serif;
-  font-weight: 500;
-  letter-spacing: -0.03em;
-  color: #ffffff;
-}
-
-.paper-heading-serif-italic {
-  display: block;
-  font-family: 'GRIFINITO L', 'PP Eiko', Georgia, 'Times New Roman', serif;
-  font-style: italic;
-  font-weight: 400;
-  color: #ffffff;
-  letter-spacing: -0.01em;
-  margin-top: 0.15em;
-  font-size: 1.14em;
-  text-shadow: 0 4px 28px rgba(255, 255, 255, 0.15);
-}
-
-/* Bottom Left Corner: Subtitle + Button */
-.paper-bottom-left {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 1.8rem;
-  max-width: 580px;
-}
-
-.paper-subtitle {
-  font-family: 'PP Neue Montreal', 'GRAPHIK', sans-serif;
-  font-size: clamp(0.92rem, 1.1vw, 1.06rem);
-  line-height: 1.65;
-  color: rgba(255, 255, 255, 0.7);
-  font-weight: 400;
-  margin: 0;
-}
-
-/* ============================================================
-   DISSENY DEL BOTÓ D'ENTRADA (A24 KINETIC EDITORIAL)
-   ============================================================ */
-.paper-enter-btn-wrapper {
-  display: flex;
-  align-items: center;
-}
-
-.paper-enter-btn {
-  display: inline-flex;
-  flex-direction: column;
-  position: relative;
-  text-decoration: none;
-  color: #ffffff;
-  cursor: pointer;
-  background: transparent !important;
-  background-color: transparent !important;
-  border: none !important;
-  border-radius: 0 !important;
-  padding: 0.5rem 0;
-  outline: none;
-  box-shadow: none !important;
-  -webkit-tap-highlight-color: transparent;
-}
-
-.paper-enter-btn .btn__divider {
-  width: 100%;
-  height: 1.5px;
-  background-color: #ffffff !important;
-  transform-origin: left center;
-  display: block;
-  box-shadow: 0 0 12px rgba(255, 255, 255, 0.4);
-}
-
-.paper-enter-btn .btn__p-mask {
-  overflow: hidden;
-  padding: 0.95rem 2.8rem;
-  display: inline-block;
-  background: transparent !important;
+  box-shadow: 0 6px 24px rgba(255, 255, 255, 0.3);
 }
 
 @media (max-width: 640px) {
-  .paper-enter-btn .btn__p-mask {
-    padding: 0.8rem 2rem;
-  }
-}
-
-.paper-enter-btn .btn__p {
-  font-family: 'GRIFINITO L', 'PP Eiko', serif !important;
-  font-weight: 500 !important;
-  font-size: clamp(17px, 1.7vw, 24px);
-  letter-spacing: 0.08em;
-  text-transform: uppercase !important;
-  white-space: nowrap;
-  display: block;
-  line-height: 1.15;
-  color: #ffffff !important;
-  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.7);
-  background: transparent !important;
-}
-
-@keyframes paper-text-roll {
-  0% { transform: translateY(0%); opacity: 1; }
-  42% { transform: translateY(-115%); opacity: 0; }
-  43% { transform: translateY(115%); opacity: 0; }
-  100% { transform: translateY(0%); opacity: 1; }
-}
-
-@media (hover: hover) and (pointer: fine) {
-  .paper-enter-btn:hover [data-hover-text] {
-    animation: paper-text-roll 0.46s cubic-bezier(0.19, 1, 0.22, 1) forwards;
-  }
-  .paper-enter-btn:hover {
-    transform: scale(1.03) rotate(-.5deg);
-  }
-  .paper-enter-btn:active {
-    transform: scale(.97) rotate(0);
-  }
-  .paper-enter-btn:hover .btn__divider {
-    animation: .4s step-end infinite btn-film-jitter;
-  }
-  .paper-enter-btn:hover .btn__p-mask {
-    animation: .45s step-end infinite btn-film-wiggle;
+  .paper-pill-outline {
+    display: none;
   }
 }
 
 /* ------------------------------------------------------------
-   RIGHT COLUMN: VIDEO REEL (MIRRORED HORIZONTALLY)
+   MAIN HERO LAYOUT
    ------------------------------------------------------------ */
-.paper-hero-right {
+.paper-hero-body {
   position: relative;
+  flex: 1;
   width: 100%;
   height: 100%;
   display: flex;
   align-items: center;
-  justify-content: center;
-}
-
-.paper-reel-container {
-  position: relative;
-  width: 100%;
-  max-width: 480px;
-  height: calc(100vh - 160px);
-  max-height: 620px;
-  border-radius: 20px;
   overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.16);
-  background-color: #000000;
-  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.85), 0 0 40px rgba(255, 255, 255, 0.04);
+}
+
+/* Columna esquerra: Textos i crida a l'acció */
+.paper-left-content {
+  position: relative;
+  z-index: 20;
+  width: 100%;
+  max-width: 640px;
+  padding-left: 3.2rem;
+  padding-bottom: 3.5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 1.8rem;
+  transition: opacity 0.55s cubic-bezier(0.16, 1, 0.3, 1), transform 0.55s cubic-bezier(0.16, 1, 0.3, 1), filter 0.55s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@media (max-width: 868px) {
+  .paper-left-content {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+    padding-bottom: 2rem;
+    max-width: 100%;
+  }
+}
+
+/* Tagline superior amb icona */
+.paper-tagline-row {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.85);
+  letter-spacing: 0.02em;
+}
+
+.paper-tagline-icon {
+  font-size: 0.85rem;
+  color: #ffffff;
+  display: inline-flex;
+  opacity: 0.9;
+}
+
+.paper-tagline-text em {
+  font-family: var(--font-titles, 'GRIFINITO L', 'PP Eiko', serif);
+  font-style: italic;
+  font-weight: 400;
+  font-size: 1.08em;
+  letter-spacing: 0.01em;
+}
+
+/* Gran Titular amb tipografia oficial de /discografia */
+.paper-hero-heading {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  line-height: 1.05;
+  letter-spacing: -0.038em;
+}
+
+.heading-line {
+  font-family: var(--font-texts, 'PP Neue Montreal', -apple-system, sans-serif);
+  font-weight: 500;
+  font-size: clamp(2.5rem, 5.1vw, 5.3rem);
+  color: #ffffff;
+}
+
+.heading-line-serif {
+  font-family: var(--font-titles, 'GRIFINITO L', 'PP Eiko', Georgia, serif);
+  font-style: italic;
+  font-weight: 400;
+  font-size: clamp(2.8rem, 5.7vw, 5.9rem);
+  color: #ffffff;
+  letter-spacing: -0.015em;
+  margin-top: 0.08em;
+  text-shadow: 0 4px 28px rgba(255, 255, 255, 0.12);
+}
+
+/* Subtítol descriptiu */
+.paper-hero-desc {
+  font-family: var(--font-texts, 'PP Neue Montreal', -apple-system, sans-serif);
+  font-size: clamp(0.92rem, 1.15vw, 1.08rem);
+  line-height: 1.62;
+  color: rgba(255, 255, 255, 0.68);
+  max-width: 440px;
+  margin: 0;
+  font-weight: 400;
+}
+
+/* Botó píndola blanc inferior */
+.paper-cta-wrapper {
+  margin-top: 0.6rem;
+}
+
+.paper-hero-cta-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65rem;
+  background-color: #ffffff;
+  color: #000000;
+  font-family: var(--font-texts, 'PP Neue Montreal', -apple-system, sans-serif);
+  font-weight: 600;
+  font-size: 0.94rem;
+  letter-spacing: 0.01em;
+  padding: 0.95rem 1.95rem;
+  border-radius: 9999px;
+  border: none;
   cursor: pointer;
+  box-shadow: 0 4px 24px rgba(255, 255, 255, 0.2), 0 2px 6px rgba(0, 0, 0, 0.7);
+  transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.paper-hero-cta-btn:hover {
+  background-color: #f2f2f2;
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 8px 32px rgba(255, 255, 255, 0.32);
+}
+
+.paper-hero-cta-btn:active {
+  transform: translateY(0) scale(0.98);
+}
+
+.cta-arrow {
+  display: inline-block;
+  font-size: 1.05rem;
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.paper-hero-cta-btn:hover .cta-arrow {
+  transform: translateX(4px);
+}
+
+/* ------------------------------------------------------------
+   VÍDEO DE LA CARA: A SANG, SENSE REQUADRES NI MARCS
+   El vídeo es fon directament amb el negre profund del fons
+   ------------------------------------------------------------ */
+.paper-face-video-wrapper {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 58vw;
+  height: 100vh;
+  height: 100dvh;
+  z-index: 10;
+  pointer-events: none;
+  overflow: hidden;
+  background-color: #000000;
+  /* El degradat esquerre fon suaument qualsevol compressió de vídeo amb el negre pur de la pàgina */
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, rgba(0, 0, 0, 0.7) 12%, black 28%, black 100%);
+  mask-image: linear-gradient(to right, transparent 0%, rgba(0, 0, 0, 0.7) 12%, black 28%, black 100%);
   transition: all 0.85s cubic-bezier(0.16, 1, 0.3, 1);
-  will-change: transform, width, height;
 }
 
-.paper-reel-container:hover {
-  border-color: rgba(255, 255, 255, 0.35);
-  box-shadow: 0 28px 70px rgba(0, 0, 0, 0.95), 0 0 50px rgba(255, 255, 255, 0.08);
+@media (max-width: 868px) {
+  .paper-face-video-wrapper {
+    width: 100vw;
+    opacity: 0.45;
+    -webkit-mask-image: none;
+    mask-image: none;
+  }
 }
 
-/* Mirrored Video element */
-.paper-reel-video {
+.paper-face-video {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: center center;
   transform: scaleX(-1);
   -webkit-transform: scaleX(-1);
   display: block;
   background-color: #000000;
-  border-radius: 20px;
+  border: none !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
 }
 
-/* Video State / Gesture Badges */
-.paper-reel-overlay {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  padding: 1.25rem;
-  background: linear-gradient(180deg, rgba(0, 0, 0, 0.4) 0%, transparent 25%, transparent 75%, rgba(0, 0, 0, 0.6) 100%);
-  transition: opacity 0.45s ease;
-}
-
-.paper-reel-top-meta {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-}
-
-.paper-reel-status-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  background-color: rgba(0, 0, 0, 0.65);
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  border-radius: 9999px;
-  padding: 4px 10px;
-  font-size: 0.72rem;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  color: #ffffff;
-  backdrop-filter: blur(8px);
-}
-
-.status-dot-pulse {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background-color: #10b981;
-  box-shadow: 0 0 8px rgba(16, 185, 129, 0.8);
-  animation: pulse-dot 1.5s infinite;
-}
-
-.status-dot-pulse.is-paused {
-  background-color: #ef4444;
-  box-shadow: 0 0 8px rgba(239, 68, 68, 0.8);
-}
-
-.paper-reel-tag {
-  font-size: 0.7rem;
-  color: rgba(255, 255, 255, 0.6);
-  letter-spacing: 0.12em;
-  font-weight: 500;
-}
-
-.paper-reel-bottom-meta {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  width: 100%;
-}
-
-.paper-reel-info {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.reel-title {
-  font-size: 0.82rem;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  color: #ffffff;
-  text-transform: uppercase;
-}
-
-.reel-sub {
-  font-size: 0.72rem;
-  color: rgba(255, 255, 255, 0.55);
-}
-
-.paper-sound-btn {
-  pointer-events: auto;
-  background-color: rgba(0, 0, 0, 0.65);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  color: #ffffff;
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 13px;
-  cursor: pointer;
-  backdrop-filter: blur(8px);
-  transition: all 0.2s ease;
-}
-
-.paper-sound-btn:hover {
-  background-color: #ffffff;
-  color: #000000;
-}
-
-/* Center paused indicator */
-.paper-reel-paused-indicator {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  background-color: rgba(0, 0, 0, 0.45);
-  backdrop-filter: blur(4px);
-  pointer-events: none;
-  transition: opacity 0.2s ease;
-}
-
-.pause-icon-circle {
-  width: 52px;
-  height: 52px;
-  border-radius: 50%;
-  background-color: rgba(255, 255, 255, 0.15);
-  border: 1px solid rgba(255, 255, 255, 0.35);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 18px;
-  color: #ffffff;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
-}
-
-.pause-text {
-  font-size: 0.76rem;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.85);
-  font-weight: 600;
-}
-
-/* ============================================================
+/* ------------------------------------------------------------
    TRANSICIÓ DE SORTIDA CINÈTICA ("BENVINGUTS")
-   Les lletres desapareixen, el vídeo queda sol i dóna pas a la web
-   ============================================================ */
+   Les lletres desapareixen completament, el vídeo de paper queda sol
+   i dóna pas netament a la web (/discografia/)
+   ------------------------------------------------------------ */
 
 .paper-root.is-exiting .paper-nav {
   opacity: 0;
@@ -531,40 +346,19 @@
   pointer-events: none;
 }
 
-.paper-root.is-exiting .paper-hero-left {
+.paper-root.is-exiting .paper-left-content {
   opacity: 0;
-  transform: translateX(-40px);
+  transform: translateY(-24px);
   filter: blur(10px);
   pointer-events: none;
 }
 
-.paper-root.is-exiting .floating-cam-window {
-  opacity: 0 !important;
-  transform: translateY(30px) scale(0.9) !important;
-  filter: blur(8px);
-  pointer-events: none !important;
-  transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1) !important;
-}
-
-.paper-root.is-exiting .paper-reel-overlay {
-  opacity: 0;
-}
-
-.paper-root.is-exiting .paper-reel-paused-indicator {
-  opacity: 0;
-}
-
-/* El vídeo es posiciona majestuosament sol al centre del fons negre */
-.paper-root.is-exiting .paper-reel-container {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%) scale(1.06);
-  width: min(88vw, 760px);
-  height: min(84vh, 680px);
-  max-width: 760px;
-  max-height: 680px;
-  z-index: 80;
-  border-color: rgba(255, 255, 255, 0.3);
-  box-shadow: 0 30px 100px rgba(0, 0, 0, 0.98), 0 0 60px rgba(255, 255, 255, 0.08);
+/* El vídeo de la cara passa a ser el protagonista absolut i net sobre el fons negre */
+.paper-root.is-exiting .paper-face-video-wrapper {
+  width: 100vw;
+  -webkit-mask-image: none;
+  mask-image: none;
+  opacity: 1;
+  z-index: 50;
+  transform: scale(1.03);
 }
