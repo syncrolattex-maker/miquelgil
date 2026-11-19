@@ -4,15 +4,11 @@ import React, { useRef, useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import HandTrackingCam from "@/components/HandTrackingCam";
-import LiquidFillTransition, {
-  LiquidFillTransitionHandle,
-} from "@/components/LiquidFillTransition";
 import "./paper.css";
 
 export default function PaperClient() {
   const router = useRouter();
   const videoRef = useRef<HTMLVideoElement | null>(null);
-  const liquidRef = useRef<LiquidFillTransitionHandle | null>(null);
 
   const [isPlaying, setIsPlaying] = useState<boolean>(true);
   const [isMuted, setIsMuted] = useState<boolean>(true);
@@ -105,13 +101,7 @@ export default function PaperClient() {
 
     // Després de deixar el vídeo com a protagonista únic sobre el negre (~1.7s), donem pas a la web
     setTimeout(() => {
-      if (liquidRef.current) {
-        liquidRef.current.trigger(0.5, 0.5, () => {
-          router.push("/discografia/");
-        });
-      } else {
-        router.push("/discografia/");
-      }
+      router.push("/discografia/");
     }, 1750);
   };
 
@@ -288,15 +278,6 @@ export default function PaperClient() {
       <HandTrackingCam
         onGestureChange={handleGestureChange}
         currentVideoState={isPlaying ? "playing" : "paused"}
-      />
-
-      {/* -------------------------------------------------------------
-          TRANSICIÓ LÍQUIDA DE FONS PER PASSAR A LA WEB
-          ------------------------------------------------------------- */}
-      <LiquidFillTransition
-        ref={liquidRef}
-        color="#000000"
-        duration={0.75}
       />
     </main>
   );

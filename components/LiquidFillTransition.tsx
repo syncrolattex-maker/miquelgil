@@ -6,6 +6,7 @@ import React, {
   useImperativeHandle,
   forwardRef,
   useCallback,
+  useState,
 } from "react";
 import * as THREE from "three";
 import gsap from "gsap";
@@ -137,6 +138,9 @@ const fragmentShader = `
 const LiquidFillTransition = forwardRef<LiquidFillTransitionHandle, LiquidFillTransitionProps>(
   ({ color = "#050505", duration = 0.85, className = "" }, ref) => {
     const canvasRef = useRef<HTMLCanvasElement | null>(null);
+    const fallbackRef = useRef<HTMLDivElement | null>(null);
+    const [useFallback, setUseFallback] = useState<boolean>(false);
+
     const animStateRef = useRef<{ progress: number }>({ progress: 0 });
     const uniformsRef = useRef<any>(null);
     const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
@@ -163,15 +167,37 @@ const LiquidFillTransition = forwardRef<LiquidFillTransitionHandle, LiquidFillTr
       const canvas = canvasRef.current;
       if (!canvas) return;
 
-      const renderer = new THREE.WebGLRenderer({
-        canvas,
-        alpha: true,
-        antialias: false,
-        powerPreference: "high-performance",
-      });
-      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
-      renderer.setClearColor(0x000000, 0);
-      rendererRef.current = renderer;
+      // Verificació segura de context WebGL
+      let gl: WebGLRenderingContext | WebGL2RenderingContext | null = null;
+      try {
+        gl = (canvas.getContext("webgl2") ||
+          canvas.getContext("webgl") ||
+          canvas.getContext("experimental-webgl")) as any;
+      } catch (_) {
+        gl = null;
+      }
+
+      if (!gl) {
+        setUseFallback(true);
+        return;
+      }
+
+      let renderer: THREE.WebGLRenderer | null = null;
+      try {
+        renderer = new THREE.WebGLRenderer({
+          canvas,
+          alpha: true,
+          antialias: false,
+          powerPreference: "high-performance",
+        });
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+        renderer.setClearColor(0x000000, 0);
+        rendererRef.current = renderer;
+      } catch (err) {
+        console.warn("LiquidFillTransition WebGL initialization fallback:", err);
+        setUseFallback(true);
+        return;
+      }
 
       const scene = new THREE.Scene();
       sceneRef.current = scene;
@@ -185,22 +211,23 @@ const LiquidFillTransition = forwardRef<LiquidFillTransitionHandle, LiquidFillTr
       const dropletOffsets: THREE.Vector2[] = [];
       const dropletVelocities: THREE.Vector2[] = [];
       const dropletSizes: number[] = [
-        0.32, 0.28, 0.35, 0.25, 0.38, 0.30, 0.26, 0.34, 0.29, 0.36, 0.27, 0.33, 0.24, 0.31
+        0.32, 0.28, 0.35, 0.25, 0.38, 0.30, 0.26, 0.34, 0.29, 0.36, 0.27, 0.33, 0.24, 0.31,
       ];
 
       // Dispersió en ventall cap amunt i laterals
       const angles = [
-        -0.85, -0.65, -0.45, -0.28, -0.12, 0.05, 0.22, 0.40, 0.60, 0.80, -0.38, 0.32, -0.15, 0.18
+        -0.85, -0.65, -0.45, -0.28, -0.12, 0.05, 0.22, 0.40, 0.60, 0.80, -0.38, 0.32, -0.15, 0.18,
       ];
       const speeds = [
-        1.15, 1.28, 1.45, 1.55, 1.62, 1.58, 1.52, 1.48, 1.35, 1.20, 1.38, 1.42, 1.60, 1.50
+        1.15, 1.28, 1.45, 1.55, 1.62, 1.58, 1.52, 1.48, 1.35, 1.20, 1.38, 1.42, 1.60, 1.50,
       ];
 
       for (let i = 0; i < 14; i++) {
-        dropletOffsets.push(new THREE.Vector2((Math.random() - 0.5) * 0.12, (Math.random() - 0.5) * 0.05));
+        dropletOffsets.push(
+          new THREE.Vector2((Math.random() - 0.5) * 0.12, (Math.random() - 0.5) * 0.05)
+        );
         const ang = angles[i];
         const spd = speeds[i];
-        // En WebGL Y creix cap amunt
         dropletVelocities.push(new THREE.Vector2(Math.sin(ang) * spd * 0.75, Math.cos(ang) * spd));
       }
 
@@ -208,7 +235,7 @@ const LiquidFillTransition = forwardRef<LiquidFillTransitionHandle, LiquidFillTr
         uResolution: { value: new THREE.Vector2(window.innerWidth, window.innerHeight) },
         uTime: { value: 0 },
         uProgress: { value: 0 },
-        uOrigin: { value: new THREE.Vector2(0.5, 0.12) }, // Inicialment al centre-inferior (posició del botó)
+        uOrigin: { value: new THREE.Vector2(0.5, 0.12) },
         uColor: { value: parseColor(color) },
         uDropletOffsets: { value: dropletOffsets },
         uDropletVelocities: { value: dropletVelocities },
@@ -229,9 +256,10 @@ const LiquidFillTransition = forwardRef<LiquidFillTransitionHandle, LiquidFillTr
       scene.add(mesh);
 
       const handleResize = () => {
+        if (!rendererRef.current) return;
         const w = window.innerWidth;
         const h = window.innerHeight;
-        renderer.setSize(w, h);
+        rendererRef.current.setSize(w, h);
         uniforms.uResolution.value.set(w, h);
       };
 
@@ -241,10 +269,15 @@ const LiquidFillTransition = forwardRef<LiquidFillTransitionHandle, LiquidFillTr
       // Render loop
       let animId = 0;
       const render = (time: number) => {
-        if (isRunningRef.current || uniforms.uProgress.value > 0) {
+        if (
+          rendererRef.current &&
+          sceneRef.current &&
+          cameraRef.current &&
+          (isRunningRef.current || uniforms.uProgress.value > 0)
+        ) {
           uniforms.uTime.value = time * 0.001;
           uniforms.uProgress.value = animStateRef.current.progress;
-          renderer.render(scene, camera);
+          rendererRef.current.render(sceneRef.current, cameraRef.current);
         }
         animId = requestAnimationFrame(render);
       };
@@ -256,8 +289,10 @@ const LiquidFillTransition = forwardRef<LiquidFillTransitionHandle, LiquidFillTr
         if (tweenRef.current) tweenRef.current.kill();
         geometry.dispose();
         material.dispose();
-        renderer.forceContextLoss();
-        renderer.dispose();
+        if (rendererRef.current) {
+          rendererRef.current.forceContextLoss();
+          rendererRef.current.dispose();
+        }
       };
     }, [color, parseColor]);
 
@@ -267,13 +302,29 @@ const LiquidFillTransition = forwardRef<LiquidFillTransitionHandle, LiquidFillTr
           tweenRef.current.kill();
         }
 
-        if (uniformsRef.current) {
-          // Convertir de coordenades de finestra (0,0 dalt a l'esquerra) a UV (0,0 baix a l'esquerra)
-          uniformsRef.current.uOrigin.value.set(originX, 1.0 - originY);
-        }
-
         isRunningRef.current = true;
         animStateRef.current.progress = 0;
+
+        if (useFallback || !rendererRef.current) {
+          // Fallback CSS/SVG fluid overlay
+          if (fallbackRef.current) {
+            fallbackRef.current.style.opacity = "1";
+            fallbackRef.current.style.transform = "scale(1)";
+          }
+          tweenRef.current = gsap.to(animStateRef.current, {
+            progress: 1,
+            duration,
+            ease: "power2.inOut",
+            onComplete: () => {
+              if (onComplete) onComplete();
+            },
+          });
+          return;
+        }
+
+        if (uniformsRef.current) {
+          uniformsRef.current.uOrigin.value.set(originX, 1.0 - originY);
+        }
 
         tweenRef.current = gsap.to(animStateRef.current, {
           progress: 1,
@@ -301,15 +352,27 @@ const LiquidFillTransition = forwardRef<LiquidFillTransitionHandle, LiquidFillTr
         if (rendererRef.current && sceneRef.current && cameraRef.current) {
           rendererRef.current.clear();
         }
+        if (fallbackRef.current) {
+          fallbackRef.current.style.opacity = "0";
+        }
       },
     }));
 
     return (
-      <canvas
-        ref={canvasRef}
-        aria-hidden="true"
-        className={`liquid-fill-canvas ${className}`}
-      />
+      <>
+        <canvas
+          ref={canvasRef}
+          aria-hidden="true"
+          className={`liquid-fill-canvas ${className}`}
+        />
+        {useFallback && (
+          <div
+            ref={fallbackRef}
+            className="liquid-fill-fallback"
+            style={{ backgroundColor: color }}
+          />
+        )}
+      </>
     );
   }
 );
