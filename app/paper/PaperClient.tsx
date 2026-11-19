@@ -130,16 +130,16 @@ export default function PaperClient() {
         {/* Columna esquerra: Textos i Botó "Entrar a la web" */}
         <div className="paper-left-content">
           {/* Gran titular amb la directriu de disseny exacta de /discografia/viatger/ */}
-          <div className="production__title paper-title-group">
-            <h1 className="heading-l paper-hero-heading">
+          <div className="paper-title-group">
+            <h1 className="paper-hero-heading">
               <span>La memòria viva</span>
               <span>de la terra,</span>
               <span>en cada plec del cant.</span>
             </h1>
           </div>
 
-          {/* Línia separadora horitzontal idèntica a /discografia/viatger/ */}
-          <div className="divider-horizontal" />
+          {/* Línia separadora horitzontal */}
+          <div className="paper-divider-horizontal" />
 
           {/* Subtítol descriptiu en Neue Montreal i Museum */}
           <p className="paper-hero-desc">

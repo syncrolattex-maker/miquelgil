@@ -75,6 +75,7 @@
   line-height: 0.90;
   letter-spacing: -0.04em;
   text-transform: uppercase !important;
+  color: #111111 !important;
 }
 
 .subheading-xs,
@@ -85,12 +86,12 @@
   line-height: 14px;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: rgba(0, 0, 0, 0.55);
+  color: rgba(0, 0, 0, 0.55) !important;
 }
 
 .theme-dark .subheading-xs,
 .theme-dark .a24-label {
-  color: rgba(255, 255, 255, 0.55);
+  color: rgba(255, 255, 255, 0.55) !important;
 }
 
 .paragraph-m {
