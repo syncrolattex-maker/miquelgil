@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import PaperClient from "./PaperClient";
 
 export const metadata: Metadata = {
-  title: "Paper — Design & Creative Direction",
+  title: "Miquel Gil — Presentació Oficial i Memòria Viva",
   description:
-    "Crafting digital experiences, one fold at a time. Dark portfolio hero page for designer Paper with mirrored video reel and real-time hand-tracking gesture control.",
+    "Pàgina de presentació de l'arxiu oficial de Miquel Gil: mig segle de cançó tradicional valenciana, cant d'estil i poesia contemporània amb escultura cinètica i control gestual per càmera.",
 };
 
 export default function PaperPage() {
