@@ -478,12 +478,12 @@
 }
 
 .paper-transition-logo-img {
-  width: clamp(240px, 30vw, 420px);
+  width: clamp(130px, 13vw, 210px);
   height: auto;
-  max-height: 22vh;
+  max-height: 9vh;
   display: block;
   object-fit: contain;
-  filter: drop-shadow(0 0 35px rgba(255, 255, 255, 0.45));
+  filter: drop-shadow(0 0 20px rgba(255, 255, 255, 0.35));
   user-select: none;
   -webkit-user-drag: none;
 }
