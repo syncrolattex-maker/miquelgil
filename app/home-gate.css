@@ -75,6 +75,21 @@
   -webkit-tap-highlight-color: transparent;
 }
 
+.intro-gate-root .btn.is-entering {
+  transform: scale(0.96) !important;
+  pointer-events: none;
+  cursor: wait;
+}
+
+.intro-gate-root .btn.is-entering .btn__divider {
+  animation: 0.12s step-end infinite btn-film-jitter;
+  box-shadow: 0 0 24px rgba(255, 255, 255, 0.9) !important;
+}
+
+.intro-gate-root .btn.is-entering .btn__p-mask {
+  opacity: 0.85;
+}
+
 .intro-gate-root .btn__divider {
   width: 100%;
   height: 1.5px;

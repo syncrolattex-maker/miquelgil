@@ -1,19 +1,38 @@
 "use client";
 
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import LiquidFillTransition, {
+  LiquidFillTransitionHandle,
+} from "@/components/LiquidFillTransition";
 import "./home-gate.css";
 
 export default function Home() {
+  const router = useRouter();
   const videoRef = useRef<HTMLVideoElement | null>(null);
+  const buttonRef = useRef<HTMLAnchorElement | null>(null);
+  const liquidRef = useRef<LiquidFillTransitionHandle | null>(null);
   const targetTimeRef = useRef<number>(0);
   const isSeekingRef = useRef<boolean>(false);
   const prevXRef = useRef<number | null>(null);
+  const [isTransitioning, setIsTransitioning] = useState<boolean>(false);
 
   // Background video controller:
   // - En mòbil s'inicia en autoplay mut per despertar el descodificador d'iOS WebKit (evitant pantalla negra)
   // - En tocar o moure el ratolí, es pausa i fa scrubbing directe 1:1 segons la posició horitzontal
   useEffect(() => {
+    // Assegurar estat net per si es torna amb el botó enrere del navegador (bfcache)
+    if (liquidRef.current) {
+      liquidRef.current.reset();
+    }
+    setIsTransitioning(false);
+
+    // Precàrrega de la ruta /discografia/ en segon pla per a una transició instantània
+    try {
+      router.prefetch("/discografia/");
+    } catch (_) {}
+
     const video = videoRef.current;
     if (video) {
       const playPromise = video.play();
@@ -96,7 +115,7 @@ export default function Home() {
       window.removeEventListener("touchstart", handleTouchStart);
       window.removeEventListener("touchmove", handleTouchMove);
     };
-  }, []);
+  }, [router]);
 
   // onSeeked handler: gestiona la cua per evitar seek-flooding
   const handleSeeked = () => {
@@ -120,6 +139,42 @@ export default function Home() {
       const nextTarget = progress * video.duration;
       video.currentTime = nextTarget;
       targetTimeRef.current = nextTarget;
+    }
+  };
+
+  // Disparador de la transició de farcit líquid (liquid fill) en clicar "ENTRAR A LA WEB"
+  const handleEnterClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault();
+    if (isTransitioning) return;
+
+    // Comprovació d'accessibilitat: navegació directa si l'usuari té moviment reduït
+    const prefersReducedMotion =
+      typeof window !== "undefined" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    if (prefersReducedMotion) {
+      router.push("/discografia/");
+      return;
+    }
+
+    setIsTransitioning(true);
+
+    // Calcular el centre exacte del botó a la pantalla
+    let originX = 0.5;
+    let originY = 0.88;
+    if (buttonRef.current) {
+      const rect = buttonRef.current.getBoundingClientRect();
+      originX = (rect.left + rect.width / 2) / window.innerWidth;
+      originY = (rect.top + rect.height / 2) / window.innerHeight;
+    }
+
+    // Disparar l'expansió orgànica del líquid
+    if (liquidRef.current) {
+      liquidRef.current.trigger(originX, originY, () => {
+        router.push("/discografia/");
+      });
+    } else {
+      router.push("/discografia/");
     }
   };
 
@@ -152,24 +207,38 @@ export default function Home() {
           ------------------------------------------------------------- */}
       <div className="intro-gate-action">
         <Link
+          ref={buttonRef}
           href="/discografia/"
+          onClick={handleEnterClick}
           data-hover=""
-          className="btn a24-btn"
+          className={`btn a24-btn ${isTransitioning ? "is-entering" : ""}`}
           aria-label="Entrar a la web oficial de Miquel Gil"
+          tabIndex={0}
         >
           <div className="btn__divider" />
           <span className="btn__p-mask">
             <span
               className="btn__p"
               data-hover-inner=""
-              data-text="ENTRAR A LA WEB ↗"
+              data-text={isTransitioning ? "ENTRANT..." : "ENTRAR A LA WEB ↗"}
             >
-              <span data-hover-text="">ENTRAR A LA WEB ↗</span>
+              <span data-hover-text="">
+                {isTransitioning ? "ENTRANT..." : "ENTRAR A LA WEB ↗"}
+              </span>
             </span>
           </span>
           <div className="btn__divider" />
         </Link>
       </div>
+
+      {/* -------------------------------------------------------------
+          CAPA DE TRANSICIÓ DE FARCIT LÍQUID (WEBGL METABALLS + NOISE)
+          ------------------------------------------------------------- */}
+      <LiquidFillTransition
+        ref={liquidRef}
+        color="#050505"
+        duration={0.85}
+      />
     </main>
   );
 }
