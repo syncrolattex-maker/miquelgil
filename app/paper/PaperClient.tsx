@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useRef, useState, useEffect } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import "./paper.css";
 
@@ -10,32 +9,28 @@ export default function PaperClient() {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const [isExiting, setIsExiting] = useState<boolean>(false);
 
-  // Precàrrega de la ruta de destí per a una navegació instantània
+  // Precàrrega de la ruta /discografia/ per a una entrada instantània
   useEffect(() => {
     try {
       router.prefetch("/discografia/");
     } catch (_) {}
   }, [router]);
 
-  // Autoplay segur del vídeo paper
+  // Assegurar que el vídeo estigui en pausa inicialment (no bucle, no autoplay)
   useEffect(() => {
     const video = videoRef.current;
     if (video) {
-      const p = video.play();
-      if (p !== undefined) {
-        p.catch(() => {
-          // Autoplay silenciós bloquejat pel navegador fins al primer gest
-        });
-      }
+      video.pause();
+      video.currentTime = 0;
     }
   }, []);
 
-  // Transició de benvinguda:
-  // 1. Desapareixen totes les lletres
-  // 2. Es queda només el vídeo del paper animant-se sol sobre fons negre
-  // 3. Dóna pas fluidament a la web (/discografia/)
-  const handleWelcome = (e: React.MouseEvent) => {
-    e.preventDefault();
+  // Acció en clicar "Entrar a la web":
+  // 1. Desapareixen immediatament les tipografies
+  // 2. S'acciona l'animació de la cara (reproducció única del vídeo)
+  // 3. Un cop transcorreguda l'animació, dóna pas a la web
+  const handleEnter = (e?: React.MouseEvent) => {
+    if (e) e.preventDefault();
     if (isExiting) return;
 
     setIsExiting(true);
@@ -46,125 +41,77 @@ export default function PaperClient() {
       video.play().catch(() => {});
     }
 
-    // Després de mostrar l'escultura del paper en solitari al centre del negre, obre la web
+    // Quan l'animació del paper s'acosta al final (~3.5s), naveguem a la web
     setTimeout(() => {
       router.push("/discografia/");
-    }, 1750);
+    }, 3500);
+  };
+
+  const handleVideoEnded = () => {
+    router.push("/discografia/");
+  };
+
+  const handleSkipToWeb = () => {
+    if (isExiting) {
+      router.push("/discografia/");
+    }
   };
 
   return (
     <main className={`paper-root ${isExiting ? "is-exiting" : ""}`}>
       {/* -------------------------------------------------------------
-          TOP NAVIGATION
-          ------------------------------------------------------------- */}
-      <nav className="paper-nav">
-        {/* Logotip Miquel Gil en tipografia Maelstrom */}
-        <Link href="/" className="paper-logo" title="Miquel Gil — Arxiu Oficial">
-          Miquel Gil
-        </Link>
-
-        {/* Enllaços centrals separats per punts visuals */}
-        <ul className="paper-nav-links">
-          <li>
-            <Link href="/discografia/" className="paper-nav-link">
-              Discografia
-            </Link>
-          </li>
-          <li className="paper-nav-dot" aria-hidden="true">·</li>
-          <li>
-            <Link href="/biografia/" className="paper-nav-link">
-              Biografia
-            </Link>
-          </li>
-          <li className="paper-nav-dot" aria-hidden="true">·</li>
-          <li>
-            <Link href="/directes/" className="paper-nav-link">
-              Directes
-            </Link>
-          </li>
-          <li className="paper-nav-dot" aria-hidden="true">·</li>
-          <li>
-            <Link href="/contacte/" className="paper-nav-link">
-              Contacte
-            </Link>
-          </li>
-        </ul>
-
-        {/* Botons d'acció de la dreta */}
-        <div className="paper-nav-actions">
-          <Link
-            href="/discografia/"
-            className="paper-pill-btn paper-pill-outline"
-            title="Veure la discografia oficial"
-          >
-            Veure l'Arxiu
-          </Link>
-
-          <button
-            type="button"
-            className="paper-pill-btn paper-pill-white"
-            onClick={handleWelcome}
-            title="Benvinguts a l'arxiu oficial de Miquel Gil"
-          >
-            Benvinguts ↗
-          </button>
-        </div>
-      </nav>
-
-      {/* -------------------------------------------------------------
           HERO BODY: TEXTOS A L'ESQUERRA + VÍDEO A SANG A LA DRETA
+          (Sense header ni menú de navegació)
           ------------------------------------------------------------- */}
       <div className="paper-hero-body">
-        {/* Contingut editorial de l'esquerra */}
+        {/* Columna esquerra: Textos i Botó "Entrar a la web" */}
         <div className="paper-left-content">
-          {/* Tagline superior */}
-          <div className="paper-tagline-row">
-            <span className="paper-tagline-icon" aria-hidden="true">✦</span>
-            <span className="paper-tagline-text">
-              Arxiu Oficial & <em>Memòria Viva</em>
-            </span>
-          </div>
-
-          {/* Gran titular amb les tipografies de /discografia (PP Neue Montreal + Grifinito L) */}
+          {/* Gran titular amb Neue Montreal i Eiko Medium */}
           <h1 className="paper-hero-heading">
             <span className="heading-line">La memòria viva</span>
             <span className="heading-line">de la terra,</span>
             <span className="heading-line-serif">en cada plec del cant.</span>
           </h1>
 
-          {/* Paràgraf subtítol */}
+          {/* Subtítol descriptiu en Neue Montreal i Museum */}
           <p className="paper-hero-desc">
-            Cinquanta anys de creació ininterrompuda: de la refundació històrica
-            de la música tradicional valenciana amb Al Tall a les sonoritats contemporànies
+            Mig segle de creació ininterrompuda: de la refundació històrica de la
+            música tradicional valenciana amb Al Tall a les sonoritats contemporànies
             d’<em>Orgànic</em>, <em>Katà</em>, <em>Viatger</em> i <em>Geometries</em>.
           </p>
 
-          {/* Botó píndola blanc inferior */}
+          {/* Únic botó d'entrada "Entrar a la web" */}
           <div className="paper-cta-wrapper">
             <button
               type="button"
               className="paper-hero-cta-btn"
-              onClick={handleWelcome}
+              onClick={handleEnter}
+              aria-label="Entrar a la web oficial de Miquel Gil"
             >
-              <span>BENVINGUTS A L'ARXIU</span>
-              <span className="cta-arrow" aria-hidden="true">↗</span>
+              <span>Entrar a la web</span>
+              <span className="cta-arrow" aria-hidden="true">→</span>
             </button>
           </div>
         </div>
 
-        {/* VÍDEO DE LA CARA: A SANG, SENSE REQUADRES NI MARCS, FOS AMB EL NEGRE PUR */}
-        <div className="paper-face-video-wrapper">
+        {/* VÍDEO DE LA CARA: A SANG, SENSE REQUADRES NI MARCS
+            No es reprodueix en bucle, s'acciona en prémer el botó */}
+        <div
+          className="paper-face-video-wrapper"
+          onClick={handleSkipToWeb}
+          title={isExiting ? "Fes clic per entrar directament" : undefined}
+        >
           <video
             ref={videoRef}
             src="/video/paper_reel.mp4"
             poster="/video/paper_poster.jpg"
-            autoPlay
-            loop
+            preload="auto"
             muted
             playsInline
             // @ts-ignore
             webkit-playsinline="true"
             className="paper-face-video"
+            onEnded={handleVideoEnded}
           />
         </div>
       </div>

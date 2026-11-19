@@ -1,8 +1,7 @@
 /* ============================================================
    PAPER HERO PAGE (/paper) — MIQUEL GIL PRESENTACIÓ OFICIAL
-   Estètica d'alta fidelitat inspirada en la captura de referència
-   Fons negre absolut (#000000), vídeo de la cara a sang (sense requadres ni marcs)
-   i tipografies oficials de /discografia (Maelstrom, Grifinito L, PP Neue Montreal)
+   Sense header ni menú. Vídeo a sang sense requadres.
+   Tipografies: Eiko Medium, Museum i Neue Montreal.
    ============================================================ */
 
 .paper-root {
@@ -14,142 +13,18 @@
   background-color: #000000;
   color: #ffffff;
   display: flex;
-  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
   user-select: none;
   -webkit-user-select: none;
-  font-family: var(--font-texts, 'PP Neue Montreal', -apple-system, BlinkMacSystemFont, sans-serif);
+  font-family: 'PP Neue Montreal', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
 /* ------------------------------------------------------------
-   TOP NAVIGATION
-   ------------------------------------------------------------ */
-.paper-nav {
-  position: relative;
-  z-index: 30;
-  width: 100%;
-  padding: 1.8rem 3.2rem;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  transition: opacity 0.55s cubic-bezier(0.16, 1, 0.3, 1), transform 0.55s cubic-bezier(0.16, 1, 0.3, 1), filter 0.55s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-@media (max-width: 868px) {
-  .paper-nav {
-    padding: 1.2rem 1.5rem;
-  }
-}
-
-/* Logo (left) */
-.paper-logo {
-  font-family: 'Maelstrom', var(--font-texts, 'PP Neue Montreal'), sans-serif;
-  font-size: 1.4rem;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: #ffffff;
-  text-decoration: none;
-  transition: opacity 0.2s ease;
-}
-
-.paper-logo:hover {
-  opacity: 0.8;
-}
-
-/* Center nav links */
-.paper-nav-links {
-  display: flex;
-  align-items: center;
-  gap: 1.6rem;
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-
-@media (max-width: 960px) {
-  .paper-nav-links {
-    display: none;
-  }
-}
-
-.paper-nav-link {
-  color: rgba(255, 255, 255, 0.7);
-  text-decoration: none;
-  font-size: 0.9rem;
-  font-weight: 400;
-  letter-spacing: 0.02em;
-  transition: color 0.2s ease;
-}
-
-.paper-nav-link:hover {
-  color: #ffffff;
-}
-
-.paper-nav-dot {
-  color: rgba(255, 255, 255, 0.35);
-  font-size: 0.85rem;
-  user-select: none;
-}
-
-/* Right buttons */
-.paper-nav-actions {
-  display: flex;
-  align-items: center;
-  gap: 0.9rem;
-}
-
-.paper-pill-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0.65rem 1.4rem;
-  border-radius: 9999px;
-  font-size: 0.82rem;
-  font-weight: 600;
-  letter-spacing: 0.02em;
-  text-decoration: none;
-  cursor: pointer;
-  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-  white-space: nowrap;
-}
-
-.paper-pill-outline {
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.25);
-  color: #ffffff;
-}
-
-.paper-pill-outline:hover {
-  background: rgba(255, 255, 255, 0.2);
-  border-color: rgba(255, 255, 255, 0.5);
-  transform: translateY(-1px);
-}
-
-.paper-pill-white {
-  background: #ffffff;
-  border: 1px solid #ffffff;
-  color: #000000;
-  box-shadow: 0 4px 18px rgba(255, 255, 255, 0.18);
-}
-
-.paper-pill-white:hover {
-  background: #f0f0f0;
-  transform: translateY(-1px) scale(1.02);
-  box-shadow: 0 6px 24px rgba(255, 255, 255, 0.3);
-}
-
-@media (max-width: 640px) {
-  .paper-pill-outline {
-    display: none;
-  }
-}
-
-/* ------------------------------------------------------------
-   MAIN HERO LAYOUT
+   MAIN HERO WRAPPER (Left Content + Right Bleed Face Video)
    ------------------------------------------------------------ */
 .paper-hero-body {
   position: relative;
-  flex: 1;
   width: 100%;
   height: 100%;
   display: flex;
@@ -157,121 +32,105 @@
   overflow: hidden;
 }
 
-/* Columna esquerra: Textos i crida a l'acció */
+/* Columna esquerra: Textos i Botó d'Entrada */
 .paper-left-content {
   position: relative;
   z-index: 20;
   width: 100%;
-  max-width: 640px;
-  padding-left: 3.2rem;
-  padding-bottom: 3.5rem;
+  max-width: 660px;
+  padding-left: clamp(2rem, 5.5vw, 6rem);
+  padding-right: 1.5rem;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  gap: 1.8rem;
-  transition: opacity 0.55s cubic-bezier(0.16, 1, 0.3, 1), transform 0.55s cubic-bezier(0.16, 1, 0.3, 1), filter 0.55s cubic-bezier(0.16, 1, 0.3, 1);
+  gap: 2rem;
+  transition: opacity 0.55s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.55s cubic-bezier(0.16, 1, 0.3, 1),
+              filter 0.55s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-@media (max-width: 868px) {
+@media (max-width: 900px) {
   .paper-left-content {
-    padding-left: 1.5rem;
-    padding-right: 1.5rem;
-    padding-bottom: 2rem;
+    padding-left: 2rem;
+    padding-right: 2rem;
     max-width: 100%;
   }
 }
 
-/* Tagline superior amb icona */
-.paper-tagline-row {
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-  font-size: 0.88rem;
-  font-weight: 500;
-  color: rgba(255, 255, 255, 0.85);
-  letter-spacing: 0.02em;
-}
-
-.paper-tagline-icon {
-  font-size: 0.85rem;
-  color: #ffffff;
-  display: inline-flex;
-  opacity: 0.9;
-}
-
-.paper-tagline-text em {
-  font-family: var(--font-titles, 'GRIFINITO L', 'PP Eiko', serif);
-  font-style: italic;
-  font-weight: 400;
-  font-size: 1.08em;
-  letter-spacing: 0.01em;
-}
-
-/* Gran Titular amb tipografia oficial de /discografia */
+/* Gran Titular amb Neue Montreal i Eiko Medium */
 .paper-hero-heading {
   margin: 0;
   display: flex;
   flex-direction: column;
-  line-height: 1.05;
+  line-height: 1.04;
   letter-spacing: -0.038em;
 }
 
+/* Línies 1 i 2 en Neue Montreal */
 .heading-line {
-  font-family: var(--font-texts, 'PP Neue Montreal', -apple-system, sans-serif);
+  font-family: 'PP Neue Montreal', -apple-system, BlinkMacSystemFont, sans-serif;
   font-weight: 500;
-  font-size: clamp(2.5rem, 5.1vw, 5.3rem);
+  font-size: clamp(2.6rem, 5.4vw, 5.6rem);
   color: #ffffff;
+  letter-spacing: -0.038em;
 }
 
+/* Línia 3 en Eiko Medium itàlica */
 .heading-line-serif {
-  font-family: var(--font-titles, 'GRIFINITO L', 'PP Eiko', Georgia, serif);
+  font-family: 'PP Eiko Medium', 'PP Eiko', Georgia, serif;
   font-style: italic;
-  font-weight: 400;
-  font-size: clamp(2.8rem, 5.7vw, 5.9rem);
+  font-weight: 500;
+  font-size: clamp(2.9rem, 6vw, 6.2rem);
   color: #ffffff;
   letter-spacing: -0.015em;
-  margin-top: 0.08em;
-  text-shadow: 0 4px 28px rgba(255, 255, 255, 0.12);
+  margin-top: 0.1em;
+  text-shadow: 0 4px 30px rgba(255, 255, 255, 0.14);
 }
 
-/* Subtítol descriptiu */
+/* Paràgraf subtítol en Neue Montreal i Museum */
 .paper-hero-desc {
-  font-family: var(--font-texts, 'PP Neue Montreal', -apple-system, sans-serif);
-  font-size: clamp(0.92rem, 1.15vw, 1.08rem);
-  line-height: 1.62;
-  color: rgba(255, 255, 255, 0.68);
-  max-width: 440px;
+  font-family: 'PP Neue Montreal', sans-serif;
+  font-size: clamp(0.96rem, 1.2vw, 1.12rem);
+  line-height: 1.65;
+  color: rgba(255, 255, 255, 0.7);
+  max-width: 480px;
   margin: 0;
   font-weight: 400;
 }
 
-/* Botó píndola blanc inferior */
+.paper-hero-desc em {
+  font-family: 'PP Museum', serif;
+  font-style: italic;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+/* Botó píndola blanc "Entrar a la web" */
 .paper-cta-wrapper {
-  margin-top: 0.6rem;
+  margin-top: 0.5rem;
 }
 
 .paper-hero-cta-btn {
   display: inline-flex;
   align-items: center;
-  gap: 0.65rem;
+  gap: 0.75rem;
   background-color: #ffffff;
   color: #000000;
-  font-family: var(--font-texts, 'PP Neue Montreal', -apple-system, sans-serif);
+  font-family: 'PP Neue Montreal', sans-serif;
   font-weight: 600;
-  font-size: 0.94rem;
-  letter-spacing: 0.01em;
-  padding: 0.95rem 1.95rem;
+  font-size: 0.96rem;
+  letter-spacing: 0.02em;
+  padding: 1rem 2.2rem;
   border-radius: 9999px;
   border: none;
   cursor: pointer;
-  box-shadow: 0 4px 24px rgba(255, 255, 255, 0.2), 0 2px 6px rgba(0, 0, 0, 0.7);
+  box-shadow: 0 4px 24px rgba(255, 255, 255, 0.22), 0 2px 6px rgba(0, 0, 0, 0.8);
   transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .paper-hero-cta-btn:hover {
   background-color: #f2f2f2;
   transform: translateY(-2px) scale(1.02);
-  box-shadow: 0 8px 32px rgba(255, 255, 255, 0.32);
+  box-shadow: 0 8px 32px rgba(255, 255, 255, 0.35);
 }
 
 .paper-hero-cta-btn:active {
@@ -280,7 +139,7 @@
 
 .cta-arrow {
   display: inline-block;
-  font-size: 1.05rem;
+  font-size: 1.1rem;
   transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
@@ -290,7 +149,7 @@
 
 /* ------------------------------------------------------------
    VÍDEO DE LA CARA: A SANG, SENSE REQUADRES NI MARCS
-   El vídeo es fon directament amb el negre profund del fons
+   No es reprodueix en bucle. Fons fos purament amb el negre.
    ------------------------------------------------------------ */
 .paper-face-video-wrapper {
   position: absolute;
@@ -301,19 +160,19 @@
   height: 100vh;
   height: 100dvh;
   z-index: 10;
-  pointer-events: none;
   overflow: hidden;
   background-color: #000000;
-  /* El degradat esquerre fon suaument qualsevol compressió de vídeo amb el negre pur de la pàgina */
-  -webkit-mask-image: linear-gradient(to right, transparent 0%, rgba(0, 0, 0, 0.7) 12%, black 28%, black 100%);
-  mask-image: linear-gradient(to right, transparent 0%, rgba(0, 0, 0, 0.7) 12%, black 28%, black 100%);
-  transition: all 0.85s cubic-bezier(0.16, 1, 0.3, 1);
+  /* Degradat suau a l'esquerra per fondre amb el negre pur */
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, rgba(0, 0, 0, 0.7) 10%, black 24%, black 100%);
+  mask-image: linear-gradient(to right, transparent 0%, rgba(0, 0, 0, 0.7) 10%, black 24%, black 100%);
+  transition: all 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: none;
 }
 
-@media (max-width: 868px) {
+@media (max-width: 900px) {
   .paper-face-video-wrapper {
     width: 100vw;
-    opacity: 0.45;
+    opacity: 0.38;
     -webkit-mask-image: none;
     mask-image: none;
   }
@@ -334,31 +193,26 @@
 }
 
 /* ------------------------------------------------------------
-   TRANSICIÓ DE SORTIDA CINÈTICA ("BENVINGUTS")
-   Les lletres desapareixen completament, el vídeo de paper queda sol
-   i dóna pas netament a la web (/discografia/)
+   TRANSICIÓ DE SORTIDA ("ENTRAR A LA WEB"):
+   1. Les tipografies desapareixen completament
+   2. S'acciona l'animació de la cara (que no estava en bucle)
+   3. Es queda com a protagonista única i dóna pas a la web
    ------------------------------------------------------------ */
-
-.paper-root.is-exiting .paper-nav {
-  opacity: 0;
-  transform: translateY(-24px);
-  filter: blur(8px);
-  pointer-events: none;
-}
 
 .paper-root.is-exiting .paper-left-content {
   opacity: 0;
   transform: translateY(-24px);
-  filter: blur(10px);
+  filter: blur(12px);
   pointer-events: none;
 }
 
-/* El vídeo de la cara passa a ser el protagonista absolut i net sobre el fons negre */
 .paper-root.is-exiting .paper-face-video-wrapper {
   width: 100vw;
   -webkit-mask-image: none;
   mask-image: none;
   opacity: 1;
   z-index: 50;
-  transform: scale(1.03);
+  cursor: pointer;
+  pointer-events: auto;
+  transform: scale(1.02);
 }
