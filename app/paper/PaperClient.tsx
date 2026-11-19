@@ -155,13 +155,17 @@ export default function PaperClient() {
 
       {/* -------------------------------------------------------------
           LOGOTIP DE MIQUEL GIL EN BLANC SOBRE EL NEGRE
+          El logotip oficial del menú de /discografia (/images/logo-W.png)
           ------------------------------------------------------------- */}
       <div
         className={`paper-transition-logo-wrap ${showLogo ? "is-visible" : ""}`}
         aria-hidden="true"
       >
-        <div className="paper-transition-logo">Miquel Gil</div>
-        <div className="paper-transition-sub">Arxiu Oficial // 1975–2026</div>
+        <img
+          src="/images/logo-W.png"
+          alt="Miquel Gil"
+          className="paper-transition-logo-img"
+        />
       </div>
 
       {/* -------------------------------------------------------------
