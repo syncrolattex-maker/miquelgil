@@ -1,11 +1,57 @@
 /* ============================================================
    PAPER HERO PAGE (/paper) — MIQUEL GIL PRESENTACIÓ OFICIAL
-   Sense header ni menú. Vídeo a sang sense requadres.
-   Tipografies: Eiko Medium, Museum i Neue Montreal.
-   La cara es queda al seu lloc (a la dreta).
-   Seqüència cinètica: reproducció ràpida -> fundit a negre ->
-   logotip MIQUEL GIL en blanc -> transició líquida a discografia.
+   Directriu de disseny idèntica a /discografia/viatger/:
+   - Títols: PP Eiko Medium en majúscules, line-height 0.90, letter-spacing -0.04em
+   - Subtítols i kickers: PP Museum, 11px, letter-spacing 0.08em, uppercase
+   - Cos de text i botons: PP Neue Montreal
+   - Línia fina divisòria horitzontal (.divider-horizontal de 0.5px)
    ============================================================ */
+
+@font-face {
+  font-family: 'PP Eiko';
+  src: url('/fonts/PPEiko-Regular.woff2') format('woff2');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'PP Eiko Medium';
+  src: url('/fonts/PPEiko-Regular.woff2') format('woff2');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'PP Museum';
+  src: url('/fonts/PPMuseum-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'PP Neue Montreal';
+  src: url('/fonts/PPNeueMontreal-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'PP Neue Montreal';
+  src: url('/fonts/PPNeueMontreal-Medium.woff2') format('woff2');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  --font-titles: 'PP Eiko Medium', 'PP Eiko', Georgia, serif;
+  --font-subtitles: 'PP Museum', serif;
+  --font-texts: 'PP Neue Montreal', -apple-system, BlinkMacSystemFont, sans-serif;
+}
 
 .paper-root {
   position: relative;
@@ -20,7 +66,7 @@
   justify-content: flex-start;
   user-select: none;
   -webkit-user-select: none;
-  font-family: 'PP Neue Montreal', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-family: var(--font-texts);
 }
 
 /* ------------------------------------------------------------
@@ -40,13 +86,13 @@
   position: relative;
   z-index: 20;
   width: 100%;
-  max-width: 660px;
+  max-width: 680px;
   padding-left: clamp(2rem, 5.5vw, 6rem);
   padding-right: 1.5rem;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  gap: 2rem;
+  gap: 1.2rem;
   transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1),
               transform 0.5s cubic-bezier(0.16, 1, 0.3, 1),
               filter 0.5s cubic-bezier(0.16, 1, 0.3, 1);
@@ -60,56 +106,77 @@
   }
 }
 
-/* Gran Titular amb Neue Montreal i Eiko Medium */
-.paper-hero-heading {
+/* Kicker d'estil idèntic a /discografia/viatger/ (PP Museum) */
+.subheading-xs {
+  font-family: var(--font-subtitles) !important;
+  font-size: 11px;
+  line-height: 14px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.55);
+  display: block;
+}
+
+/* TÍTOL HERO AMB LA DIRECTRIU EXACTA DE /discografia/viatger/
+   PP Eiko Medium, Majúscules, line-height 0.90, letter-spacing -0.04em */
+.paper-title-group {
   margin: 0;
-  display: flex;
-  flex-direction: column;
-  line-height: 1.04;
-  letter-spacing: -0.038em;
 }
 
-/* Línies 1 i 2 en Neue Montreal */
-.heading-line {
-  font-family: 'PP Neue Montreal', -apple-system, BlinkMacSystemFont, sans-serif;
-  font-weight: 500;
-  font-size: clamp(2.6rem, 5.4vw, 5.6rem);
+.heading-l,
+.paper-hero-heading {
+  font-family: var(--font-titles) !important;
+  font-weight: 500 !important;
+  font-size: clamp(3rem, 6.4vw, 6.8rem) !important;
+  line-height: 0.90 !important;
+  letter-spacing: -0.04em !important;
+  text-transform: uppercase !important;
   color: #ffffff;
-  letter-spacing: -0.038em;
+  margin: 0;
+  display: block;
 }
 
-/* Línia 3 en Eiko Medium itàlica */
-.heading-line-serif {
-  font-family: 'PP Eiko Medium', 'PP Eiko', Georgia, serif;
-  font-style: italic;
-  font-weight: 500;
-  font-size: clamp(2.9rem, 6vw, 6.2rem);
-  color: #ffffff;
-  letter-spacing: -0.015em;
-  margin-top: 0.1em;
-  text-shadow: 0 4px 30px rgba(255, 255, 255, 0.14);
+.heading-l span,
+.paper-hero-heading span {
+  display: block;
+  font-family: inherit !important;
+  font-weight: inherit !important;
+  letter-spacing: inherit !important;
+  line-height: inherit !important;
+  text-transform: inherit !important;
 }
 
-/* Paràgraf subtítol en Neue Montreal i Museum */
+/* Línia separadora fina de 0.5px idèntica a /discografia/viatger/ */
+.divider-horizontal {
+  background-color: #ffffff;
+  opacity: 0.18;
+  width: 100%;
+  max-width: 540px;
+  height: 0.5px;
+  margin: 1.35rem 0 1.15rem 0;
+  transform-origin: left center;
+}
+
+/* Paràgraf subtítol en PP Neue Montreal i Museum */
 .paper-hero-desc {
-  font-family: 'PP Neue Montreal', sans-serif;
-  font-size: clamp(0.96rem, 1.2vw, 1.12rem);
-  line-height: 1.65;
+  font-family: var(--font-texts);
+  font-size: clamp(0.92rem, 1.15vw, 1.08rem);
+  line-height: 1.62;
   color: rgba(255, 255, 255, 0.7);
-  max-width: 480px;
+  max-width: 500px;
   margin: 0;
   font-weight: 400;
 }
 
 .paper-hero-desc em {
-  font-family: 'PP Museum', serif;
+  font-family: var(--font-subtitles);
   font-style: italic;
   color: rgba(255, 255, 255, 0.9);
 }
 
 /* Botó píndola blanc "Entrar a la web" */
 .paper-cta-wrapper {
-  margin-top: 0.5rem;
+  margin-top: 0.8rem;
 }
 
 .paper-hero-cta-btn {
@@ -118,7 +185,7 @@
   gap: 0.75rem;
   background-color: #ffffff;
   color: #000000;
-  font-family: 'PP Neue Montreal', sans-serif;
+  font-family: var(--font-texts);
   font-weight: 600;
   font-size: 0.96rem;
   letter-spacing: 0.02em;
@@ -238,6 +305,7 @@
 
 /* ------------------------------------------------------------
    LOGOTIP MIQUEL GIL EN BLANC SOBRE EL FUNDIT A NEGRE
+   Idèntic a la marca de /discografia/viatger/
    ------------------------------------------------------------ */
 .paper-transition-logo-wrap {
   position: fixed;
@@ -261,20 +329,21 @@
 }
 
 .paper-transition-logo {
-  font-family: 'Maelstrom', 'PP Neue Montreal', sans-serif;
+  font-family: var(--font-titles) !important;
   font-size: clamp(2.4rem, 5.2vw, 4.4rem);
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  font-weight: 500 !important;
+  letter-spacing: -0.04em !important;
+  line-height: 0.90 !important;
+  text-transform: uppercase !important;
   color: #ffffff;
   text-shadow: 0 0 35px rgba(255, 255, 255, 0.3);
 }
 
 .paper-transition-sub {
-  font-family: 'PP Neue Montreal', sans-serif;
-  font-size: 0.82rem;
-  letter-spacing: 0.28em;
+  font-family: var(--font-subtitles) !important;
+  font-size: 11px;
+  line-height: 14px;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: rgba(255, 255, 255, 0.6);
-  font-weight: 500;
 }
