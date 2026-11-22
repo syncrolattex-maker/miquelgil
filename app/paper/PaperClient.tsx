@@ -2,6 +2,7 @@
 
 import React, { useRef, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import gsap from "gsap";
 import LiquidFillTransition, {
   LiquidFillTransitionHandle,
 } from "@/components/LiquidFillTransition";
@@ -11,6 +12,12 @@ export default function PaperClient() {
   const router = useRouter();
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const liquidRef = useRef<LiquidFillTransitionHandle | null>(null);
+
+  const leftContentRef = useRef<HTMLDivElement | null>(null);
+  const titleSpansRef = useRef<(HTMLSpanElement | null)[]>([]);
+  const dividerRef = useRef<HTMLDivElement | null>(null);
+  const descRef = useRef<HTMLParagraphElement | null>(null);
+  const ctaWrapperRef = useRef<HTMLDivElement | null>(null);
 
   const [isExiting, setIsExiting] = useState<boolean>(false);
   const [isFadingToBlack, setIsFadingToBlack] = useState<boolean>(false);
@@ -41,7 +48,7 @@ export default function PaperClient() {
     };
   }, []);
 
-  // Transició cinètica quan la cara acaba de plegar-se completament en bola de paper
+  // Transició cinètica: Fundit a negre ABANS que acabi el vídeo, logotip i efecte líquid a discografia
   const triggerFadeAndTransition = () => {
     if (hasTriggeredFadeRef.current) return;
     hasTriggeredFadeRef.current = true;
@@ -51,13 +58,13 @@ export default function PaperClient() {
       fallbackTimerRef.current = null;
     }
 
-    // Pas 1: Fundit a negre en finalitzar l'animació de la cara
+    // Pas 1: Fundit a negre suau iniciat abans que acabi el vídeo
     setIsFadingToBlack(true);
 
     // Pas 2: Mostrar el logotip blanc oficial de Miquel Gil al centre del negre
     setTimeout(() => {
       setShowLogo(true);
-    }, 420);
+    }, 450);
 
     // Pas 3: Transició de l'efecte líquid directament cap a discografia
     setTimeout(() => {
@@ -72,38 +79,110 @@ export default function PaperClient() {
   };
 
   // Seqüència cinètica en prémer "Entrar a la web":
-  // 1. Tipografies desapareixen IMMEDIATAMENT SENSE ANIMACIÓ.
-  // 2. El vídeo de la cara es reprodueix per complet fins al final (per apreciar tot el plegat en bola).
-  // 3. El fundit a negre s'activa quan culmina l'animació de la cara (~3.3s - 3.5s).
-  // 4. Es mostra el logotip oficial de Miquel Gil (/images/logo-W.png) en blanc al centre del negre.
-  // 5. Transició de l'efecte líquid des del centre cap a la pantalla de discografia.
+  // 1. Animació GSAP elegant on desapareixen títols, línia divisòria i subtítols.
+  // 2. Entra l'animació de la cara (el vídeo s'acciona).
+  // 3. Abans que acabi el vídeo de la cara, s'inicia el fundit a negre.
+  // 4. Mostra el logotip oficial de Miquel Gil en blanc al centre del negre.
+  // 5. Transició líquida cap a /discografia/ per carregar la web.
   const handleEnter = (e?: React.MouseEvent) => {
     if (e) e.preventDefault();
     if (hasTriggeredSequenceRef.current) return;
     hasTriggeredSequenceRef.current = true;
 
-    // Desaparició immediata dels textos sense cap animació
     setIsExiting(true);
 
+    // 1. Animació cinètica amb GSAP de desaparició dels textos
+    const titleElements = titleSpansRef.current.filter(Boolean);
+    const tl = gsap.timeline();
+
+    // Desaparició esglaonada: elevació suau, desenfocament i esvaïment
+    if (titleElements.length > 0) {
+      tl.to(
+        titleElements,
+        {
+          y: -28,
+          opacity: 0,
+          filter: "blur(10px)",
+          duration: 0.55,
+          stagger: 0.08,
+          ease: "power2.inOut",
+        },
+        0
+      );
+    }
+
+    if (dividerRef.current) {
+      tl.to(
+        dividerRef.current,
+        {
+          scaleX: 0,
+          opacity: 0,
+          duration: 0.45,
+          ease: "power2.inOut",
+        },
+        0.06
+      );
+    }
+
+    if (descRef.current) {
+      tl.to(
+        descRef.current,
+        {
+          y: -20,
+          opacity: 0,
+          filter: "blur(8px)",
+          duration: 0.52,
+          ease: "power2.inOut",
+        },
+        0.1
+      );
+    }
+
+    if (ctaWrapperRef.current) {
+      tl.to(
+        ctaWrapperRef.current,
+        {
+          y: -14,
+          opacity: 0,
+          scale: 0.96,
+          duration: 0.38,
+          ease: "power2.inOut",
+        },
+        0.04
+      );
+    }
+
+    tl.to(leftContentRef.current, {
+      autoAlpha: 0,
+      duration: 0.15,
+      onComplete: () => {
+        if (leftContentRef.current) {
+          leftContentRef.current.style.display = "none";
+        }
+      },
+    });
+
+    // 2. Aquí entra l'animació de la cara (reproducció a velocitat fluida)
     const video = videoRef.current;
     if (video) {
       video.currentTime = 0;
-      video.playbackRate = 1.05; // Velocitat fluida i natural per apreciar el plegat sencer
+      video.playbackRate = 1.08;
       video.play().catch(() => {});
     }
 
-    // Fallback de seguretat si no s'emeten els esdeveniments del vídeo
+    // Fallback de seguretat abans que acabi el vídeo per si no salta l'esdeveniment
     fallbackTimerRef.current = setTimeout(() => {
       triggerFadeAndTransition();
-    }, 3650);
+    }, 2750);
   };
 
+  // 3. Abans que acabi l'animació del vídeo (abans del final), s'inicia el fundit a negre
   const handleVideoTimeUpdate = () => {
     const video = videoRef.current;
     if (!video || !isExiting || hasTriggeredFadeRef.current) return;
     const dur = video.duration || 3.92;
-    // S'activa quan la bola de paper s'ha format completament
-    if (video.currentTime >= 3.35 || video.currentTime >= dur - 0.45) {
+    // S'inicia el fundit a negre abans del final (quan la bola es replega, ~2.45s o dur - 1.25s)
+    if (video.currentTime >= 2.45 || video.currentTime >= dur - 1.25) {
       triggerFadeAndTransition();
     }
   };
@@ -128,28 +207,46 @@ export default function PaperClient() {
           ------------------------------------------------------------- */}
       <div className="paper-hero-body">
         {/* Columna esquerra: Textos i Botó "Entrar a la web" */}
-        <div className="paper-left-content">
+        <div ref={leftContentRef} className="paper-left-content">
           {/* Gran titular amb la directriu de disseny exacta de /discografia/viatger/ */}
           <div className="paper-title-group">
             <h1 className="paper-hero-heading">
-              <span>La memòria viva</span>
-              <span>de la terra,</span>
-              <span>en cada plec del cant.</span>
+              <span
+                ref={(el) => {
+                  titleSpansRef.current[0] = el;
+                }}
+              >
+                La memòria viva
+              </span>
+              <span
+                ref={(el) => {
+                  titleSpansRef.current[1] = el;
+                }}
+              >
+                de la terra,
+              </span>
+              <span
+                ref={(el) => {
+                  titleSpansRef.current[2] = el;
+                }}
+              >
+                en cada plec del cant.
+              </span>
             </h1>
           </div>
 
           {/* Línia separadora horitzontal */}
-          <div className="paper-divider-horizontal" />
+          <div ref={dividerRef} className="paper-divider-horizontal" />
 
           {/* Subtítol descriptiu en Neue Montreal i Museum */}
-          <p className="paper-hero-desc">
+          <p ref={descRef} className="paper-hero-desc">
             Mig segle de creació ininterrompuda: de la refundació històrica de la
             música tradicional valenciana amb Al Tall a les sonoritats contemporànies
             d’<em>Orgànic</em>, <em>Katà</em>, <em>Viatger</em> i <em>Geometries</em>.
           </p>
 
           {/* Únic botó d'entrada "Entrar a la web" */}
-          <div className="paper-cta-wrapper">
+          <div ref={ctaWrapperRef} className="paper-cta-wrapper">
             <button
               type="button"
               className="paper-hero-cta-btn"
@@ -157,7 +254,9 @@ export default function PaperClient() {
               aria-label="Entrar a la web oficial de Miquel Gil"
             >
               <span>Entrar a la web</span>
-              <span className="cta-arrow" aria-hidden="true">→</span>
+              <span className="cta-arrow" aria-hidden="true">
+                →
+              </span>
             </button>
           </div>
         </div>
