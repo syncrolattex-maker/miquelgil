@@ -1100,6 +1100,18 @@
 }
 
 /* ============================================================
+   RESPONSIVE PORTÀTILS, TABLETS I MÒBIL (<= 1536px)
+   Enquadrament centrat de la fotografia de Miquel Gil a la
+   secció 'Tradició que mira cap endavant' (bio-portrait-bleed).
+   En pantalles grans desktop (> 1536px) es manté l'enquadrament 'center 25%'.
+   ============================================================ */
+@media (max-width: 1536px) {
+  .bio-portrait-bleed__bg {
+    object-position: center center !important;
+  }
+}
+
+/* ============================================================
    RESPONSIVE MÒBIL I TABLET (<= 991px i <= 640px)
    ============================================================ */
 @media (max-width: 991px) {
@@ -1151,6 +1163,10 @@
 
   .bio-portrait-bleed__vh {
     padding: calc(var(--dissolve-overlap, 0px) + 3.5rem) 1.25rem 4.5rem 1.25rem;
+  }
+
+  .bio-portrait-bleed__bg {
+    object-position: center center !important;
   }
 
   .bio-portrait-quote {
@@ -1242,6 +1258,10 @@
   .bio-hero__metadata {
     grid-template-columns: 1fr;
     gap: 1rem;
+  }
+
+  .bio-portrait-bleed__bg {
+    object-position: center center !important;
   }
 
   .bio-portrait-Card__caption,
