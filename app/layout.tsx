@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import Nav from "@/components/Nav";
 import Reveal from "@/components/Reveal";
+import SiteLockGate from "@/components/SiteLockGate";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://miquelgil.com"),
@@ -39,11 +40,11 @@ export const metadata: Metadata = {
     images: ["/images/viatgerO1.jpg"],
   },
   robots: {
-    index: true,
-    follow: true,
+    index: false,
+    follow: false,
     googleBot: {
-      index: true,
-      follow: true,
+      index: false,
+      follow: false,
       "max-video-preview": -1,
       "max-image-preview": "large",
       "max-snippet": -1,
@@ -122,9 +123,11 @@ export default function RootLayout({
         />
       </head>
       <body>
-        <Nav />
-        {children}
-        <Reveal />
+        <SiteLockGate>
+          <Nav />
+          {children}
+          <Reveal />
+        </SiteLockGate>
       </body>
     </html>
   );
